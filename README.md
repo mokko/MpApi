@@ -1,5 +1,5 @@
-# Example Package
+# MpApi - Proof of Concept API for Zetcom's MuseumPlus
 
-This is a simple example package. You can use
-[Github-flavored Markdown](https://guides.github.com/features/mastering-markdown/)
-to write your content.
+Work in progress. Incomplete.
+
+This is the first api client that I write from scratch.

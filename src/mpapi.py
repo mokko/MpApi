@@ -4,7 +4,6 @@ from requests.structures import CaseInsensitiveDict
 from lxml import etree
 from Search import Search
 from ObjectGroup import ObjectGroup
-from wsgiref import validate
 
 """
 mpApi - MuseumPlus API Client  
@@ -13,7 +12,7 @@ USAGE
     api = MpWebService(baseURL=baseURL, user=user, pw=pw)
     r = api.getItem(module="Object", ID="12345")
     key = api.getSessionKey()
-    api.write(response=r, path="path/to/file.xml")
+    api.toFile(response=r, path="path/to/file.xml")
 
 Which are the modules our instance knows
     - _SystemMessage
@@ -92,7 +91,7 @@ class mpApi:
 
     def getDefinition(self, *, module=None):
         """
-        returns a request containing module definition for specified module
+        returns a request containing the module definition for specified module
         or all modules if no module is specified.
         """
 
@@ -109,22 +108,6 @@ class mpApi:
 
     # POST http://.../ria-ws/application/module/{module}/search/
     def search(self, *, module, et=None, xml=None):
-        xml = """<application xmlns="http://www.zetcom.com/ria/ws/module/search" 
-            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-            xsi:schemaLocation="http://www.zetcom.com/ria/ws/module/search http://www.zetcom.com/ria/ws/module/search/search_1_1.xsd">
-          <modules>
-          <module name="ObjectGroup">
-            <search limit="10" offset="0">
-              <expert>
-                <and>
-                  <equalsField fieldPath="__id" operand="29825" />
-                </and>
-              </expert>
-            </search>
-          </module>
-        </modules>
-        </application>"""
-
         url = self.appURL + "/module/" + module + "/search"
         if et is not None:
             xml=etree.tostring(et)
@@ -137,31 +120,35 @@ class mpApi:
         return r
 
     #
-    # Helpers
+    # Public Helpers
     #
 
-    def write(self, *, response, path):
+    def toFile(self, *, response, path):
+        """Write to file"""
         tree = etree.fromstring(bytes(response.text, "utf8"))
         et = etree.ElementTree(tree)
-        et.write(path, pretty_print=True)
+        et.write(str(path), pretty_print=True)
 
-
+    def toString(self, *, response):
+        """Return response as string"""
+        return response.text
+        #etree.indent(self.et)
+        #return etree.tostring(self.et, pretty_print=True, encoding="unicode")  # not UTF-8
 if __name__ == "__main__":
-
+    from pathlib import Path
     with open("credentials.py") as f:
         exec(f.read())
 
     print(f"{baseURL}:{user}:{pw}")
     api = mpApi(baseURL=baseURL, user=user, pw=pw)
 
-    s = Search(module="ObjectGroup")
-    s.addCriterion(operator="equalsField", field="__id", value="29825")
+    #project: exhibit objects
+    project=Path("../sdata/exhibitObjects")
+    s = Search(module="Object")
+    s.addCriterion(operator="equalsField", field="Object.ObjRegistrarRef.RegExhibitionRef.__id", value="20222")
+    print(s.toString())
     s.validate()
-    s.write(path="../data/search.xml")
-    r = api.search(module="ObjectGroup", et=s.et)
-    api.write(response=r, path="../data/objectGroup.xml")
-    ogr = ObjectGroup(xml=bytes(r.text, "utf8"))
-    for each in ogr.items():
-        print(each)
-        obj = api.getItem(module="Object", ID=each[0])
-        api.write(response=obj, path=f"../data/obj{each[0]}.xml")
+    s.toFile(path=project.join("search.xml"))
+
+    r = api.search(module="Object", et=s.et)
+    api.toFile(response=r, path=project.join("response.xml"))

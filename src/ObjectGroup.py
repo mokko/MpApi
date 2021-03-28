@@ -7,6 +7,14 @@
         g.name
         for each in g.items():
             print (each) # {id: text}
+
+    Initialize the object loading xml in one of three ways:
+    a) from string using xml=string
+    b) from file using file=path
+    c) or just pass an lxml etree with et=etreeObject
+    
+    Currently this class doesn't allow to make an ObjectGroup from scratch.
+    Is this necessary? This would be necessary to create new records.
 """
 
 from lxml import etree
@@ -15,6 +23,11 @@ NSMAP = {"s": "http://www.zetcom.com/ria/ws/module"}
 
 class ObjectGroup:
     def __init__(self, *, xml=None, file=None, et=None):
+        """
+        ogr = ObjectGroup(xml="<root/>")
+        ogr = ObjectGroup(file="path.xml")
+        ogr = ObjectGroup(et=tree)
+        """
         parser = etree.XMLParser(remove_blank_text=True)
         if xml is not None:
             self.et = etree.fromstring(xml, parser)

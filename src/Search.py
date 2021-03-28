@@ -24,7 +24,7 @@ USAGE
 
 #helpers
     print(s.toString())
-    s.write(path="out.xml")
+    s.toFile(path="out.xml")
     s.validate()
     
 self.et stores the lxml object containing the xml document.
@@ -49,6 +49,7 @@ EXAMPLE
 
 """
 
+from pathlib import Path
 from lxml import etree
 
 # xpath 1.0 and lxml don't empty string or None for default ns
@@ -99,8 +100,6 @@ class Search:
         self.et = etree.fromstring(xml, parser)
 
     def addCriterion(self, *, operator, field, value=None):
-        """"""
-
         if operator not in allowedOperators:
             raise TypeError(f"Unknown operator: '{operator}'")
 
@@ -146,10 +145,10 @@ class Search:
         etree.indent(self.et)
         return etree.tostring(self.et, pretty_print=True, encoding="unicode")  # not UTF-8
 
-    def write(self, *, path):
+    def toFile(self, *, path):
         etree.indent(self.et)
         et = etree.ElementTree(self.et)
-        et.write(path, pretty_print=True)
+        et.write(str(path), pretty_print=True)
 
     #
     # private helpers
@@ -192,17 +191,12 @@ class Search:
 
 
 if __name__ == "__main__":
-    s = Search(module="ObjectGroup")
-    s.AND()
-    s.addCriterion(operator="equalsField", field="__id", value="29825")
-    s.addCriterion(operator="equalsField", field="__id", value="29825")
-    s.OR()
-    s.addCriterion(operator="equalsField", field="__id", value="29825")
-    s.addCriterion(operator="equalsField", field="__id", value="29825")
+    s = Search(module="Object")
+    s.addCriterion(operator="equalsField", field="Object.ObjRegistrarRef.RegExhibitionRef.__id", value="20222")
     print(s.toString())
     s.validate()
 #    print(s.toString())
 #    s.validate()
 # s.addCriterion(operator="equalsField",field="__id", value="29825")
-#    s.write(path="search.xml")
+#    s.toFIle(path="search.xml")
 #    s.validate()
