@@ -1,0 +1,2339 @@
+<application xmlns="http://www.zetcom.com/ria/ws/module">
+  <modules>
+    <module name="Object">
+      <moduleItem>
+        <systemField dataType="Long" name="__id"/>
+        <systemField dataType="Varchar" name="__lastModifiedUser"/>
+        <systemField dataType="Timestamp" name="__lastModified"/>
+        <systemField dataType="Varchar" name="__createdUser"/>
+        <systemField dataType="Timestamp" name="__created"/>
+        <systemField dataType="Long" name="__orgUnit"/>
+        <systemField name="__uuid"/>
+        <systemField dataType="Varchar" name="__attachment"/>
+        <dataField dataType="Long" name="ObjAgeLnu"/>
+        <dataField dataType="Clob" name="ObjHabitatClb"/>
+        <dataField dataType="Clob" name="ObjElementsClb"/>
+        <dataField dataType="Varchar" name="ObjPartOfTxt"/>
+        <dataField dataType="Clob" name="ObjScopeContentClb"/>
+        <dataField dataType="Clob" name="ObjHistoricalChangeLogClb"/>
+        <dataField dataType="Date" name="ObjDepositDateDat"/>
+        <dataField dataType="Clob" name="ObjDepositNoteClb"/>
+        <dataField dataType="Varchar" name="ObjCoordinatesTxt"/>
+        <dataField dataType="Clob" name="ObjContentClb"/>
+        <dataField dataType="Varchar" name="ObjSignificanceTxt"/>
+        <dataField dataType="Varchar" name="ObjAcquisitionAddressTxt"/>
+        <dataField dataType="Date" name="ObjAcquisitionAuthorisationDateDat"/>
+        <dataField dataType="Clob" name="ObjTechnicalTermClb"/>
+        <dataField dataType="Clob" name="ObjSystematicClb"/>
+        <dataField dataType="Date" name="ObjAcquisitionDateDat"/>
+        <dataField dataType="Clob" name="ObjAcquisitionFundingClb"/>
+        <dataField dataType="Clob" name="ObjAcquisitionNotesClb"/>
+        <dataField dataType="Varchar" name="ObjAcquisitionReferenceNrTxt"/>
+        <dataField dataType="Clob" name="ObjAssemblyClb"/>
+        <dataField dataType="Clob" name="ObjBriefDescriptionClb"/>
+        <dataField dataType="Date" name="ObjConditionDateDat"/>
+        <dataField dataType="Clob" name="ObjConditionNoteClb"/>
+        <dataField dataType="Varchar" name="ObjContentDescriptionTxt"/>
+        <dataField dataType="Varchar" name="ObjCreditLineTxt"/>
+        <dataField dataType="Long" name="ObjDateFromLnu"/>
+        <dataField dataType="Long" name="ObjDateToLnu"/>
+        <dataField dataType="Varchar" name="ObjDateTxt"/>
+        <dataField dataType="Clob" name="ObjDisplayRecommendationClb"/>
+        <dataField dataType="Varchar" name="ObjEditionNrTxt"/>
+        <dataField dataType="Varchar" name="ObjEnsembleDescriptionTxt"/>
+        <dataField dataType="Varchar" name="ObjFramingTxt"/>
+        <dataField dataType="Clob" name="ObjHandlingRecommendationClb"/>
+        <dataField dataType="Varchar" name="ObjObjectNumberSortedTxt"/>
+        <dataField dataType="Date" name="ObjHazardDateDat"/>
+        <dataField dataType="Varchar" name="ObjHumidityTxt"/>
+        <dataField dataType="Clob" name="ObjInsuranceNotesClb"/>
+        <dataField dataType="Varchar" name="ObjLuminosityTxt"/>
+        <dataField dataType="Varchar" name="ObjMaterialTechniqueTxt"/>
+        <dataField dataType="Clob" name="ObjNotesClb"/>
+        <dataField dataType="Long" name="ObjNumberObjectsLnu"/>
+        <dataField dataType="Varchar" name="ObjObjectNumberTxt"/>
+        <dataField dataType="Varchar" name="ObjObjectTitleTxt"/>
+        <dataField dataType="Varchar" name="ObjOtherNumberTxt"/>
+        <dataField dataType="Clob" name="ObjOwnerHistoryClb"/>
+        <dataField dataType="Varchar" name="ObjRecordCreatedByTxt"/>
+        <dataField dataType="Date" name="ObjRecordCreatedDateDat"/>
+        <dataField dataType="Date" name="ObjSalvagePriorityCodeDateDat"/>
+        <dataField dataType="Clob" name="ObjSecurityRecommendationsClb"/>
+        <dataField dataType="Clob" name="ObjShippingRequirementsClb"/>
+        <dataField dataType="Clob" name="ObjStorageRequirementsClb"/>
+        <dataField dataType="Varchar" name="ObjStyleTxt"/>
+        <dataField dataType="Varchar" name="ObjTemperatureTxt"/>
+        <dataField dataType="Varchar" name="ObjTransferTitleNrTxt"/>
+        <dataField dataType="Varchar" name="ObjIsContentOfLocationVocNodeTxt"/>
+        <dataField dataType="Clob" name="ObjBarcodeNotesClb"/>
+        <dataField dataType="Long" name="ObjBarcodeThiIdLnu"/>
+        <dataField dataType="Clob" name="ObjIconographyContentClb"/>
+        <dataField dataType="Clob" name="ObjIconographyContentBriefClb"/>
+        <dataField dataType="Clob" name="ObjInventoryNotesClb"/>
+        <dataField dataType="Date" name="ObjInventoryDateDat"/>
+        <dataField dataType="Varchar" name="ObjMigrationTxt"/>
+        <dataField dataType="Clob" name="ObjProvenanceEvaluationClb"/>
+        <vocabularyReference name="ObjSexVoc" id="41619" instanceName="ObjSexVgr"/>
+        <vocabularyReference name="ObjSpecimenVoc" id="41621" instanceName="ObjSpecimenVgr"/>
+        <vocabularyReference name="ObjCollectionVoc" id="41620" instanceName="ObjCollectionVgr"/>
+        <vocabularyReference name="ObjGeologicTimeVoc" id="41622" instanceName="ObjGeologicTimeVgr"/>
+        <vocabularyReference name="ObjTaxonomyVoc" id="30442" instanceName="ObjTaxonomyVgr"/>
+        <vocabularyReference name="ObjItemTypeVoc" id="40617" instanceName="ObjItemTypeVgr"/>
+        <vocabularyReference name="ObjArchivePlanFilesVoc" id="39617" instanceName="ObjArchivePlanFilesVgr"/>
+        <vocabularyReference name="ObjArchiveLevelVoc" id="39618" instanceName="ObjArchiveLevelVgr"/>
+        <vocabularyReference name="ObjArchiveCategoryVoc" id="39619" instanceName="ObjArchiveCategoryVgr"/>
+        <vocabularyReference name="ObjArchiveFormatVoc" id="39620" instanceName="ObjArchiveFormatVgr"/>
+        <vocabularyReference name="ObjPlaceVoc" id="30288" instanceName="GenPlaceVgr"/>
+        <vocabularyReference name="ObjScientificNameVoc" id="36617" instanceName="ObjScientificNameVgr"/>
+        <vocabularyReference name="ObjGNDVoc" id="55629" instanceName="ObjGNDVgr"/>
+        <vocabularyReference name="ObjSubjectVoc" id="35620" instanceName="ObjSubjectVgr"/>
+        <vocabularyReference name="ObjAcquisitionAuthorizerVoc" id="30343" instanceName="ObjAcquisitionAuthorizerVgr"/>
+        <vocabularyReference name="ObjAcquisitionMethodVoc" id="30344" instanceName="ObjAcquisitionModeVgr"/>
+        <vocabularyReference name="ObjAcquisitionStatusVoc" id="30345" instanceName="ObjAcquisitionStatusVgr"/>
+        <vocabularyReference name="ObjAssociatedPlaceTxt" id="30288" instanceName="GenPlaceVgr"/>
+        <vocabularyReference name="ObjAssociatedPlaceVoc" id="30288" instanceName="GenPlaceVgr"/>
+        <vocabularyReference name="ObjCategoryVoc" id="30349" instanceName="ObjCategoryVgr"/>
+        <vocabularyReference name="ObjClassificationVoc" id="30350" instanceName="ObjClassificationVgr"/>
+        <vocabularyReference name="ObjConditionVoc" id="30355" instanceName="ObjConditionVgr"/>
+        <vocabularyReference name="ObjHazardVoc" id="30377" instanceName="ObjHazardVgr"/>
+        <vocabularyReference name="ObjInternetVoc" id="30385" instanceName="ObjInternetVgr"/>
+        <vocabularyReference name="ObjNormalLocationVoc" id="30283" instanceName="GenLocationVgr"/>
+        <vocabularyReference name="ObjObjectNameTxt" id="30406" instanceName="ObjObjectNameVgr"/>
+        <vocabularyReference name="ObjPublicationStatusVoc" id="30432" instanceName="ObjPublicationStatusVgr"/>
+        <vocabularyReference name="ObjRecordingStatusVoc" id="30433" instanceName="ObjRecordingStatusVgr"/>
+        <vocabularyReference name="ObjRecordTypeVoc" id="30434" instanceName="ObjRecordTypeVgr"/>
+        <vocabularyReference name="ObjConservationTermsLoanVoc" id="61649" instanceName="ObjConservationTermsLoanVgr"/>
+        <vocabularyReference name="ObjSalvagePriorityCodeVoc" id="30436" instanceName="ObjSalvagePriorityCodeVgr"/>
+        <vocabularyReference name="ObjCurrentLocationVoc" id="30283" instanceName="GenLocationVgr"/>
+        <vocabularyReference name="ObjBarcodeLocationVoc" id="30283" instanceName="GenLocationVgr"/>
+        <vocabularyReference name="ObjBarcodeArtMobStandortVoc" id="71639" instanceName="ObjBarcodeArtMobStandortVgr"/>
+        <vocabularyReference name="ObjBarcodeModulRaumVoc" id="71640" instanceName="ObjBarcodeModulRaumVgr"/>
+        <vocabularyReference name="ObjBarcodeSammlungVgr" id="71641" instanceName="ObjBarcodeSammlungVgr"/>
+        <vocabularyReference name="ObjArchiveVoc" id="61640" instanceName="ObjArchiveVgr"/>
+        <vocabularyReference name="ObjAcquisitionSourceVoc" id="61639" instanceName="ObjAcquisitionSourceVgr"/>
+        <vocabularyReference name="ObjCreditLineVoc" id="61642" instanceName="ObjCreditLineVgr"/>
+        <vocabularyReference name="ObjCompilationVoc" id="61641" instanceName="ObjCompilationVgr"/>
+        <vocabularyReference name="ObjOrgGroupVoc" id="61643" instanceName="ObjOrgGroupVgr"/>
+        <vocabularyReference name="ObjProvBewertungVoc" id="61644" instanceName="ObjProvBewertungVgr"/>
+        <virtualField name="ObjObjectArchiveContentVrt"/>
+        <virtualField name="ObjUuidVrt"/>
+        <virtualField name="ObjPerAssociationMainParticipantNameVrt"/>
+        <virtualField name="ObjObjectNumberSortedVrt"/>
+        <virtualField name="ObjPerAssociationMainParticipantVrt"/>
+        <virtualField name="ObjMaterialTechniqueVrt"/>
+        <virtualField name="ObjAssociatedPlaceVrt"/>
+        <virtualField name="ObjGeograficVrt"/>
+        <virtualField name="ObjNormalLocationVrt"/>
+        <virtualField name="ObjCurrentLocationGrpVrt"/>
+        <virtualField name="ObjObjectNumberSorted02MEKVrt"/>
+        <virtualField name="ObjObjectNumberSortedMEKVrt"/>
+        <virtualField name="ObjMultimediaRestrictionsVrt"/>
+        <virtualField name="ObjPerAssociationGenderVrt"/>
+        <virtualField name="ObjObjectIPTCVrt"/>
+        <virtualField name="ObjPerAssociationSurnameVrt"/>
+        <virtualField name="ObjObjectENVrt"/>
+        <virtualField name="ObjObjectNumberPart3Vrt"/>
+        <virtualField name="ObjObjectNumberPart1Vrt"/>
+        <virtualField name="ObjObjectNumberPart2Vrt"/>
+        <virtualField name="ObjCurrentLocationVrt"/>
+        <virtualField name="ObjObjectTitleVrt"/>
+        <virtualField name="ObjObjectVrt"/>
+        <virtualField name="ObjPerAssociationVrt"/>
+        <virtualField name="ObjObjectNumberVrt"/>
+        <repeatableGroup name="ObjInscriptionGrp">
+          <repeatableGroupItem>
+            <dataField dataType="Varchar" name="DateTxt"/>
+            <dataField dataType="Varchar" name="InscriberTxt"/>
+            <dataField dataType="Varchar" name="MethodTxt"/>
+            <dataField dataType="Varchar" name="PositionTxt"/>
+            <dataField dataType="Long" name="SortLnu"/>
+            <dataField dataType="Clob" name="TranslationClb"/>
+            <dataField dataType="Clob" name="TransliterationClb"/>
+            <vocabularyReference name="LanguageVoc" id="30281" instanceName="GenLanguageVgr"/>
+            <vocabularyReference name="TypeVoc" id="30383" instanceName="ObjInscriptionTypeVgr"/>
+          </repeatableGroupItem>
+        </repeatableGroup>
+        <repeatableGroup name="ObjLabelRaisonneTextGrp">
+          <repeatableGroupItem>
+            <dataField dataType="Clob" name="TextClb"/>
+            <dataField dataType="Date" name="DateDat"/>
+            <dataField dataType="Clob" name="NotesClb"/>
+            <dataField dataType="Long" name="SortLnu"/>
+            <vocabularyReference name="TypeVoc" id="30392" instanceName="ObjLabelTypeVgr"/>
+            <vocabularyReference name="LanguageVoc" id="30281" instanceName="GenLanguageVgr"/>
+            <vocabularyReference name="ReasonVoc" id="30390" instanceName="ObjLabelReasonVgr"/>
+            <vocabularyReference name="StatusVoc" id="30391" instanceName="ObjLabelStatusVgr"/>
+            <moduleReference name="AddressRef" targetModule="Address" multiplicity="N:1"/>
+          </repeatableGroupItem>
+        </repeatableGroup>
+        <repeatableGroup name="ObjObjectNumberGrp">
+          <repeatableGroupItem>
+            <dataField dataType="Clob" name="InvDescriptionClb"/>
+            <dataField dataType="Varchar" name="InventarNrSTxt"/>
+            <dataField dataType="Varchar" name="Part7Txt"/>
+            <dataField dataType="Varchar" name="NumberMaxTxt"/>
+            <dataField dataType="Varchar" name="ModifiedByTxt"/>
+            <dataField dataType="Clob" name="NotesClb"/>
+            <dataField dataType="Date" name="ModifiedDateDat"/>
+            <dataField dataType="Varchar" name="Part1Txt"/>
+            <dataField dataType="Varchar" name="Part2Txt"/>
+            <dataField dataType="Varchar" name="Part3Txt"/>
+            <dataField dataType="Varchar" name="Part4Txt"/>
+            <dataField dataType="Varchar" name="Part5Txt"/>
+            <dataField dataType="Varchar" name="Part10Txt"/>
+            <dataField dataType="Varchar" name="Part6Txt"/>
+            <dataField dataType="Long" name="SortLnu"/>
+            <dataField dataType="Varchar" name="SourceTxt"/>
+            <dataField dataType="Varchar" name="Part8Txt"/>
+            <dataField dataType="Varchar" name="Part9Txt"/>
+            <virtualField name="NumberSortedMEKVrt"/>
+            <virtualField name="NumbersVrt"/>
+            <virtualField name="NumberSortedVrt"/>
+            <virtualField name="NumberWithoutSpecialCharactersVrt"/>
+            <virtualField name="NumberSortedPart02MEKVrt"/>
+            <virtualField name="NumberVrt"/>
+            <vocabularyReference name="DenominationVoc" id="41617" instanceName="ObjObjectNumberDenominationVgr"/>
+            <vocabularyReference name="TypeVoc" id="30408" instanceName="ObjObjectNumberTypeVgr"/>
+            <moduleReference name="InvNumberSchemeRef" targetModule="InventoryNumber" multiplicity="N:1"/>
+          </repeatableGroupItem>
+        </repeatableGroup>
+        <repeatableGroup name="ObjObjectTitleGrp">
+          <repeatableGroupItem>
+            <dataField dataType="Clob" name="NotesClb"/>
+            <dataField dataType="Long" name="SortLnu"/>
+            <dataField dataType="Varchar" name="SourceTxt"/>
+            <dataField dataType="Varchar" name="TitleTxt"/>
+            <dataField dataType="Date" name="ModifiedDateDat"/>
+            <dataField dataType="Varchar" name="ModifiedByTxt"/>
+            <dataField dataType="Date" name="ApprovalDateDat"/>
+            <vocabularyReference name="LanguageVoc" id="30281" instanceName="GenLanguageVgr"/>
+            <vocabularyReference name="TypeVoc" id="30450" instanceName="ObjTitleTypeVgr"/>
+            <vocabularyReference name="ApprovedByVoc" id="30451" instanceName="ObjTittleApprovedByVgr"/>
+          </repeatableGroupItem>
+        </repeatableGroup>
+        <repeatableGroup name="ObjOtherNumberGrp">
+          <repeatableGroupItem>
+            <dataField dataType="Varchar" name="ModifiedByTxt"/>
+            <dataField dataType="Long" name="SortLnu"/>
+            <dataField dataType="Varchar" name="SourceTxt"/>
+            <dataField dataType="Clob" name="NotesClb"/>
+            <dataField dataType="Date" name="ModifiedDateDat"/>
+            <dataField dataType="Varchar" name="Part1Txt"/>
+            <dataField dataType="Varchar" name="NumberTxt"/>
+            <dataField dataType="Varchar" name="Part2Txt"/>
+            <vocabularyReference name="DenominationVoc" id="77649" instanceName="ObjOtherNumberDenominationVgr"/>
+            <vocabularyReference name="TypeVoc" id="30415" instanceName="ObjOtherNumberTypeVgr"/>
+          </repeatableGroupItem>
+        </repeatableGroup>
+        <repeatableGroup name="ObjOwnershipGrp">
+          <repeatableGroupItem>
+            <dataField dataType="Varchar" name="DateTxt"/>
+            <dataField dataType="Clob" name="ExchangeNoteClb"/>
+            <dataField dataType="Varchar" name="ExchangePriceTxt"/>
+            <dataField dataType="Date" name="DateFromDat"/>
+            <dataField dataType="Varchar" name="OwnerTxt"/>
+            <dataField dataType="Varchar" name="PlaceTxt"/>
+            <dataField dataType="Date" name="DateToDat"/>
+            <dataField dataType="Varchar" name="PriceOutTxt"/>
+            <dataField dataType="Long" name="SortLnu"/>
+            <vocabularyReference name="CategoryVoc" id="30416" instanceName="ObjOwnershipCategoryVgr"/>
+            <vocabularyReference name="ExchangeMethodVoc" id="30419" instanceName="ObjOwnershipMethodVgr"/>
+            <vocabularyReference name="MethodOutVoc" id="30419" instanceName="ObjOwnershipMethodVgr"/>
+            <moduleReference name="AddressRef" targetModule="Address" multiplicity="N:1"/>
+            <moduleReference name="LiteratureRef" targetModule="Literature" multiplicity="N:1"/>
+          </repeatableGroupItem>
+        </repeatableGroup>
+        <repeatableGroup name="ObjRightsGrp">
+          <repeatableGroupItem>
+            <dataField dataType="Date" name="BeginDateDat"/>
+            <dataField dataType="Date" name="EndDateDat"/>
+            <dataField dataType="Date" name="ModifiedDateDat"/>
+            <dataField dataType="Varchar" name="ModifiedByTxt"/>
+            <dataField dataType="Clob" name="NotesClb"/>
+            <dataField dataType="Clob" name="TermsClb"/>
+            <vocabularyReference name="TermsVoc" id="61686" instanceName="ObjRightsTermsVgr"/>
+            <vocabularyReference name="HolderVoc" id="61685" instanceName="ObjRightsHolderVgr"/>
+            <vocabularyReference name="TypeVoc" id="30435" instanceName="ObjRightsTypeVgr"/>
+            <moduleReference name="HolderRef" targetModule="Address" multiplicity="N:1"/>
+          </repeatableGroupItem>
+        </repeatableGroup>
+        <repeatableGroup name="ObjTextGrp">
+          <repeatableGroupItem>
+            <dataField dataType="Date" name="DateDat"/>
+            <dataField dataType="Clob" name="TextHTMLClb"/>
+            <dataField dataType="Clob" name="NotesClb"/>
+            <dataField dataType="Long" name="SortLnu"/>
+            <dataField dataType="Clob" name="TextClb"/>
+            <vocabularyReference name="LanguageVoc" id="30281" instanceName="GenLanguageVgr"/>
+            <vocabularyReference name="ReasonVoc" id="30446" instanceName="ObjTextReasonVgr"/>
+            <vocabularyReference name="StatusVoc" id="30447" instanceName="ObjTextStatusVgr"/>
+            <vocabularyReference name="TypeVoc" id="30448" instanceName="ObjTextTypeVgr"/>
+            <moduleReference name="AddressRef" targetModule="Address" multiplicity="N:1"/>
+            <moduleReference name="ExhibitionRef" targetModule="Exhibition" multiplicity="N:1"/>
+          </repeatableGroupItem>
+        </repeatableGroup>
+        <repeatableGroup name="ObjValuationGrp">
+          <repeatableGroupItem>
+            <dataField dataType="Long" name="DatestampToFuzzySearchLnu"/>
+            <dataField dataType="Long" name="DatestampFromFuzzySearchLnu"/>
+            <dataField dataType="Varchar" name="DateTxt"/>
+            <dataField dataType="Varchar" name="DateToTxt"/>
+            <dataField dataType="Varchar" name="SourceTxt"/>
+            <dataField dataType="Varchar" name="InvoiceNumberTxt"/>
+            <dataField dataType="Long" name="SortLnu"/>
+            <dataField dataType="Numeric" name="ConversionRateNum"/>
+            <dataField dataType="Date" name="DateDat"/>
+            <dataField dataType="Clob" name="NotesClb"/>
+            <dataField dataType="Date" name="ModifiedDateDat"/>
+            <dataField dataType="Date" name="RenewalDateDat"/>
+            <dataField dataType="Varchar" name="ModifiedByTxt"/>
+            <dataField dataType="Numeric" name="ValueNum"/>
+            <dataField dataType="Numeric" name="ValueOriginNum"/>
+            <dataField dataType="Varchar" name="DateFromTxt"/>
+            <virtualField name="PreviewVrt"/>
+            <virtualField name="PreviewENVrt"/>
+            <vocabularyReference name="PrefixVoc" id="34623" instanceName="ObjDatePrefixVgr"/>
+            <vocabularyReference name="PeriodVoc" id="34622" instanceName="ObjDatePeriodVgr"/>
+            <vocabularyReference name="SuffixVoc" id="34624" instanceName="ObjDateSuffixVgr"/>
+            <vocabularyReference name="CurrencyVoc" id="30273" instanceName="GenCurrencyVgr"/>
+            <vocabularyReference name="TypeVoc" id="30454" instanceName="ObjValueType"/>
+            <vocabularyReference name="CertaintyVoc" id="34621" instanceName="ObjDateCertaintyVgr"/>
+            <moduleReference name="ContractRef" targetModule="Contract" multiplicity="N:1"/>
+            <moduleReference name="RegistrarRef" targetModule="Registrar" multiplicity="N:1"/>
+            <moduleReference name="ValuerRef" targetModule="Address" multiplicity="N:1"/>
+          </repeatableGroupItem>
+        </repeatableGroup>
+        <repeatableGroup name="ObjGeograficGrp">
+          <repeatableGroupItem>
+            <dataField dataType="Varchar" name="ModifiedByTxt"/>
+            <dataField dataType="Date" name="ModifiedDateDat"/>
+            <dataField dataType="Varchar" name="SourceTxt"/>
+            <dataField dataType="Long" name="SourceIDLnu"/>
+            <dataField dataType="Clob" name="NotesClb"/>
+            <dataField dataType="Long" name="SortLnu"/>
+            <dataField dataType="Varchar" name="DetailsTxt"/>
+            <vocabularyReference name="GeopolVoc" id="61663" instanceName="ObjGeopolVgr"/>
+            <vocabularyReference name="GeonamesVoc" id="61662" instanceName="ObjGeograficGeonamesVgr"/>
+            <vocabularyReference name="idaiVoc" id="61664" instanceName="ObjGeograficIdaiVgr"/>
+            <vocabularyReference name="PlaceAntiqueVoc" id="61665" instanceName="ObjGeograficAntiqueVgr"/>
+            <vocabularyReference name="GNDVoc" id="76649" instanceName="ObjGeographicGNDVgr"/>
+            <vocabularyReference name="PlaceILSVoc" id="61667" instanceName="ObjGeograficISLVgr"/>
+            <vocabularyReference name="PlaceEgyptVoc" id="61666" instanceName="ObjGeograficEgyptVgr"/>
+            <vocabularyReference name="TGNVoc" id="61668" instanceName="ObjGeograficTgnVgr"/>
+            <vocabularyReference name="PlaceVoc" id="30288" instanceName="GenPlaceVgr"/>
+            <vocabularyReference name="TypeVoc" id="52617" instanceName="ObjGeographicTypeVgr"/>
+            <moduleReference name="PlaceRef" targetModule="Place" multiplicity="N:1"/>
+          </repeatableGroupItem>
+        </repeatableGroup>
+        <repeatableGroup name="ObjDimAllGrp">
+          <repeatableGroupItem>
+            <dataField dataType="Clob" name="NotesClb"/>
+            <dataField dataType="Varchar" name="PrefixTxt"/>
+            <dataField dataType="Long" name="SortLnu"/>
+            <dataField dataType="Varchar" name="PartTxt"/>
+            <dataField dataType="Varchar" name="SuffixTxt"/>
+            <dataField dataType="Numeric" name="SecondNum"/>
+            <dataField dataType="Numeric" name="FirstNum"/>
+            <dataField dataType="Varchar" name="TextTxt"/>
+            <dataField dataType="Numeric" name="ThirdNum"/>
+            <dataField dataType="Numeric" name="SecondInchNum"/>
+            <dataField dataType="Numeric" name="FirstInchNum"/>
+            <dataField dataType="Numeric" name="ThirdInchNum"/>
+            <dataField dataType="Numeric" name="CircumferenceNum"/>
+            <dataField dataType="Long" name="ConfectionSizeLnu"/>
+            <dataField dataType="Numeric" name="FromNum"/>
+            <dataField dataType="Numeric" name="HeightNum"/>
+            <dataField dataType="Numeric" name="DepthNum"/>
+            <dataField dataType="Numeric" name="DiameterNum"/>
+            <dataField dataType="Numeric" name="SpeedNum"/>
+            <dataField dataType="Numeric" name="ToNum"/>
+            <dataField dataType="Long" name="Scale1Lnu"/>
+            <dataField dataType="Long" name="Scale2Lnu"/>
+            <dataField dataType="Numeric" name="Unknown3Num"/>
+            <dataField dataType="Numeric" name="VolumeNum"/>
+            <dataField dataType="Numeric" name="Unknown1Num"/>
+            <dataField dataType="Numeric" name="Unknown2Num"/>
+            <dataField dataType="Numeric" name="WeightNum"/>
+            <dataField dataType="Numeric" name="WidthNum"/>
+            <dataField dataType="Varchar" name="RadiusINVALIDNum"/>
+            <dataField dataType="Varchar" name="ThicknessINVALIDNum"/>
+            <dataField dataType="Varchar" name="LengthINVALIDNum"/>
+            <dataField dataType="Numeric" name="LengthNum"/>
+            <dataField dataType="Numeric" name="RadiusNum"/>
+            <dataField dataType="Numeric" name="ThicknessNum"/>
+            <dataField dataType="Long" name="HoursLnu"/>
+            <dataField dataType="Long" name="SecondsLnu"/>
+            <dataField dataType="Long" name="MinutesLnu"/>
+            <virtualField name="PreviewVrt"/>
+            <virtualField name="PreviewENVrt"/>
+            <virtualField name="DenominationSpecific1ENVrt"/>
+            <virtualField name="DenominationSpecific1Vrt"/>
+            <virtualField name="Delimiter1Vrt"/>
+            <virtualField name="Delimiter2Vrt"/>
+            <virtualField name="DenominationSpecific3ENVrt"/>
+            <virtualField name="DenominationSpecific3Vrt"/>
+            <virtualField name="DenominationSpecific2ENVrt"/>
+            <virtualField name="DenominationSpecific2Vrt"/>
+            <vocabularyReference name="TypeVoc" id="44617" instanceName="ObjDimAllTypeVgr"/>
+            <vocabularyReference name="MeasureType1DimVoc" id="44618" instanceName="ObjDimAllMeasureType1DimVgr"/>
+            <vocabularyReference name="MeasureType3DimVoc" id="44620" instanceName="ObjDimAllMeasureType3DimVgr"/>
+            <vocabularyReference name="MeasureType2DimVoc" id="44619" instanceName="ObjDimAllMeasureType2DimVgr"/>
+            <vocabularyReference name="UnitVoc" id="44622" instanceName="ObjDimAllUnitVgr"/>
+            <vocabularyReference name="MeasureTypeDurationVoc" id="44621" instanceName="ObjDimAllMeasureTypeDurationVgr"/>
+            <vocabularyReference name="UnitDdiVoc" id="79755" instanceName="DdiUnitVgr"/>
+            <vocabularyReference name="MeasureTypeTextVoc" id="64639" instanceName="ObjDimAllMeasureTypeTextVgr"/>
+            <moduleReference name="TypeDimRef" targetModule="DefDimension" multiplicity="N:1"/>
+          </repeatableGroupItem>
+        </repeatableGroup>
+        <repeatableGroup name="ObjDenominationGrp">
+          <repeatableGroupItem>
+            <dataField dataType="Long" name="YearLnu"/>
+            <dataField dataType="Clob" name="NotesClb"/>
+            <vocabularyReference name="DenominationVoc" id="36617" instanceName="ObjScientificNameVgr"/>
+            <vocabularyReference name="TypeVoc" id="36618" instanceName="ObjDenominationTypeVgr"/>
+            <moduleReference name="MakerRef" targetModule="Person" multiplicity="N:1"/>
+          </repeatableGroupItem>
+        </repeatableGroup>
+        <repeatableGroup name="ObjConClearingGrp">
+          <repeatableGroupItem>
+            <dataField dataType="Varchar" name="ModifiedByTxt"/>
+            <dataField dataType="Clob" name="NotesClb"/>
+            <dataField dataType="Clob" name="BasicClb"/>
+            <dataField dataType="Date" name="DateDat"/>
+            <dataField dataType="Clob" name="ProtectionClb"/>
+            <dataField dataType="Clob" name="PackingCurrentClb"/>
+            <dataField dataType="Clob" name="PackingNewClb"/>
+            <dataField dataType="Clob" name="StorageDimensionClb"/>
+            <dataField dataType="Long" name="SortLnu"/>
+            <dataField dataType="Clob" name="StorageClb"/>
+            <dataField dataType="Numeric" name="SuctionNum"/>
+            <dataField dataType="Date" name="ModifiedDateDat"/>
+            <vocabularyReference name="ReasonVoc" id="73640" instanceName="ObjConClearingReasonVgr"/>
+            <vocabularyReference name="StorageTechVoc" id="73641" instanceName="ObjConClearingStorageTechVgr"/>
+          </repeatableGroupItem>
+        </repeatableGroup>
+        <repeatableGroup name="ObjConPackingGrp">
+          <repeatableGroupItem>
+            <dataField dataType="Date" name="DateDat"/>
+            <dataField dataType="Varchar" name="ModifiedByTxt"/>
+            <dataField dataType="Clob" name="NotesClb"/>
+            <dataField dataType="Date" name="ModifiedDateDat"/>
+            <dataField dataType="Long" name="SortLnu"/>
+            <vocabularyReference name="Specification4Voc" id="73653" instanceName="ObjConPackingSpecification4Vgr"/>
+            <vocabularyReference name="DestinationVoc" id="73642" instanceName="ObjConPackingDestinationVgr"/>
+            <vocabularyReference name="Kind1Voc" id="73643" instanceName="ObjConPackingKind1Vgr"/>
+            <vocabularyReference name="Kind4Voc" id="73646" instanceName="ObjConPackingKind4Vgr"/>
+            <vocabularyReference name="Kind2Voc" id="73644" instanceName="ObjConPackingKind2Vgr"/>
+            <vocabularyReference name="Kind3Voc" id="73645" instanceName="ObjConPackingKind3Vgr"/>
+            <vocabularyReference name="ReasonVoc" id="73648" instanceName="ObjConPackingReasonVgr"/>
+            <vocabularyReference name="SectionVoc" id="73649" instanceName="ObjConPackingSectionVgr"/>
+            <vocabularyReference name="OrientationVoc" id="73647" instanceName="ObjConPackingOrientationVgr"/>
+            <vocabularyReference name="Specification2Voc" id="73651" instanceName="ObjConPackingSpecification2Vgr"/>
+            <vocabularyReference name="Specification3Voc" id="73652" instanceName="ObjConPackingSpecification3Vgr"/>
+            <vocabularyReference name="Specification1Voc" id="73650" instanceName="ObjConPackingSpecification1Vgr"/>
+          </repeatableGroupItem>
+        </repeatableGroup>
+        <repeatableGroup name="ObjConPlanningGrp">
+          <repeatableGroupItem>
+            <dataField dataType="Date" name="DateDat"/>
+            <dataField dataType="Clob" name="NotesClb"/>
+            <dataField dataType="Varchar" name="ModifiedByTxt"/>
+            <dataField dataType="Long" name="SortLnu"/>
+            <dataField dataType="Date" name="ModifiedDateDat"/>
+            <vocabularyReference name="ConditionVoc" id="73655" instanceName="ObjConPlanningConditionVgr"/>
+            <vocabularyReference name="BoxVoc" id="73654" instanceName="ObjConPlanningBoxVgr"/>
+            <vocabularyReference name="PackingVoc" id="73657" instanceName="ObjConPlanningPackingVgr"/>
+            <vocabularyReference name="DesinfestationVoc" id="73656" instanceName="ObjConPlanningDesinfestationVgr"/>
+            <vocabularyReference name="ReasonVoc" id="73660" instanceName="ObjConPlanningReasonVgr"/>
+            <vocabularyReference name="PostVoc" id="73658" instanceName="ObjConPlanningPostVgr"/>
+            <vocabularyReference name="PresentationVoc" id="73659" instanceName="ObjConPlanningPresentationVgr"/>
+            <vocabularyReference name="TimeRemainingNeededVoc" id="73661" instanceName="ObjConRemainingNeedVgr"/>
+            <vocabularyReference name="TimeRemainingProjectedVoc" id="73662" instanceName="ObjConRemainingProVgr"/>
+          </repeatableGroupItem>
+        </repeatableGroup>
+        <repeatableGroup name="ObjTextConservationGrp">
+          <repeatableGroupItem>
+            <dataField dataType="Date" name="DateDat"/>
+            <dataField dataType="Clob" name="NotesClb"/>
+            <dataField dataType="Long" name="SortLnu"/>
+            <dataField dataType="Clob" name="TextClb"/>
+            <dataField dataType="Clob" name="TextHTMLClb"/>
+            <vocabularyReference name="LanguageVoc" id="30281" instanceName="GenLanguageVgr"/>
+            <vocabularyReference name="ReasonVoc" id="66640" instanceName="ObjTextConservationReasonVgr"/>
+            <vocabularyReference name="StatusVoc" id="66641" instanceName="ObjTextConservationStatusVgr"/>
+            <vocabularyReference name="TypeVoc" id="66642" instanceName="ObjTextConservationTypeVgr"/>
+            <moduleReference name="ExhibitionRef" targetModule="Exhibition" multiplicity="N:1"/>
+            <moduleReference name="AddressRef" targetModule="Address" multiplicity="N:1"/>
+          </repeatableGroupItem>
+        </repeatableGroup>
+        <repeatableGroup name="ObjTextPRGrp">
+          <repeatableGroupItem>
+            <dataField dataType="Clob" name="TextHTMLClb"/>
+            <dataField dataType="Date" name="DateDat"/>
+            <dataField dataType="Clob" name="NotesClb"/>
+            <dataField dataType="Long" name="SortLnu"/>
+            <dataField dataType="Clob" name="TextClb"/>
+            <vocabularyReference name="LanguageVoc" id="30281" instanceName="GenLanguageVgr"/>
+            <vocabularyReference name="ReasonVoc" id="66646" instanceName="ObjTextPRReasonVgr"/>
+            <vocabularyReference name="StatusVoc" id="66647" instanceName="ObjTextPRStatusVgr"/>
+            <vocabularyReference name="TypeVoc" id="66648" instanceName="ObjTextPRTypeVgr"/>
+            <moduleReference name="ExhibitionRef" targetModule="Address" multiplicity="N:1"/>
+            <moduleReference name="Exhibition002Ref" targetModule="Exhibition" multiplicity="N:1"/>
+            <moduleReference name="AddressRef" targetModule="Address" multiplicity="N:1"/>
+          </repeatableGroupItem>
+        </repeatableGroup>
+        <repeatableGroup name="ObjTextOnlineGrp">
+          <repeatableGroupItem>
+            <dataField dataType="Long" name="SortLnu"/>
+            <dataField dataType="Clob" name="TextHTMLClb"/>
+            <dataField dataType="Clob" name="TextClb"/>
+            <dataField dataType="Date" name="DateDat"/>
+            <dataField dataType="Clob" name="NotesClb"/>
+            <vocabularyReference name="ReasonVoc" id="66643" instanceName="ObjTextOnlineReasonVgr"/>
+            <vocabularyReference name="StatusVoc" id="66644" instanceName="ObjTextOnlineStatusVgr"/>
+            <vocabularyReference name="TypeVoc" id="66645" instanceName="ObjTextOnlineTypeVgr"/>
+            <vocabularyReference name="LanguageVoc" id="30281" instanceName="GenLanguageVgr"/>
+            <moduleReference name="AddressRef" targetModule="Address" multiplicity="N:1"/>
+            <moduleReference name="ExhibitionRef" targetModule="Exhibition" multiplicity="N:1"/>
+          </repeatableGroupItem>
+        </repeatableGroup>
+        <repeatableGroup name="ObjAcquisitionDateGrp">
+          <repeatableGroupItem>
+            <dataField dataType="Long" name="DatestampFromFuzzySearchLnu"/>
+            <dataField dataType="Varchar" name="DateFromTxt"/>
+            <dataField dataType="Varchar" name="DateToTxt"/>
+            <dataField dataType="Long" name="DatestampToFuzzySearchLnu"/>
+            <dataField dataType="Clob" name="NotesClb"/>
+            <dataField dataType="Varchar" name="DateTxt"/>
+            <dataField dataType="Varchar" name="SourceTxt"/>
+            <dataField dataType="Long" name="SortLnu"/>
+            <virtualField name="PreviewVrt"/>
+            <virtualField name="PreviewENVrt"/>
+            <vocabularyReference name="Type001Voc" id="74640" instanceName="ObjAcquisitionDateTypeVgr"/>
+            <vocabularyReference name="CertaintyVoc" id="34621" instanceName="ObjDateCertaintyVgr"/>
+            <vocabularyReference name="PrefixVoc" id="34623" instanceName="ObjDatePrefixVgr"/>
+            <vocabularyReference name="PeriodVoc" id="34622" instanceName="ObjDatePeriodVgr"/>
+            <vocabularyReference name="TypeVoc" id="30361" instanceName="ObjDateTypeVgr"/>
+            <vocabularyReference name="SuffixVoc" id="34624" instanceName="ObjDateSuffixVgr"/>
+          </repeatableGroupItem>
+        </repeatableGroup>
+        <repeatableGroup name="ObjAcquisitionNotesGrp">
+          <repeatableGroupItem>
+            <dataField dataType="Clob" name="MemoClb"/>
+            <dataField dataType="Long" name="SortLnu"/>
+            <dataField dataType="Clob" name="NotesClb"/>
+            <vocabularyReference name="TypeVoc" id="62641" instanceName="ObjAcquisitionNotesTypeVgr"/>
+          </repeatableGroupItem>
+        </repeatableGroup>
+        <repeatableGroup name="ObjAcquisitionMethodGrp">
+          <repeatableGroupItem>
+            <dataField dataType="Clob" name="NotesClb"/>
+            <vocabularyReference name="StatusVoc" id="62640" instanceName="ObjAcquisitionMethodStatusVgr"/>
+            <vocabularyReference name="MethodVoc" id="62639" instanceName="ObjAcquisitionMethodVgr"/>
+          </repeatableGroupItem>
+        </repeatableGroup>
+        <repeatableGroup name="ObjIlluminationGrp">
+          <repeatableGroupItem>
+            <dataField dataType="Date" name="DateDat"/>
+            <dataField dataType="Clob" name="NotesClb"/>
+            <vocabularyReference name="UVVoc" id="62645" instanceName="ObjIlluminationUVVgr"/>
+            <vocabularyReference name="LuxVoc" id="62643" instanceName="ObjIlluminationLuxVgr"/>
+            <vocabularyReference name="StatusVoc" id="62644" instanceName="ObjIlluminationStatusVgr"/>
+          </repeatableGroupItem>
+        </repeatableGroup>
+        <repeatableGroup name="ObjCommentGrp">
+          <repeatableGroupItem>
+            <dataField dataType="Clob" name="CommentClb"/>
+            <dataField dataType="Long" name="SortLnu"/>
+            <vocabularyReference name="TypeVoc" id="62642" instanceName="ObjCommentTypeVgr"/>
+          </repeatableGroupItem>
+        </repeatableGroup>
+        <repeatableGroup name="ObjObjectArchiveContentGrp">
+          <repeatableGroupItem>
+            <dataField dataType="Long" name="SortLnu"/>
+            <dataField dataType="Clob" name="NotesClb"/>
+            <dataField dataType="Varchar" name="ContentTxt"/>
+            <dataField dataType="Date" name="ModifiedDateDat"/>
+            <dataField dataType="Varchar" name="ModifiedByTxt"/>
+            <vocabularyReference name="TypeVoc" id="30450" instanceName="ObjTitleTypeVgr"/>
+          </repeatableGroupItem>
+        </repeatableGroup>
+        <repeatableGroup name="ObjNumberObjectsGrp">
+          <repeatableGroupItem>
+            <dataField dataType="Varchar" name="NotesClb"/>
+            <dataField dataType="Long" name="SortLnu"/>
+            <dataField dataType="Long" name="NumberLnu"/>
+            <vocabularyReference name="TypeVoc" id="62646" instanceName="ObjNumberObjectsTypeVgr"/>
+          </repeatableGroupItem>
+        </repeatableGroup>
+        <repeatableGroup name="ObjPublicationGrp">
+          <repeatableGroupItem>
+            <dataField dataType="Date" name="ModifiedDateDat"/>
+            <dataField dataType="Varchar" name="ModifiedByTxt"/>
+            <dataField dataType="Clob" name="NotesClb"/>
+            <dataField dataType="Long" name="SortLnu"/>
+            <vocabularyReference name="PublicationVoc" id="62649" instanceName="ObjPublicationVgr"/>
+            <vocabularyReference name="TypeVoc" id="62650" instanceName="ObjPublicationTypeVgr"/>
+          </repeatableGroupItem>
+        </repeatableGroup>
+        <repeatableGroup name="ObjOwnerMethodGrp">
+          <repeatableGroupItem>
+            <dataField dataType="Clob" name="NotesClb"/>
+            <vocabularyReference name="MethodVoc" id="62647" instanceName="ObjOwnerMethodVgr"/>
+            <vocabularyReference name="StatusVoc" id="62648" instanceName="ObjOwnerMethodStatusVgr"/>
+          </repeatableGroupItem>
+        </repeatableGroup>
+        <repeatableGroup name="ObjGNDGrp">
+          <repeatableGroupItem>
+            <dataField dataType="Clob" name="NotesClb"/>
+            <dataField dataType="Long" name="SortLnu"/>
+            <vocabularyReference name="GNDVoc" id="55629" instanceName="ObjGNDVgr"/>
+            <vocabularyReference name="TypeVoc" id="55630" instanceName="ObjGNDTypeVgr"/>
+          </repeatableGroupItem>
+        </repeatableGroup>
+        <repeatableGroup name="ObjConditionGrp">
+          <repeatableGroupItem>
+            <dataField dataType="Clob" name="NotesClb"/>
+            <dataField dataType="Date" name="DateDat"/>
+            <dataField dataType="Date" name="ModifiedDateDat"/>
+            <dataField dataType="Varchar" name="ModifiedByTxt"/>
+            <dataField dataType="Clob" name="ConditionClb"/>
+            <vocabularyReference name="StatusVoc" id="61646" instanceName="ObjConditionStatusVgr"/>
+            <vocabularyReference name="ConditionShortVoc" id="55628" instanceName="ObjConditionConditionShortVgr"/>
+          </repeatableGroupItem>
+        </repeatableGroup>
+        <repeatableGroup name="ObjApprovalGrp">
+          <repeatableGroupItem>
+            <vocabularyReference name="OnlineVoc" id="61645" instanceName="ObjOnlineVgr"/>
+          </repeatableGroupItem>
+        </repeatableGroup>
+        <repeatableGroup name="ObjGeneralGrp">
+          <repeatableGroupItem>
+            <dataField dataType="Date" name="DateDat"/>
+            <dataField dataType="Clob" name="Content001Clb"/>
+            <dataField dataType="Varchar" name="LabelTxt"/>
+            <dataField dataType="Varchar" name="ContentTxt"/>
+            <dataField dataType="Varchar" name="TypeTxt"/>
+            <dataField dataType="Long" name="SortLnu"/>
+            <vocabularyReference name="TypeKindVoc" id="49617" instanceName="ObjCommonTypeVgr"/>
+            <vocabularyReference name="TypeCategoryVoc" id="49617" instanceName="ObjCommonTypeVgr"/>
+            <vocabularyReference name="ContentVoc" id="49617" instanceName="ObjCommonTypeVgr"/>
+            <vocabularyReference name="TypeVoc" id="49617" instanceName="ObjCommonTypeVgr"/>
+            <moduleReference name="MultimediaRef" targetModule="Multimedia" multiplicity="M:N"/>
+          </repeatableGroupItem>
+        </repeatableGroup>
+        <repeatableGroup name="ObjCulturalContextGrp">
+          <repeatableGroupItem>
+            <dataField dataType="Clob" name="NotesClb"/>
+            <dataField dataType="Long" name="SortLnu"/>
+            <vocabularyReference name="DenominationVoc" id="61653" instanceName="ObjCulturalContextDenominationVgr"/>
+            <vocabularyReference name="NameVoc" id="61654" instanceName="ObjCulturalContextNameVgr"/>
+            <vocabularyReference name="TypeVoc" id="61655" instanceName="ObjCulturalContextTypeVgr"/>
+          </repeatableGroupItem>
+        </repeatableGroup>
+        <repeatableGroup name="ObjConservationTermsGrp">
+          <repeatableGroupItem>
+            <dataField dataType="Clob" name="StorageClb"/>
+            <dataField dataType="Clob" name="TransportClb"/>
+            <dataField dataType="Clob" name="MontageFramingClb"/>
+            <dataField dataType="Date" name="DateDat"/>
+            <dataField dataType="Clob" name="HandlingClb"/>
+            <dataField dataType="Clob" name="DisplayClb"/>
+            <dataField dataType="Clob" name="LoanNotesClb"/>
+            <dataField dataType="Varchar" name="ModifiedByTxt"/>
+            <dataField dataType="Date" name="ModifiedDateDat"/>
+            <dataField dataType="Varchar" name="PackingClb"/>
+            <dataField dataType="Clob" name="NotesClb"/>
+            <dataField dataType="Clob" name="SecurityClb"/>
+            <vocabularyReference name="TemperatureVoc" id="61652" instanceName="ObjConservationTermsTemperatureVgr"/>
+            <vocabularyReference name="ContaminantVoc" id="61647" instanceName="ObjConservationTermsContaminantVgr"/>
+            <vocabularyReference name="HumidityVoc" id="61648" instanceName="ObjConservationTermsHumidityVgr"/>
+            <vocabularyReference name="LoanVoc" id="61649" instanceName="ObjConservationTermsLoanVgr"/>
+            <vocabularyReference name="MontageFramingVoc" id="61650" instanceName="ObjConservationTermsFramingVgr"/>
+            <vocabularyReference name="StatusVoc" id="61651" instanceName="ObjConservationTermsStatusVgr"/>
+          </repeatableGroupItem>
+        </repeatableGroup>
+        <repeatableGroup name="ObjEditorNotesGrp">
+          <repeatableGroupItem>
+            <dataField dataType="Clob" name="NotesClb"/>
+            <dataField dataType="Long" name="SortLnu"/>
+            <vocabularyReference name="TypeVoc" id="61661" instanceName="ObjEditorNotesTypeVgr"/>
+            <vocabularyReference name="NotesVoc" id="61660" instanceName="ObjEditorNotesVgr"/>
+          </repeatableGroupItem>
+        </repeatableGroup>
+        <repeatableGroup name="ObjEditingGrp">
+          <repeatableGroupItem>
+            <dataField dataType="Date" name="DateDat"/>
+            <dataField dataType="Varchar" name="DetailsTxt"/>
+            <dataField dataType="Date" name="ModifiedDateDat"/>
+            <dataField dataType="Varchar" name="ModifiedByTxt"/>
+            <dataField dataType="Clob" name="NotesClb"/>
+            <vocabularyReference name="EditingVoc" id="61659" instanceName="ObjEditingVgr"/>
+          </repeatableGroupItem>
+        </repeatableGroup>
+        <repeatableGroup name="ObjLabelObjectGrp">
+          <repeatableGroupItem>
+            <dataField dataType="Clob" name="IconographyClb"/>
+            <dataField dataType="Varchar" name="DateTxt"/>
+            <dataField dataType="Varchar" name="InscriberTxt"/>
+            <dataField dataType="Varchar" name="MethodTxt"/>
+            <dataField dataType="Varchar" name="LetteringTxt"/>
+            <dataField dataType="Varchar" name="OrientationTxt"/>
+            <dataField dataType="Clob" name="NotesClb"/>
+            <dataField dataType="Clob" name="LabelClb"/>
+            <dataField dataType="Varchar" name="PositionTxt"/>
+            <dataField dataType="Varchar" name="PartTxt"/>
+            <dataField dataType="Clob" name="TranslationClb"/>
+            <dataField dataType="Long" name="SortLnu"/>
+            <dataField dataType="Clob" name="PurposeClb"/>
+            <dataField dataType="Clob" name="TransliterationClb"/>
+            <vocabularyReference name="CategoryVoc" id="63640" instanceName="ObjLabelObjectCategoryVgr"/>
+            <vocabularyReference name="AuthenticityVoc" id="72640" instanceName="ObjLabelObjectAuthenticityVgr"/>
+            <vocabularyReference name="LanguageVoc" id="30281" instanceName="GenLanguageVgr"/>
+            <vocabularyReference name="TypeVoc" id="61675" instanceName="ObjLabelObjectTypeVgr"/>
+            <moduleReference name="LiteratureRef" targetModule="Literature" multiplicity="N:1"/>
+          </repeatableGroupItem>
+        </repeatableGroup>
+        <repeatableGroup name="ObjIconographyGrp">
+          <repeatableGroupItem>
+            <dataField dataType="Long" name="SortLnu"/>
+            <dataField dataType="Clob" name="NotesClb"/>
+            <vocabularyReference name="KeywordEMVoc" id="61670" instanceName="ObjIconographyKeywordEthnologicalVgr"/>
+            <vocabularyReference name="KeywordANTVoc" id="61669" instanceName="ObjIconographyKeywordAntiqueVgr"/>
+            <vocabularyReference name="KeywordVoc" id="61672" instanceName="ObjIconographyKeywordVgr"/>
+            <vocabularyReference name="KeywordProjectVoc" id="61671" instanceName="ObjIconographyKeywordProjectVgr"/>
+            <vocabularyReference name="TypeVoc" id="61673" instanceName="ObjIconographyTypeVgr"/>
+          </repeatableGroupItem>
+        </repeatableGroup>
+        <repeatableGroup name="ObjNormalLocationGrp">
+          <repeatableGroupItem>
+            <dataField dataType="Varchar" name="DetailsTxt"/>
+            <vocabularyReference name="LocationVoc" id="30283" instanceName="GenLocationVgr"/>
+          </repeatableGroupItem>
+        </repeatableGroup>
+        <repeatableGroup name="ObjResponsibleGrp">
+          <repeatableGroupItem>
+            <dataField dataType="Clob" name="NotesClb"/>
+            <dataField dataType="Long" name="SortLnu"/>
+            <vocabularyReference name="ResposibleVoc" id="61683" instanceName="ObjResponsibleVgr"/>
+            <vocabularyReference name="TypeVoc" id="61684" instanceName="ObjResponsibleTypeVgr"/>
+          </repeatableGroupItem>
+        </repeatableGroup>
+        <repeatableGroup name="ObjReproductionGrp">
+          <repeatableGroupItem>
+            <dataField dataType="Clob" name="NotesClb"/>
+            <dataField dataType="Long" name="SortLnu"/>
+            <virtualField name="ReproductionVrt"/>
+            <vocabularyReference name="ReproductionVoc" id="61681" instanceName="ObjReproductionVgr"/>
+            <vocabularyReference name="TypeVoc" id="61682" instanceName="ObjReproductionTypeVgr"/>
+          </repeatableGroupItem>
+        </repeatableGroup>
+        <repeatableGroup name="ObjSystematicGrp">
+          <repeatableGroupItem>
+            <dataField dataType="Varchar" name="ModifiedByTxt"/>
+            <dataField dataType="Long" name="SortLnu"/>
+            <dataField dataType="Boolean" name="SystematicMultipleBoo"/>
+            <dataField dataType="Date" name="ModifiedDateDat"/>
+            <vocabularyReference name="AntiqueVoc" id="61688" instanceName="ObjTechnicalTermAntiqueArchive2Vgr"/>
+            <vocabularyReference name="EthnologicalVoc" id="61690" instanceName="ObjSystematicEthnologicalVgr"/>
+            <vocabularyReference name="ArtsCraftsVoc" id="61689" instanceName="ObjTechnicalTermArtsCraftsVgr"/>
+            <vocabularyReference name="ISLVoc" id="61692" instanceName="ObjTechnicalTermISLVgr"/>
+            <vocabularyReference name="EuropeanVoc" id="61691" instanceName="ObjSystematicEuropeanVgr"/>
+            <vocabularyReference name="SystematicVoc" id="61693" instanceName="ObjSystematicVgr"/>
+          </repeatableGroupItem>
+        </repeatableGroup>
+        <repeatableGroup name="ObjSWDGrp">
+          <repeatableGroupItem>
+            <dataField dataType="Numeric" name="SortLnu"/>
+            <dataField dataType="Clob" name="NotesClb"/>
+            <dataField dataType="Long" name="Sort001Lnu"/>
+            <vocabularyReference name="SWDVoc" id="61687" instanceName="ObjSWDVgr"/>
+          </repeatableGroupItem>
+        </repeatableGroup>
+        <repeatableGroup name="ObjTechnicalTermGrp">
+          <repeatableGroupItem>
+            <dataField dataType="Varchar" name="TechnicalTermTxt"/>
+            <dataField dataType="Boolean" name="TechnicalTermMultipleBoo"/>
+            <dataField dataType="Varchar" name="ModifiedByTxt"/>
+            <dataField dataType="Clob" name="NotesClb"/>
+            <dataField dataType="Date" name="ModifiedDateDat"/>
+            <dataField dataType="Long" name="SortLnu"/>
+            <vocabularyReference name="TechnicalTermAntiqueArchive2Voc" id="61688" instanceName="ObjTechnicalTermAntiqueArchive2Vgr"/>
+            <vocabularyReference name="TechnicalTermPrehistoryVoc" id="79757" instanceName="ObjTechnicalTermPrehistoryVgr"/>
+            <vocabularyReference name="TechnicalTermAntiqueArchive1Voc" id="61695" instanceName="ObjTechnicalTermAntiqueArchive1Vgr"/>
+            <vocabularyReference name="TechnicalTermArtsCraftsVoc" id="61689" instanceName="ObjTechnicalTermArtsCraftsVgr"/>
+            <vocabularyReference name="TechnicalTermAntiqueVoc" id="61696" instanceName="ObjTechnicalTermAntiqueVgr"/>
+            <vocabularyReference name="TechnicalTermEthnologicalVoc" id="61698" instanceName="ObjTechnicalTermEthnologicalVgr"/>
+            <vocabularyReference name="TechnicalTermEgyptVoc" id="61697" instanceName="ObjTechnicalTermEgyptVgr"/>
+            <vocabularyReference name="TechnicalTermISLVoc" id="61692" instanceName="ObjTechnicalTermISLVgr"/>
+            <vocabularyReference name="TechnicalTermGndVoc" id="61699" instanceName="ObjTechnicalTermGndVgr"/>
+            <vocabularyReference name="TechnicalTermReplicaVoc" id="61701" instanceName="ObjTechnicalTermReplicaVgr"/>
+            <vocabularyReference name="TechnicalTermNomismaVoc" id="61700" instanceName="ObjTechnicalTermNomismaVgr"/>
+            <vocabularyReference name="TechnicalTermVoc" id="61702" instanceName="ObjTechnicalTermVgr"/>
+            <vocabularyReference name="TypeVoc" id="61703" instanceName="ObjTechnicalTermTypeVgr"/>
+            <vocabularyReference name="TechnicalTermAatVoc" id="61694" instanceName="ObjTechnicalTermAatVgr"/>
+          </repeatableGroupItem>
+        </repeatableGroup>
+        <repeatableGroup name="ObjMaterialTechniqueGrp">
+          <repeatableGroupItem>
+            <dataField dataType="Varchar" name="ModifiedByTxt"/>
+            <dataField dataType="Date" name="ModifiedDateDat"/>
+            <dataField dataType="Clob" name="SpecialClb"/>
+            <dataField dataType="Clob" name="NotesClb"/>
+            <dataField dataType="Varchar" name="DetailsTxt"/>
+            <dataField dataType="Long" name="SortLnu"/>
+            <dataField dataType="Clob" name="ExportClb"/>
+            <dataField dataType="Long" name="SortingTxt"/>
+            <dataField dataType="Clob" name="LocalizationClb"/>
+            <virtualField name="TechniqueVrt"/>
+            <virtualField name="MaterialVrt"/>
+            <vocabularyReference name="MatTechVoc" id="61678" instanceName="ObjMaterialTechniqueMatTechVgr"/>
+            <vocabularyReference name="PhotographyVoc" id="61679" instanceName="ObjMaterialTechniquePhotographyVgr"/>
+            <vocabularyReference name="PresentationVoc" id="61680" instanceName="ObjMaterialTechniquePresentationVgr"/>
+            <vocabularyReference name="MaterialVoc" id="43617" instanceName="ObjMaterialTechniqueMaterialVgr"/>
+            <vocabularyReference name="EgyptVoc" id="61676" instanceName="ObjMaterialTechniqueEgyptVgr"/>
+            <vocabularyReference name="TypeVoc" id="30401" instanceName="ObjMaterialTechniqueTypeVgr"/>
+            <vocabularyReference name="ISLVoc" id="61677" instanceName="ObjMaterialTechniqueISLVgr"/>
+            <vocabularyReference name="TechniqueVoc" id="43618" instanceName="ObjMaterialTechniqueTechniqueVgr"/>
+          </repeatableGroupItem>
+        </repeatableGroup>
+        <repeatableGroup name="ObjTypeGrp">
+          <repeatableGroupItem>
+            <dataField dataType="Clob" name="Content001Clb"/>
+            <dataField dataType="Varchar" name="LabelTxt"/>
+            <dataField dataType="Varchar" name="ContentTxt"/>
+            <dataField dataType="Long" name="SortLnu"/>
+            <dataField dataType="Varchar" name="TypeTxt"/>
+            <vocabularyReference name="TypeCategoryVoc" id="48617" instanceName="ObjTypeTypeVgr"/>
+            <vocabularyReference name="TypeVoc" id="48617" instanceName="ObjTypeTypeVgr"/>
+          </repeatableGroupItem>
+        </repeatableGroup>
+        <repeatableGroup name="ObjGeneralVAMSchluetersaal2025Grp">
+          <repeatableGroupItem>
+            <dataField dataType="Date" name="OalDatumDDat"/>
+            <dataField dataType="Varchar" name="OalA09STxt"/>
+            <dataField dataType="Long" name="OalSortierungLLnu"/>
+            <dataField dataType="Clob" name="OalTextMClb"/>
+            <vocabularyReference name="OalA11SVoc" id="78654" instanceName="ObjGeneralVAMSchluetersaal2025OalA11SVgr"/>
+            <vocabularyReference name="OalA10SVoc" id="78653" instanceName="ObjGeneralVAMSchluetersaal2025OalA10SVgr"/>
+            <vocabularyReference name="OalTextSVoc" id="78655" instanceName="ObjGeneralVAMSchluetersaal2025OalTextSVgr"/>
+            <vocabularyReference name="OalA04SVoc" id="78649" instanceName="ObjGeneralVAMSchluetersaal2025OalA04SVgr"/>
+            <vocabularyReference name="OalA07SVoc" id="78652" instanceName="ObjGeneralVAMSchluetersaal2025OalA07SVgr"/>
+            <vocabularyReference name="OalA08SVoc" id="78651" instanceName="ObjGeneralVAMSchluetersaal2025OalA08SVgr"/>
+            <vocabularyReference name="OalA05SVoc" id="78650" instanceName="ObjGeneralVAMSchluetersaal2025OalA05SVgr"/>
+            <vocabularyReference name="OalA06SVoc" id="78651" instanceName="ObjGeneralVAMSchluetersaal2025OalA08SVgr"/>
+          </repeatableGroupItem>
+        </repeatableGroup>
+        <repeatableGroup name="ObjTypeNumismatikGrp">
+          <repeatableGroupItem>
+            <dataField dataType="Varchar" name="ObjA11STxt"/>
+            <dataField dataType="Varchar" name="ObjA05STxt"/>
+            <dataField dataType="Varchar" name="ObjA06STxt"/>
+            <dataField dataType="Clob" name="ObjA01MClb"/>
+            <dataField dataType="Varchar" name="ObjA04STxt"/>
+            <dataField dataType="Varchar" name="ObjA09STxt"/>
+            <dataField dataType="Varchar" name="ObjA10STxt"/>
+            <dataField dataType="Varchar" name="ObjA07STxt"/>
+            <dataField dataType="Varchar" name="ObjA08STxt"/>
+          </repeatableGroupItem>
+        </repeatableGroup>
+        <repeatableGroup name="ObjAccessionGrp">
+          <repeatableGroupItem>
+            <dataField dataType="Varchar" name="DateFromTxt"/>
+            <dataField dataType="Long" name="DatestampToFuzzySearchLnu"/>
+            <dataField dataType="Long" name="DatestampFromFuzzySearchLnu"/>
+            <dataField dataType="Varchar" name="DateTxt"/>
+            <dataField dataType="Varchar" name="DateToTxt"/>
+            <dataField dataType="Clob" name="NotesClb"/>
+            <dataField dataType="Long" name="SortLnu"/>
+            <dataField dataType="Varchar" name="SourceTxt"/>
+            <virtualField name="PreviewVrt"/>
+            <vocabularyReference name="TypeVoc" id="66639" instanceName="ObjAcquisitionTypeVgr"/>
+            <vocabularyReference name="CertaintyVoc" id="34621" instanceName="ObjDateCertaintyVgr"/>
+            <vocabularyReference name="PeriodVoc" id="34622" instanceName="ObjDatePeriodVgr"/>
+            <vocabularyReference name="PrefixVoc" id="34623" instanceName="ObjDatePrefixVgr"/>
+            <vocabularyReference name="SuffixVoc" id="34624" instanceName="ObjDateSuffixVgr"/>
+          </repeatableGroupItem>
+        </repeatableGroup>
+        <repeatableGroup name="ObjKeyWordsGrp">
+          <repeatableGroupItem>
+            <dataField dataType="Varchar" name="NotationTxt"/>
+            <dataField dataType="Clob" name="NotesClb"/>
+            <dataField dataType="Long" name="SortLnu"/>
+            <vocabularyReference name="KeyWordVoc" id="39621" instanceName="ObjKeyWordVgr"/>
+            <vocabularyReference name="DelimiterVoc" id="61674" instanceName="ObjKeyWordsDelimiterVgr"/>
+            <vocabularyReference name="TypeVoc" id="55631" instanceName="ObjKeywordTypeVgr"/>
+          </repeatableGroupItem>
+        </repeatableGroup>
+        <repeatableGroup name="ObjCurrentLocationGrp">
+          <repeatableGroupItem>
+            <dataField dataType="Varchar" name="DateFromTxt"/>
+            <dataField dataType="Long" name="DatestampToFuzzySearchLnu"/>
+            <dataField dataType="Long" name="DatestampFromFuzzySearchLnu"/>
+            <dataField dataType="Varchar" name="DateTxt"/>
+            <dataField dataType="Varchar" name="DateToTxt"/>
+            <dataField dataType="Varchar" name="ModifiedByTxt"/>
+            <dataField dataType="Time" name="DateFromTim"/>
+            <dataField dataType="Date" name="ModifiedDateDat"/>
+            <dataField dataType="Timestamp" name="DateFromTsp"/>
+            <dataField dataType="Varchar" name="SourceTxt"/>
+            <dataField dataType="Time" name="DateToTim"/>
+            <dataField dataType="Timestamp" name="DateToTsp"/>
+            <dataField dataType="Timestamp" name="DateTsp"/>
+            <dataField dataType="Varchar" name="AuthorizationTxt"/>
+            <dataField dataType="Date" name="DateDat"/>
+            <dataField dataType="Date" name="DateToDat"/>
+            <dataField dataType="Varchar" name="SynchroGuidTxt"/>
+            <dataField dataType="Clob" name="NotesClb"/>
+            <dataField dataType="Varchar" name="DetailTxt"/>
+            <virtualField name="PreviewVrt"/>
+            <vocabularyReference name="CertaintyVoc" id="34621" instanceName="ObjDateCertaintyVgr"/>
+            <vocabularyReference name="DetailsVoc" id="61656" instanceName="ObjCurrentLocationDetailsVgr"/>
+            <vocabularyReference name="PeriodVoc" id="34622" instanceName="ObjDatePeriodVgr"/>
+            <vocabularyReference name="PrefixVoc" id="34623" instanceName="ObjDatePrefixVgr"/>
+            <vocabularyReference name="TypeVoc" id="30285" instanceName="GenMoveReasonVgr"/>
+            <vocabularyReference name="SuffixVoc" id="34624" instanceName="ObjDateSuffixVgr"/>
+            <vocabularyReference name="LocationVoc" id="30283" instanceName="GenLocationVgr"/>
+            <vocabularyReference name="ReasonVoc" id="30285" instanceName="GenMoveReasonVgr"/>
+            <vocabularyReference name="StatusVoc" id="30286" instanceName="GenMoveStatusVgr"/>
+            <moduleReference name="AddressRef" targetModule="Address" multiplicity="N:1"/>
+            <moduleReference name="CollectionActivityRef" targetModule="CollectionActivity" multiplicity="N:1"/>
+            <moduleReference name="MovementRef" targetModule="Movement" multiplicity="N:1"/>
+          </repeatableGroupItem>
+        </repeatableGroup>
+        <repeatableGroup name="ObjDateGrp">
+          <repeatableGroupItem>
+            <dataField dataType="Long" name="DateFromLnu"/>
+            <dataField dataType="Varchar" name="DateTxt"/>
+            <dataField dataType="Long" name="DateToLnu"/>
+            <dataField dataType="Varchar" name="PreviewOther1Txt"/>
+            <dataField dataType="Varchar" name="PreviewOther2Txt"/>
+            <dataField dataType="Varchar" name="PreviewTxt"/>
+            <dataField dataType="Varchar" name="DateFromTxt"/>
+            <dataField dataType="Varchar" name="DateToTxt"/>
+            <dataField dataType="Date" name="DateFromDat"/>
+            <dataField dataType="Date" name="DateToDat"/>
+            <dataField dataType="Varchar" name="DatingTxt"/>
+            <dataField dataType="Clob" name="NotesClb"/>
+            <dataField dataType="Long" name="SortLnu"/>
+            <dataField dataType="Varchar" name="SourceTxt"/>
+            <dataField dataType="Long" name="YearFromLnu"/>
+            <dataField dataType="Long" name="YearToLnu"/>
+            <dataField dataType="Long" name="DatestampToFuzzySearchLnu"/>
+            <dataField dataType="Long" name="DatestampFromFuzzySearchLnu"/>
+            <virtualField name="PreviewVrt"/>
+            <virtualField name="PreviewENVrt"/>
+            <vocabularyReference name="CertaintyVoc" id="34621" instanceName="ObjDateCertaintyVgr"/>
+            <vocabularyReference name="PeriodVoc" id="34622" instanceName="ObjDatePeriodVgr"/>
+            <vocabularyReference name="PrefixVoc" id="34623" instanceName="ObjDatePrefixVgr"/>
+            <vocabularyReference name="SuffixVoc" id="34624" instanceName="ObjDateSuffixVgr"/>
+            <vocabularyReference name="PeriodAntiqueVoc" id="61657" instanceName="ObjDatePeriodAntiqueVgr"/>
+            <vocabularyReference name="PeriodEgyptVoc" id="61658" instanceName="ObjDatePeriodEgyptVgr"/>
+            <vocabularyReference name="TypeVoc" id="30361" instanceName="ObjDateTypeVgr"/>
+          </repeatableGroupItem>
+        </repeatableGroup>
+        <moduleReference name="ObjOwnershipRef" targetModule="Ownership" multiplicity="1:N">
+          <moduleReferenceItem>
+            <dataField dataType="Long" name="SortLnu"/>
+          </moduleReferenceItem>
+        </moduleReference>
+        <moduleReference name="ObjLoanRef" targetModule="Address" multiplicity="M:N">
+          <moduleReferenceItem>
+            <dataField dataType="Clob" name="NotesClb"/>
+            <dataField dataType="Long" name="SortLnu"/>
+            <vocabularyReference name="TypeVoc" id="62651" instanceName="ObjLoanTypeVgr"/>
+          </moduleReferenceItem>
+        </moduleReference>
+        <moduleReference name="ObjAccessoryRef" targetModule="Accessory" multiplicity="M:N">
+          <moduleReferenceItem>
+            <dataField dataType="Clob" name="NotesClb"/>
+          </moduleReferenceItem>
+        </moduleReference>
+        <moduleReference name="ObjAcquisitionAddressRef" targetModule="Address" multiplicity="N:1">
+          <moduleReferenceItem/>
+        </moduleReference>
+        <moduleReference name="ObjAcquisitionSourceRef" targetModule="Address" multiplicity="N:1">
+          <moduleReferenceItem/>
+        </moduleReference>
+        <moduleReference name="ObjCollectionActivityRef" targetModule="CollectionActivity" multiplicity="M:N">
+          <moduleReferenceItem>
+            <dataField dataType="Clob" name="NotesClb"/>
+            <dataField dataType="Date" name="DateFromDat"/>
+            <dataField dataType="Date" name="DateToDat"/>
+            <dataField dataType="Clob" name="DescriptionClb"/>
+            <dataField dataType="Varchar" name="MAoutTxt"/>
+            <dataField dataType="Varchar" name="MAreserveTxt"/>
+            <vocabularyReference name="StatusVoc" id="60640" instanceName="ColObjectStatusVgr"/>
+            <vocabularyReference name="TypeVoc" id="60641" instanceName="ColObjectTypeVgr"/>
+          </moduleReferenceItem>
+        </moduleReference>
+        <moduleReference name="ObjConservationRef" targetModule="Conservation" multiplicity="M:N">
+          <moduleReferenceItem/>
+        </moduleReference>
+        <moduleReference name="ObjContractRef" targetModule="Contract" multiplicity="M:N">
+          <moduleReferenceItem>
+            <dataField dataType="Boolean" name="Box2Boo"/>
+            <dataField dataType="Boolean" name="Box3Boo"/>
+            <dataField dataType="Boolean" name="Box4Boo"/>
+            <dataField dataType="Varchar" name="CatalogNoTxt"/>
+            <dataField dataType="Clob" name="ConditionExhibitionClb"/>
+            <dataField dataType="Clob" name="ConditionPackingClb"/>
+            <dataField dataType="Clob" name="ConditionTransportClb"/>
+            <dataField dataType="Clob" name="ConservationClb"/>
+            <dataField dataType="Numeric" name="ConservationFeeNum"/>
+            <dataField dataType="Numeric" name="ConversionRateNum"/>
+            <dataField dataType="Clob" name="CourierClb"/>
+            <dataField dataType="Numeric" name="CourierFeeNum"/>
+            <dataField dataType="Date" name="DecisionDateDat"/>
+            <dataField dataType="Clob" name="DisplayClb"/>
+            <dataField dataType="Varchar" name="GalleryTxt"/>
+            <dataField dataType="Boolean" name="HighResolutionBoo"/>
+            <dataField dataType="Boolean" name="ImageClearedBoo"/>
+            <dataField dataType="Clob" name="ImageNotesClb"/>
+            <dataField dataType="Numeric" name="InsuranceValueNum"/>
+            <dataField dataType="Boolean" name="LabelPrintedBoo"/>
+            <dataField dataType="Numeric" name="LoanFeeNum"/>
+            <dataField dataType="Clob" name="NotesClb"/>
+            <dataField dataType="Long" name="RefContractLnu"/>
+            <dataField dataType="Boolean" name="RightsClearedBoo"/>
+            <dataField dataType="Varchar" name="SectionTxt"/>
+            <dataField dataType="Clob" name="SecurityClb"/>
+            <dataField dataType="Clob" name="ShippingClb"/>
+            <dataField dataType="Varchar" name="WallCaseTxt"/>
+            <dataField dataType="Boolean" name="Box1Boo"/>
+            <vocabularyReference name="CurrencyVoc" id="30273" instanceName="GenCurrencyVgr"/>
+            <vocabularyReference name="DecisionVoc" id="30212" instanceName="CtrObjectDecisionVgr"/>
+          </moduleReferenceItem>
+        </moduleReference>
+        <moduleReference name="ObjAcquisitionSourcePerRef" targetModule="Person" multiplicity="N:1">
+          <moduleReferenceItem/>
+        </moduleReference>
+        <moduleReference name="ObjDepositorRef" targetModule="Address" multiplicity="N:1">
+          <moduleReferenceItem/>
+        </moduleReference>
+        <moduleReference name="ObjExhibitionRef" targetModule="Exhibition" multiplicity="M:N">
+          <moduleReferenceItem>
+            <dataField dataType="Clob" name="SecurityClb"/>
+            <dataField dataType="Clob" name="ShippingClb"/>
+            <dataField dataType="Long" name="SortLnu"/>
+            <dataField dataType="Varchar" name="SubTheme0039Txt"/>
+            <dataField dataType="Varchar" name="Theme0039Txt"/>
+            <dataField dataType="Varchar" name="WallCaseTxt"/>
+            <dataField dataType="Clob" name="Accessory0015Clb"/>
+            <dataField dataType="Varchar" name="Arrival0015Txt"/>
+            <dataField dataType="Numeric" name="ConversionRateNum"/>
+            <dataField dataType="Clob" name="Exhibition0015Clb"/>
+            <dataField dataType="Varchar" name="Hang0015Txt"/>
+            <dataField dataType="Varchar" name="HangOut0015Txt"/>
+            <dataField dataType="Clob" name="Packing0015Clb"/>
+            <dataField dataType="Varchar" name="Packing0015Txt"/>
+            <dataField dataType="Varchar" name="Return0015Txt"/>
+            <dataField dataType="Varchar" name="Unpacking0015Txt"/>
+            <dataField dataType="Boolean" name="Box1Boo"/>
+            <dataField dataType="Boolean" name="Box2Boo"/>
+            <dataField dataType="Boolean" name="Box3Boo"/>
+            <dataField dataType="Boolean" name="Box4Boo"/>
+            <dataField dataType="Varchar" name="CatalogNoTxt"/>
+            <dataField dataType="Varchar" name="ConditionCheckBy0014Txt"/>
+            <dataField dataType="Clob" name="ConditionNotes0014Clb"/>
+            <dataField dataType="Varchar" name="ConditionStatus0014Txt"/>
+            <dataField dataType="Clob" name="ConservationClb"/>
+            <dataField dataType="Numeric" name="ConservationFeeNum"/>
+            <dataField dataType="Clob" name="CourierClb"/>
+            <dataField dataType="Numeric" name="CourierFeeNum"/>
+            <dataField dataType="Date" name="DecisionDateDat"/>
+            <dataField dataType="Clob" name="DisplayClb"/>
+            <dataField dataType="Varchar" name="GalleryTxt"/>
+            <dataField dataType="Boolean" name="HighResolutionBoo"/>
+            <dataField dataType="Boolean" name="ImageClearedBoo"/>
+            <dataField dataType="Clob" name="ImageNotesClb"/>
+            <dataField dataType="Numeric" name="InsuranceValueNum"/>
+            <dataField dataType="Boolean" name="LabelPrintedBoo"/>
+            <dataField dataType="Numeric" name="LoanFeeNum"/>
+            <dataField dataType="Clob" name="NotesClb"/>
+            <dataField dataType="Long" name="RefContractLnu"/>
+            <dataField dataType="Boolean" name="RightsClearedBoo"/>
+            <dataField dataType="Varchar" name="RoomNoTxt"/>
+            <dataField dataType="Varchar" name="SectionTxt"/>
+            <vocabularyReference name="CurrencyVoc" id="30273" instanceName="GenCurrencyVgr"/>
+            <vocabularyReference name="InsuranceStatus0015Voc" id="34619" instanceName="ExhObjectInsuranceStatus0015Vgr"/>
+            <vocabularyReference name="ConditionReportPrinted0014Voc" id="30590" instanceName="ExhObjectConditionReportPrintedVgr"/>
+            <vocabularyReference name="DecisionVoc" id="30252" instanceName="ExhObjectDecisionVgr"/>
+            <vocabularyReference name="LoanReportPrinted0014Voc" id="30592" instanceName="ExhObjectLoanReportPrintedVgr"/>
+          </moduleReferenceItem>
+        </moduleReference>
+        <moduleReference name="ObjFundingSourceRef" targetModule="Address" multiplicity="N:1">
+          <moduleReferenceItem/>
+        </moduleReference>
+        <moduleReference name="ObjLiteratureRef" targetModule="Literature" multiplicity="M:N">
+          <moduleReferenceItem>
+            <dataField dataType="Varchar" name="CatalogueNumberTxt"/>
+            <dataField dataType="Varchar" name="FigRefTxt"/>
+            <dataField dataType="Varchar" name="PicturePageTxt"/>
+            <dataField dataType="Clob" name="NotesClb"/>
+            <dataField dataType="Long" name="NumCatalogueLnu"/>
+            <dataField dataType="Varchar" name="PageRefTxt"/>
+            <dataField dataType="Long" name="SortLnu"/>
+            <vocabularyReference name="Type0114Voc" id="35617" instanceName="LitObjectType0114Vgr"/>
+            <vocabularyReference name="TypeVoc" id="30317" instanceName="LitObjectTypeVgr"/>
+          </moduleReferenceItem>
+        </moduleReference>
+        <moduleReference name="ObjMovementRef" targetModule="Movement" multiplicity="M:N">
+          <moduleReferenceItem>
+            <dataField dataType="Clob" name="NotesClb"/>
+            <dataField dataType="Varchar" name="BoxNumTxt"/>
+          </moduleReferenceItem>
+        </moduleReference>
+        <moduleReference name="ObjMultimediaRef" targetModule="Multimedia" multiplicity="M:N">
+          <moduleReferenceItem>
+            <dataField dataType="Boolean" name="ExportBoo"/>
+            <dataField dataType="Boolean" name="ThumbnailBoo"/>
+            <dataField dataType="Long" name="SortLnu"/>
+            <vocabularyReference name="CategoryVoc" id="54617" instanceName="ObjMulCategoryVgr"/>
+          </moduleReferenceItem>
+        </moduleReference>
+        <moduleReference name="ObjObjectGroupsRef" targetModule="ObjectGroup" multiplicity="M:N">
+          <moduleReferenceItem>
+            <dataField dataType="Clob" name="NotesClb"/>
+            <dataField dataType="Long" name="SortLnu"/>
+          </moduleReferenceItem>
+        </moduleReference>
+        <moduleReference name="ObjOwnerRef" targetModule="Address" multiplicity="N:1">
+          <moduleReferenceItem/>
+        </moduleReference>
+        <moduleReference name="ObjPerAssociationRef" targetModule="Person" multiplicity="M:N">
+          <moduleReferenceItem>
+            <dataField dataType="Varchar" name="NotesClb"/>
+            <dataField dataType="Varchar" name="Part0045Txt"/>
+            <dataField dataType="Varchar" name="RoleTxt"/>
+            <dataField dataType="Long" name="SortLnu"/>
+            <dataField dataType="Varchar" name="PerForeNameTxt"/>
+            <dataField dataType="Varchar" name="PerSurNameTxt"/>
+            <dataField dataType="Varchar" name="Role0051Txt"/>
+            <dataField dataType="Varchar" name="Source0051Txt"/>
+            <dataField dataType="Varchar" name="Display0019Txt"/>
+            <vocabularyReference name="Role0047Voc" id="30423" instanceName="ObjPerAssociationRoleVgr"/>
+            <vocabularyReference name="RoleVoc" id="30423" instanceName="ObjPerAssociationRoleVgr"/>
+            <vocabularyReference name="SourceTxt" id="30424" instanceName="ObjPerAssociationSourceVgr"/>
+            <vocabularyReference name="AttributionVoc" id="30422" instanceName="ObjPerAssociationAttributionVgr"/>
+          </moduleReferenceItem>
+        </moduleReference>
+        <moduleReference name="ObjPlaceRef" targetModule="Place" multiplicity="M:N">
+          <moduleReferenceItem>
+            <dataField dataType="Clob" name="NotesClb"/>
+            <dataField dataType="Varchar" name="PositionTxt"/>
+            <dataField dataType="Long" name="SortLnu"/>
+            <dataField dataType="Varchar" name="SourceTxt"/>
+            <vocabularyReference name="TypeVoc" id="30594" instanceName="PlaObjectType0044Vgr"/>
+          </moduleReferenceItem>
+        </moduleReference>
+        <moduleReference name="ObjContactAddressRef" targetModule="Address" multiplicity="M:N">
+          <moduleReferenceItem>
+            <dataField dataType="Clob" name="NotesClb"/>
+            <vocabularyReference name="TypeVoc" id="41618" instanceName="ObjContactAddressTypeVgr"/>
+          </moduleReferenceItem>
+        </moduleReference>
+        <moduleReference name="ObjTaskRef" targetModule="Task" multiplicity="M:N">
+          <moduleReferenceItem/>
+        </moduleReference>
+        <moduleReference name="ObjOwnership001Ref" targetModule="Ownership" multiplicity="M:N">
+          <moduleReferenceItem>
+            <dataField dataType="Long" name="SortLnu"/>
+          </moduleReferenceItem>
+        </moduleReference>
+        <moduleReference name="ObjParticipantStrongAdrRef" targetModule="Address" multiplicity="M:N">
+          <moduleReferenceItem>
+            <dataField dataType="Clob" name="NotesClb"/>
+            <dataField dataType="Long" name="SortLnu"/>
+            <vocabularyReference name="TypeVoc" id="35621" instanceName="ObjParticipantAdrVgr"/>
+          </moduleReferenceItem>
+        </moduleReference>
+        <moduleReference name="ObjRegistrarRef" targetModule="Registrar" multiplicity="1:N">
+          <moduleReferenceItem/>
+        </moduleReference>
+        <composite name="ObjObjectCre">
+          <compositeItem seqNo="0">
+            <moduleReference name="ObjObjectARef" targetModule="Object" multiplicity="M:N">
+              <moduleReferenceItem>
+                <dataField dataType="Clob" name="EvidenceAClb"/>
+                <dataField dataType="Clob" name="EvidenceBClb"/>
+                <dataField dataType="Clob" name="NotesAClb"/>
+                <dataField dataType="Clob" name="NotesBClb"/>
+                <dataField dataType="Clob" name="NotesClb"/>
+                <vocabularyReference name="TypeAVoc" id="30413" instanceName="ObjObjectTypeVgr"/>
+                <vocabularyReference name="TypeBVoc" id="30413" instanceName="ObjObjectTypeVgr"/>
+                <vocabularyReference name="PreselectTypeAVoc" id="30413" instanceName="ObjObjectTypeVgr"/>
+                <vocabularyReference name="PreselectTypeBVoc" id="30413" instanceName="ObjObjectTypeVgr"/>
+              </moduleReferenceItem>
+            </moduleReference>
+          </compositeItem>
+          <compositeItem seqNo="1">
+            <moduleReference name="ObjObjectBRef" targetModule="Object" multiplicity="M:N">
+              <moduleReferenceItem>
+                <dataField dataType="Clob" name="EvidenceAClb"/>
+                <dataField dataType="Clob" name="EvidenceBClb"/>
+                <dataField dataType="Clob" name="NotesAClb"/>
+                <dataField dataType="Clob" name="NotesBClb"/>
+                <dataField dataType="Clob" name="NotesClb"/>
+                <vocabularyReference name="TypeAVoc" id="30413" instanceName="ObjObjectTypeVgr"/>
+                <vocabularyReference name="TypeBVoc" id="30413" instanceName="ObjObjectTypeVgr"/>
+                <vocabularyReference name="PreselectTypeAVoc" id="30413" instanceName="ObjObjectTypeVgr"/>
+                <vocabularyReference name="PreselectTypeBVoc" id="30413" instanceName="ObjObjectTypeVgr"/>
+              </moduleReferenceItem>
+            </moduleReference>
+          </compositeItem>
+        </composite>
+        <composite name="ObjGeneralCre">
+          <compositeItem seqNo="0">
+            <repeatableGroup name="_UserObjGeneralAEMPAnalysenGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Clob" name="_UserOalA01MClb"/>
+                <dataField dataType="Clob" name="_UserOalA02MClb"/>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+                <dataField dataType="Clob" name="_UserOalA03MClb"/>
+                <dataField dataType="Varchar" name="_UserOalA04STxt"/>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+                <dataField dataType="Varchar" name="_UserOalTextSTxt"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="1">
+            <repeatableGroup name="_UserObjGeneralAEMPLabelGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+                <vocabularyReference name="_UserOalTextSVoc" id="79649" instanceName="ObjGeneralAEMPLabelOalTextSVgr"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="2">
+            <repeatableGroup name="_UserObjGeneralANT1KorrekturenVerlustGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+                <dataField dataType="Varchar" name="_UserOalTextSTxt"/>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="3">
+            <repeatableGroup name="_UserObjGeneralANT2KorrekturenVerlustGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+                <vocabularyReference name="_UserOalTextSVoc" id="79650" instanceName="ObjGeneralANT2KorrekturenVerlustdokumentationnichterfaszOalTextSVgr"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="4">
+            <repeatableGroup name="_UserObjGeneralANT3KorrekturenVerlustGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+                <vocabularyReference name="_UserOalTextSVoc" id="79651" instanceName="ObjGeneralANT3KorrekturenVerlustdokumentationerfasztOalTextSVgr"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="5">
+            <repeatableGroup name="_UserObjGeneralANTAusstellungsbeschriGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+                <dataField dataType="Varchar" name="_UserOalTextSTxt"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="6">
+            <repeatableGroup name="_UserObjGeneralANTBibliographieGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+                <dataField dataType="Varchar" name="_UserOalTextSTxt"/>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="7">
+            <repeatableGroup name="_UserObjGeneralANTNeuesMuseumGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+                <dataField dataType="Varchar" name="_UserOalTextSTxt"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="8">
+            <repeatableGroup name="_UserObjGeneralANTUnueberpruefteAngabGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+                <dataField dataType="Varchar" name="_UserOalTextSTxt"/>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="9">
+            <repeatableGroup name="_UserObjGeneralANTwissenschKorrespondGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+                <dataField dataType="Varchar" name="_UserOalTextSTxt"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="10">
+            <repeatableGroup name="_UserObjGeneralARGEAbbauGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+                <vocabularyReference name="_UserOalTextSVoc" id="79652" instanceName="ObjGeneralARGEAbbauOalTextSVgr"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="11">
+            <repeatableGroup name="_UserObjGeneralARGEAbbauundVerpackenGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+                <vocabularyReference name="_UserOalTextSVoc" id="79653" instanceName="ObjGeneralARGEAbbauundVerpackenOalTextSVgr"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="12">
+            <repeatableGroup name="_UserObjGeneralARGEAbriszGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+                <vocabularyReference name="_UserOalTextSVoc" id="79654" instanceName="ObjGeneralARGEAbriszOalTextSVgr"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="13">
+            <repeatableGroup name="_UserObjGeneralARGEandabweichendeMaszGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+                <dataField dataType="Varchar" name="_UserOalTextSTxt"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="14">
+            <repeatableGroup name="_UserObjGeneralARGEBesBehandlungbeiVeGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+                <dataField dataType="Varchar" name="_UserOalTextSTxt"/>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="15">
+            <repeatableGroup name="_UserObjGeneralARGEBesSicherungfTransGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+                <vocabularyReference name="_UserOalTextSVoc" id="79655" instanceName="ObjGeneralARGEBesSicherungfTransportOalTextSVgr"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="16">
+            <repeatableGroup name="_UserObjGeneralARGEKeinTransportGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+                <vocabularyReference name="_UserOalTextSVoc" id="79656" instanceName="ObjGeneralARGEKeinTransportOalTextSVgr"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="17">
+            <repeatableGroup name="_UserObjGeneralARGENichttransportfaehGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+                <vocabularyReference name="_UserOalTextSVoc" id="79657" instanceName="ObjGeneralARGENichttransportfaehigRestmasznahmenotwendigOalTextSVgr"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="18">
+            <repeatableGroup name="_UserObjGeneralARGEPfannerGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+                <vocabularyReference name="_UserOalTextSVoc" id="79658" instanceName="ObjGeneralARGEPfannerOalTextSVgr"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="19">
+            <repeatableGroup name="_UserObjGeneralARGEPfannerLagerungBefGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+                <dataField dataType="Varchar" name="_UserOalTextSTxt"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="20">
+            <repeatableGroup name="_UserObjGeneralARGEPfannerMarkiertGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+                <dataField dataType="Varchar" name="_UserOalTextSTxt"/>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="21">
+            <repeatableGroup name="_UserObjGeneralARGEPfannerNameDatumGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+                <dataField dataType="Varchar" name="_UserOalTextSTxt"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="22">
+            <repeatableGroup name="_UserObjGeneralARGEPfannerNichtamOrtGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+                <vocabularyReference name="_UserOalTextSVoc" id="79659" instanceName="ObjGeneralARGEPfannerNichtamOrtOalTextSVgr"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="23">
+            <repeatableGroup name="_UserObjGeneralARGEPfannerProvenienzGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+                <vocabularyReference name="_UserOalTextSVoc" id="79660" instanceName="ObjGeneralARGEPfannerProvenienzOalTextSVgr"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="24">
+            <repeatableGroup name="_UserObjGeneralARGETransportunproblemGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+                <vocabularyReference name="_UserOalTextSVoc" id="79661" instanceName="ObjGeneralARGETransportunproblematischOalTextSVgr"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="25">
+            <repeatableGroup name="_UserObjGeneralAusstellungenGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+                <vocabularyReference name="_UserOalTextSVoc" id="79662" instanceName="ObjGeneralAusstellungenOalTextSVgr"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="26">
+            <repeatableGroup name="_UserObjGeneralBerufFunktionGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+                <vocabularyReference name="_UserOalTextSVoc" id="79663" instanceName="ObjGeneralBerufFunktionOalTextSVgr"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="27">
+            <repeatableGroup name="_UserObjGeneralBeschriftungGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Clob" name="_UserOalA01MClb"/>
+                <dataField dataType="Clob" name="_UserOalA02MClb"/>
+                <dataField dataType="Varchar" name="_UserOalA05STxt"/>
+                <dataField dataType="Varchar" name="_UserOalA06STxt"/>
+                <dataField dataType="Clob" name="_UserOalA03MClb"/>
+                <dataField dataType="Varchar" name="_UserOalA04STxt"/>
+                <dataField dataType="Varchar" name="_UserOalA10STxt"/>
+                <dataField dataType="Varchar" name="_UserOalA08STxt"/>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <dataField dataType="Varchar" name="_UserOalTextSTxt"/>
+                <vocabularyReference name="_UserOalA09SVoc" id="79665" instanceName="ObjGeneralBeschriftungOalA09SVgr"/>
+                <vocabularyReference name="_UserOalA07SVoc" id="79664" instanceName="ObjGeneralBeschriftungOalA07SVgr"/>
+                <vocabularyReference name="_UserOalA11SVoc" id="79666" instanceName="ObjGeneralBeschriftungOalA11SVgr"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="28">
+            <repeatableGroup name="_UserObjGeneralBezugBauwerkGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Clob" name="_UserOalA02MClb"/>
+                <dataField dataType="Clob" name="_UserOalA03MClb"/>
+                <dataField dataType="Clob" name="_UserOalA01MClb"/>
+                <dataField dataType="Varchar" name="_UserOalA06STxt"/>
+                <dataField dataType="Varchar" name="_UserOalA07STxt"/>
+                <dataField dataType="Varchar" name="_UserOalA04STxt"/>
+                <dataField dataType="Varchar" name="_UserOalA05STxt"/>
+                <dataField dataType="Varchar" name="_UserOalA10STxt"/>
+                <dataField dataType="Varchar" name="_UserOalA11STxt"/>
+                <dataField dataType="Varchar" name="_UserOalA08STxt"/>
+                <dataField dataType="Varchar" name="_UserOalA09STxt"/>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+                <dataField dataType="Varchar" name="_UserOalTextSTxt"/>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="29">
+            <repeatableGroup name="_UserObjGeneralDokumentationRestGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+                <dataField dataType="Varchar" name="_UserOalA05STxt"/>
+                <dataField dataType="Varchar" name="_UserOalA07STxt"/>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+                <dataField dataType="Varchar" name="_UserOalTextSTxt"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="30">
+            <repeatableGroup name="_UserObjGeneralEinsenderGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+                <vocabularyReference name="_UserOalTextSVoc" id="79667" instanceName="ObjGeneralEinsenderOalTextSVgr"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="31">
+            <repeatableGroup name="_UserObjGeneralEinsenderOrtGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+                <vocabularyReference name="_UserOalTextSVoc" id="79668" instanceName="ObjGeneralEinsenderOrtOalTextSVgr"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="32">
+            <repeatableGroup name="_UserObjGeneralEMVerlustdokumentationGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+                <dataField dataType="Varchar" name="_UserOalTextSTxt"/>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="33">
+            <repeatableGroup name="_UserObjGeneralEnglischeUEbersetzungeGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+                <dataField dataType="Varchar" name="_UserOalTextSTxt"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="34">
+            <repeatableGroup name="_UserObjGeneralFormatGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Clob" name="_UserOalA01MClb"/>
+                <dataField dataType="Varchar" name="_UserOalA05STxt"/>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+                <dataField dataType="Varchar" name="_UserOalA07STxt"/>
+                <dataField dataType="Varchar" name="_UserOalA09STxt"/>
+                <dataField dataType="Varchar" name="_UserOalTextSTxt"/>
+                <vocabularyReference name="_UserOalTextMVoc" id="79669" instanceName="ObjGeneralFormatOalTextMVgr"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="35">
+            <repeatableGroup name="_UserObjGeneralGaleriedes20JhsKKGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+                <vocabularyReference name="_UserOalTextSVoc" id="79670" instanceName="ObjGeneralGaleriedes20JhsKKOalTextSVgr"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="36">
+            <repeatableGroup name="_UserObjGeneralGaleriedes20JhsNGGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+                <vocabularyReference name="_UserOalTextSVoc" id="79671" instanceName="ObjGeneralGaleriedes20JhsNGOalTextSVgr"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="37">
+            <repeatableGroup name="_UserObjGeneralGebrauchsgeschichteGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Clob" name="_UserOalA01MClb"/>
+                <dataField dataType="Varchar" name="_UserOalA04STxt"/>
+                <dataField dataType="Varchar" name="_UserOalA07STxt"/>
+                <dataField dataType="Varchar" name="_UserOalA09STxt"/>
+                <dataField dataType="Varchar" name="_UserOalA05STxt"/>
+                <dataField dataType="Varchar" name="_UserOalA06STxt"/>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+                <dataField dataType="Varchar" name="_UserOalTextSTxt"/>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="38">
+            <repeatableGroup name="_UserObjGeneralGebrauchsgeschtichteGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+                <vocabularyReference name="_UserOalTextSVoc" id="79672" instanceName="ObjGeneralGebrauchsgeschtichteOalTextSVgr"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="39">
+            <repeatableGroup name="_UserObjGeneralInschriftANTGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+                <vocabularyReference name="_UserOalTextSVoc" id="79673" instanceName="ObjGeneralInschriftANTOalTextSVgr"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="40">
+            <repeatableGroup name="_UserObjGeneralISLAusstellung2026Grp">
+              <repeatableGroupItem>
+                <dataField dataType="Clob" name="_UserOalA02MClb"/>
+                <dataField dataType="Varchar" name="_UserOalA04STxt"/>
+                <dataField dataType="Varchar" name="_UserOalA10STxt"/>
+                <dataField dataType="Varchar" name="_UserOalA11STxt"/>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+                <dataField dataType="Varchar" name="_UserOalTextSTxt"/>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+                <vocabularyReference name="_UserOalA03MVoc" id="79674" instanceName="ObjGeneralISLAusstellung2026OalA03MVgr"/>
+                <vocabularyReference name="_UserOalA06SVoc" id="79676" instanceName="ObjGeneralISLAusstellung2026OalA06SVgr"/>
+                <vocabularyReference name="_UserOalA07SVoc" id="79677" instanceName="ObjGeneralISLAusstellung2026OalA07SVgr"/>
+                <vocabularyReference name="_UserOalA05SVoc" id="79675" instanceName="ObjGeneralISLAusstellung2026OalA05SVgr"/>
+                <vocabularyReference name="_UserOalA08SVoc" id="79678" instanceName="ObjGeneralISLAusstellung2026OalA08SVgr"/>
+                <vocabularyReference name="_UserOalA09SVoc" id="79679" instanceName="ObjGeneralISLAusstellung2026OalA09SVgr"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="41">
+            <repeatableGroup name="_UserObjGeneralISLBeschriftungAusstelGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Varchar" name="_UserOalA05STxt"/>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <dataField dataType="Clob" name="_UserOalA01MClb"/>
+                <dataField dataType="Clob" name="_UserOalA02MClb"/>
+                <dataField dataType="Varchar" name="_UserOalTextSTxt"/>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+                <vocabularyReference name="_UserOalTextMVoc" id="79680" instanceName="ObjGeneralISLBeschriftungAusstellungOalTextMVgr"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="42">
+            <repeatableGroup name="_UserObjGeneralISLDigitalisierungGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Varchar" name="_UserOalTextSTxt"/>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+                <dataField dataType="Varchar" name="_UserOalA11STxt"/>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <dataField dataType="Varchar" name="_UserOalA09STxt"/>
+                <dataField dataType="Varchar" name="_UserOalA10STxt"/>
+                <vocabularyReference name="_UserOalA04SVoc" id="79681" instanceName="ObjGeneralISLDigitalisierungOalA04SVgr"/>
+                <vocabularyReference name="_UserOalA07SVoc" id="79684" instanceName="ObjGeneralISLDigitalisierungOalA07SVgr"/>
+                <vocabularyReference name="_UserOalA08SVoc" id="79685" instanceName="ObjGeneralISLDigitalisierungOalA08SVgr"/>
+                <vocabularyReference name="_UserOalA05SVoc" id="79682" instanceName="ObjGeneralISLDigitalisierungOalA05SVgr"/>
+                <vocabularyReference name="_UserOalA06SVoc" id="79683" instanceName="ObjGeneralISLDigitalisierungOalA06SVgr"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="43">
+            <repeatableGroup name="_UserObjGeneralISLGrabungGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Clob" name="_UserOalA01MClb"/>
+                <dataField dataType="Varchar" name="_UserOalA04STxt"/>
+                <dataField dataType="Varchar" name="_UserOalA05STxt"/>
+                <dataField dataType="Clob" name="_UserOalA02MClb"/>
+                <dataField dataType="Clob" name="_UserOalA03MClb"/>
+                <dataField dataType="Varchar" name="_UserOalA08STxt"/>
+                <dataField dataType="Varchar" name="_UserOalA09STxt"/>
+                <dataField dataType="Varchar" name="_UserOalA07STxt"/>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+                <dataField dataType="Varchar" name="_UserOalA10STxt"/>
+                <dataField dataType="Varchar" name="_UserOalA11STxt"/>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+                <dataField dataType="Varchar" name="_UserOalTextSTxt"/>
+                <vocabularyReference name="_UserOalA06SVoc" id="79686" instanceName="ObjGeneralISLGrabungOalA06SVgr"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="44">
+            <repeatableGroup name="_UserObjGeneralISLRestaurierung2026Grp">
+              <repeatableGroupItem>
+                <dataField dataType="Clob" name="_UserOalA01MClb"/>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <dataField dataType="Varchar" name="_UserOalTextSTxt"/>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+                <vocabularyReference name="_UserOalA02MVoc" id="79687" instanceName="ObjGeneralISLRestaurierung2026OalA02MVgr"/>
+                <vocabularyReference name="_UserOalA05SVoc" id="79690" instanceName="ObjGeneralISLRestaurierung2026OalA05SVgr"/>
+                <vocabularyReference name="_UserOalA06SVoc" id="79691" instanceName="ObjGeneralISLRestaurierung2026OalA06SVgr"/>
+                <vocabularyReference name="_UserOalA03MVoc" id="79688" instanceName="ObjGeneralISLRestaurierung2026OalA03MVgr"/>
+                <vocabularyReference name="_UserOalA04SVoc" id="79689" instanceName="ObjGeneralISLRestaurierung2026OalA04SVgr"/>
+                <vocabularyReference name="_UserOalA10SVoc" id="79694" instanceName="ObjGeneralISLRestaurierung2026OalA10SVgr"/>
+                <vocabularyReference name="_UserOalA07SVoc" id="79692" instanceName="ObjGeneralISLRestaurierung2026OalA07SVgr"/>
+                <vocabularyReference name="_UserOalA08SVoc" id="79693" instanceName="ObjGeneralISLRestaurierung2026OalA08SVgr"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="45">
+            <repeatableGroup name="_UserObjGeneralKoerperschaftGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <vocabularyReference name="_UserOalTextSVoc" id="79695" instanceName="ObjGeneralKoerperschaftOalTextSVgr"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="46">
+            <repeatableGroup name="_UserObjGeneralLiteratureintragGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Clob" name="_UserOalA01MClb"/>
+                <dataField dataType="Varchar" name="_UserOalTextSTxt"/>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+                <dataField dataType="Varchar" name="_UserOalA04STxt"/>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <vocabularyReference name="_UserOalTextMVoc" id="79696" instanceName="ObjGeneralLiteratureintragOalTextMVgr"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="47">
+            <repeatableGroup name="_UserObjGeneralMarkenGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+                <dataField dataType="Varchar" name="_UserOalA11STxt"/>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <dataField dataType="Varchar" name="_UserOalTextSTxt"/>
+                <dataField dataType="Varchar" name="_UserOalA05STxt"/>
+                <dataField dataType="Varchar" name="_UserOalA06STxt"/>
+                <dataField dataType="Varchar" name="_UserOalA04STxt"/>
+                <dataField dataType="Varchar" name="_UserOalA09STxt"/>
+                <dataField dataType="Varchar" name="_UserOalA10STxt"/>
+                <dataField dataType="Varchar" name="_UserOalA07STxt"/>
+                <dataField dataType="Varchar" name="_UserOalA08STxt"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="48">
+            <repeatableGroup name="_UserObjGeneralMidasAspektGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Varchar" name="_UserOalTextSTxt"/>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="49">
+            <repeatableGroup name="_UserObjGeneralNGBezeichnungenamObjekGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <dataField dataType="Varchar" name="_UserOalTextSTxt"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="50">
+            <repeatableGroup name="_UserObjGeneralNGMBSSGGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+                <dataField dataType="Varchar" name="_UserOalA10STxt"/>
+                <dataField dataType="Varchar" name="_UserOalA11STxt"/>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+                <dataField dataType="Varchar" name="_UserOalTextSTxt"/>
+                <dataField dataType="Varchar" name="_UserOalA08STxt"/>
+                <dataField dataType="Varchar" name="_UserOalA09STxt"/>
+                <dataField dataType="Clob" name="_UserOalA01MClb"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="51">
+            <repeatableGroup name="_UserObjGeneralNGNotizenGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+                <vocabularyReference name="_UserOalTextSVoc" id="79697" instanceName="ObjGeneralNGNotizenOalTextSVgr"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="52">
+            <repeatableGroup name="_UserObjGeneralNNGBemerkungenAusstellGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Varchar" name="_UserOalTextSTxt"/>
+                <dataField dataType="Clob" name="_UserOalA01MClb"/>
+                <dataField dataType="Clob" name="_UserOalA02MClb"/>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+                <dataField dataType="Clob" name="_UserOalA03MClb"/>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="53">
+            <repeatableGroup name="_UserObjGeneralObjektbeschrdtGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <dataField dataType="Varchar" name="_UserOalTextSTxt"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="54">
+            <repeatableGroup name="_UserObjGeneralObjektbeschrenglGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Varchar" name="_UserOalTextSTxt"/>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="55">
+            <repeatableGroup name="_UserObjGeneralOnlinebeschrenglGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <vocabularyReference name="_UserOalTextSVoc" id="79698" instanceName="ObjGeneralOnlinebeschrenglOalTextSVgr"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="56">
+            <repeatableGroup name="_UserObjGeneralPublikationenGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <vocabularyReference name="_UserOalTextSVoc" id="79699" instanceName="ObjGeneralPublikationenOalTextSVgr"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="57">
+            <repeatableGroup name="_UserObjGeneralQuellenGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Clob" name="_UserOalA03MClb"/>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <dataField dataType="Clob" name="_UserOalA02MClb"/>
+                <dataField dataType="Varchar" name="_UserOalTextSTxt"/>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="58">
+            <repeatableGroup name="_UserObjGeneralRuBTransportGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+                <dataField dataType="Varchar" name="_UserOalTextSTxt"/>
+                <dataField dataType="Clob" name="_UserOalA01MClb"/>
+                <dataField dataType="Varchar" name="_UserOalA04STxt"/>
+                <dataField dataType="Varchar" name="_UserOalA05STxt"/>
+                <dataField dataType="Clob" name="_UserOalA02MClb"/>
+                <dataField dataType="Clob" name="_UserOalA03MClb"/>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+                <dataField dataType="Varchar" name="_UserOalA06STxt"/>
+                <dataField dataType="Varchar" name="_UserOalA07STxt"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="59">
+            <repeatableGroup name="_UserObjGeneralSprachfassungGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Clob" name="_UserOalA02MClb"/>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+                <dataField dataType="Varchar" name="_UserOalTextSTxt"/>
+                <vocabularyReference name="_UserOalA01MVoc" id="79700" instanceName="ObjGeneralSprachfassungOalA01MVgr"/>
+                <vocabularyReference name="_UserOalA03MVoc" id="79701" instanceName="ObjGeneralSprachfassungOalA03MVgr"/>
+                <vocabularyReference name="_UserOalA05SVoc" id="79702" instanceName="ObjGeneralSprachfassungOalA05SVgr"/>
+                <vocabularyReference name="_UserOalTextMVoc" id="79703" instanceName="ObjGeneralSprachfassungOalTextMVgr"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="60">
+            <repeatableGroup name="_UserObjGeneralStandortGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+                <dataField dataType="Varchar" name="_UserOalTextSTxt"/>
+                <dataField dataType="Varchar" name="_UserOalA04STxt"/>
+                <dataField dataType="Varchar" name="_UserOalA05STxt"/>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+                <dataField dataType="Varchar" name="_UserOalA06STxt"/>
+                <dataField dataType="Varchar" name="_UserOalA07STxt"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="61">
+            <repeatableGroup name="_UserObjGeneralTextartObjekteGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Clob" name="_UserOalA01MClb"/>
+                <dataField dataType="Clob" name="_UserOalA02MClb"/>
+                <dataField dataType="Varchar" name="_UserOalA05STxt"/>
+                <dataField dataType="Varchar" name="_UserOalA06STxt"/>
+                <dataField dataType="Clob" name="_UserOalA03MClb"/>
+                <dataField dataType="Varchar" name="_UserOalA04STxt"/>
+                <dataField dataType="Varchar" name="_UserOalA09STxt"/>
+                <dataField dataType="Varchar" name="_UserOalA10STxt"/>
+                <dataField dataType="Varchar" name="_UserOalA07STxt"/>
+                <dataField dataType="Varchar" name="_UserOalA08STxt"/>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+                <dataField dataType="Varchar" name="_UserOalA11STxt"/>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <dataField dataType="Varchar" name="_UserOalTextSTxt"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="62">
+            <repeatableGroup name="_UserObjGeneralTexteObjekteGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Clob" name="_UserOalA03MClb"/>
+                <dataField dataType="Varchar" name="_UserOalA04STxt"/>
+                <dataField dataType="Clob" name="_UserOalA02MClb"/>
+                <dataField dataType="Varchar" name="_UserOalA07STxt"/>
+                <dataField dataType="Varchar" name="_UserOalA08STxt"/>
+                <dataField dataType="Varchar" name="_UserOalA05STxt"/>
+                <dataField dataType="Varchar" name="_UserOalA06STxt"/>
+                <dataField dataType="Varchar" name="_UserOalA11STxt"/>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <dataField dataType="Varchar" name="_UserOalA09STxt"/>
+                <dataField dataType="Varchar" name="_UserOalA10STxt"/>
+                <dataField dataType="Varchar" name="_UserOalTextSTxt"/>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="63">
+            <repeatableGroup name="_UserObjGeneralTitelGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <vocabularyReference name="_UserOalTextSVoc" id="79704" instanceName="ObjGeneralTitelOalTextSVgr"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="64">
+            <repeatableGroup name="_UserObjGeneralTransportGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+                <vocabularyReference name="_UserOalTextSVoc" id="79705" instanceName="ObjGeneralTransportOalTextSVgr"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="65">
+            <repeatableGroup name="_UserObjGeneralVAMAusstellungsbeschriGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Clob" name="_UserOalA01MClb"/>
+                <dataField dataType="Varchar" name="_UserOalA06STxt"/>
+                <dataField dataType="Varchar" name="_UserOalA04STxt"/>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+                <dataField dataType="Varchar" name="_UserOalTextSTxt"/>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+                <vocabularyReference name="_UserOalA07SVoc" id="79707" instanceName="ObjGeneralVAMAusstellungsbeschriftungdeutschOalA07SVgr"/>
+                <vocabularyReference name="_UserOalA05SVoc" id="79706" instanceName="ObjGeneralVAMAusstellungsbeschriftungdeutschOalA05SVgr"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="66">
+            <repeatableGroup name="_UserObjGeneralVAMBabylonprojekt20172Grp">
+              <repeatableGroupItem>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+                <dataField dataType="Varchar" name="_UserOalTextSTxt"/>
+                <vocabularyReference name="_UserOalA06SVoc" id="79710" instanceName="ObjGeneralVAMBabylonprojekt20172020OalA06SVgr"/>
+                <vocabularyReference name="_UserOalA07SVoc" id="79711" instanceName="ObjGeneralVAMBabylonprojekt20172020OalA07SVgr"/>
+                <vocabularyReference name="_UserOalA04SVoc" id="79708" instanceName="ObjGeneralVAMBabylonprojekt20172020OalA04SVgr"/>
+                <vocabularyReference name="_UserOalA05SVoc" id="79709" instanceName="ObjGeneralVAMBabylonprojekt20172020OalA05SVgr"/>
+                <vocabularyReference name="_UserOalA08SVoc" id="79712" instanceName="ObjGeneralVAMBabylonprojekt20172020OalA08SVgr"/>
+                <vocabularyReference name="_UserOalA09SVoc" id="79713" instanceName="ObjGeneralVAMBabylonprojekt20172020OalA09SVgr"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="67">
+            <repeatableGroup name="_UserObjGeneralVAMDauerausstellung202Grp">
+              <repeatableGroupItem>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+                <dataField dataType="Varchar" name="_UserOalTextSTxt"/>
+                <dataField dataType="Varchar" name="_UserOalA09STxt"/>
+                <vocabularyReference name="_UserOalA10SVoc" id="79719" instanceName="ObjGeneralVAMDauerausstellung2025OalA10SVgr"/>
+                <vocabularyReference name="_UserOalA11SVoc" id="79720" instanceName="ObjGeneralVAMDauerausstellung2025OalA11SVgr"/>
+                <vocabularyReference name="_UserOalA04SVoc" id="79714" instanceName="ObjGeneralVAMDauerausstellung2025OalA04SVgr"/>
+                <vocabularyReference name="_UserOalA05SVoc" id="79715" instanceName="ObjGeneralVAMDauerausstellung2025OalA05SVgr"/>
+                <vocabularyReference name="_UserOalA08SVoc" id="79718" instanceName="ObjGeneralVAMDauerausstellung2025OalA08SVgr"/>
+                <vocabularyReference name="_UserOalA06SVoc" id="79716" instanceName="ObjGeneralVAMDauerausstellung2025OalA06SVgr"/>
+                <vocabularyReference name="_UserOalA07SVoc" id="79717" instanceName="ObjGeneralVAMDauerausstellung2025OalA07SVgr"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="68">
+            <repeatableGroup name="_UserObjGeneralVAMSchluetersaal2019Grp">
+              <repeatableGroupItem>
+                <dataField dataType="Date" name="_UserOalDatumDDat"/>
+                <dataField dataType="Varchar" name="_UserOalA09STxt"/>
+                <dataField dataType="Varchar" name="_UserOalTextSTxt"/>
+                <dataField dataType="Long" name="_UserOalSortierungLLnu"/>
+                <dataField dataType="Clob" name="_UserOalTextMClb"/>
+                <vocabularyReference name="_UserOalA04SVoc" id="79721" instanceName="ObjGeneralVAMSchluetersaal2019OalA04SVgr"/>
+                <vocabularyReference name="_UserOalA05SVoc" id="79722" instanceName="ObjGeneralVAMSchluetersaal2019OalA05SVgr"/>
+                <vocabularyReference name="_UserOalA11SVoc" id="79724" instanceName="ObjGeneralVAMSchluetersaal2019OalA11SVgr"/>
+                <vocabularyReference name="_UserOalA10SVoc" id="79723" instanceName="ObjGeneralVAMSchluetersaal2019OalA10SVgr"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+        </composite>
+        <composite name="ObjTypeCre">
+          <compositeItem seqNo="0">
+            <repeatableGroup name="_UserObjTypeAllgemeinAEMPZusatz1Grp">
+              <repeatableGroupItem>
+                <dataField dataType="Clob" name="_UserObjA01MClb"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="1">
+            <repeatableGroup name="_UserObjTypeAudioZusatz1Grp">
+              <repeatableGroupItem>
+                <dataField dataType="Varchar" name="_UserObjA04STxt"/>
+                <dataField dataType="Clob" name="_UserObjA01MClb"/>
+                <dataField dataType="Varchar" name="_UserObjA06STxt"/>
+                <vocabularyReference name="_UserObjA03MVoc" id="79726" instanceName="ObjTypeAudioObjA03MVgr"/>
+                <vocabularyReference name="_UserObjA02MVoc" id="79725" instanceName="ObjTypeAudioObjA02MVgr"/>
+                <vocabularyReference name="_UserObjA08SVoc" id="79728" instanceName="ObjTypeAudioObjA08SVgr"/>
+                <vocabularyReference name="_UserObjA05SVoc" id="79727" instanceName="ObjTypeAudioObjA05SVgr"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="2">
+            <repeatableGroup name="_UserObjTypeAudioZusatz2Grp">
+              <repeatableGroupItem>
+                <dataField dataType="Clob" name="_UserObjB02MClb"/>
+                <dataField dataType="Clob" name="_UserObjB01MClb"/>
+                <vocabularyReference name="_UserObjB04SVoc" id="79730" instanceName="ObjTypeAudioObjB04SVgr"/>
+                <vocabularyReference name="_UserObjB06SVoc" id="79731" instanceName="ObjTypeAudioObjB06SVgr"/>
+                <vocabularyReference name="_UserObjB03MVoc" id="79729" instanceName="ObjTypeAudioObjB03MVgr"/>
+                <vocabularyReference name="_UserObjB08SVoc" id="79732" instanceName="ObjTypeAudioObjB08SVgr"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="3">
+            <repeatableGroup name="_UserObjTypeFilmVideoZusatz1Grp">
+              <repeatableGroupItem>
+                <dataField dataType="Varchar" name="_UserObjA04STxt"/>
+                <dataField dataType="Varchar" name="_UserObjA05STxt"/>
+                <dataField dataType="Varchar" name="_UserObjA08STxt"/>
+                <dataField dataType="Clob" name="_UserObjA01MClb"/>
+                <vocabularyReference name="_UserObjA06SVoc" id="79735" instanceName="ObjTypeFilmVideoObjA06SVgr"/>
+                <vocabularyReference name="_UserObjA07SVoc" id="79736" instanceName="ObjTypeFilmVideoObjA07SVgr"/>
+                <vocabularyReference name="_UserObjA02MVoc" id="79733" instanceName="ObjTypeFilmVideoObjA02MVgr"/>
+                <vocabularyReference name="_UserObjA03MVoc" id="79734" instanceName="ObjTypeFilmVideoObjA03MVgr"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="4">
+            <repeatableGroup name="_UserObjTypeFilmVideoZusatz2Grp">
+              <repeatableGroupItem>
+                <dataField dataType="Clob" name="_UserObjB02MClb"/>
+                <dataField dataType="Varchar" name="_UserObjB07STxt"/>
+                <dataField dataType="Varchar" name="_UserObjB05STxt"/>
+                <dataField dataType="Varchar" name="_UserObjB09STxt"/>
+                <vocabularyReference name="_UserObjB03MVoc" id="79738" instanceName="ObjTypeFilmVideoObjB03MVgr"/>
+                <vocabularyReference name="_UserObjB01MVoc" id="79737" instanceName="ObjTypeFilmVideoObjB01MVgr"/>
+                <vocabularyReference name="_UserObjB06SVoc" id="79740" instanceName="ObjTypeFilmVideoObjB06SVgr"/>
+                <vocabularyReference name="_UserObjB04SVoc" id="79739" instanceName="ObjTypeFilmVideoObjB04SVgr"/>
+                <vocabularyReference name="_UserObjB08SVoc" id="79741" instanceName="ObjTypeFilmVideoObjB08SVgr"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="5">
+            <repeatableGroup name="_UserObjTypeFotografieZusatz1Grp">
+              <repeatableGroupItem>
+                <dataField dataType="Varchar" name="_UserObjA05STxt"/>
+                <dataField dataType="Clob" name="_UserObjA03MClb"/>
+                <dataField dataType="Varchar" name="_UserObjA09STxt"/>
+                <dataField dataType="Varchar" name="_UserObjA10STxt"/>
+                <dataField dataType="Varchar" name="_UserObjA07STxt"/>
+                <dataField dataType="Varchar" name="_UserObjA08STxt"/>
+                <dataField dataType="Varchar" name="_UserObjA11STxt"/>
+                <vocabularyReference name="_UserObjA06SVoc" id="79745" instanceName="ObjTypeFotografieObjA06SVgr"/>
+                <vocabularyReference name="_UserObjA04SVoc" id="79744" instanceName="ObjTypeFotografieObjA04SVgr"/>
+                <vocabularyReference name="_UserObjA01MVoc" id="79742" instanceName="ObjTypeFotografieObjA01MVgr"/>
+                <vocabularyReference name="_UserObjA02MVoc" id="79743" instanceName="ObjTypeFotografieObjA02MVgr"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="6">
+            <repeatableGroup name="_UserObjTypeMidasObjektZusatz1Grp">
+              <repeatableGroupItem>
+                <dataField dataType="Varchar" name="_UserObjA05STxt"/>
+                <dataField dataType="Varchar" name="_UserObjA04STxt"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="7">
+            <repeatableGroup name="_UserObjTypeMidasObjektZusatz2Grp">
+              <repeatableGroupItem>
+                <dataField dataType="Clob" name="_UserObjB01MClb"/>
+                <dataField dataType="Varchar" name="_UserObjB07STxt"/>
+                <dataField dataType="Varchar" name="_UserObjB05STxt"/>
+                <dataField dataType="Varchar" name="_UserObjB06STxt"/>
+                <dataField dataType="Clob" name="_UserObjB02MClb"/>
+                <dataField dataType="Varchar" name="_UserObjB04STxt"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="8">
+            <repeatableGroup name="_UserObjTypeNumismatikZusatz1Grp">
+              <repeatableGroupItem>
+                <dataField dataType="Clob" name="_UserObjA03MClb"/>
+                <dataField dataType="Varchar" name="_UserObjA04STxt"/>
+                <dataField dataType="Clob" name="_UserObjA01MClb"/>
+                <dataField dataType="Varchar" name="_UserObjA07STxt"/>
+                <dataField dataType="Varchar" name="_UserObjA08STxt"/>
+                <dataField dataType="Varchar" name="_UserObjA05STxt"/>
+                <dataField dataType="Varchar" name="_UserObjA06STxt"/>
+                <dataField dataType="Varchar" name="_UserObjA11STxt"/>
+                <dataField dataType="Varchar" name="_UserObjA09STxt"/>
+                <dataField dataType="Varchar" name="_UserObjA10STxt"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="9">
+            <repeatableGroup name="_UserObjTypeArchivalieAkteZusatz1Grp">
+              <repeatableGroupItem>
+                <dataField dataType="Varchar" name="_UserObjA11STxt"/>
+                <dataField dataType="Varchar" name="_UserObjA08STxt"/>
+                <dataField dataType="Varchar" name="_UserObjA09STxt"/>
+                <dataField dataType="Clob" name="_UserObjA01MClb"/>
+                <dataField dataType="Clob" name="_UserObjA03MClb"/>
+                <dataField dataType="Varchar" name="_UserObjA06STxt"/>
+                <dataField dataType="Varchar" name="_UserObjA04STxt"/>
+                <dataField dataType="Varchar" name="_UserObjA05STxt"/>
+                <vocabularyReference name="_UserObjA07SVoc" id="79747" instanceName="ObjTypeArchivalieAkteObjA07SVgr"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="10">
+            <repeatableGroup name="_UserObjTypeArchivalieEinzelblattZusatz1Grp">
+              <repeatableGroupItem>
+                <dataField dataType="Clob" name="_UserObjA01MClb"/>
+                <dataField dataType="Varchar" name="_UserObjA05STxt"/>
+                <dataField dataType="Varchar" name="_UserObjA06STxt"/>
+                <dataField dataType="Clob" name="_UserObjA03MClb"/>
+                <dataField dataType="Varchar" name="_UserObjA04STxt"/>
+                <dataField dataType="Varchar" name="_UserObjA09STxt"/>
+                <dataField dataType="Varchar" name="_UserObjA11STxt"/>
+                <dataField dataType="Varchar" name="_UserObjA08STxt"/>
+                <vocabularyReference name="_UserObjA07SVoc" id="79748" instanceName="ObjTypeArchivalieEinzelblattObjA07SVgr"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="11">
+            <repeatableGroup name="_UserObjTypeArchivalieSonstigesZusatz1Grp">
+              <repeatableGroupItem>
+                <dataField dataType="Varchar" name="_UserObjA08STxt"/>
+                <dataField dataType="Varchar" name="_UserObjA09STxt"/>
+                <dataField dataType="Varchar" name="_UserObjA06STxt"/>
+                <dataField dataType="Varchar" name="_UserObjA11STxt"/>
+                <dataField dataType="Varchar" name="_UserObjA04STxt"/>
+                <dataField dataType="Varchar" name="_UserObjA05STxt"/>
+                <dataField dataType="Clob" name="_UserObjA01MClb"/>
+                <dataField dataType="Clob" name="_UserObjA03MClb"/>
+                <vocabularyReference name="_UserObjA07SVoc" id="79749" instanceName="ObjTypeArchivalieSonstigesObjA07SVgr"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="12">
+            <repeatableGroup name="_UserObjTypeArchivalieVorgangZusatz1Grp">
+              <repeatableGroupItem>
+                <dataField dataType="Clob" name="_UserObjA03MClb"/>
+                <dataField dataType="Varchar" name="_UserObjA04STxt"/>
+                <dataField dataType="Clob" name="_UserObjA01MClb"/>
+                <dataField dataType="Varchar" name="_UserObjA08STxt"/>
+                <dataField dataType="Varchar" name="_UserObjA05STxt"/>
+                <dataField dataType="Varchar" name="_UserObjA06STxt"/>
+                <dataField dataType="Varchar" name="_UserObjA09STxt"/>
+                <dataField dataType="Varchar" name="_UserObjA11STxt"/>
+                <vocabularyReference name="_UserObjA07SVoc" id="79750" instanceName="ObjTypeArchivalieVorgangObjA07SVgr"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+        </composite>
+        <composite name="ObjActionCgr">
+          <compositeItem seqNo="0">
+            <repeatableGroup name="ObjActionGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Date" name="DateFromDat"/>
+                <dataField dataType="Date" name="DateToDat"/>
+                <dataField dataType="Clob" name="NotesClb"/>
+                <dataField dataType="Long" name="NumberObjectsLnu"/>
+                <dataField dataType="Clob" name="Part1Txt"/>
+                <dataField dataType="Clob" name="Part2Txt"/>
+                <dataField dataType="Clob" name="GenStatusActionClb"/>
+                <dataField dataType="Clob" name="GenUserTxt"/>
+                <dataField dataType="Date" name="GenDateDat"/>
+                <vocabularyReference name="LocationVoc" id="30283" instanceName="GenLocationVgr"/>
+                <vocabularyReference name="ReasonVoc" id="37617" instanceName="ObjActionReasonVgr"/>
+                <vocabularyReference name="StatusVoc" id="37618" instanceName="ObjActionStatusVgr"/>
+                <vocabularyReference name="TypeVoc" id="30346" instanceName="ObjActionTypeVgr"/>
+                <vocabularyReference name="GenStatusActionVoc" id="38617" instanceName="ObjStatusActionVgr"/>
+                <moduleReference name="ObjActionUserRef" targetModule="User" multiplicity="N:1"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+        </composite>
+        <composite name="ObjDimObjectSpectrumCgr">
+          <compositeItem seqNo="0">
+            <repeatableGroup name="ObjDim1DGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Numeric" name="ValueNum"/>
+                <dataField dataType="Varchar" name="PartTxt"/>
+                <dataField dataType="Varchar" name="PreviewOther1Txt"/>
+                <dataField dataType="Varchar" name="PreviewOther2Txt"/>
+                <dataField dataType="Numeric" name="ValueInchNum"/>
+                <dataField dataType="Clob" name="NotesClb"/>
+                <dataField dataType="Varchar" name="PrefixTxt"/>
+                <dataField dataType="Varchar" name="PreviewTxt"/>
+                <dataField dataType="Long" name="SortLnu"/>
+                <dataField dataType="Varchar" name="SuffixTxt"/>
+                <vocabularyReference name="UnitVoc" id="30276" instanceName="GenDimSizeUnitVgr"/>
+                <vocabularyReference name="UnitInchVoc" id="34625" instanceName="GenUnitInchVgr"/>
+                <vocabularyReference name="TypeVoc" id="33617" instanceName="ObjDim1DTypeVgr"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="1">
+            <repeatableGroup name="ObjDim2DGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Numeric" name="FirstNum"/>
+                <dataField dataType="Clob" name="NotesClb"/>
+                <dataField dataType="Varchar" name="PrefixTxt"/>
+                <dataField dataType="Varchar" name="PreviewTxt"/>
+                <dataField dataType="Numeric" name="SecondNum"/>
+                <dataField dataType="Long" name="SortLnu"/>
+                <dataField dataType="Varchar" name="SuffixTxt"/>
+                <dataField dataType="Numeric" name="FirstInchNum"/>
+                <dataField dataType="Varchar" name="PartTxt"/>
+                <dataField dataType="Varchar" name="PreviewOther1Txt"/>
+                <dataField dataType="Varchar" name="PreviewOther2Txt"/>
+                <dataField dataType="Numeric" name="SecondInchNum"/>
+                <vocabularyReference name="TypeVoc" id="30362" instanceName="ObjDim2DTypeVgr"/>
+                <vocabularyReference name="UnitVoc" id="30276" instanceName="GenDimSizeUnitVgr"/>
+                <vocabularyReference name="UnitInchVoc" id="34625" instanceName="GenUnitInchVgr"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="2">
+            <repeatableGroup name="ObjDim3DGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Numeric" name="FirstInchNum"/>
+                <dataField dataType="Varchar" name="PartTxt"/>
+                <dataField dataType="Varchar" name="PreviewOther1Txt"/>
+                <dataField dataType="Varchar" name="PreviewOther2Txt"/>
+                <dataField dataType="Numeric" name="SecondInchNum"/>
+                <dataField dataType="Varchar" name="ThirdInchNum"/>
+                <dataField dataType="Numeric" name="ThirdInchesNum"/>
+                <dataField dataType="Numeric" name="FirstNum"/>
+                <dataField dataType="Clob" name="NotesClb"/>
+                <dataField dataType="Varchar" name="PrefixTxt"/>
+                <dataField dataType="Varchar" name="PreviewTxt"/>
+                <dataField dataType="Numeric" name="SecondNum"/>
+                <dataField dataType="Long" name="SortLnu"/>
+                <dataField dataType="Varchar" name="SuffixTxt"/>
+                <dataField dataType="Numeric" name="ThirdNum"/>
+                <vocabularyReference name="UnitInchVoc" id="34625" instanceName="GenUnitInchVgr"/>
+                <vocabularyReference name="TypeVoc" id="30363" instanceName="ObjDim3DTypeVgr"/>
+                <vocabularyReference name="UnitVoc" id="30276" instanceName="GenDimSizeUnitVgr"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="3">
+            <repeatableGroup name="ObjDimDurationGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Long" name="HoursLnu"/>
+                <dataField dataType="Long" name="MinutesLnu"/>
+                <dataField dataType="Clob" name="NotesClb"/>
+                <dataField dataType="Varchar" name="PrefixTxt"/>
+                <dataField dataType="Varchar" name="PreviewTxt"/>
+                <dataField dataType="Long" name="SecondsLnu"/>
+                <dataField dataType="Long" name="SortLnu"/>
+                <dataField dataType="Varchar" name="SuffixTxt"/>
+                <dataField dataType="Varchar" name="PartTxt"/>
+                <dataField dataType="Varchar" name="PreviewOther1Txt"/>
+                <dataField dataType="Varchar" name="PreviewOther2Txt"/>
+                <vocabularyReference name="TypeVoc" id="35619" instanceName="ObjDimDurationTypeVgr"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+          <compositeItem seqNo="4">
+            <repeatableGroup name="ObjDimOtherGrp">
+              <repeatableGroupItem>
+                <dataField dataType="Varchar" name="PartTxt"/>
+                <dataField dataType="Varchar" name="PrefixTxt"/>
+                <dataField dataType="Varchar" name="PreviewOther1Txt"/>
+                <dataField dataType="Varchar" name="PreviewOther2Txt"/>
+                <dataField dataType="Varchar" name="PreviewTxt"/>
+                <dataField dataType="Varchar" name="SuffixTxt"/>
+                <dataField dataType="Varchar" name="DimensionTxt"/>
+                <dataField dataType="Clob" name="NotesClb"/>
+                <dataField dataType="Long" name="SortLnu"/>
+                <vocabularyReference name="TypeVoc" id="30364" instanceName="ObjDimOtherTypeVgr"/>
+              </repeatableGroupItem>
+            </repeatableGroup>
+          </compositeItem>
+        </composite>
+      </moduleItem>
+    </module>
+  </modules>
+</application>
