@@ -51,7 +51,7 @@ Which are the modules our instance knows
     - User
     - UserGroup
 SEE ALSO: 
-    http://docs.zetcom.com/ws/
+    http://docs.zetcom.com/ws
 """
 
 
