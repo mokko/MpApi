@@ -172,7 +172,7 @@ class Search (Helper):
 if __name__ == "__main__":
     s = Search(module="Object")
     s.addCriterion(operator="equalsField", field="Object.ObjRegistrarRef.RegExhibitionRef.__id", value="20222")
-    s.prints()
+    s.print()
     s.validate(mode="search")
 #    print(s.toString())
 #    s.validate()

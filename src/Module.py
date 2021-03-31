@@ -284,8 +284,8 @@ if __name__ == "__main__":
         ml.dataField(parent=rgi, name="InventarNrSTxt", value="I C 7723")
 
         for mi in ml.iter(): 
-            ml.prints(mi)
-        ml.prints()
+            ml.print(mi)
+        ml.print()
         ml.validate()
         ml.toFile(path="fromScratch.xml")
 

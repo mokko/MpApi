@@ -6,7 +6,7 @@ class Helper:
             et = self.etree
         return etree.tostring(et, pretty_print=True, encoding="unicode")
 
-    def prints(self, et=None):
+    def print(self, et=None):
         print(self.toString(et))
 
     def validate(self, mode="module"):
