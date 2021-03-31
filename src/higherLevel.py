@@ -1,6 +1,7 @@
 from pathlib import Path
 from Search import Search
-from mpApi import mpApi
+from MpApi import MpApi
+from Module import Module
 
 with open("credentials.py") as f:
     exec(f.read())
@@ -10,7 +11,15 @@ class HigherLevel:
     def __init__(self): 
 
         print(f"{baseURL}:{user}:{pw}")
-        self.api = mpApi(baseURL=baseURL, user=user, pw=pw)
+        self.api = MpApi(baseURL=baseURL, user=user, pw=pw)
+        
+    def changeRecord(self):
+        print ("*CHANGE RECORD")
+        m = Module(name="Object")
+        mi = m.moduleItem()
+        m.dataField(parent=mi, name="ObjTechnicalTermClb", value="Zupftrommel")
+        #m.dataField(parent=rgi, name="InventarNrSTxt", value="I C 7723")
+        m.print()
         
     def exhibitObjects (self):
 
@@ -52,4 +61,5 @@ class HigherLevel:
 
 if __name__ == "__main__":
     hl = HigherLevel()
-    hl.exhibitObjects()
+    hl.changeRecord()
+    #hl.exhibitObjects()

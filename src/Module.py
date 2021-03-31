@@ -16,14 +16,14 @@ What Zetcom calls item I also call a record or Datensatz.
 
 USAGE:
     # 4 ways to make a moduleList
-    m = ModuleList(file="path.xml")  # load from disc
-    m = ModuleList(xml=xml)          # from xml string
-    m = ModuleList(etree=lxml.etree) # from lxml.etree object
-    m = ModuleList(name="Object", totalSize=1) # new Object item from scratch
+    m = Module(file="path.xml")  # load from disc
+    m = Module(xml=xml)          # from xml string
+    m = Module(etree=lxml.etree) # from lxml.etree object
+    m = Module(name="Object", totalSize=1) # new Object item from scratch
 
     #new interface
-    m = ModuleList(name="Object", totalSize=1) # new Object item from scratch
-    #m is ModuleList object; 
+    m = Module(name="Object", totalSize=1) # new Object item from scratch
+    #m is Module object; 
     #following objects are lxml.etree objects, the stuff I sometimes suffix with N
     mi = m.moduleItem(hasAttachments="false", id="254808")
     m.dataField(parent=mi, dataType="Clob", name="ObjTechnicalTermClb", value="Zupfinstrument")
@@ -52,7 +52,7 @@ from Helper import Helper
 
 
 class Module(Helper):
-    def __init__(self, *, file=None, tree=None, xml=None, name=None, totalSize=1):
+    def __init__(self, *, file=None, tree=None, xml=None, name=None):
         parser = etree.XMLParser(remove_blank_text=True)
         if tree is not None:
             self.etree = tree  # didnt rm the blanks
@@ -64,7 +64,7 @@ class Module(Helper):
             xml = f"""
             <application xmlns="http://www.zetcom.com/ria/ws/module">
                 <modules>
-                    <module name="{name}" totalSize="{totalSize}"/>
+                    <module name="{name}"/>
                 </modules>
             </application>"""
             self.etree = etree.fromstring(xml, parser)
@@ -113,7 +113,7 @@ class Module(Helper):
             )
             valueN.text = value
 
-    def moduleItem(self, *, hasAttachments, id):
+    def moduleItem(self, *, hasAttachments=None, id=None):
         """
         <moduleItem hasAttachments="false" id="254808">
             <systemField dataType="Long" name="__id">
@@ -123,9 +123,11 @@ class Module(Helper):
         """
         mi = etree.Element(
             "{http://www.zetcom.com/ria/ws/module}moduleItem",
-            hasAttachments=hasAttachments,
-            id=id,
         )
+        if id is not None:
+            mi.set("id", id)
+        if hasAttachments is not None:
+            mi.set("hasAttachments", hasAttachments)
 
         moduleItemN = self.etree.xpath(
             "/m:application/m:modules/m:module[last()]", namespaces=NSMAP
@@ -272,15 +274,15 @@ if __name__ == "__main__":
         ml.validate()
 
     def from_scratch():
-        ml = ModuleList(name="Object", totalSize=1)
-        mi = ml.moduleItem(hasAttachments="false", id="254808")
-        ml.dataField(parent=mi, name="ObjTechnicalTermClb", value="Zupftrommel")
-        vr = ml.vocabularyReference(
+        m = Module(name="Object")
+        mi = m.moduleItem(hasAttachments="false")
+        m.dataField(parent=mi, name="ObjTechnicalTermClb", value="Zupftrommel")
+        vr = m.vocabularyReference(
             parent=mi, name="ObjCategoryVoc", id="30349", instanceName="ObjCategoryVgr"
         )
-        ml.vocabularyReferenceItem(parent=vr, id="3206642", name="Musikinstrument")
-        rg = ml.repeatableGroup(parent=mi, name="ObjObjectNumberGrp", size="1")
-        rgi = ml.repeatableGroupItem(parent=rg, id="20414895")
+        m.vocabularyReferenceItem(parent=vr, id="3206642", name="Musikinstrument")
+        rg = m.repeatableGroup(parent=mi, name="ObjObjectNumberGrp", size="1")
+        rgi = m.repeatableGroupItem(parent=rg, id="20414895")
         ml.dataField(parent=rgi, name="InventarNrSTxt", value="I C 7723")
 
         for mi in ml.iter(): 

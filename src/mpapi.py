@@ -3,10 +3,10 @@ from requests.auth import HTTPBasicAuth
 from requests.structures import CaseInsensitiveDict
 from lxml import etree
 from Search import Search
-from ObjectGroup import ObjectGroup
+from Module import Module
 
 """
-mpApi - MuseumPlus API Client  
+MpApi - MuseumPlus API Client  
 
 USAGE
     api = MpWebService(baseURL=baseURL, user=user, pw=pw)
@@ -55,7 +55,7 @@ SEE ALSO:
 """
 
 
-class mpApi:
+class MpApi:
     def __init__(self, *, baseURL, user, pw):
         self.baseURL = baseURL
         self.appURL = baseURL + "/ria-ws/application"
@@ -119,6 +119,11 @@ class mpApi:
             raise TypeError(f"Request response status code: {r.status_code}")
         return r
 
+    #POST http://.../ria-ws/application/module/{module}
+    def newModuleItem (self, *, module, moduleN):
+        url = self.appURL + "/module/" + module 
+        xml=etree.tostring(moduleN)
+        r = requests.post(url, data=xml, headers=self.headers, auth=self.auth)
     #
     # Public Helpers
     #
@@ -140,7 +145,7 @@ if __name__ == "__main__":
         exec(f.read())
 
     print(f"{baseURL}:{user}:{pw}")
-    api = mpApi(baseURL=baseURL, user=user, pw=pw)
+    api = MpApi(baseURL=baseURL, user=user, pw=pw)
 
     #project: exhibit objects
     project=Path("../sdata/exhibitObjects")
