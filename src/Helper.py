@@ -15,7 +15,7 @@ class Helper:
         """
         if mode == "module":
             xsdLoc = "../sdata/module_1_4.xsd"
-        elif  type == "search":
+        elif mode == "search":
             xsdLoc = "../sdata/search_1_4.xsd"
         else:
             raise TypeError ("Unknown validation mode")

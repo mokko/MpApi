@@ -27,7 +27,7 @@ USAGE
     s.toFile(path="out.xml")
     s.validate()
     
-self.et stores the lxml object containing the xml document.
+self.etree stores the lxml object containing the xml document.
 
 EXAMPLE
 <application 
@@ -51,6 +51,7 @@ EXAMPLE
 
 from pathlib import Path
 from lxml import etree
+from Helper import Helper
 
 # xpath 1.0 and lxml don't empty string or None for default ns
 NSMAP = {"s": "http://www.zetcom.com/ria/ws/module/search"}
@@ -78,7 +79,7 @@ allowedOperators = {
 }  # let's use an inmutable set
 
 
-class Search:
+class Search (Helper):
     def __init__(self, *, module, limit=-1, offset=0):
 
         # vanilla version without a single and
@@ -97,14 +98,14 @@ class Search:
         </modules>
         </application>"""
         parser = etree.XMLParser(remove_blank_text=True)
-        self.et = etree.fromstring(xml, parser)
+        self.etree = etree.fromstring(xml, parser)
 
     def addCriterion(self, *, operator, field, value=None):
         if operator not in allowedOperators:
             raise TypeError(f"Unknown operator: '{operator}'")
 
         parentN = self._findParent()
-        # expertN = self.et.xpath(
+        # expertN = self.etree.xpath(
         #    "/s:application/s:modules/s:module/s:search/s:expert",
         #    namespaces=NSMAP)
         etree.SubElement(
@@ -127,39 +128,17 @@ class Search:
     def NOT(self, *, modifier=False):
         self._addConjunction("not", modifier)
 
-    #
-    # public helpers
-    #
-
-    def validate(self):
-        """
-        Validate the search xml expression created.
-        """
-        if not hasattr(self, "xsd"):
-            self.xsd = etree.parse("../data/search_1_4.xsd")
-        xmlschema = etree.XMLSchema(self.xsd)
-        xmlschema.assertValid(self.et)
-        print("***VALIDATES")
-
-    def toString(self):
-        etree.indent(self.et)
-        return etree.tostring(self.et, pretty_print=True, encoding="unicode")  # not UTF-8
-
-    def toFile(self, *, path):
-        etree.indent(self.et)
-        et = etree.ElementTree(self.et)
-        et.write(str(path), pretty_print=True)
 
     #
     # private helpers
     #
 
     def _findParent(self):
-        conjN = self.et.xpath("//s:and|//s:and|//s:or", namespaces=NSMAP)
+        conjN = self.etree.xpath("//s:and|//s:and|//s:or", namespaces=NSMAP)
 
-        tree = etree.ElementTree(self.et)
+        tree = etree.ElementTree(self.etree)
         if len(conjN) == 0:
-            parentN = self.et.xpath(
+            parentN = self.etree.xpath(
                 "/s:application/s:modules/s:module/s:search/s:expert", namespaces=NSMAP
             )[0]
         else:
@@ -193,8 +172,8 @@ class Search:
 if __name__ == "__main__":
     s = Search(module="Object")
     s.addCriterion(operator="equalsField", field="Object.ObjRegistrarRef.RegExhibitionRef.__id", value="20222")
-    print(s.toString())
-    s.validate()
+    s.prints()
+    s.validate(mode="search")
 #    print(s.toString())
 #    s.validate()
 # s.addCriterion(operator="equalsField",field="__id", value="29825")
