@@ -9,18 +9,21 @@ with open("credentials.py") as f:
 class HigherLevel:
 
     def __init__(self): 
-
         print(f"{baseURL}:{user}:{pw}")
         self.api = MpApi(baseURL=baseURL, user=user, pw=pw)
         
-    def changeRecord(self):
+    def newRecord(self):
         print ("*CHANGE RECORD")
         m = Module(name="Object")
         mi = m.moduleItem()
         m.dataField(parent=mi, name="ObjTechnicalTermClb", value="Zupftrommel")
         #m.dataField(parent=rgi, name="InventarNrSTxt", value="I C 7723")
         m.print()
-        
+        m.validate()
+
+        r = self.api.newModuleItem(module="Object", xml=m.toString())
+        print (r)
+
     def exhibitObjects (self):
 
         #mkdir project dir    
@@ -31,7 +34,7 @@ class HigherLevel:
         #prepare search request
         s = Search(module="Object")
         s.addCriterion(operator="equalsField", field="ObjRegistrarRef.RegExhibitionRef.__id", value="20222")
-        print(s.toString())
+        s.print()
         s.validate()
         s.toFile(path=project.joinpath("search.xml"))
     
@@ -42,7 +45,7 @@ class HigherLevel:
     def objectsViaGroup (self):
 
         #mkdir project dir    
-        project=Path("../sdata/objectsViaGroup")
+        project = Path("../sdata/objectsViaGroup")
 
         #prepare search request
         s = Search(module="ObjectGroup")
@@ -61,5 +64,5 @@ class HigherLevel:
 
 if __name__ == "__main__":
     hl = HigherLevel()
-    hl.changeRecord()
+    hl.newRecord()
     #hl.exhibitObjects()
