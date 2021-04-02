@@ -5,10 +5,13 @@ CLI USAGE
     cd projectData
     mink.py -j job 
 
+CONFIGURATION
+    use jobs.dsl file; expected in project dir 
+
 DIR STRUCTURE    
 projectData
     credentials.py
-    HFObjekte/20210401/
+    HFObjekte/20210401 # <-- project dir
         report.log
         response.xml
         response-join.xml
@@ -104,7 +107,7 @@ class Mink:
         if out_fn.exists():
             self._info(" Clean file exists already, no overwrite")
         else:
-            self._info(f" Making new clean file ({out_fn})")
+            self._info(f" Making new clean file")
             
             m = Module(file=in_fn)
             for mi in m.iter(): 
@@ -116,7 +119,10 @@ class Mink:
                 m._dropFields(
                     parent=mi, type="systemField"
                 )  # if no parent, assume self.etree
+            m.validate()
+            self._info(" Clean document validates")
             m.toFile(path=out_fn)
+            self._info(f" Clean document written ({out_fn})")
 
     def digitalAssets(self, out_path):
         print(f"da {out_path}")
@@ -221,6 +227,7 @@ class Mink:
             self._info(f" New response written to {request_fn}")
 
     def validate(self, out_path):
+        """not necessary at the moment; would use module"""
         print(f"val {out_path}")
 
     #
