@@ -141,7 +141,6 @@ class Mink:
             self._info(f"Join exists already, no overwrite ({out_fn})")
         else:
             self._info(f"join file doesn't exist yet, making new one {out_fn}")
-
             first = None
             for each in self.project_dir.glob("response*.xml"):
                 print(each)
@@ -170,13 +169,15 @@ class Mink:
                             f"/m:application/m:modules/m:module[@name = '{type}']/m:moduleItem",
                             namespaces=NSMAP
                         )
-                        moduleN = first.xpath(
-                            f"/m:application/m:modules/m:module[@name = '{type}']",
-                            namespaces=NSMAP
-                        )[0]
-                        attributes = moduleN.attrib
-                        attributes['totalSize']=str(len(items))
-                        first.write(str(out_fn), pretty_print=True)
+            #write once when you're done joining files
+            moduleN = first.xpath(
+                f"/m:application/m:modules/m:module[@name = '{type}']",
+                namespaces=NSMAP
+            )[0]
+            attributes = moduleN.attrib
+            attributes['totalSize'] = str(len(items))
+            first.write(str(out_fn), pretty_print=True)
+            self._info("clean file written ({out_fn})")
 
     def getObjects(self, args):
         """
