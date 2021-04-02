@@ -186,14 +186,14 @@ class Mink:
         That means you needto manually delete files like search.xml and response.xml in
         your project dir if you want to do a new request.
 
-        Speed is really bad. I wonder if Zetcom server supports compression.
+        Speed is really bad. I wonder if the Zetcom server supports compression.
         """
 
         # making search request
         id = args[1]
         out = args[2]  # something unique
         self._info(f"GetObjects: {args[0]} {id} {out}")
-        search_fn = self.project_dir.joinpath("search" + out + ".xml")
+        search_fn = self.project_dir.joinpath(f"search{out}.xml")
         if search_fn.exists():
             self._info(f" Loading existing SEARCH request ({search_fn})")
             s = Search(fromFile=search_fn)
@@ -216,7 +216,7 @@ class Mink:
             s.toFile(path=search_fn)  # overwrites old files
             self._info(f" Search request saved to {search_fn}")
 
-        request_fn = self.project_dir.joinpath("response" + out + ".xml")
+        request_fn = self.project_dir.joinpath(f"response{out}.xml")
         if request_fn.exists():
             self._info(f" Loading existing REQUEST file ({request_fn})")
         else:
