@@ -58,7 +58,7 @@ class Module(Helper):
         elif xml is not None:
             self.etree = etree.fromstring(xml, parser)
         elif file is not None:
-            self.etree = etree.parse(file, parser)
+            self.etree = etree.parse(str(file), parser)
         elif name is not None:
             xml = f"""
             <application xmlns="http://www.zetcom.com/ria/ws/module">

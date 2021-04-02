@@ -4,10 +4,14 @@ class Helper:
     def toFile(self, *, path):
         
         print (":"+str(type(self.etree))+" _Element works")
-        #doc = self.etree
-        doc = etree.ElementTree(self.etree)
-        etree.indent(doc)
-        doc.write(str(path), pretty_print=True) # appears to write Element
+        doc = self.etree
+        #etree.indent(doc)
+        try:
+            doc.write(str(path), pretty_print=True) # appears to write Element
+        except:
+            doc = etree.ElementTree(self.etree)
+            doc.write(str(path), pretty_print=True) # appears to write Element
+
 
     def toString(self, *, et=None):
         if et is None:

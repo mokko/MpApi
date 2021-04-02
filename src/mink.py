@@ -93,8 +93,30 @@ class Mink:
                         # print (f"**{cmd} {args}")
                         getattr(self, cmd)(args)
 
-    def clean(self, out_path):
-        print(f"clean {out_path}")
+    def clean(self, args):
+        """
+        Strip certain elements out of response.xml so that it validates and is easier to
+        read.
+        """
+        in_fn = self.project_dir.joinpath(args[0])
+        out_fn = self.project_dir.joinpath(args[1])
+        print (f"Clean in:{in_fn} out:{out_fn}")
+        if out_fn.exists():
+            self._info(" Clean file exists already, no overwrite")
+        else:
+            self._info(f" Making new clean file ({out_fn})")
+            
+            m = Module(file=in_fn)
+            for mi in m.iter(): 
+                m.attribute(parent=mi, name="uuid", action="remove")
+                m._rmUuidsInReferenceItems(parent=mi)
+                m._dropFields(
+                    parent=mi, type="virtualField"
+                )  # if no parent, assume self.etree
+                m._dropFields(
+                    parent=mi, type="systemField"
+                )  # if no parent, assume self.etree
+            m.toFile(path=out_fn)
 
     def digitalAssets(self, out_path):
         print(f"da {out_path}")
@@ -107,7 +129,7 @@ class Mink:
         """
         out_fn = self.project_dir.joinpath(out_path[0])
         if out_fn.exists():
-            self._info(f"join exists already, no overwrite {out_fn}")
+            self._info(f"Join exists already, no overwrite ({out_fn})")
         else:
             self._info(f"join file doesn't exist yet, making new one {out_fn}")
 
@@ -126,16 +148,21 @@ class Mink:
                     if len(newItems) > 0:
                         lastItem = first.xpath(
                             f"/m:application/m:modules/m:module[@name = '{type}']",
-                            namespaces=NSMAP,
+                            namespaces=NSMAP
                         )[-1]
                         print(f":::{len(newItems)}")
                         for eachN in newItems:
                             lastItem.append(eachN)
                         items = first.xpath(
                             f"/m:application/m:modules/m:module[@name = '{type}']/m:moduleItem",
-                            namespaces=NSMAP,
+                            namespaces=NSMAP
                         )
-                        print(f"****{len(items)}")
+                        moduleN = first.xpath(
+                            f"/m:application/m:modules/m:module[@name = '{type}']",
+                            namespaces=NSMAP
+                        )[0]
+                        attributes = moduleN.attrib
+                        attributes['totalSize']=str(len(items))
                         first.write(str(out_fn), pretty_print=True)
 
     def getObjects(self, args):
