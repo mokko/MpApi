@@ -147,7 +147,12 @@ class Mink:
                 print(each)
                 if first is None:
                     first = etree.parse(str(each), ETparser)
-                    type = "Object"  # cheating
+                    moduleN = first.xpath(
+                        f"/m:application/m:modules/m:module",
+                        namespaces=NSMAP,
+                    )[0]
+                    moduleA = moduleN.attrib
+                    type = moduleA['name']
                 else:
                     responseTree = etree.parse(str(each), ETparser)
                     newItems = responseTree.xpath(
@@ -159,7 +164,6 @@ class Mink:
                             f"/m:application/m:modules/m:module[@name = '{type}']",
                             namespaces=NSMAP
                         )[-1]
-                        print(f":::{len(newItems)}")
                         for eachN in newItems:
                             lastItem.append(eachN)
                         items = first.xpath(
