@@ -17,18 +17,9 @@ projectData
     jobs.dsl
 
 CLASS USAGE
-    m = Mink(conf="jobs.dsl", "job="tjob")
+    m = Mink(conf="jobs.dsl", "job="tjob") # parses jobs.dsl and runs commands listed there
+    m.getObjects(args)
 
-# mink domain-specific language (DSL)
-HFObjekte:                  # makes dirs "HFobjekte/20210401" (with current date) 
-                            # relative to pwd, 
-    getObjects:
-        exhibitId: 20222    # search0.xml, response0.xml
-        groupID: 12345      # search1.xml, response1.xml
-    #join (implicit)        # response-join.xml, if more than onr getObject
-    clean                   # response-clean.xml
-    validate                # log and print results: report.log
-    digitalAssets
 """
 import datetime
 import logging
@@ -102,6 +93,51 @@ class Mink:
                         #print (f"**{cmd} {args}")
                         getattr(self,cmd)(args)
 
+    def clean(self, out_path):
+        print (f"clean {out_path}")
+    
+    def digitalAssets(self, out_path):
+        print (f"da {out_path}")
+
+    def join(self, out_path):
+        """
+        Join reponse*.xml and write it to out_path.
+
+        For now, we assume that the module/@name is the same. 
+        """
+        out_fn = self.project_dir.joinpath(out_path[0])
+        if out_fn.exists():
+            self._info(f"join exists already, no overwrite {out_fn}")
+        else:
+            self._info(f"join file doesn't exist yet, making new one {out_fn}")
+            
+            first=None
+            for each in self.project_dir.glob('response*.xml'):
+                print (each)
+                if first is None:
+                    first = etree.parse (str(each), ETparser)
+                    type = "Object" # cheating
+                else:
+                    responseTree = etree.parse (str(each), ETparser)
+                    newItems = responseTree.xpath(
+                        f"/m:application/m:modules/m:module[@name = '{type}']/m:moduleItem", 
+                        namespaces=NSMAP
+                    )
+                    if len(newItems)>0:
+                        lastItem = first.xpath(
+                            f"/m:application/m:modules/m:module[@name = '{type}']", 
+                            namespaces=NSMAP
+                            )[-1]
+                        print(f":::{len(newItems)}")
+                        for eachN in newItems:
+                            lastItem.append(eachN)
+                        items = first.xpath(
+                            f"/m:application/m:modules/m:module[@name = '{type}']/m:moduleItem", 
+                            namespaces=NSMAP
+                        )
+                        print(f"****{len(items)}")
+                        first.write(str(out_fn), pretty_print=True) 
+
     def getObjects(self, args):
         """
         Use existing files as cache; i.e. only make new equests, if files don't exist yet.
@@ -150,52 +186,6 @@ class Mink:
             root = etree.ElementTree(tree)
             root.write(str(request_fn), pretty_print=True) #only works on tree, not Element? 
             self._info(f" New response written to {request_fn}")
-
-    def clean(self, out_path):
-        print (f"clean {out_path}")
-    
-    def digitalAssets(self, out_path):
-        print (f"da {out_path}")
-
-    def join(self, out_path):
-        """
-        Join reponse*.xml and write it to out_path.
-
-        For now, we assume that the module/@name is the same. 
-        """
-        out_fn = self.project_dir.joinpath(out_path[0])
-        if out_fn.exists():
-            self._info(f"join exists already, no overwrite {out_fn}")
-        else:
-            self._info(f"join file doesn't exist yet, making new one {out_fn}")
-            
-            first=None
-            for each in self.project_dir.glob('response*.xml'):
-                print (each)
-                if first is None:
-                    first = etree.parse (str(each), ETparser)
-                    type = "Object" # cheating
-                else:
-                    responseTree = etree.parse (str(each), ETparser)
-                    newItems = responseTree.xpath(
-                        f"/m:application/m:modules/m:module[@name = '{type}']/m:moduleItem", 
-                        namespaces=NSMAP
-                    )
-                    if len(newItems)>0:
-                        lastItem = first.xpath(
-                            f"/m:application/m:modules/m:module[@name = '{type}']", 
-                            namespaces=NSMAP
-                            )[-1]
-                        print(f":::{len(newItems)}")
-                        for eachN in newItems:
-                            lastItem.append(eachN)
-                        items = first.xpath(
-                            f"/m:application/m:modules/m:module[@name = '{type}']/m:moduleItem", 
-                            namespaces=NSMAP
-                        )
-                        print(f"****{len(items)}")
-                        first.write(str(out_fn), pretty_print=True) 
-
 
     def validate(self, out_path):
         print (f"val {out_path}")
