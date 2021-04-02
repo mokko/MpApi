@@ -41,6 +41,12 @@ from lxml import etree # necessary?
 with open("credentials.py") as f:
     exec(f.read())
 
+ETparser = etree.XMLParser(remove_blank_text=True)
+NSMAP = {
+    "s": "http://www.zetcom.com/ria/ws/module/search",
+    "m": "http://www.zetcom.com/ria/ws/module"
+    }
+
 
 class Mink:
     def __init__(self, *, conf, job):
@@ -139,11 +145,10 @@ class Mink:
             self._info(f" Status: {r.status_code}")
 
             #lxml's pretty printer
-            parser = etree.XMLParser(remove_blank_text=True)
-            tree = etree.fromstring(bytes(r.text, "utf8"), parser)
+            tree = etree.fromstring(bytes(r.text, "utf8"), ETparser)
             etree.indent(tree)
-            et = etree.ElementTree(tree)
-            et.write(str(request_fn), pretty_print=True) 
+            root = etree.ElementTree(tree)
+            root.write(str(request_fn), pretty_print=True) #only works on tree, not Element? 
             self._info(f" New response written to {request_fn}")
 
     def clean(self, out_path):
@@ -153,7 +158,44 @@ class Mink:
         print (f"da {out_path}")
 
     def join(self, out_path):
-        print (f"join {out_path}")
+        """
+        Join reponse*.xml and write it to out_path.
+
+        For now, we assume that the module/@name is the same. 
+        """
+        out_fn = self.project_dir.joinpath(out_path[0])
+        if out_fn.exists():
+            self._info(f"join exists already, no overwrite {out_fn}")
+        else:
+            self._info(f"join file doesn't exist yet, making new one {out_fn}")
+            
+            first=None
+            for each in self.project_dir.glob('response*.xml'):
+                print (each)
+                if first is None:
+                    first = etree.parse (str(each), ETparser)
+                    type = "Object" # cheating
+                else:
+                    responseTree = etree.parse (str(each), ETparser)
+                    newItems = responseTree.xpath(
+                        f"/m:application/m:modules/m:module[@name = '{type}']/m:moduleItem", 
+                        namespaces=NSMAP
+                    )
+                    if len(newItems)>0:
+                        lastItem = first.xpath(
+                            f"/m:application/m:modules/m:module[@name = '{type}']", 
+                            namespaces=NSMAP
+                            )[-1]
+                        print(f":::{len(newItems)}")
+                        for eachN in newItems:
+                            lastItem.append(eachN)
+                        items = first.xpath(
+                            f"/m:application/m:modules/m:module[@name = '{type}']/m:moduleItem", 
+                            namespaces=NSMAP
+                        )
+                        print(f"****{len(items)}")
+                        first.write(str(out_fn), pretty_print=True) 
+
 
     def validate(self, out_path):
         print (f"val {out_path}")
