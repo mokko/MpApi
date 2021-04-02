@@ -22,7 +22,10 @@ class HigherLevel:
         m.validate()
 
         r = self.api.newModuleItem(module="Object", xml=m.toString())
+        #I find it strange that there is no return value with new record
         print (r)
+
+    def changeExistingRecord(self): pass
 
     def exhibitObjects (self):
 
@@ -39,10 +42,14 @@ class HigherLevel:
         s.toFile(path=project.joinpath("search.xml"))
     
         #request and response
-        r = self.api.search(module="Object", et=s.et)
+        r = self.api.search(module="Object", xml=s.toString())
         self.api.toFile(response=r, path=project.joinpath("response.xml"))
 
     def objectsViaGroup (self):
+        """ 
+        First look up a group, then request an individual record (item) for each 
+        goup member. Works, but is extraordinarily slow.
+        """
 
         #mkdir project dir    
         project = Path("../sdata/objectsViaGroup")

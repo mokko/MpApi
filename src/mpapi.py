@@ -66,7 +66,7 @@ class MpApi:
         self.headers = headers
 
     #
-    # (A) SESSION
+    # A SESSION
     #
     def getSessionKey(self):
         """
@@ -87,11 +87,11 @@ class MpApi:
 
 
     #
-    # (A) REQUESTS WITH module.xsd response
+    # B REQUESTS WITH module.xsd response
     # 
 
     #
-    # (A.1) DATA DEFINITIONs
+    # B.1 DATA DEFINITIONs
     #
     def getDefinition(self, *, module=None):
         """
@@ -115,7 +115,7 @@ class MpApi:
         return r
     
     #
-    # (A.2) SEARCHING 
+    # B.2 SEARCHING 
     #
     def runSavedQuery(self, *, __id):
         """
@@ -134,11 +134,11 @@ class MpApi:
         if r.status_code != 200:
             print(url)
             print(r.text)
-            raise TypeError(f"Request response status code: {r.status_code}")
+            raise ValueError(f"Response status code: {r.status_code}")
         return r
 
     #
-    # WHOLE MODULE ITEMS
+    # B.3 WHOLE MODULE ITEMS
     #
     def getItem(self, *, module, __id):
         """
@@ -159,7 +159,7 @@ class MpApi:
 
         print(r)
         if r.status_code != 200:
-            raise TypeError(f"Request response status code: {r.status_code}")
+            raise ValueError(f"Request response status code: {r.status_code}")
         return r
 
     def createItem (self, *, module, xml):
@@ -176,7 +176,7 @@ class MpApi:
         if r.status_code != 200:
             print(url)
             print(r.text)
-            raise TypeError(f"Request response status code: {r.status_code}")
+            raise ValueError(f"Request response status code: {r.status_code}")
         return r
 
     def updateItem(self, *, module, __id):
@@ -190,7 +190,7 @@ class MpApi:
         DELETE http://.../ria-ws/application/module/{module}/{__id}
         """
     #
-    # FIELDs
+    # B.4 FIELDs
     #
     def updateField(self, *, module, __id, datafield):
         """
@@ -198,7 +198,7 @@ class MpApi:
         PUT http://.../ria-ws/application/module/{module}/{__id}/{datafield}
         """
     #
-    # REPEATABLE GROUPS
+    # B.5 REPEATABLE GROUPS
     #
     def createRerefence(self, *, module, __id, repeatableGroup, __groupId, reference, xml):
         """
@@ -234,7 +234,7 @@ class MpApi:
         DELETE http://.../ria-ws/application/module/{module}/{__id}/{repeatableGroup}/{__groupId}/{reference}/{__referenceId}    
         """
     #
-    # ATTACHMENTs AND THUMBNAILs
+    # C ATTACHMENTs AND THUMBNAILs
     # 
 
     def getAttachment(self,*, module, __id):
@@ -249,7 +249,7 @@ class MpApi:
         correct. The content will be send using the MIME type application/octet-stream 
         and the Content-disposition header with a suggested filename.
         """
-    def getThumbnail(self, *):
+    def getThumbnail(self, *, module, __id):
         """
         Get the thumbnail of a module item attachment
         GET http://.../ria-ws/application/module/{module}/{__id}/thumbnail
@@ -267,7 +267,7 @@ class MpApi:
         DELETE http://.../ria-ws/application/module/{module}/{__id}/attachment
         """
     #
-    # RESPONSE orgunit
+    # D RESPONSE orgunit
     #
     def getOrgUnits(self, *, module):
         """
@@ -303,6 +303,15 @@ class MpApi:
         Export multiple module items via the reporting system
         POST http://.../ria-ws/application/module/{module}/export/{id}
         """
+
+    #
+    # HELPER
+    #
+
+    def toFile(self, *, response, path):
+        with open(path, "w", encoding='utf8') as f:
+            f.write(response.text)
+
 
 if __name__ == "__main__":
     from pathlib import Path

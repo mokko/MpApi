@@ -24,13 +24,12 @@ class Helper:
         if not hasattr(self, "xsd"):
             self.xsd = etree.parse(xsdLoc)
         xmlschema = etree.XMLSchema(self.xsd)
-        xmlschema.assertValid(self.etree)
-        print("***VALIDATES")
+        xmlschema.assertValid(self.etree) # dies is doesn't validate
 
     def toFile(self, *, path):
         
-        print (type(self.etree))
-        doc=self.etree
-        #et = etree.ElementTree(self.etree)
+        print (":"+str(type(self.etree))+" _Element works")
+        #doc = self.etree
+        doc = etree.ElementTree(self.etree)
         etree.indent(doc)
         doc.write(str(path), pretty_print=True) # appears to write Element

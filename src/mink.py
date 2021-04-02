@@ -1,0 +1,173 @@
+"""
+mink.py: Commandline frontend for MpApi.py
+
+CLI USAGE
+    cd projectData
+    mink.py -j job 
+
+DIR STRUCTURE    
+projectData
+    credentials.py
+    HFObjekte/20210401/
+        report.log
+        response.xml
+        response-join.xml
+        search.xml
+        ...
+    jobs.dsl
+
+CLASS USAGE
+    m = Mink(conf="jobs.dsl", "job="tjob")
+
+# mink domain-specific language (DSL)
+HFObjekte:                  # makes dirs "HFobjekte/20210401" (with current date) 
+                            # relative to pwd, 
+    getObjects:
+        exhibitId: 20222    # search0.xml, response0.xml
+        groupID: 12345      # search1.xml, response1.xml
+    #join (implicit)        # response-join.xml, if more than onr getObject
+    clean                   # response-clean.xml
+    validate                # log and print results: report.log
+    digitalAssets
+"""
+import datetime
+import logging
+from Module import Module
+from MpApi import MpApi
+from pathlib import Path
+from Search import Search
+
+with open("credentials.py") as f:
+    exec(f.read())
+
+
+class Mink:
+    def __init__(self, *, conf, job):
+        self.job = job
+        job_DF = None # definition in conf file
+        mlc = False   # multiline command; not used, to clarify intent
+        cmd = []
+        args = []
+
+        #pretty ugly dsl parser...
+        with open(conf, mode="r") as file:
+            c = 0  # line counter
+            error = 0
+            for line in file:
+                c += 1
+                uncomment = line.split("#", 1)[0].strip()
+                if not uncomment:
+                    continue
+                line = line.expandtabs(4)
+                indent_lvl = int((len(line) - len(line.lstrip())+4)/4)
+                parts = uncomment.split()
+                if indent_lvl == 1: #job label
+                    if not parts[0].endswith(":"):
+                        raise TypeError ("Job label has to end with colon") 
+                    job_DF = parts[0][:-1]
+                    if job_DF == job:
+                        right_job = True
+                        self._mkdirs()
+                    else:
+                        right_job = False
+                    continue
+                elif indent_lvl == 2: 
+                    if parts[0].endswith(":"):
+                        mlc = True
+                        cmd = parts[0][:-1]
+                        continue
+                    else:
+                        mlc = False
+                        cmd = parts[0]
+                        if len(parts)>1:
+                            args = parts[1:]
+                        else:
+                            args = []
+                    if right_job is True:
+                        #print(f"**{cmd} {args}")
+                        getattr(self,cmd)(args)
+                elif indent_lvl == 3:
+                    args = parts 
+                    if right_job is True:
+                        #print (f"**{cmd} {args}")
+                        getattr(self,cmd)(args)
+
+        log_fn = Path(self.project_dir).joinpath("report.log")
+
+        logging.basicConfig(
+            datefmt="%Y%m%d %I:%M:%S %p",
+            filename=log_fn,
+            filemode="w", # not append, start new file every time
+            level=logging.INFO,
+            format="%(asctime)s: %(message)s",
+        )
+
+
+    def getObjects(self, args):
+        #making search request
+        id = args[1]
+        out = args[2]
+        self._info(f"ENTER getObjects: {args[0]} {id} {out}")
+        s = Search(module="Object")
+        if args[0] == "exhibitId":
+            s.addCriterion(operator="equalsField", 
+                field="ObjRegistrarRef.RegExhibitionRef.__id", value=id)
+        elif args[0] == "groupId":
+            s.addCriterion(operator="equalsField", 
+                field="ObjObjectGroupsRef.__id", value=id)
+        else:
+            raise ValueError("Unknown argument!")
+        s.validate(mode="search")
+        self._info(" Search validates")
+        out_fn = self.project_dir.joinpath("search"+out+".xml")
+        s.toFile(path=out_fn) #overwrites old files
+        self._info(f" search request saved to {out_fn}")
+        
+        self._info(" about to execute search request")
+        api = MpApi(baseURL=baseURL, user=user, pw=pw)
+        r = api.search(module="Object", xml=s.toString())
+        self._info(f" status: {r.status_code}")
+
+        #we're overwriting existing files 
+        out_fn = self.project_dir.joinpath("response"+out+".xml")        
+        api.toFile(response=r, path=out_fn)
+        self._info(f" response written to {out_fn}")
+
+    def clean(self, out_path):
+        print (f"clean {out_path}")
+    
+    def digitalAssets(self, out_path):
+        print (f"da {out_path}")
+
+    def join(self, out_path):
+        print (f"join {out_path}")
+
+    def validate(self, out_path):
+        print (f"val {out_path}")
+
+    #
+    # PRIVATE HELPERS
+    #
+
+    def _info(self, msg):
+        logging.info (msg)
+        print(msg)
+
+    def _mkdirs(self):
+        date = datetime.datetime.today().strftime ('%Y%m%d')
+        dir = Path(self.job).joinpath(date)
+        if not Path.is_dir(dir):
+            Path.mkdir (dir, parents=True)
+        self.project_dir = dir
+        print (f"project dir: {dir}")
+
+        
+
+if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser(description="Commandline frontend for MpApi.py")
+    parser.add_argument("-j", "--job", help="job to run")
+    parser.add_argument("-c", "--conf", help="config file", default="jobs.dsl")
+    args = parser.parse_args()
+
+    m = Mink(job=args.job, conf=args.conf)

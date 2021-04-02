@@ -50,7 +50,6 @@ dataTypes = {"Clb": "Clob", "Dat": "Date", "Lnu": "Long", "Txt": "Varchar"}
 from lxml import etree
 from Helper import Helper
 
-
 class Module(Helper):
     def __init__(self, *, file=None, tree=None, xml=None, name=None):
         parser = etree.XMLParser(remove_blank_text=True)
