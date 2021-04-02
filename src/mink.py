@@ -235,7 +235,7 @@ class Mink:
             self._info(f" New response written to {request_fn}")
 
     def validate(self, out_path):
-        """not necessary at the moment; would use module"""
+        """not necessary at the moment; would probably use Module.py"""
         print(f"val {out_path}")
 
     #

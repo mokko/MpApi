@@ -237,7 +237,7 @@ class MpApi:
     # C ATTACHMENTs AND THUMBNAILs
     # 
 
-    def getAttachment(self,*, module, __id):
+    def getAttachment(self, *, module, id):
         """
         GET http://.../ria-ws/application/module/{module}/{__id}/attachment
         Get an attachment for a specified module item. You should use the GET method with 
@@ -248,20 +248,42 @@ class MpApi:
         The request will return status code 200 (OK) if the syntax of the request was 
         correct. The content will be send using the MIME type application/octet-stream 
         and the Content-disposition header with a suggested filename.
+
+        "Accept: application/octet-stream"
         """
-    def getThumbnail(self, *, module, __id):
+        
+        url = f"{self.appURL}/module/{module}/{id}/attachment" 
+
+        headers = self.headers # is this a true copy?
+        oldAccept = self.headers['Accept']
+        self.headers['Accept'] = "application/octet-stream"
+        r = requests.get(url, headers=self.headers, auth=self.auth)
+        if r.status_code != 200:
+            raise ValueError(f"Request response status code: {r.status_code}")
+        self.headers['Accept'] = old
+        #print(r.status_code)
+        path = r.headers["Content-Disposition"].split("=")[1]
+        with open(path, "wb") as f:
+            f.write(r.content)
+        self.headers['Accept'] = oldAccept
+        
+        #print(r.text)
+        return r
+
+        
+    def getThumbnail(self,* , module, __id):
         """
         Get the thumbnail of a module item attachment
         GET http://.../ria-ws/application/module/{module}/{__id}/thumbnail
         """
-    def updateAttachment(self, *, module, __id):
+    def updateAttachment(self,* , module, __id):
         """
         Add or update the attachment of a module item, as a base64 encoded XML
         Add or update the attachment of a module item, as a binary stream
         PUT http://.../ria-ws/application/module/{module}/{__id}/attachment
         """
 
-    def deleteAttachment(self, *, module, __id):
+    def deleteAttachment(self,* , module, __id):
         """
         Delete the attachment of a module item
         DELETE http://.../ria-ws/application/module/{module}/{__id}/attachment
@@ -321,13 +343,6 @@ if __name__ == "__main__":
     print(f"{baseURL}:{user}:{pw}")
     api = MpApi(baseURL=baseURL, user=user, pw=pw)
 
-    #project: exhibit objects
-    project=Path("../sdata/exhibitObjects")
-    s = Search(module="Object")
-    s.addCriterion(operator="equalsField", field="Object.ObjRegistrarRef.RegExhibitionRef.__id", value="20222")
-    print(s.toString())
-    s.validate()
-    s.toFile(path=project.join("search.xml"))
-
-    r = api.search(module="Object", et=s.et)
-    api.toFile(response=r, path=project.join("response.xml"))
+    r = api.getAttachment(module="Object", id="2609893")
+    #print(r.status_code)
+    #print(r.text)
