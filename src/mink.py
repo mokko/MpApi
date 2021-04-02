@@ -21,7 +21,10 @@ projectData
 
 CLASS USAGE
     m = Mink(conf="jobs.dsl", "job="tjob") # parses jobs.dsl and runs commands listed there
+    m.clean(args) # list with in and out file
+    m.digitalAssets(args) # list with in file
     m.getObjects(args)
+    ...
 
 """
 import datetime
@@ -124,8 +127,8 @@ class Mink:
             m.toFile(path=out_fn)
             self._info(f" Clean document written ({out_fn})")
 
-    def digitalAssets(self, out_path):
-        print(f"da {out_path}")
+    def digitalAssets(self, in_fn):
+        print(f"da {in_fn}")
 
     def join(self, out_path):
         """
