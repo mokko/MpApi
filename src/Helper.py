@@ -1,7 +1,15 @@
 from lxml import etree
 
 class Helper:
-    def toString(self, et=None):
+    def toFile(self, *, path):
+        
+        print (":"+str(type(self.etree))+" _Element works")
+        #doc = self.etree
+        doc = etree.ElementTree(self.etree)
+        etree.indent(doc)
+        doc.write(str(path), pretty_print=True) # appears to write Element
+
+    def toString(self, *, et=None):
         if et is None:
             et = self.etree
         return etree.tostring(et, pretty_print=True, encoding="unicode")
@@ -9,7 +17,7 @@ class Helper:
     def print(self, et=None):
         print(self.toString(et))
 
-    def validate(self, mode="module"):
+    def validate(self, *, mode="module"):
         """
         Validates a whole xml document of the type module.
         """
@@ -26,10 +34,5 @@ class Helper:
         xmlschema = etree.XMLSchema(self.xsd)
         xmlschema.assertValid(self.etree) # dies is doesn't validate
 
-    def toFile(self, *, path):
-        
-        print (":"+str(type(self.etree))+" _Element works")
-        #doc = self.etree
-        doc = etree.ElementTree(self.etree)
-        etree.indent(doc)
-        doc.write(str(path), pretty_print=True) # appears to write Element
+    def fromFile(self, *, path):
+        self.etree = etree.parse(str(path))

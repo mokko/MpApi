@@ -80,25 +80,27 @@ allowedOperators = {
 
 
 class Search (Helper):
-    def __init__(self, *, module, limit=-1, offset=0):
+    def __init__(self, *, module=None, limit=-1, offset=0, fromFile=None):
 
-        # vanilla version without a single and
-        xml = f"""<application 
-        xmlns="http://www.zetcom.com/ria/ws/module/search" 
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-        xsi:schemaLocation="http://www.zetcom.com/ria/ws/module/search 
-        http://www.zetcom.com/ria/ws/module/search/search_1_1.xsd">
-        <modules>
-            <module name="{module}">
-                <search limit="{limit}" offset="{offset}">
-                    <expert>
-                    </expert>
-                </search>
-            </module>
-        </modules>
-        </application>"""
-        parser = etree.XMLParser(remove_blank_text=True)
-        self.etree = etree.fromstring(xml, parser)
+        if fromFile is not None:
+            self.etree = etree.parse(str(fromFile))
+        else:
+            xml = f"""<application 
+            xmlns="http://www.zetcom.com/ria/ws/module/search" 
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+            xsi:schemaLocation="http://www.zetcom.com/ria/ws/module/search 
+            http://www.zetcom.com/ria/ws/module/search/search_1_1.xsd">
+            <modules>
+                <module name="{module}">
+                    <search limit="{limit}" offset="{offset}">
+                        <expert>
+                        </expert>
+                    </search>
+                </module>
+            </modules>
+            </application>"""
+            parser = etree.XMLParser(remove_blank_text=True)
+            self.etree = etree.fromstring(xml, parser)
 
     def addCriterion(self, *, operator, field, value=None):
         if operator not in allowedOperators:

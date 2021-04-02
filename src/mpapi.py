@@ -1,7 +1,7 @@
 import requests
 from requests.auth import HTTPBasicAuth
 from requests.structures import CaseInsensitiveDict
-from lxml import etree # necessary?
+#from lxml import etree # necessary?
 from Search import Search
 from Module import Module
 

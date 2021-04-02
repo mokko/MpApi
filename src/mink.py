@@ -36,6 +36,7 @@ from Module import Module
 from MpApi import MpApi
 from pathlib import Path
 from Search import Search
+from lxml import etree # necessary?
 
 with open("credentials.py") as f:
     exec(f.read())
@@ -68,6 +69,9 @@ class Mink:
                     if job_DF == job:
                         right_job = True
                         self._mkdirs()
+                        self._init_log()
+                        self._info(f"Project dir: {self.project_dir}")
+
                     else:
                         right_job = False
                     continue
@@ -92,46 +96,55 @@ class Mink:
                         #print (f"**{cmd} {args}")
                         getattr(self,cmd)(args)
 
-        log_fn = Path(self.project_dir).joinpath("report.log")
-
-        logging.basicConfig(
-            datefmt="%Y%m%d %I:%M:%S %p",
-            filename=log_fn,
-            filemode="w", # not append, start new file every time
-            level=logging.INFO,
-            format="%(asctime)s: %(message)s",
-        )
-
-
     def getObjects(self, args):
+        """
+        Use existing files as cache; i.e. only make new equests, if files don't exist yet.
+        
+        That means you needto manually delete files like search.xml and response.xml in
+        your project dir if you want to do a new request.
+        
+        Speed is really bad. I wonder if Zetcom server supports compression.
+        """
+       
         #making search request
         id = args[1]
-        out = args[2]
-        self._info(f"ENTER getObjects: {args[0]} {id} {out}")
-        s = Search(module="Object")
-        if args[0] == "exhibitId":
-            s.addCriterion(operator="equalsField", 
-                field="ObjRegistrarRef.RegExhibitionRef.__id", value=id)
-        elif args[0] == "groupId":
-            s.addCriterion(operator="equalsField", 
-                field="ObjObjectGroupsRef.__id", value=id)
+        out = args[2] #something unique
+        self._info(f"GetObjects: {args[0]} {id} {out}")
+        search_fn = self.project_dir.joinpath("search"+out+".xml")
+        if search_fn.exists():
+            self._info(f" Loading existing SEARCH request ({search_fn})")
+            s = Search(fromFile=search_fn)
         else:
-            raise ValueError("Unknown argument!")
-        s.validate(mode="search")
-        self._info(" Search validates")
-        out_fn = self.project_dir.joinpath("search"+out+".xml")
-        s.toFile(path=out_fn) #overwrites old files
-        self._info(f" search request saved to {out_fn}")
+            s = Search(module="Object")
+            if args[0] == "exhibitId":
+                s.addCriterion(operator="equalsField", 
+                    field="ObjRegistrarRef.RegExhibitionRef.__id", value=id)
+            elif args[0] == "groupId":
+                s.addCriterion(operator="equalsField", 
+                    field="ObjObjectGroupsRef.__id", value=id)
+            else:
+                raise ValueError("Unknown argument!")
+            s.validate(mode="search")
+            self._info(" Search validates")
+            s.toFile(path=search_fn) #overwrites old files
+            self._info(f" Search request saved to {search_fn}")
         
-        self._info(" about to execute search request")
-        api = MpApi(baseURL=baseURL, user=user, pw=pw)
-        r = api.search(module="Object", xml=s.toString())
-        self._info(f" status: {r.status_code}")
+        request_fn = self.project_dir.joinpath("response"+out+".xml")
+        if request_fn.exists():
+            self._info(f" Loading existing REQUEST file ({request_fn})")
+        else:
+            self._info(" About to execute new search request")
+            api = MpApi(baseURL=baseURL, user=user, pw=pw)
+            r = api.search(module="Object", xml=s.toString())
+            self._info(f" Status: {r.status_code}")
 
-        #we're overwriting existing files 
-        out_fn = self.project_dir.joinpath("response"+out+".xml")        
-        api.toFile(response=r, path=out_fn)
-        self._info(f" response written to {out_fn}")
+            #lxml's pretty printer
+            parser = etree.XMLParser(remove_blank_text=True)
+            tree = etree.fromstring(bytes(r.text, "utf8"), parser)
+            etree.indent(tree)
+            et = etree.ElementTree(tree)
+            et.write(str(request_fn), pretty_print=True) 
+            self._info(f" New response written to {request_fn}")
 
     def clean(self, out_path):
         print (f"clean {out_path}")
@@ -153,13 +166,22 @@ class Mink:
         logging.info (msg)
         print(msg)
 
+    def _init_log(self):
+        log_fn = Path(self.project_dir).joinpath("report.log")
+        logging.basicConfig(
+            datefmt="%Y%m%d %I:%M:%S %p",
+            filename=log_fn,
+            filemode="w", # not append, start new file every time
+            level=logging.DEBUG,
+            format="%(asctime)s: %(message)s",
+        )
+
     def _mkdirs(self):
         date = datetime.datetime.today().strftime ('%Y%m%d')
         dir = Path(self.job).joinpath(date)
         if not Path.is_dir(dir):
             Path.mkdir (dir, parents=True)
         self.project_dir = dir
-        print (f"project dir: {dir}")
 
         
 
