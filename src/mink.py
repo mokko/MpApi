@@ -161,15 +161,15 @@ class Mink:
             
     def join(self, args):
         """
-        Join reponse*.xml and write it to out_path.
+        Join multiple documents and write them to new file. Expects globbing 
+        expression at args[0] and a filename at args[1] for the output.
+        Output will be added to project directory path, so don't supply full
+        file path. 
 
-        For now, we assume that the module/@name is the same.
-
-        TODO: Deal with multiple item types
-        The first one can have multiple types and all the following ones
-        can also have multiple types.
+        Should work with multiple random item types now.
         
-        Make a set with the encountered types and update it for every file.
+        Doesn't overwrite existing files as usual, so delete manually as usual.
+        Normal log policy. No explicit return value.
         """
         known_types = set()
         glob_expr = args[0]
