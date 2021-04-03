@@ -6,21 +6,22 @@ CLI USAGE
     mink.py -j job 
 
 CONFIGURATION
-    use jobs.dsl file; expected in project dir 
+    credentials.py   # put it out of harm's way 
+    jobs.dsl         # defines/describes multiple jobs; expected in project dir 
 
 DIR STRUCTURE    
-projectData
-    credentials.py
-    HFObjekte/20210401 # <-- project dir
-        report.log
-        response.xml
-        response-join.xml
-        search.xml
-        ...
-    jobs.dsl
+    projectData              # <-- use it as working directory (pwd)
+        ajob/20210401        # <-- project dir
+            report.log
+            response.xml
+            response-join.xml
+            search.xml
+            ...
+        credentials.py       # use protection (e.g. .gitignore)
+        jobs.dsl             # expected in pwd
 
 CLASS USAGE
-    m = Mink(conf="jobs.dsl", "job="tjob") # parses jobs.dsl and runs commands listed there
+    m = Mink(conf="jobs.dsl", "job="ajob") # parses jobs.dsl and runs commands listed there
     m.clean(args) # list with in and out file
     m.digitalAssets(args) # list with in file
     m.getObjects(args)
@@ -129,36 +130,10 @@ class Mink:
                     parent=mi, type="systemField"
                 )  # if no parent, assume self.etree
             m.validate()
-            self._info(" Clean document validates")
+            self._info(" clean document validates")
             m.toFile(path=out_fn)
-            self._info(f" Clean document written ({out_fn})")
+            self._info(f" clean document written ({out_fn})")
 
-    def multimedia(self, in_fn):
-        """
-        For an object.xml get all multimedia items that have attachments and save
-        those to disk using mm{id}.xml filename.
-        """
-        print(f"ENTER digitalAssets {in_fn[0]}")
-        in_fn=self.project_dir.joinpath(in_fn[0])
-        #Download all mmItems which have an attachment
-        mmTree = etree.parse(str(in_fn), ETparser)
-        mmL = mmTree.xpath(
-            "/m:application/m:modules/m:module/m:moduleItem/m:moduleReference[@name = 'ObjMultimediaRef']/m:moduleReferenceItem" +
-            "[m:dataField/@name = 'ThumbnailBoo' and m:dataField/m:value = 'true']",
-            namespaces=NSMAP)
-        for mm in mmL:
-            #print(etree.tostring(mm, pretty_print=True, encoding="unicode"))
-            a = mm.attrib
-            mmId = a["moduleItemId"]
-            path = self.project_dir.joinpath(f"mm{mmId}.xml")
-            if path.exists():
-                self._info(f"mm data exists already, not getting it again ({path})")
-            else:
-                self._info(f"requesting multimediaItem {mmId}")
-                r = self.api.getItem(module="Multimedia", id=mmId)
-                self._info(f"{r.status_code}, about to write to disk")
-                self.toFile(xml=r.text, path=path)
-            
     def join(self, args):
         """
         Join multiple documents and write them to new file. Expects globbing 
@@ -175,13 +150,13 @@ class Mink:
         glob_expr = args[0]
         out_fn = self.project_dir.joinpath(args[1])
         if out_fn.exists():
-            self._info(f"Join exists already, no overwrite ({out_fn})")
+            self._info(f" join file exists already, no overwrite: {out_fn}")
         else:
-            self._info(f"join file doesn't exist yet, making new one {out_fn}")
+            self._info(f" join file doesn't exist yet, making new one {out_fn}")
             firstET = None
-            for eachFile in self.project_dir.glob(glob_expr):
+            for eachFile in sorted(self.project_dir.glob(glob_expr)):
                 self._info(f" joining {eachFile}")
-                eachET = etree.parse(str(eachFile), ETparser)
+                eachET = self.etreeFromFile(path=eachFile)
                 moduleL = eachET.xpath(
                     f"/m:application/m:modules/m:module",
                     namespaces=NSMAP,
@@ -226,9 +201,71 @@ class Mink:
                 attributes = moduleN.attrib
                 attributes['totalSize'] = str(len(itemsL))
             #write once when you're done joining files
-            firstET.write(str(out_fn), pretty_print=True)
+            self.etreeToFile(ET=firstET, path=out_fn)
             self._info(f"join file written ({out_fn})")
 
+    def getItem(self, args):
+        module = args[0]
+        id = args[1]
+        out_fn = self.project_dir.joinpath(args[2])
+        if not out_fn.exists():
+            self._info(f"GetItem module={module} id={id} out_fn={out_fn}")
+            r = self.api.getItem(module="Multimedia", id=id)
+            self.xmlToFile(xml=r.text, path=out_fn)
+
+    def getMultimedia(self, in_fn):
+        """
+        Get multimedia metadata and files.
+
+        Parse an input xml file for multimedia moduleReferences, get all multimedia
+        items having attachments and save those to disk using mm{id}.xml filename. 
+        
+        Also save their attachments using {mmId}.{extension} filename.
+        """
+
+        print(f"GetMultimedia {in_fn[0]}")
+        in_fn=self.project_dir.joinpath(in_fn[0])
+        #Download all mmItems which have an attachment
+        mmTree = etree.parse(str(in_fn), ETparser)
+        #seems the thumbnail info cannot be trusted or is irrelevant
+        #[m:dataField/@name = 'ThumbnailBoo' and m:dataField/m:value = 'true']
+        mmL = mmTree.xpath(
+            "/m:application/m:modules/m:module/m:moduleItem/m:moduleReference[@name = 'ObjMultimediaRef']" +
+            "/m:moduleReferenceItem", namespaces=NSMAP)
+        for mm in mmL:
+            #print(etree.tostring(mm, pretty_print=True, encoding="unicode"))
+            a = mm.attrib
+            mmId = a["moduleItemId"]
+            mmpath = self.project_dir.joinpath(f"mm{mmId}.xml")
+            if mmpath.exists():
+                #self._info(f" mm data exists already, not getting it again ({path})")
+                mmT = self.etreeFromFile(path=mmpath)
+            else:
+                self._info(f"requesting multimediaItem {mmId}")
+                r = self.api.getItem(module="Multimedia", id=mmId)
+                self._info(f"{r.status_code}, about to write to disk")
+                mmT = self.xmlToEtree(xml=r.text)
+                self.etreeToFile(ET=mmT, path=mmpath)
+            
+            itemsL = mmT.xpath("/m:application/m:modules/m:module[@name='Multimedia']/m:moduleItem"+
+                "[@hasAttachments = 'true']", namespaces=NSMAP) 
+            for itemN in itemsL:
+                itemA = itemN.attrib
+                mmId = itemA["id"]
+                fn_old = itemN.xpath("m:dataField[@name = 'MulOriginalFileTxt']/m:value/text()", 
+                    namespaces=NSMAP)[0] #assuming that there can be only one
+                fn = mmId+Path(fn_old).suffix
+                mmpath = self.pix_dir.joinpath(fn)
+                #print(f"****{fn}")
+                if not mmpath.exists():    
+                    r = self.api.getAttachment(module="Multimedia", id=mmId)
+                    #fn = Path(r.headers["Content-Disposition"].split("=")[1])
+                    #path = self.pix_dir.joinpath(mmId+fn.suffix)
+                    self._info(f"About to write attachment to disk ({fn})")
+                    with open(mmpath, "wb") as f:
+                        f.write(r.content) # memory?
+
+            
     def getObjects(self, args):
         """
         Use existing files as cache; i.e. only make new equests, if files don't exist yet.
@@ -306,20 +343,34 @@ class Mink:
         if not Path.is_dir(dir):
             Path.mkdir(dir, parents=True)
         self.project_dir = dir
+        self.pix_dir = dir.joinpath("..").joinpath("pix").resolve()
+        if not self.pix_dir.exists():
+            self._info("Making pix dir: {self.pix_dir}")
+            Path.mkdir(self.pix_dir)
 
-    def toFile(self, *, xml, path):
+    def xmlToEtree(self, *, xml):
+        tree = etree.fromstring(bytes(xml, "utf8"), ETparser)
+        etree.indent(tree)
+        return etree.ElementTree(tree)
+
+    def xmlToFile(self, *, xml, path):
         """
         Pretty print and write to disk; expects xml.
 
         If you already have an etree, you could write to file in one
         line, not sure if we need a method for that.
         """
+        tree = self.xmlToEtree (xml=xml)
+        tree.write(str(path), pretty_print=True)  # only works on tree, not Element?
 
-        tree = etree.fromstring(bytes(xml, "utf8"), ETparser)
-        etree.indent(tree)
-        root = etree.ElementTree(tree)
-        root.write(str(path), pretty_print=True)  # only works on tree, not Element?
+    def etreeFromFile(self, *, path):
+        return etree.parse(str(path), ETparser)
 
+    def etreeToFile (self, *, ET, path):
+        ET.write(str(path), pretty_print=True)  # only works on tree, not Element?
+
+    def etreePrint (self, *, ET):
+        print(etree.tostring(ET, pretty_print=True))
 
 if __name__ == "__main__":
     import argparse

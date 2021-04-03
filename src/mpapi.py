@@ -259,15 +259,7 @@ class MpApi:
         r = requests.get(url, headers=self.headers, auth=self.auth)
         if r.status_code != 200:
             raise ValueError(f"Request response status code: {r.status_code}")
-        self.headers['Accept'] = old
-        #print(r.status_code)
-        path = r.headers["Content-Disposition"].split("=")[1]
-        #perhaps i should return the whole picture
-        with open(path, "wb") as f:
-            f.write(r.content)
         self.headers['Accept'] = oldAccept
-        
-        #print(r.text)
         return r
 
         
