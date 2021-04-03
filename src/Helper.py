@@ -3,7 +3,7 @@ from lxml import etree
 class Helper:
     def toFile(self, *, path):
         
-        print (":"+str(type(self.etree))+" _Element works")
+        #print (":"+str(type(self.etree))+" _Element works")
         doc = self.etree
         #etree.indent(doc)
         try:

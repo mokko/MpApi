@@ -253,6 +253,16 @@ class Module(Helper):
         for eachN in typeL:
             eachN.getparent().remove(eachN)
 
+    def _dropRG(self, *, parent=None, name):
+        """
+        Drop a repeatableGroup by name. Expects a name, user may provide
+        parent node. If no parent provided uses self.etree.
+        """
+        if parent is None:
+            parent = self.etree
+        rgL = parent.xpath(f"//m:repeatableGroup[@name ='{name}']", namespaces=NSMAP)
+        for rgN in rgL:
+            rgN.getparent().remove(rgN)
 
 if __name__ == "__main__":
 

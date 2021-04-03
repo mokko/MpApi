@@ -110,6 +110,8 @@ class Mink:
         """
         Strip certain elements out of response.xml so that it validates and is easier to
         read.
+        Eliminates virtual fields, @uuid, Werte & Versicherungen. Used to eliminates
+        also system fields, but still need those.
         """
         in_fn = self.project_dir.joinpath(args[0])
         out_fn = self.project_dir.joinpath(args[1])
@@ -123,11 +125,9 @@ class Mink:
             for mi in m.iter(): 
                 m.attribute(parent=mi, name="uuid", action="remove")
                 m._rmUuidsInReferenceItems(parent=mi)
+                m._dropRG(parent=mi, name="ObjValuationGrp")
                 m._dropFields(
                     parent=mi, type="virtualField"
-                )  # if no parent, assume self.etree
-                m._dropFields(
-                    parent=mi, type="systemField"
                 )  # if no parent, assume self.etree
             m.validate()
             self._info(" clean document validates")
@@ -149,6 +149,7 @@ class Mink:
         known_types = set()
         glob_expr = args[0]
         out_fn = self.project_dir.joinpath(args[1])
+        self._info(f"JOIN {glob_expr} {out_fn}")
         if out_fn.exists():
             self._info(f" join file exists already, no overwrite: {out_fn}")
         else:
