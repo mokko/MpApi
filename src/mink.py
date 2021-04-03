@@ -32,6 +32,7 @@ import logging
 from Module import Module
 from MpApi import MpApi
 from pathlib import Path
+import requests
 from Search import Search
 from lxml import etree  # necessary?
 
@@ -48,6 +49,8 @@ NSMAP = {
 class Mink:
     def __init__(self, *, conf, job):
         self.job = job
+        self.api = MpApi(baseURL=baseURL, user=user, pw=pw)
+
         job_DF = None   # definition in conf file
         mlc = False     # multiline command; not used, to clarify intent
         cmd = []
@@ -75,7 +78,6 @@ class Mink:
                         self._mkdirs()
                         self._init_log()
                         self._info(f"Project dir: {self.project_dir}")
-
                     else:
                         right_job = False
                     continue
@@ -112,9 +114,9 @@ class Mink:
         out_fn = self.project_dir.joinpath(args[1])
         print (f"Clean in:{in_fn} out:{out_fn}")
         if out_fn.exists():
-            self._info(" Clean file exists already, no overwrite")
+            self._info(" clean file exists already, no overwrite")
         else:
-            self._info(f" Making new clean file")
+            self._info(f" making new clean file")
             
             m = Module(file=in_fn)
             for mi in m.iter(): 
@@ -131,57 +133,101 @@ class Mink:
             m.toFile(path=out_fn)
             self._info(f" Clean document written ({out_fn})")
 
-    def digitalAssets(self, in_fn):
-        print(f"da {in_fn}")
-
-    def join(self, out_path):
+    def multimedia(self, in_fn):
+        """
+        For an object.xml get all multimedia items that have attachments and save
+        those to disk using mm{id}.xml filename.
+        """
+        print(f"ENTER digitalAssets {in_fn[0]}")
+        in_fn=self.project_dir.joinpath(in_fn[0])
+        #Download all mmItems which have an attachment
+        mmTree = etree.parse(str(in_fn), ETparser)
+        mmL = mmTree.xpath(
+            "/m:application/m:modules/m:module/m:moduleItem/m:moduleReference[@name = 'ObjMultimediaRef']/m:moduleReferenceItem" +
+            "[m:dataField/@name = 'ThumbnailBoo' and m:dataField/m:value = 'true']",
+            namespaces=NSMAP)
+        for mm in mmL:
+            #print(etree.tostring(mm, pretty_print=True, encoding="unicode"))
+            a = mm.attrib
+            mmId = a["moduleItemId"]
+            path = self.project_dir.joinpath(f"mm{mmId}.xml")
+            if path.exists():
+                self._info(f"mm data exists already, not getting it again ({path})")
+            else:
+                self._info(f"requesting multimediaItem {mmId}")
+                r = self.api.getItem(module="Multimedia", id=mmId)
+                self._info(f"{r.status_code}, about to write to disk")
+                self.toFile(xml=r.text, path=path)
+            
+    def join(self, args):
         """
         Join reponse*.xml and write it to out_path.
 
         For now, we assume that the module/@name is the same.
+
+        TODO: Deal with multiple item types
+        The first one can have multiple types and all the following ones
+        can also have multiple types.
+        
+        Make a set with the encountered types and update it for every file.
         """
-        out_fn = self.project_dir.joinpath(out_path[0])
+        known_types = set()
+        glob_expr = args[0]
+        out_fn = self.project_dir.joinpath(args[1])
         if out_fn.exists():
             self._info(f"Join exists already, no overwrite ({out_fn})")
         else:
             self._info(f"join file doesn't exist yet, making new one {out_fn}")
-            first = None
-            for each in self.project_dir.glob("objects*.xml"):
-                print(each)
-                if first is None:
-                    first = etree.parse(str(each), ETparser)
-                    moduleN = first.xpath(
-                        f"/m:application/m:modules/m:module",
-                        namespaces=NSMAP,
-                    )[0]
+            firstET = None
+            for eachFile in self.project_dir.glob(glob_expr):
+                self._info(f" joining {eachFile}")
+                eachET = etree.parse(str(eachFile), ETparser)
+                moduleL = eachET.xpath(
+                    f"/m:application/m:modules/m:module",
+                    namespaces=NSMAP,
+                )
+                for moduleN in moduleL:
                     moduleA = moduleN.attrib
-                    type = moduleA['name']
-                else:
-                    responseTree = etree.parse(str(each), ETparser)
-                    newItems = responseTree.xpath(
-                        f"/m:application/m:modules/m:module[@name = '{type}']/m:moduleItem",
-                        namespaces=NSMAP,
-                    )
-                    if len(newItems) > 0:
-                        lastItem = first.xpath(
-                            f"/m:application/m:modules/m:module[@name = '{type}']",
-                            namespaces=NSMAP
-                        )[-1]
-                        for eachN in newItems:
-                            lastItem.append(eachN)
-                        items = first.xpath(
+                    known_types.add(moduleA['name'])
+                if firstET is None:
+                    firstET = eachET
+                else: 
+                    for type in known_types:
+                        newItemsL = eachET.xpath(
                             f"/m:application/m:modules/m:module[@name = '{type}']/m:moduleItem",
-                            namespaces=NSMAP
+                            namespaces=NSMAP,
                         )
+                        if len(newItemsL) > 0: #only append if there is something to append
+                            #print(f"type: {type}")
+                            try:
+                                lastModuleN = firstET.xpath(
+                                    f"/m:application/m:modules/m:module[@name = '{type}']",
+                                    namespaces=NSMAP
+                                )[-1]
+                            except:
+                                #make a node with the write type
+                                modulesN = firstET.xpath(
+                                    f"/m:application/m:modules",
+                                    namespaces=NSMAP
+                                )[-1]
+                                lastModuleN = etree.SubElement(modulesN, "{http://www.zetcom.com/ria/ws/module}module", name=type)
+                            #print(f"len:{len(lastModuleN)} {lastModuleN}")
+                            for newItemN in newItemsL:
+                                lastModuleN.append(newItemN)
+            for type in known_types: #update totalSize for every type
+                itemsL = firstET.xpath(
+                    f"/m:application/m:modules/m:module[@name = '{type}']/m:moduleItem",
+                    namespaces=NSMAP
+                )
+                moduleN = firstET.xpath(
+                    f"/m:application/m:modules/m:module[@name = '{type}']",
+                    namespaces=NSMAP
+                )[0]
+                attributes = moduleN.attrib
+                attributes['totalSize'] = str(len(itemsL))
             #write once when you're done joining files
-            moduleN = first.xpath(
-                f"/m:application/m:modules/m:module[@name = '{type}']",
-                namespaces=NSMAP
-            )[0]
-            attributes = moduleN.attrib
-            attributes['totalSize'] = str(len(items))
-            first.write(str(out_fn), pretty_print=True)
-            self._info("clean file written ({out_fn})")
+            firstET.write(str(out_fn), pretty_print=True)
+            self._info(f"join file written ({out_fn})")
 
     def getObjects(self, args):
         """
@@ -199,7 +245,7 @@ class Mink:
         self._info(f"GetObjects: {args[0]} {id} {out}")
         search_fn = self.project_dir.joinpath(f"search-objects{out}.xml")
         if search_fn.exists():
-            self._info(f" Loading existing SEARCH request ({search_fn})")
+            self._info(f" loading existing SEARCH request ({search_fn})")
             s = Search(fromFile=search_fn)
         else:
             s = Search(module="Object")
@@ -216,26 +262,20 @@ class Mink:
             else:
                 raise ValueError("Unknown argument!")
             s.validate(mode="search")
-            self._info(" Search validates")
+            self._info(" search validates")
             s.toFile(path=search_fn)  # overwrites old files
-            self._info(f" Search request saved to {search_fn}")
+            self._info(f" search request saved to {search_fn}")
 
         request_fn = self.project_dir.joinpath(f"objects{out}.xml")
         if request_fn.exists():
-            self._info(f" Loading existing REQUEST file ({request_fn})")
+            self._info(f" loading existing REQUEST file ({request_fn})")
         else:
-            self._info(" About to execute new search request")
-            api = MpApi(baseURL=baseURL, user=user, pw=pw)
-            r = api.search(module="Object", xml=s.toString())
+            self._info(" about to execute new search request")
+            r = self.api.search(module="Object", xml=s.toString())
             self._info(f" Status: {r.status_code}")
 
             # lxml's pretty printer
-            tree = etree.fromstring(bytes(r.text, "utf8"), ETparser)
-            etree.indent(tree)
-            root = etree.ElementTree(tree)
-            root.write(
-                str(request_fn), pretty_print=True
-            )  # only works on tree, not Element?
+            self.toFile(r.text)
             self._info(f" New response written to {request_fn}")
 
     def validate(self, out_path):
@@ -266,6 +306,19 @@ class Mink:
         if not Path.is_dir(dir):
             Path.mkdir(dir, parents=True)
         self.project_dir = dir
+
+    def toFile(self, *, xml, path):
+        """
+        Pretty print and write to disk; expects xml.
+
+        If you already have an etree, you could write to file in one
+        line, not sure if we need a method for that.
+        """
+
+        tree = etree.fromstring(bytes(xml, "utf8"), ETparser)
+        etree.indent(tree)
+        root = etree.ElementTree(tree)
+        root.write(str(path), pretty_print=True)  # only works on tree, not Element?
 
 
 if __name__ == "__main__":
