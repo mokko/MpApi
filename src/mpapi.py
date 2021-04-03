@@ -140,7 +140,7 @@ class MpApi:
     #
     # B.3 WHOLE MODULE ITEMS
     #
-    def getItem(self, *, module, __id):
+    def getItem(self, *, module, id):
         """
         Get a single module item
         GET http://.../ria-ws/application/module/{module}/{__id}
@@ -154,7 +154,7 @@ class MpApi:
         loadThumbnailLarge | type: boolean | default: false | load large thumbnail
         loadThumbnailExtraLarge | type: boolean | default: false | load extra large thumbnail
         """
-        url = self.appURL + "/module/" + module + "/" + __id
+        url = f"{self.appURL}/module/{module}/{id}"
         r = requests.get(url, headers=self.headers, auth=self.auth)
 
         print(r)
@@ -249,7 +249,6 @@ class MpApi:
         correct. The content will be send using the MIME type application/octet-stream 
         and the Content-disposition header with a suggested filename.
 
-        "Accept: application/octet-stream"
         """
         
         url = f"{self.appURL}/module/{module}/{id}/attachment" 
@@ -263,6 +262,7 @@ class MpApi:
         self.headers['Accept'] = old
         #print(r.status_code)
         path = r.headers["Content-Disposition"].split("=")[1]
+        #perhaps i should return the whole picture
         with open(path, "wb") as f:
             f.write(r.content)
         self.headers['Accept'] = oldAccept
@@ -343,6 +343,10 @@ if __name__ == "__main__":
     print(f"{baseURL}:{user}:{pw}")
     api = MpApi(baseURL=baseURL, user=user, pw=pw)
 
-    r = api.getAttachment(module="Object", id="2609893")
+    #r = api.getAttachment(module="Object", id="2609893")
+    r = api.getItem(module="Object", id="2609893")
     #print(r.status_code)
-    #print(r.text)
+    print(r.text)
+    with open("response.xml", "w") as f:
+        f.write(r.text)
+    

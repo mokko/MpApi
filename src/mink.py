@@ -48,11 +48,11 @@ NSMAP = {
 class Mink:
     def __init__(self, *, conf, job):
         self.job = job
-        job_DF = None  # definition in conf file
-        mlc = False  # multiline command; not used, to clarify intent
+        job_DF = None   # definition in conf file
+        mlc = False     # multiline command; not used, to clarify intent
         cmd = []
         args = []
-
+        any_job = False
         # pretty ugly dsl parser...
         with open(conf, mode="r") as file:
             c = 0  # line counter
@@ -71,6 +71,7 @@ class Mink:
                     job_DF = parts[0][:-1]
                     if job_DF == job:
                         right_job = True
+                        any_job = True
                         self._mkdirs()
                         self._init_log()
                         self._info(f"Project dir: {self.project_dir}")
@@ -98,6 +99,9 @@ class Mink:
                     if right_job is True:
                         # print (f"**{cmd} {args}")
                         getattr(self, cmd)(args)
+                
+        if any_job is False:
+            print(f"WARNING: User-supplied job didn't match any job in the job definition file!")
 
     def clean(self, args):
         """
@@ -142,7 +146,7 @@ class Mink:
         else:
             self._info(f"join file doesn't exist yet, making new one {out_fn}")
             first = None
-            for each in self.project_dir.glob("response*.xml"):
+            for each in self.project_dir.glob("objects*.xml"):
                 print(each)
                 if first is None:
                     first = etree.parse(str(each), ETparser)
@@ -193,7 +197,7 @@ class Mink:
         id = args[1]
         out = args[2]  # something unique
         self._info(f"GetObjects: {args[0]} {id} {out}")
-        search_fn = self.project_dir.joinpath(f"search{out}.xml")
+        search_fn = self.project_dir.joinpath(f"search-objects{out}.xml")
         if search_fn.exists():
             self._info(f" Loading existing SEARCH request ({search_fn})")
             s = Search(fromFile=search_fn)
@@ -216,7 +220,7 @@ class Mink:
             s.toFile(path=search_fn)  # overwrites old files
             self._info(f" Search request saved to {search_fn}")
 
-        request_fn = self.project_dir.joinpath(f"response{out}.xml")
+        request_fn = self.project_dir.joinpath(f"objects{out}.xml")
         if request_fn.exists():
             self._info(f" Loading existing REQUEST file ({request_fn})")
         else:
