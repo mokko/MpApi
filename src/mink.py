@@ -126,9 +126,9 @@ class Mink:
                 m.attribute(parent=mi, name="uuid", action="remove")
                 m._rmUuidsInReferenceItems(parent=mi)
                 m._dropRG(parent=mi, name="ObjValuationGrp")
-                m._dropFields(
-                    parent=mi, type="virtualField"
-                )  # if no parent, assume self.etree
+                #m._dropFields(
+                #    parent=mi, type="virtualField"
+                #)  # if no parent, assume self.etree
             m.validate()
             self._info(" clean document validates")
             m.toFile(path=out_fn)
@@ -312,8 +312,7 @@ class Mink:
             r = self.api.search(module="Object", xml=s.toString())
             self._info(f" Status: {r.status_code}")
 
-            # lxml's pretty printer
-            self.toFile(r.text)
+            self.xmlToFile(xml=r.text, path=request_fn)
             self._info(f" New response written to {request_fn}")
 
     def validate(self, out_path):
@@ -321,7 +320,7 @@ class Mink:
         print(f"val {out_path}")
 
     #
-    # PRIVATE HELPERS
+    # PUBLIC AND PRIVATE HELPERS
     #
 
     def _info(self, msg):
@@ -346,7 +345,7 @@ class Mink:
         self.project_dir = dir
         self.pix_dir = dir.joinpath("..").joinpath("pix").resolve()
         if not self.pix_dir.exists():
-            self._info("Making pix dir: {self.pix_dir}")
+            self._info(f"Making pix dir: {self.pix_dir}")
             Path.mkdir(self.pix_dir)
 
     def xmlToEtree(self, *, xml):
