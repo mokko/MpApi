@@ -1,4 +1,5 @@
 credentials.py
+.settings/*
 dist/*
 build/*
 *.json

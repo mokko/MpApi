@@ -1,3 +1,4 @@
+# -*- coding: utf8
 """
 mink.py: Commandline frontend for MpApi.py
 
@@ -29,6 +30,7 @@ CLASS USAGE
 
 """
 import datetime
+import html
 import logging
 from Module import Module
 from MpApi import MpApi
@@ -126,9 +128,9 @@ class Mink:
                 m.attribute(parent=mi, name="uuid", action="remove")
                 m._rmUuidsInReferenceItems(parent=mi)
                 m._dropRG(parent=mi, name="ObjValuationGrp")
-                m._dropFields(
-                    parent=mi, type="virtualField"
-                )  # if no parent, assume self.etree
+                #m._dropFields(
+                #    parent=mi, type="virtualField"
+                #)  # if no parent, assume self.etree
             m.validate()
             self._info(" clean document validates")
             m.toFile(path=out_fn)
@@ -209,10 +211,15 @@ class Mink:
         module = args[0]
         id = args[1]
         out_fn = self.project_dir.joinpath(args[2])
+        print("GH")
+        print(html.unescape('&#228;&#220;'))
         if not out_fn.exists():
             self._info(f"GetItem module={module} id={id} out_fn={out_fn}")
             r = self.api.getItem(module="Multimedia", id=id)
+            #unesc = html.unescape(r.text)
             self.xmlToFile(xml=r.text, path=out_fn)
+        else:
+            print("File exists already; no overwrite")
 
     def getMultimedia(self, in_fn):
         """
@@ -245,6 +252,7 @@ class Mink:
                 self._info(f"requesting multimediaItem {mmId}")
                 r = self.api.getItem(module="Multimedia", id=mmId)
                 self._info(f"{r.status_code}, about to write to disk")
+                unescaped = html.unescape(r.text)
                 mmT = self.xmlToEtree(xml=r.text)
                 self.etreeToFile(ET=mmT, path=mmpath)
             
@@ -271,7 +279,7 @@ class Mink:
         """
         Use existing files as cache; i.e. only make new equests, if files don't exist yet.
 
-        That means you needto manually delete files like search.xml and response.xml in
+        That means you need to manually delete files like search.xml and response.xml in
         your project dir if you want to do a new request.
 
         Speed is really bad. I wonder if the Zetcom server supports compression.
@@ -310,10 +318,9 @@ class Mink:
         else:
             self._info(" about to execute new search request")
             r = self.api.search(module="Object", xml=s.toString())
+            unescaped = html.unescape(r.text)
             self._info(f" Status: {r.status_code}")
-
-            # lxml's pretty printer
-            self.toFile(r.text)
+            self.xmlToFile(xml=r.text, path=request_fn)
             self._info(f" New response written to {request_fn}")
 
     def validate(self, out_path):
@@ -350,8 +357,8 @@ class Mink:
             Path.mkdir(self.pix_dir)
 
     def xmlToEtree(self, *, xml):
-        tree = etree.fromstring(bytes(xml, "utf8"), ETparser)
-        etree.indent(tree)
+        tree = etree.fromstring(bytes(xml, "utf-8"), ETparser)
+        #etree.indent(tree)
         return etree.ElementTree(tree)
 
     def xmlToFile(self, *, xml, path):
@@ -361,8 +368,11 @@ class Mink:
         If you already have an etree, you could write to file in one
         line, not sure if we need a method for that.
         """
-        tree = self.xmlToEtree (xml=xml)
-        tree.write(str(path), pretty_print=True)  # only works on tree, not Element?
+        with open(path, "w", encoding='utf8') as f:
+            f.write(xml)
+
+        #tree = self.xmlToEtree (xml=xml) 
+        #tree.write(str(path), pretty_print=True)  # only works on tree, not Element?
 
     def etreeFromFile(self, *, path):
         return etree.parse(str(path), ETparser)

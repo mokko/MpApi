@@ -1,7 +1,7 @@
 import requests
 from requests.auth import HTTPBasicAuth
 from requests.structures import CaseInsensitiveDict
-#from lxml import etree # necessary?
+from lxml import etree # currently only necessary for getSession
 from Search import Search
 from Module import Module
 
@@ -9,8 +9,8 @@ from Module import Module
 MpApi - MuseumPlus API Client  
 
 USAGE
-    api = MpWebService(baseURL=baseURL, user=user, pw=pw)
-    r = api.getItem(module="Object", ID="12345")
+    api = MpApi(baseURL=baseURL, user=user, pw=pw)
+    r = api.getItem(module="Object", id="12345")
     key = api.getSessionKey()
     api.toFile(response=r, path="path/to/file.xml")
 
@@ -62,7 +62,7 @@ class MpApi:
         self.auth = HTTPBasicAuth(user, pw)
         headers = CaseInsensitiveDict()
         headers["Content-Type"] = "application/xml"
-        headers["Accept"] = "application/xml"
+        headers["Accept"] = "application/xml;charset=UTF-8"
         self.headers = headers
 
     #
@@ -75,8 +75,7 @@ class MpApi:
         url = self.appURL + "/session"
         r = requests.get(url, headers=self.headers, auth=self.auth)
 
-        if r.status_code != 200:
-            raise TypeError(f"Request response status code: {r.status_code}")
+        self._check(r)
 
         tree = etree.fromstring(bytes(r.text, "utf8"))
         key = tree.xpath(
@@ -108,10 +107,7 @@ class MpApi:
         else:
             url = self.appURL + "/module/" + module + "/definition"
         r = requests.get(url, headers=self.headers, auth=self.auth)
-        if r.status_code != 200:
-            print(url)
-            print(r.text)
-            raise TypeError(f"Request response status code: {r.status_code}")
+        self._check(r)
         return r
     
     #
@@ -130,11 +126,7 @@ class MpApi:
         """
         url = self.appURL + "/module/" + module + "/search"
         r = requests.post(url, data=xml, headers=self.headers, auth=self.auth)
-
-        if r.status_code != 200:
-            print(url)
-            print(r.text)
-            raise ValueError(f"Response status code: {r.status_code}")
+        self._check(r)
         return r
 
     #
@@ -156,10 +148,7 @@ class MpApi:
         """
         url = f"{self.appURL}/module/{module}/{id}"
         r = requests.get(url, headers=self.headers, auth=self.auth)
-
-        print(r)
-        if r.status_code != 200:
-            raise ValueError(f"Request response status code: {r.status_code}")
+        self._check(r)
         return r
 
     def createItem (self, *, module, xml):
@@ -173,10 +162,7 @@ class MpApi:
         #xml=etree.tostring(nodes)
         r = requests.post(url, data=xml, headers=self.headers, auth=self.auth)
 
-        if r.status_code != 200:
-            print(url)
-            print(r.text)
-            raise ValueError(f"Request response status code: {r.status_code}")
+        self._check(r)
         return r
 
     def updateItem(self, *, module, __id):
@@ -257,8 +243,7 @@ class MpApi:
         oldAccept = self.headers['Accept']
         self.headers['Accept'] = "application/octet-stream"
         r = requests.get(url, headers=self.headers, auth=self.auth)
-        if r.status_code != 200:
-            raise ValueError(f"Request response status code: {r.status_code}")
+        self._check(r)
         self.headers['Accept'] = oldAccept
         return r
 
@@ -319,12 +304,16 @@ class MpApi:
         """
 
     #
-    # HELPER
+    # HELPERS
     #
 
-    def toFile(self, *, response, path):
+    def toFile(self, *, xml, path):
         with open(path, "w", encoding='utf8') as f:
-            f.write(response.text)
+            f.write(xml)
+
+    def _check(self, r):
+        if r.status_code != 200:
+            raise TypeError(f"Request response status code: {r.status_code}")
 
 
 if __name__ == "__main__":
@@ -335,10 +324,3 @@ if __name__ == "__main__":
     print(f"{baseURL}:{user}:{pw}")
     api = MpApi(baseURL=baseURL, user=user, pw=pw)
 
-    #r = api.getAttachment(module="Object", id="2609893")
-    r = api.getItem(module="Object", id="2609893")
-    #print(r.status_code)
-    print(r.text)
-    with open("response.xml", "w") as f:
-        f.write(r.text)
-    
