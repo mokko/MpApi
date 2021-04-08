@@ -30,7 +30,6 @@ CLASS USAGE
 
 """
 import datetime
-import html
 import logging
 from Module import Module
 from MpApi import MpApi
@@ -38,9 +37,6 @@ from pathlib import Path
 import requests
 from Search import Search
 from lxml import etree  # necessary?
-
-with open("credentials.py") as f:
-    exec(f.read())
 
 ETparser = etree.XMLParser(remove_blank_text=True)
 NSMAP = {
@@ -50,7 +46,7 @@ NSMAP = {
 
 
 class Mink:
-    def __init__(self, *, conf, job):
+    def __init__(self, *, conf, job, baseURL, user, pw):
         self.job = job
         self.api = MpApi(baseURL=baseURL, user=user, pw=pw)
 
@@ -78,10 +74,11 @@ class Mink:
                     if job_DF == job:
                         right_job = True
                         any_job = True
-                        self._mkdirs()
+                        self._mkdirs() #also sets project_dir etc.
                         self._init_log()
                         self._info(f"Project dir: {self.project_dir}")
                     else:
+                        self.project_dir = Path(".")
                         right_job = False
                     continue
                 elif indent_lvl == 2:
@@ -208,18 +205,23 @@ class Mink:
             self._info(f"join file written ({out_fn})")
 
     def getItem(self, args):
+        """
+        Expects list of two arguments: module and id;
+        returns response.text as xml.
+        
+        Makes a new response only if no cached requests already on disk.
+        """
         module = args[0]
         id = args[1]
-        out_fn = self.project_dir.joinpath(args[2])
-        print("GH")
-        print(html.unescape('&#228;&#220;'))
+        out_fn = self.project_dir.joinpath(args[1]+".xml")
         if not out_fn.exists():
             self._info(f"GetItem module={module} id={id} out_fn={out_fn}")
             r = self.api.getItem(module="Multimedia", id=id)
-            #unesc = html.unescape(r.text)
             self.xmlToFile(xml=r.text, path=out_fn)
+            return r.text
         else:
             print("File exists already; no overwrite")
+            return str(self.xmlFromFile(path=out_fn))
 
     def getMultimedia(self, in_fn):
         """
@@ -229,10 +231,18 @@ class Mink:
         items having attachments and save those to disk using mm{id}.xml filename. 
         
         Also save their attachments using {mmId}.{extension} filename.
+        
+        This version is quite slow since we query indivdual records. It would be
+        faster if we construed a query that all media attached to objects in one 
+        group or exhibit at once.
+        
+        What should this method return?
+        
+        This method should be split: a) get the mm data; b) get the attachments
         """
 
         print(f"GetMultimedia {in_fn[0]}")
-        in_fn=self.project_dir.joinpath(in_fn[0])
+        in_fn = self.project_dir.joinpath(in_fn[0])
         #Download all mmItems which have an attachment
         mmTree = etree.parse(str(in_fn), ETparser)
         #seems the thumbnail info cannot be trusted or is irrelevant
@@ -252,7 +262,8 @@ class Mink:
                 self._info(f"requesting multimediaItem {mmId}")
                 r = self.api.getItem(module="Multimedia", id=mmId)
                 self._info(f"{r.status_code}, about to write to disk")
-                unescaped = html.unescape(r.text)
+                self.xmlToFile(xml=r.text, path=mmpath)
+                #encoding problems
                 mmT = self.xmlToEtree(xml=r.text)
                 self.etreeToFile(ET=mmT, path=mmpath)
             
@@ -286,8 +297,9 @@ class Mink:
         """
 
         # making search request
+        type = args[0]
         id = args[1]
-        out = args[2]  # something unique
+        out = args[2]  # something unique; dont add suffix
         self._info(f"GetObjects: {args[0]} {id} {out}")
         search_fn = self.project_dir.joinpath(f"search-objects{out}.xml")
         if search_fn.exists():
@@ -295,13 +307,13 @@ class Mink:
             s = Search(fromFile=search_fn)
         else:
             s = Search(module="Object")
-            if args[0] == "exhibitId":
+            if type == "exhibitId":
                 s.addCriterion(
                     operator="equalsField",
                     field="ObjRegistrarRef.RegExhibitionRef.__id",
                     value=id,
                 )
-            elif args[0] == "groupId":
+            elif type == "groupId":
                 s.addCriterion(
                     operator="equalsField", field="ObjObjectGroupsRef.__id", value=id
                 )
@@ -315,13 +327,14 @@ class Mink:
         request_fn = self.project_dir.joinpath(f"objects{out}.xml")
         if request_fn.exists():
             self._info(f" loading existing REQUEST file ({request_fn})")
+            return str(self.xmlFromFile(path=request_fn))
         else:
             self._info(" about to execute new search request")
             r = self.api.search(module="Object", xml=s.toString())
-            unescaped = html.unescape(r.text)
             self._info(f" Status: {r.status_code}")
             self.xmlToFile(xml=r.text, path=request_fn)
             self._info(f" New response written to {request_fn}")
+            return r.text
 
     def validate(self, out_path):
         """not necessary at the moment; would probably use Module.py"""
@@ -356,6 +369,11 @@ class Mink:
             self._info("Making pix dir: {self.pix_dir}")
             Path.mkdir(self.pix_dir)
 
+    def xmlFromFile(self, *, path):
+        with open(path, "r", encoding='utf8') as f:
+            xml = f.read()
+        return xml
+    
     def xmlToEtree(self, *, xml):
         tree = etree.fromstring(bytes(xml, "utf-8"), ETparser)
         #etree.indent(tree)
@@ -378,17 +396,19 @@ class Mink:
         return etree.parse(str(path), ETparser)
 
     def etreeToFile (self, *, ET, path):
-        ET.write(str(path), pretty_print=True)  # only works on tree, not Element?
+        ET.write(str(path), pretty_print=True, encoding="UTF-8") # encoding is important! 
 
     def etreePrint (self, *, ET):
         print(etree.tostring(ET, pretty_print=True))
 
 if __name__ == "__main__":
     import argparse
+    with open("../sdata/credentials.py") as f:
+        exec(f.read())
 
     parser = argparse.ArgumentParser(description="Commandline frontend for MpApi.py")
     parser.add_argument("-j", "--job", help="job to run")
     parser.add_argument("-c", "--conf", help="config file", default="jobs.dsl")
     args = parser.parse_args()
 
-    m = Mink(job=args.job, conf=args.conf)
+    m = Mink(job=args.job, conf=args.conf, baseURL=baseURL, pw=pw, user=user)

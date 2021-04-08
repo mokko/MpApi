@@ -159,7 +159,6 @@ class MpApi:
         Is there a return value? I would like to know the id
         """
         url = self.appURL + "/module/" + module 
-        #xml=etree.tostring(nodes)
         r = requests.post(url, data=xml, headers=self.headers, auth=self.auth)
 
         self._check(r)
@@ -308,7 +307,7 @@ class MpApi:
     #
 
     def toFile(self, *, xml, path):
-        with open(path, "w", encoding='utf8') as f:
+        with open(path, "w", encoding='utf-8') as f:
             f.write(xml)
 
     def _check(self, r):
