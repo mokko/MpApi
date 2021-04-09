@@ -16,7 +16,7 @@ class Helper:
     def toString(self, *, et=None):
         if et is None:
             et = self.etree
-        return etree.tostring(et, pretty_print=True, encoding="unicode")
+        return etree.tostring(et, pretty_print=True, encoding="unicode") # why not utf-8?
 
     def print(self, et=None):
         print(self.toString(et))
