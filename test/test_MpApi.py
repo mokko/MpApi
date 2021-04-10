@@ -3,7 +3,6 @@
 import chardet
 import sys
 import requests
-from io import BytesIO
 from lxml import etree
 from pathlib import Path
 sys.path.append ("../src")
