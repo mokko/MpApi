@@ -16,5 +16,4 @@ def test_search():
         operator="equalsField",
         value="20222")
     s.validate(mode="search")
-    api.search(xml=s.toString())
     

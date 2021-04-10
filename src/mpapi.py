@@ -75,9 +75,10 @@ class MpApi:
         url = self.appURL + "/session"
         r = requests.get(url, headers=self.headers, auth=self.auth)
 
-        self._check(r)
+        self.check_request(r)
 
-        tree = etree.fromstring(bytes(r.text, "utf8"))
+        tree = self.ETfromString(r.text)
+
         key = tree.xpath(
             "/s:application/s:session/s:key/text()",
             namespaces={"s": "http://www.zetcom.com/ria/ws/session"},
@@ -107,7 +108,7 @@ class MpApi:
         else:
             url = self.appURL + "/module/" + module + "/definition"
         r = requests.get(url, headers=self.headers, auth=self.auth)
-        self._check(r)
+        self.check_request(r)
         return r
     
     #
@@ -119,14 +120,23 @@ class MpApi:
         POST http://.../ria-ws/application/module/{module}/search/savedQuery/{__id}
         """
         
-    def search(self, *, module, xml):
+    def search(self, *, xml):
         """
-            Perform an ad-hoc search for modules items
-            POST http://.../ria-ws/application/module/{module}/search/
+        Perform an ad-hoc search for modules items
+        POST http://.../ria-ws/application/module/{module}/search/
+        
+        We should get the module from the xml to avoid mistakes.
         """
-        url = self.appURL + "/module/" + module + "/search"
+        tree = self.ETfromString(xml=xml)
+        module = tree.xpath(
+            "/s:application/s:modules/s:module/@name",
+            namespaces={"s": "http://www.zetcom.com/ria/ws/module/search"}
+        )
+        if not module[0]:
+            raise TypeError("Unknown module")
+        url = self.appURL + "/module/" + module[0] + "/search"
         r = requests.post(url, data=xml, headers=self.headers, auth=self.auth)
-        self._check(r)
+        self.check_request(r)
         return r
 
     #
@@ -148,7 +158,7 @@ class MpApi:
         """
         url = f"{self.appURL}/module/{module}/{id}"
         r = requests.get(url, headers=self.headers, auth=self.auth)
-        self._check(r)
+        self.check_request(r)
         return r
 
     def createItem (self, *, module, xml):
@@ -161,7 +171,7 @@ class MpApi:
         url = self.appURL + "/module/" + module 
         r = requests.post(url, data=xml, headers=self.headers, auth=self.auth)
 
-        self._check(r)
+        self.check_request(r)
         return r
 
     def updateItem(self, *, module, __id):
@@ -242,7 +252,7 @@ class MpApi:
         oldAccept = self.headers['Accept']
         self.headers['Accept'] = "application/octet-stream"
         r = requests.get(url, headers=self.headers, auth=self.auth)
-        self._check(r)
+        self.check_request(r)
         self.headers['Accept'] = oldAccept
         return r
 
@@ -306,20 +316,30 @@ class MpApi:
     # HELPERS
     #
 
+    def ETfromString(self, *, xml):
+        return etree.fromstring(xml) # bytes(xml, "UTF-8")
+
     def toFile(self, *, xml, path):
-        with open(path, "w", encoding='utf-8') as f:
+        with open(path, "w", encoding='UTF-8') as f:
             f.write(xml)
 
-    def _check(self, r):
+    def check_request(self, r):
         if r.status_code != 200:
             raise TypeError(f"Request response status code: {r.status_code}")
 
-
 if __name__ == "__main__":
     from pathlib import Path
-    with open("credentials.py") as f:
+    with open("../sdata/credentials.py") as f:
         exec(f.read())
 
     print(f"{baseURL}:{user}:{pw}")
     api = MpApi(baseURL=baseURL, user=user, pw=pw)
-
+    
+    s = Search(module="Object")
+    s.addCriterion(
+        field="ObjRegistrarRef.RegExhibitionRef.__id",
+        operator="equalsField",
+        value="20222")
+    s.validate(mode="search")
+    print("About to do a request")
+    api.search(xml=s.toString())

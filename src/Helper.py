@@ -7,19 +7,19 @@ class Helper:
         doc = self.etree
         #etree.indent(doc)
         try:
-            doc.write(str(path), pretty_print=True) # appears to write Element
+            doc.write(str(path), pretty_print=True, encoding="UTF-8") # appears to write Element
         except:
             doc = etree.ElementTree(self.etree)
-            doc.write(str(path), pretty_print=True) # appears to write Element
+            doc.write(str(path), pretty_print=True, encoding="UTF-8") # appears to write Element
 
 
     def toString(self, *, et=None):
         if et is None:
             et = self.etree
-        return etree.tostring(et, pretty_print=True, encoding="unicode") # why not utf-8?
+        return etree.tostring(et, pretty_print=True, encoding="UTF-8") # why not utf-8?
 
     def print(self, et=None):
-        print(self.toString(et))
+        print(self.toString(et=et))
 
     def validate(self, *, mode="module"):
         """

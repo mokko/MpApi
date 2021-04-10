@@ -44,11 +44,11 @@ NSMAP = {
     "m": "http://www.zetcom.com/ria/ws/module",
 }
 
-
 class Mink:
     def __init__(self, *, conf, job, baseURL, user, pw):
         self.job = job
         self.api = MpApi(baseURL=baseURL, user=user, pw=pw)
+        self.sar = Sar(baseURL=baseURL, user=user, pw=pw)
 
         job_DF = None   # definition in conf file
         mlc = False     # multiline command; not used, to clarify intent
@@ -216,7 +216,7 @@ class Mink:
         out_fn = self.project_dir.joinpath(args[1]+".xml")
         if not out_fn.exists():
             self._info(f"GetItem module={module} id={id} out_fn={out_fn}")
-            r = self.api.getItem(module="Multimedia", id=id)
+            r = self.api.getItem(module=module, id=id)
             self.xmlToFile(xml=r.text, path=out_fn)
             return r.text
         else:
