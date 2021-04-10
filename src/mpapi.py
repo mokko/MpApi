@@ -85,11 +85,8 @@ class MpApi:
         )
         return key
 
-
     #
     # B REQUESTS WITH module.xsd response
-    # 
-
     #
     # B.1 DATA DEFINITIONs
     #
@@ -125,7 +122,7 @@ class MpApi:
         Perform an ad-hoc search for modules items
         POST http://.../ria-ws/application/module/{module}/search/
         
-        We should get the module from the xml to avoid mistakes.
+        We'new getting the module from the xml to avoid mistakes from redundancy.
         """
         tree = self.ETfromString(xml=xml)
         module = tree.xpath(

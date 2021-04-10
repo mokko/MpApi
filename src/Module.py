@@ -7,7 +7,7 @@ Python object representing moduleItems
       <moduleItem hasAttachments="false" id="254808" uuid="254808">
         ...
 
-module is really a list moduleItems.
+module is really a set of moduleItems.
 
 I guess there could be multiple moduleLists for different kinds of modules
 (object, person etc.). At the moment, I assume there is only one.
@@ -15,28 +15,29 @@ I guess there could be multiple moduleLists for different kinds of modules
 What Zetcom calls item I also call a record or Datensatz.
 
 USAGE:
-    # 4 ways to make a moduleList
+    # CONSTRUCTION: 4 ways to make a moduleList
     m = Module(file="path.xml")  # load from disc
     m = Module(xml=xml)          # from xml string
     m = Module(etree=lxml.etree) # from lxml.etree object
     m = Module(name="Object", totalSize=1) # new Object item from scratch
 
-    #new interface
+    # WRITING XML FROM SCRATCH
+    #m is a Module object; others are lxml.etree objects
+    # N is a node, L is a list, T is a etree, E is an element 
     m = Module(name="Object", totalSize=1) # new Object item from scratch
-    #m is Module object; 
-    #following objects are lxml.etree objects, the stuff I sometimes suffix with N
-    mi = m.moduleItem(hasAttachments="false", id="254808")
-    m.dataField(parent=mi, dataType="Clob", name="ObjTechnicalTermClb", value="Zupfinstrument")
-    m.systemField(parent=mi, dataType="Long", name="__id", value="254808")
+    miN = m.moduleItem(hasAttachments="false", id="254808")
+    m.dataField(parent=miN, dataType="Clob", name="ObjTechnicalTermClb", value="Zupfinstrument")
+    m.systemField(parent=miN, dataType="Long", name="__id", value="254808")
 
-    rg = m.repeatableGroup(parent=mi, name=name, size=size)
-    rgi = m.repeatableGroupItem(parent=rg, id=id)
-    m.dataField(parent=rgi, dataType="Clob", name="ObjTechnicalTermClb", value="Zupfinstrument")
+    rgN = m.repeatableGroup(parent=miN, name=name, size=size)
+    rgiN = m.repeatableGroupItem(parent=rgN, id=id)
+    m.dataField(parent=rgiN, dataType="Clob", name="ObjTechnicalTermClb", value="Zupfinstrument")
 
     for eachN in m.iter(parent=rg):
         m.print(eachN)
     
-    # Helpers
+    
+    # HELPERS
     m.toFile()
     m.toString()
     m.validate()
