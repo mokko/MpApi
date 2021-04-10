@@ -142,7 +142,7 @@ class Mink:
 
         #getting media
         mm_fn = self.project_dir.joinpath(f"{label}-mm-{type}{id}.xml")
-        if obj_fn.exists():
+        if mm_fn.exists():
             self.info(f"Getting media from file cache {mm_fn}")
             mmX = self.xmlFromFile(path=mm_fn)
         else:
@@ -152,6 +152,7 @@ class Mink:
             mmX = r.text
 
         #saving attachments 
+        self.info(f"Getting attachments saving to {self.pix_dir}")
         self.sar.saveAttachments(xml=mmX, dir=self.pix_dir)
         #todo we probably want to delete those files that are no longer attached to media
         #just to do a better update
@@ -173,7 +174,7 @@ class Mink:
             self.info(f"Getting join from file cache {join_fn}")
             joinX = self.xmlFromFile(path=join_fn)
         else:
-            self.info("Joining objects, media and actors")
+            self.info(f"Joining objects, media and actors, saving to {join_fn}")
             joinX = sar.join(inL=[objX, mmX, pkX])
             self.xmlToFile(xml=joinX, path=join_fn)
         del objX, mmX, pkX # saves some memory perhaps
@@ -188,7 +189,7 @@ class Mink:
             cleanX = sar.clean(inX=joinX)
             self.xmlToFile(xml=cleanX, path=clean_fn)
             self.info(" clean validates")
-        del joinX
+        #del joinX
         
     #
     # PRIVATE HELPERS

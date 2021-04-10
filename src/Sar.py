@@ -22,9 +22,9 @@ USAGE:
 
     #get stuff from single ids
     r = sr.getItem(module="Objekt", id="1234")      # returns single item for any module
-    r = sr.getObjectSet(type="groupId", id="1234")  # Objekt items in given exhibit or group
-    r = sr.getMediaSet(type="exhibitId", id="1234") # Media items for objects in given exhibit or group
-    r = sr.getActorSet(type="exhibitId", id="1234") # Actor items for objects in given exhibit or group
+    r = sr.getObjectSet(type="group", id="1234")  # Objekt items in given exhibit or group
+    r = sr.getMediaSet(type="exhibit", id="1234") # Media items for objects in given exhibit or group
+    r = sr.getActorSet(type="exhibit", id="1234") # Actor items for objects in given exhibit or group
 
     #find out about the last search
     s = sr.searchRequest  # returns the last search request as xml, if any
@@ -91,12 +91,12 @@ class Sar: #methods in alphabetical order
         Get actors 
         """
         s = Search(module="Person")
-        if type == "exhibitId":
+        if type == "exhibit":
             s.addCriterion(
                 field="PerObjectRef.ObjRegistrarRef.RegExhibitionRef.__id",
                 operator="equalsField",
                 value=id)
-        elif type == "groupId":
+        elif type == "group":
             s.addCriterion(
                 field="PerObjectRef.ObjObjectGroupsRef.__id", 
                 operator="equalsField", 
@@ -112,12 +112,12 @@ class Sar: #methods in alphabetical order
         requests object with a set of items.
         """
         s = Search(module="Multimedia")
-        if type == "exhibitId":
+        if type == "exhibit":
             s.addCriterion(
                 field="MulObjectRef.ObjRegistrarRef.RegExhibitionRef.__id",
                 operator="equalsField",
                 value=id)
-        elif type == "groupId":
+        elif type == "group":
             s.addCriterion(
                 field="MulObjectRef.ObjObjectGroupsRef.__id", 
                 operator="equalsField", 
@@ -130,17 +130,17 @@ class Sar: #methods in alphabetical order
     def getObjectSet(self, *, id, type):
         """ 
         Get object items for exhibits or groups; expects id and type. Type is either 
-        "exhibitId" or "groupId". Returns the request. Also sets searchRequest.
+        "exhibit" or "group". Returns the request. Also sets searchRequest.
         """
 
         s = Search(module="Object")
-        if type == "exhibitId":
+        if type == "exhibit":
             s.addCriterion(
                 field="ObjRegistrarRef.RegExhibitionRef.__id",
                 operator="equalsField",
                 value=id
             )
-        elif type == "groupId":
+        elif type == "group":
             s.addCriterion(
                 field="ObjObjectGroupsRef.__id", operator="equalsField", value=id
             )
