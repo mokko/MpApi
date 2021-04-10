@@ -123,13 +123,14 @@ class Mink:
 
         type = args[0]
         id = args[1]
+        label = args[2]
         sar = self.sar
         objX = None
         mmX = None
         pkX = None
         joinX = None 
         #getting objects
-        obj_fn = self.project_dir.joinpath(f"obj-{type}{id}.xml")
+        obj_fn = self.project_dir.joinpath(f"{label}-obj-{type}{id}.xml")
         if obj_fn.exists():
             self.info(f"Getting objects from file cache {obj_fn}")
             objX = self.xmlFromFile(path=obj_fn)
@@ -140,7 +141,7 @@ class Mink:
             objX = r.text
 
         #getting media
-        mm_fn = self.project_dir.joinpath(f"mm-{type}{id}.xml")
+        mm_fn = self.project_dir.joinpath(f"{label}-mm-{type}{id}.xml")
         if obj_fn.exists():
             self.info(f"Getting media from file cache {mm_fn}")
             mmX = self.xmlFromFile(path=mm_fn)
@@ -156,7 +157,7 @@ class Mink:
         #just to do a better update
 
         #getting actors
-        pk_fn = self.project_dir.joinpath(f"pk-{type}{id}.xml")
+        pk_fn = self.project_dir.joinpath(f"{label}-pk-{type}{id}.xml")
         if pk_fn.exists():
             self.info(f"Getting actors from file cache {pk_fn}")
             pkX = self.xmlFromFile(path=pk_fn)
@@ -167,7 +168,7 @@ class Mink:
             pkX = r.text
         
         #joining
-        join_fn = self.project_dir.joinpath(f"join-{type}{id}.xml")
+        join_fn = self.project_dir.joinpath(f"{label}-join-{type}{id}.xml")
         if join_fn.exists():
             self.info(f"Getting join from file cache {join_fn}")
             joinX = self.xmlFromFile(path=join_fn)
@@ -178,16 +179,17 @@ class Mink:
         del objX, mmX, pkX # saves some memory perhaps
 
         #cleaning
-        clean_fn = self.project_dir.joinpath(f"clean-{type}{id}.xml")
+        clean_fn = self.project_dir.joinpath(f"{label}-clean-{type}{id}.xml")
         if clean_fn.exists():
             self.info(f"Getting clean from file cache {clean_fn}")
             cleanX = self.xmlFromFile(path=clean_fn)
         else:
             self.info(f"Cleaning join, saving to {clean_fn}")
             cleanX = sar.clean(inX=joinX)
-            self.xmlToFile(xml=cleanX, path=join_fn)
+            self.xmlToFile(xml=cleanX, path=clean_fn)
             self.info(" clean validates")
-            
+        del joinX
+        
     #
     # PRIVATE HELPERS
     #
