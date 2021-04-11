@@ -54,6 +54,7 @@ dataTypes = {"Clb": "Clob", "Dat": "Date", "Lnu": "Long", "Txt": "Varchar"}
 from lxml import etree
 from Helper import Helper
 
+
 class Module(Helper):
     def __init__(self, *, file=None, tree=None, xml=None, name=None):
         parser = etree.XMLParser(remove_blank_text=True)
@@ -76,9 +77,9 @@ class Module(Helper):
         """
         Remove, add or overwrite attributes in the element moduleItem.
         action: write or remove
-        
+
         Obsolete! -> let's just use attrib
-        for miN in m.iter(): 
+        for miN in m.iter():
             a = miN.attrib
             if uuid in a:
                 print("delete @uuid")
@@ -146,8 +147,8 @@ class Module(Helper):
         return mi
 
     def iter(self, *, parent=None):
-        #we could extract the xpath from parent and feed in the next step
-        #that would be an consistent interface
+        # we could extract the xpath from parent and feed in the next step
+        # that would be an consistent interface
         if parent is None:
             axpath = "/m:application/m:modules/m:module/m:moduleItem"
         else:
@@ -157,7 +158,6 @@ class Module(Helper):
         for itemN in itemsN:
             yield itemN
 
-    
     def moduleReference(self, *, parent, name, targetModule, multiplicity, size):
         """
         <moduleReference name="InvNumberSchemeRef" targetModule="InventoryNumber" multiplicity="N:1" size="1">
@@ -243,7 +243,7 @@ class Module(Helper):
             id=id,
             name=name,
         )
-    
+
     #
     # getter and setter
     #
@@ -252,23 +252,26 @@ class Module(Helper):
         Reports module types and number of moduleItems per type. Works on self.etree.
         Returns a dictionary like this: {'Object': 173, 'Person': 58, 'Multimedia': 608}
         """
-        #report[type] = number_of_items
+        # report[type] = number_of_items
         known_types = set()
         report = dict()
         moduleL = self.etree.xpath(
-            f"/m:application/m:modules/m:module", namespaces=NSMAP,
+            f"/m:application/m:modules/m:module",
+            namespaces=NSMAP,
         )
         for moduleN in moduleL:
             moduleA = moduleN.attrib
-            known_types.add(moduleA['name'])
+            known_types.add(moduleA["name"])
 
         for type in known_types:
             itemL = self.etree.xpath(
                 f"/m:application/m:modules/m:module[@name = '{type}']/m:moduleItem",
-                namespaces=NSMAP)
-            report [type] = len(itemL)
+                namespaces=NSMAP,
+            )
+            report[type] = len(itemL)
         return report
-    # 
+
+    #
     # HELPER
     # quick and dirty
     def _rmUuidsInReferenceItems(self, *, parent=None):
@@ -301,8 +304,10 @@ class Module(Helper):
         for rgN in rgL:
             rgN.getparent().remove(rgN)
 
+
 if __name__ == "__main__":
     import argparse
+
     parser = argparse.ArgumentParser(description="Commandline frontend for Module.py")
     parser.add_argument("-c", "--cmd", help="command", required=True)
     parser.add_argument("-a", "--args", help="arguments", nargs="*")
@@ -310,7 +315,7 @@ if __name__ == "__main__":
 
     m = Module(file=args.args[0])
     print(f"*args: {args}")
-    #print (args.cmd)
-    #print (args.args)
+    # print (args.cmd)
+    # print (args.args)
     result = getattr(m, args.cmd)()
     print(result)

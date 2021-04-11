@@ -42,12 +42,13 @@ NSMAP = {
     "m": "http://www.zetcom.com/ria/ws/module",
 }
 
+
 class Mink:
     def __init__(self, *, conf, job, baseURL, user, pw):
         self.job = job
         self.sar = Sar(baseURL=baseURL, user=user, pw=pw)
 
-        self.current_job = None   # definition in conf file
+        self.current_job = None  # definition in conf file
         cmd = []
         args = []
         any_job = False
@@ -70,7 +71,7 @@ class Mink:
                     if self.current_job == job:
                         right_job = True
                         any_job = True
-                        self._mkdirs() #also sets project_dir etc.
+                        self._mkdirs()  # also sets project_dir etc.
                         self._init_log()
                         self.info(f"Project dir: {self.project_dir}")
                     else:
@@ -87,22 +88,24 @@ class Mink:
                         # print(f"**{cmd} {args}")
                         getattr(self, cmd)(args)
                 elif indent_lvl > 2:
-                    print (f"indent lvl: {indent_lvl} {parts}")
-                    raise TypeError ("Too many indents in config file")
-                
+                    print(f"indent lvl: {indent_lvl} {parts}")
+                    raise TypeError("Too many indents in config file")
+
         if any_job is False:
-            print(f"WARNING: User-supplied job didn't match any job from the definition file!")
+            print(
+                f"WARNING: User-supplied job didn't match any job from the definition file!"
+            )
 
     def getItem(self, args):
         """
         Expects list of two arguments: module and id;
         returns response.text as xml.
-        
+
         Makes a new response only if no cached requests already on disk.
         """
         module = args[0]
         id = args[1]
-        out_fn = self.project_dir.joinpath(args[1]+".xml")
+        out_fn = self.project_dir.joinpath(args[1] + ".xml")
         if not out_fn.exists():
             self.info(f"GetItem module={module} id={id} out_fn={out_fn}")
             r = self.sar.getItem(module=module, id=id)
@@ -115,9 +118,9 @@ class Mink:
     def getPackage(self, args):
         """
         Download object and related information (attachment, media, people).
-        Expects a type (exhibit or group) and a corresponding id 
+        Expects a type (exhibit or group) and a corresponding id
         """
-        print (f"getPackage {args}")
+        print(f"getPackage {args}")
 
         type = args[0]
         id = args[1]
@@ -126,8 +129,8 @@ class Mink:
         objX = None
         mmX = None
         pkX = None
-        joinX = None 
-        #getting objects
+        joinX = None
+        # getting objects
         obj_fn = self.project_dir.joinpath(f"{label}-obj-{type}{id}.xml")
         if obj_fn.exists():
             self.info(f"Getting objects from file cache {obj_fn}")
@@ -138,7 +141,7 @@ class Mink:
             self.xmlToFile(xml=r.text, path=obj_fn)
             objX = r.text
 
-        #getting media
+        # getting media
         mm_fn = self.project_dir.joinpath(f"{label}-mm-{type}{id}.xml")
         if mm_fn.exists():
             self.info(f"Getting media from file cache {mm_fn}")
@@ -149,13 +152,13 @@ class Mink:
             self.xmlToFile(xml=r.text, path=mm_fn)
             mmX = r.text
 
-        #saving attachments 
+        # saving attachments
         self.info(f"Getting attachments saving to {self.pix_dir}")
         self.sar.saveAttachments(xml=mmX, dir=self.pix_dir)
-        #todo we probably want to delete those files that are no longer attached to media
-        #just to do a better update
+        # todo we probably want to delete those files that are no longer attached to media
+        # just to do a better update
 
-        #getting actors
+        # getting actors
         pk_fn = self.project_dir.joinpath(f"{label}-pk-{type}{id}.xml")
         if pk_fn.exists():
             self.info(f"Getting actors from file cache {pk_fn}")
@@ -165,8 +168,8 @@ class Mink:
             r = sar.getActorSet(type=type, id=id)
             self.xmlToFile(xml=r.text, path=pk_fn)
             pkX = r.text
-        
-        #joining
+
+        # joining
         join_fn = self.project_dir.joinpath(f"{label}-join-{type}{id}.xml")
         if join_fn.exists():
             self.info(f"Getting join from file cache {join_fn}")
@@ -175,9 +178,9 @@ class Mink:
             self.info(f"Joining objects, media and actors, saving to {join_fn}")
             joinX = sar.join(inL=[objX, mmX, pkX])
             self.xmlToFile(xml=joinX, path=join_fn)
-        del objX, mmX, pkX # saves some memory perhaps
+        del objX, mmX, pkX  # saves some memory perhaps
 
-        #cleaning
+        # cleaning
         clean_fn = self.project_dir.joinpath(f"{label}-clean-{type}{id}.xml")
         if clean_fn.exists():
             self.info(f"Getting clean from file cache {clean_fn}")
@@ -187,8 +190,8 @@ class Mink:
             cleanX = sar.clean(inX=joinX)
             self.xmlToFile(xml=cleanX, path=clean_fn)
             self.info(" clean validates")
-        #del joinX #at this point not necessary
-        
+        # del joinX #at this point not necessary
+
     #
     # PRIVATE HELPERS
     #
@@ -203,7 +206,7 @@ class Mink:
             datefmt="%Y%m%d %I:%M:%S %p",
             filename=log_fn,
             filemode="a",  # append now since we're starting a new folder
-                           # every day now anyways.
+            # every day now anyways.
             level=logging.DEBUG,
             format="%(asctime)s: %(message)s",
         )
@@ -220,36 +223,40 @@ class Mink:
             Path.mkdir(self.pix_dir)
 
     def xmlFromFile(self, *, path):
-        with open(path, "r", encoding='utf8') as f:
+        with open(path, "r", encoding="utf8") as f:
             xml = f.read()
         return xml
-    
+
     def xmlToEtree(self, *, xml):
         tree = etree.fromstring(bytes(xml, "utf-8"), ETparser)
-        #etree.indent(tree)
+        # etree.indent(tree)
         return etree.ElementTree(tree)
 
     def xmlToFile(self, *, xml, path):
         """
         Write xml to disk; expects xml as string.
         """
-        with open(path, "w", encoding='utf8') as f:
+        with open(path, "w", encoding="utf8") as f:
             f.write(xml)
 
-        #tree = self.xmlToEtree (xml=xml) 
-        #tree.write(str(path), pretty_print=True)  # only works on tree, not Element?
+        # tree = self.xmlToEtree (xml=xml)
+        # tree.write(str(path), pretty_print=True)  # only works on tree, not Element?
 
     def etreeFromFile(self, *, path):
         return etree.parse(str(path), ETparser)
 
-    def etreeToFile (self, *, ET, path):
-        ET.write(str(path), pretty_print=True, encoding="UTF-8") # encoding is important! 
+    def etreeToFile(self, *, ET, path):
+        ET.write(
+            str(path), pretty_print=True, encoding="UTF-8"
+        )  # encoding is important!
 
-    def etreePrint (self, *, ET):
+    def etreePrint(self, *, ET):
         print(etree.tostring(ET, pretty_print=True))
+
 
 if __name__ == "__main__":
     import argparse
+
     with open("../sdata/credentials.py") as f:
         exec(f.read())
 

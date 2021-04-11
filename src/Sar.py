@@ -64,27 +64,28 @@ NSMAP = {
     "m": "http://www.zetcom.com/ria/ws/module",
 }
 
-class Sar: #methods in alphabetical order
-    def __init__(self, *, baseURL, user, pw): 
-        self.searchRequest = None # attrib for search requests
-        self.api=MpApi(baseURL=baseURL, user=user, pw=pw)
+
+class Sar:  # methods in alphabetical order
+    def __init__(self, *, baseURL, user, pw):
+        self.searchRequest = None  # attrib for search requests
+        self.api = MpApi(baseURL=baseURL, user=user, pw=pw)
 
     def clean(self, *, inX):
         m = Module(xml=inX)
         c = 0
-        for miN in m.iter(): 
+        for miN in m.iter():
             a = miN.attrib
-            c +=1
-            print (f" {c}: id {a['id']} {a}")
+            c += 1
+            print(f" {c}: id {a['id']} {a}")
             if uuid in a:
                 print("delete @uuid")
-                del a['uuid']
+                del a["uuid"]
             m._rmUuidsInReferenceItems(parent=miN)
             m._dropRG(parent=miN, name="ObjValuationGrp")
         m.validate()
         return m.toString()
 
-    def getItem(self, *, module, id): 
+    def getItem(self, *, module, id):
         """
         Get a single item of any module by id. Returns a request object.
         Doesn't set self.searchRequest.
@@ -94,27 +95,29 @@ class Sar: #methods in alphabetical order
 
     def getActorSet(self, *, type, id):
         """
-        Get actors 
+        Get actors
         """
         s = Search(module="Person")
         if type == "exhibit":
             s.addCriterion(
                 field="PerObjectRef.ObjRegistrarRef.RegExhibitionRef.__id",
                 operator="equalsField",
-                value=id)
+                value=id,
+            )
         elif type == "group":
             s.addCriterion(
-                field="PerObjectRef.ObjObjectGroupsRef.__id", 
-                operator="equalsField", 
-                value=id)
+                field="PerObjectRef.ObjObjectGroupsRef.__id",
+                operator="equalsField",
+                value=id,
+            )
         else:
             raise ValueError("Unknown type! {type}")
         self.searchRequest = s.toString()
         return self.api.search(xml=s.toString())
 
     def getMediaSet(self, *, id, type):
-        """ 
-        Get a set multimedia items for exhibits or groups containing objects; returns a 
+        """
+        Get a set multimedia items for exhibits or groups containing objects; returns a
         requests object with a set of items.
         """
         s = Search(module="Multimedia")
@@ -122,20 +125,22 @@ class Sar: #methods in alphabetical order
             s.addCriterion(
                 field="MulObjectRef.ObjRegistrarRef.RegExhibitionRef.__id",
                 operator="equalsField",
-                value=id)
+                value=id,
+            )
         elif type == "group":
             s.addCriterion(
-                field="MulObjectRef.ObjObjectGroupsRef.__id", 
-                operator="equalsField", 
-                value=id)
+                field="MulObjectRef.ObjObjectGroupsRef.__id",
+                operator="equalsField",
+                value=id,
+            )
         else:
             raise ValueError("Unknown type! {type}")
         self.searchRequest = s.toString()
         return self.api.search(xml=s.toString())
-        
+
     def getObjectSet(self, *, id, type):
-        """ 
-        Get object items for exhibits or groups; expects id and type. Type is either 
+        """
+        Get object items for exhibits or groups; expects id and type. Type is either
         "exhibit" or "group". Returns the request. Also sets searchRequest.
         """
 
@@ -144,7 +149,7 @@ class Sar: #methods in alphabetical order
             s.addCriterion(
                 field="ObjRegistrarRef.RegExhibitionRef.__id",
                 operator="equalsField",
-                value=id
+                value=id,
             )
         elif type == "group":
             s.addCriterion(
@@ -155,118 +160,134 @@ class Sar: #methods in alphabetical order
         s.validate(mode="search")
         self.searchRequest = s.toString()
         return self.api.search(xml=s.toString())
-    
-    def join (self, *, inL):
+
+    def join(self, *, inL):
         """
         Expects several documents as lxml.etree objects to join them to one
         bigger document. Returns docN.
         """
-        #print (inL)
+        # print (inL)
         known_types = set()
         firstET = None
         for xml in inL:
-            tree = etree.fromstring(bytes(xml, "UTF-8")) 
+            tree = etree.fromstring(bytes(xml, "UTF-8"))
             moduleL = tree.xpath(
-                f"/m:application/m:modules/m:module", namespaces=NSMAP,
+                f"/m:application/m:modules/m:module",
+                namespaces=NSMAP,
             )
             for moduleN in moduleL:
                 moduleA = moduleN.attrib
-                known_types.add(moduleA['name'])
-            
+                known_types.add(moduleA["name"])
+
             if firstET is None:
                 firstET = tree
-            else: 
+            else:
                 for type in known_types:
                     newItemsL = tree.xpath(
                         f"/m:application/m:modules/m:module[@name = '{type}']/m:moduleItem",
                         namespaces=NSMAP,
                     )
-                    if len(newItemsL) > 0: 
+                    if len(newItemsL) > 0:
                         # only append if there is something to append
                         # print(f"type: {type}")
                         try:
                             lastModuleN = firstET.xpath(
                                 f"/m:application/m:modules/m:module[@name = '{type}']",
-                                namespaces=NSMAP
+                                namespaces=NSMAP,
                             )[-1]
                         except:
-                            #make a node with the write type
+                            # make a node with the write type
                             modulesN = firstET.xpath(
-                                f"/m:application/m:modules",
-                                namespaces=NSMAP
+                                f"/m:application/m:modules", namespaces=NSMAP
                             )[-1]
-                            lastModuleN = etree.SubElement(modulesN, "{http://www.zetcom.com/ria/ws/module}module", name=type)
-                        #print(f"len:{len(lastModuleN)} {lastModuleN}")
+                            lastModuleN = etree.SubElement(
+                                modulesN,
+                                "{http://www.zetcom.com/ria/ws/module}module",
+                                name=type,
+                            )
+                        # print(f"len:{len(lastModuleN)} {lastModuleN}")
                         for newItemN in newItemsL:
                             lastModuleN.append(newItemN)
-                    #else:
+                    # else:
                     #    print ("None found!")
-        for type in known_types: #update totalSize for every type
+        for type in known_types:  # update totalSize for every type
             itemsL = firstET.xpath(
                 f"/m:application/m:modules/m:module[@name = '{type}']/m:moduleItem",
-                namespaces=NSMAP
+                namespaces=NSMAP,
             )
             moduleN = firstET.xpath(
-                f"/m:application/m:modules/m:module[@name = '{type}']",
-                namespaces=NSMAP
+                f"/m:application/m:modules/m:module[@name = '{type}']", namespaces=NSMAP
             )[0]
             attributes = moduleN.attrib
-            attributes['totalSize'] = str(len(itemsL))
-        #print(known_types)
+            attributes["totalSize"] = str(len(itemsL))
+        # print(known_types)
         xml = etree.tostring(firstET, pretty_print=True, encoding="unicode")
         if not xml:
-            raise TypeError ("Join failed")
+            raise TypeError("Join failed")
         return xml
-    
-    def saveAttachments(self, *, xml, dir): 
+
+    def saveAttachments(self, *, xml, dir):
         """
         For a set of multimedia moduleItems, download their attachments.
-        
-        Expects a xml string and an directory to save the attachments to. 
+
+        Expects a xml string and an directory to save the attachments to.
         Attachments are saved to disk with {mulId}.{ext} filename.
         """
-        E = etree.fromstring(bytes(xml, "UTF-8")) 
+        E = etree.fromstring(bytes(xml, "UTF-8"))
 
-        itemsL = E.xpath("/m:application/m:modules/m:module[@name='Multimedia']/m:moduleItem"+
-            "[@hasAttachments = 'true']", namespaces=NSMAP) 
+        itemsL = E.xpath(
+            "/m:application/m:modules/m:module[@name='Multimedia']/m:moduleItem"
+            + "[@hasAttachments = 'true']",
+            namespaces=NSMAP,
+        )
         for itemN in itemsL:
             itemA = itemN.attrib
             mmId = itemA["id"]
 
-            fn_old = itemN.xpath("m:dataField[@name = 'MulOriginalFileTxt']/m:value/text()", 
-                namespaces=NSMAP)[0] #assuming that there can be only one
-            fn = mmId+Path(fn_old).suffix
+            fn_old = itemN.xpath(
+                "m:dataField[@name = 'MulOriginalFileTxt']/m:value/text()",
+                namespaces=NSMAP,
+            )[
+                0
+            ]  # assuming that there can be only one
+            fn = mmId + Path(fn_old).suffix
             mmPath = Path(dir).joinpath(fn)
 
-            if not mmPath.exists(): #only d/l if doesn't exist yet, not sure if we want that   
+            if (
+                not mmPath.exists()
+            ):  # only d/l if doesn't exist yet, not sure if we want that
                 r = self.api.getAttachment(module="Multimedia", id=mmId)
                 with open(mmPath, "wb") as f:
-                    f.write(r.content) 
+                    f.write(r.content)
 
     def search(self, *, xml):
         """
         Send a request to the api and return the response. Expects a search in xml
         (Same as in MpApi).
-        """           
+        """
         self.searchRequest = xml
         return self.api.search(xml=xml)
 
-    #Helper        
+    # Helper
     def xmlFromFile(self, *, path):
-        with open(path, "r", encoding='UTF-8') as f:
+        with open(path, "r", encoding="UTF-8") as f:
             xml = f.read()
         return xml
 
     def toFile(self, *, xml, path):
-        E = etree.fromstring(bytes(xml, "UTF-8")) 
+        E = etree.fromstring(bytes(xml, "UTF-8"))
         tree = etree.ElementTree(E)
-        tree.write(str(path), pretty_print=True, encoding="UTF-8") # appears to write Element
+        tree.write(
+            str(path), pretty_print=True, encoding="UTF-8"
+        )  # appears to write Element
 
     def EToString(self, *, tree):
         etree.tostring(tree, pretty_print=True, encoding="unicode")
 
+
 if __name__ == "__main__":
     import argparse
+
     # __file__
     with open("../sdata/credentials.py") as f:
         exec(f.read())
@@ -283,9 +304,8 @@ if __name__ == "__main__":
 
     m = Sar(baseURL=baseURL, pw=pw, user=user)
     print(f"{args}")
-    print (args.cmd)
-    print (args.args)
-    
+    print(args.cmd)
+    print(args.args)
+
     result = getattr(m, args.cmd)(args.args)
-    #print (result)
-        
+    # print (result)

@@ -79,7 +79,7 @@ allowedOperators = {
 }  # let's use an inmutable set
 
 
-class Search (Helper):
+class Search(Helper):
     def __init__(self, *, module=None, limit=-1, offset=0, fromFile=None):
 
         if fromFile is not None:
@@ -130,7 +130,6 @@ class Search (Helper):
     def NOT(self, *, modifier=False):
         self._addConjunction("not", modifier)
 
-
     #
     # private helpers
     #
@@ -151,7 +150,7 @@ class Search (Helper):
                 if len(alist) >= amax:
                     amax = len(alist)
                     parentN = eachN
-        #print("parentN" + tree.getelementpath(parentN))
+        # print("parentN" + tree.getelementpath(parentN))
         return parentN
 
     def _addConjunction(self, kind, modifier=False):
@@ -173,7 +172,11 @@ class Search (Helper):
 
 if __name__ == "__main__":
     s = Search(module="Object")
-    s.addCriterion(operator="equalsField", field="Object.ObjRegistrarRef.RegExhibitionRef.__id", value="20222")
+    s.addCriterion(
+        operator="equalsField",
+        field="Object.ObjRegistrarRef.RegExhibitionRef.__id",
+        value="20222",
+    )
     s.print()
     s.validate(mode="search")
 #    print(s.toString())
