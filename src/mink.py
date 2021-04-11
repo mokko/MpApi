@@ -14,9 +14,7 @@ DIR STRUCTURE
     projectData              # <-- use it as working directory (pwd)
         ajob/20210401        # <-- project dir
             report.log
-            response.xml
-            response-join.xml
-            search.xml
+            variousFiles.xml
             ...
         credentials.py       # use protection (e.g. .gitignore)
         jobs.dsl             # expected in pwd
@@ -189,7 +187,7 @@ class Mink:
             cleanX = sar.clean(inX=joinX)
             self.xmlToFile(xml=cleanX, path=clean_fn)
             self.info(" clean validates")
-        #del joinX
+        #del joinX #at this point not necessary
         
     #
     # PRIVATE HELPERS
@@ -204,7 +202,8 @@ class Mink:
         logging.basicConfig(
             datefmt="%Y%m%d %I:%M:%S %p",
             filename=log_fn,
-            filemode="w",  # not append, start new file every time
+            filemode="a",  # append now since we're starting a new folder
+                           # every day now anyways.
             level=logging.DEBUG,
             format="%(asctime)s: %(message)s",
         )

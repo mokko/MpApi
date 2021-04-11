@@ -71,8 +71,14 @@ class Sar: #methods in alphabetical order
 
     def clean(self, *, inX):
         m = Module(xml=inX)
+        c = 0
         for miN in m.iter(): 
-            m.attribute(parent=miN, name="uuid", action="remove")
+            a = miN.attrib
+            c +=1
+            print (f" {c}: id {a['id']} {a}")
+            if uuid in a:
+                print("delete @uuid")
+                del a['uuid']
             m._rmUuidsInReferenceItems(parent=miN)
             m._dropRG(parent=miN, name="ObjValuationGrp")
         m.validate()
@@ -258,4 +264,28 @@ class Sar: #methods in alphabetical order
 
     def EToString(self, *, tree):
         etree.tostring(tree, pretty_print=True, encoding="unicode")
+
+if __name__ == "__main__":
+    import argparse
+    # __file__
+    with open("../sdata/credentials.py") as f:
+        exec(f.read())
+
+    """
+    USAGE
+        Sar.py -c describe arg1 arg2
+    """
+
+    parser = argparse.ArgumentParser(description="Commandline frontend for Sar.py")
+    parser.add_argument("-c", "--cmd", help="command", required=True)
+    parser.add_argument("-a", "--args", help="arguments", nargs="*")
+    args = parser.parse_args()
+
+    m = Sar(baseURL=baseURL, pw=pw, user=user)
+    print(f"{args}")
+    print (args.cmd)
+    print (args.args)
+    
+    result = getattr(m, args.cmd)(args.args)
+    #print (result)
         
