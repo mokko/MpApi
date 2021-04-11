@@ -133,7 +133,7 @@ class Mink:
         # getting objects
         obj_fn = self.project_dir.joinpath(f"{label}-obj-{type}{id}.xml")
         if obj_fn.exists():
-            self.info(f"Getting objects from file cache {obj_fn}")
+            print(f"Getting objects from file cache {obj_fn}")
             objX = self.xmlFromFile(path=obj_fn)
         else:
             self.info(f"Getting objects, saving to {obj_fn}")
@@ -144,7 +144,7 @@ class Mink:
         # getting media
         mm_fn = self.project_dir.joinpath(f"{label}-mm-{type}{id}.xml")
         if mm_fn.exists():
-            self.info(f"Getting media from file cache {mm_fn}")
+            print(f"Getting media from file cache {mm_fn}")
             mmX = self.xmlFromFile(path=mm_fn)
         else:
             self.info(f"Getting media, saving to {mm_fn}")
@@ -153,7 +153,7 @@ class Mink:
             mmX = r.text
 
         # saving attachments
-        self.info(f"Getting attachments saving to {self.pix_dir}")
+        self.info(f"Getting attachments; saving to {self.pix_dir}")
         self.sar.saveAttachments(xml=mmX, dir=self.pix_dir)
         # todo we probably want to delete those files that are no longer attached to media
         # just to do a better update
@@ -161,7 +161,7 @@ class Mink:
         # getting actors
         pk_fn = self.project_dir.joinpath(f"{label}-pk-{type}{id}.xml")
         if pk_fn.exists():
-            self.info(f"Getting actors from file cache {pk_fn}")
+            print(f"Getting actors from file cache {pk_fn}")
             pkX = self.xmlFromFile(path=pk_fn)
         else:
             self.info(f"Getting actors, saving to {pk_fn}")
@@ -172,7 +172,7 @@ class Mink:
         # joining
         join_fn = self.project_dir.joinpath(f"{label}-join-{type}{id}.xml")
         if join_fn.exists():
-            self.info(f"Getting join from file cache {join_fn}")
+            print(f"Getting join from file cache {join_fn}")
             joinX = self.xmlFromFile(path=join_fn)
         else:
             self.info(f"Joining objects, media and actors, saving to {join_fn}")
@@ -183,7 +183,7 @@ class Mink:
         # cleaning
         clean_fn = self.project_dir.joinpath(f"{label}-clean-{type}{id}.xml")
         if clean_fn.exists():
-            self.info(f"Getting clean from file cache {clean_fn}")
+            print(f"Getting clean from file cache {clean_fn}")
             cleanX = self.xmlFromFile(path=clean_fn)
         else:
             self.info(f"Cleaning join, saving to {clean_fn}")

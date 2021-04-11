@@ -306,7 +306,7 @@ class MpApi:
         status code 204 (No Content) will be returned.
         """
 
-    def reportModuleItem(self, *, module, __id, exportId):
+    def reportModuleItem(self, *, module, itemId, exportId):
         """
         Export a single module item via the reporting system
         GET http://.../ria-ws/application/module/{module}/{__id}/export/{id}
@@ -314,6 +314,15 @@ class MpApi:
             Content-Type: application/octet-stream
             Content-Disposition: attachment;filename={random-file-name}.{export-specific-file-extension}
         """
+        oldAccept = self.headers["Accept"]
+        self.headers["Accept"] = "application/octet-stream"
+        url = f"{self.appURL}/module/{module}/{itemId}/export/{exportId}"
+        r = requests.get(url, headers=self.headers, auth=self.auth)
+        self.check_request(r)
+        self.headers["Accept"] = oldAccept
+        return r
+
+
 
     def reportModuleItems(self, *, module, id):
         """
@@ -343,15 +352,15 @@ if __name__ == "__main__":
     with open("../sdata/credentials.py") as f:
         exec(f.read())
 
+    def save(content, path):
+        with open(path, "wb") as f:
+            f.write(r.content)
+        
     print(f"{baseURL}:{user}:{pw}")
     api = MpApi(baseURL=baseURL, user=user, pw=pw)
-
-    s = Search(module="Object")
-    s.addCriterion(
-        field="ObjRegistrarRef.RegExhibitionRef.__id",
-        operator="equalsField",
-        value="20222",
-    )
-    s.validate(mode="search")
-    print("About to do a request")
-    api.search(xml=s.toString())
+    r = api.reportModuleItem(module="Object", itemId="744767", exportId="45003")
+    save(r.content, "report45003.xml")
+    r = api.reportModuleItem(module="Object", itemId="744767", exportId="48014")
+    save(r.content, "report48014.xml")
+    r = api.reportModuleItem(module="Object", itemId="744767", exportId="57028")
+    save(r.content, "report57028.xml")

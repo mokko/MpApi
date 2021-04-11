@@ -76,9 +76,9 @@ class Sar:  # methods in alphabetical order
         for miN in m.iter():
             a = miN.attrib
             c += 1
-            print(f" {c}: id {a['id']} {a}")
-            if uuid in a:
-                print("delete @uuid")
+            #print(f" {c}: id {a['id']} {a}")
+            if "uuid" in a:
+                #print("delete @uuid")
                 del a["uuid"]
             m._rmUuidsInReferenceItems(parent=miN)
             m._dropRG(parent=miN, name="ObjValuationGrp")
@@ -268,6 +268,29 @@ class Sar:  # methods in alphabetical order
         self.searchRequest = xml
         return self.api.search(xml=xml)
 
+    def visibleActiveUsers(self):
+        """
+        Returns list of all visible active users
+        """
+        s = Search(module="User")
+        s.addCriterion(
+            field="UsrStatusBoo",
+            operator="equalsField",
+            value="True"
+        )
+        s.validate(mode="search")
+        r = self.search(xml=s.toString())
+        tree = etree.fromstring(bytes(r.text, "UTF-8"))
+        emailL = tree.xpath(
+            "/m:application/m:modules/m:module[@name = 'User']/m:moduleItem/m:dataField[@name = 'UsrEmailTxt']/m:value",
+            namespaces=NSMAP
+        )
+        ls = []
+        for emailN in emailL:
+            if emailN.text != "@smb.spk-berlin.de":
+                ls.append(emailN.text)
+        return "; ".join(ls)
+
     # Helper
     def xmlFromFile(self, *, path):
         with open(path, "r", encoding="UTF-8") as f:
@@ -302,10 +325,13 @@ if __name__ == "__main__":
     parser.add_argument("-a", "--args", help="arguments", nargs="*")
     args = parser.parse_args()
 
-    m = Sar(baseURL=baseURL, pw=pw, user=user)
-    print(f"{args}")
-    print(args.cmd)
-    print(args.args)
+    s = Sar(baseURL=baseURL, pw=pw, user=user)
+    userList = s.visibleActiveUsers()
+    print (userList)
+    #m = Module(xml=r.text)
+    #print(f"{args}")
+    #print(args.cmd)
+    #print(args.args)
 
-    result = getattr(m, args.cmd)(args.args)
+    #result = getattr(m, args.cmd)(args.args)
     # print (result)

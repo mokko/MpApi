@@ -37,6 +37,7 @@ USAGE:
     for eachN in m.iter(parent=rg):
         m.print(eachN)
     
+    m.describe()
        
     # HELPERS
     m.toFile()
