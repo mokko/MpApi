@@ -228,7 +228,7 @@ class Mink:
         return xml
 
     def xmlToEtree(self, *, xml):
-        tree = etree.fromstring(bytes(xml, "utf-8"), ETparser)
+        tree = etree.fromstring(bytes(xml, "utf-8"), ETparser) #unicode
         # etree.indent(tree)
         return etree.ElementTree(tree)
 

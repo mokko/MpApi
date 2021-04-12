@@ -1,10 +1,10 @@
 """
 Sar stands for "search and response". It's a higher level interface on top of MpApi that 
-bundles multiple requests together, typically searches and responses. 
+bundles multiple requests together in one method, typically searches and responses. 
 
 I introduce it mainly to clean up the code of the Mink class, so that Mink has to deal less 
 with xml and Sar.py can be tested easier. (Conversely, that means that mink parses DSL config 
-file, writes files, reports to log and user. 
+file, writes files, logs report. 
 
 Sar typically returns a requests reponse (r) which contains xml in r.text or binary in
 r.content. 
@@ -163,8 +163,8 @@ class Sar:  # methods in alphabetical order
 
     def join(self, *, inL):
         """
-        Expects several documents as lxml.etree objects to join them to one
-        bigger document. Returns docN.
+        Expects several documents as lxml.etree objects to join them to one bigger 
+        document. Returns docN.
         """
         # print (inL)
         known_types = set()
@@ -229,6 +229,9 @@ class Sar:  # methods in alphabetical order
     def saveAttachments(self, *, xml, dir):
         """
         For a set of multimedia moduleItems, download their attachments.
+        
+        Typcially will process moduleItems of type multimeida (aka media). But
+        could theoretically also work on different types.
 
         Expects a xml string and an directory to save the attachments to.
         Attachments are saved to disk with {mulId}.{ext} filename.
@@ -258,7 +261,7 @@ class Sar:  # methods in alphabetical order
             ):  # only d/l if doesn't exist yet, not sure if we want that
                 r = self.api.getAttachment(module="Multimedia", id=mmId)
                 with open(mmPath, "wb") as f:
-                    f.write(r.content)
+                    f.write(r.content)                
 
     def search(self, *, xml):
         """
@@ -270,7 +273,10 @@ class Sar:  # methods in alphabetical order
 
     def visibleActiveUsers(self):
         """
-        Returns list of all visible active users
+        Returns list of active users' emails that are visible to the user who logging in through 
+        the api.
+        
+        Returns a Python list (and not a requests objects).
         """
         s = Search(module="User")
         s.addCriterion(
@@ -289,7 +295,7 @@ class Sar:  # methods in alphabetical order
         for emailN in emailL:
             if emailN.text != "@smb.spk-berlin.de":
                 ls.append(emailN.text)
-        return "; ".join(ls)
+        return ls # "; ".join(ls)
 
     # Helper
     def xmlFromFile(self, *, path):
@@ -305,7 +311,7 @@ class Sar:  # methods in alphabetical order
         )  # appears to write Element
 
     def EToString(self, *, tree):
-        etree.tostring(tree, pretty_print=True, encoding="unicode")
+        etree.tostring(tree, pretty_print=True, encoding="unicode") # so as not to return bytes
 
 
 if __name__ == "__main__":
