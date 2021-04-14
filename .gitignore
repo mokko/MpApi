@@ -8,3 +8,4 @@ bak/*
 __pycache__
 src/MpApi_M3.egg-info/*
 sdata/*
+test/sdata/*

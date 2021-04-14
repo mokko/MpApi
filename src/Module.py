@@ -7,7 +7,7 @@ Python object representing moduleItems
       <moduleItem hasAttachments="false" id="254808" uuid="254808">
         ...
 
-module is really a list moduleItems.
+module is really a set of moduleItems.
 
 I guess there could be multiple moduleLists for different kinds of modules
 (object, person etc.). At the moment, I assume there is only one.
@@ -15,33 +15,38 @@ I guess there could be multiple moduleLists for different kinds of modules
 What Zetcom calls item I also call a record or Datensatz.
 
 USAGE:
-    # 4 ways to make a moduleList
+    # CONSTRUCTION: 4 ways to make a moduleList
     m = Module(file="path.xml")  # load from disc
     m = Module(xml=xml)          # from xml string
     m = Module(etree=lxml.etree) # from lxml.etree object
     m = Module(name="Object", totalSize=1) # new Object item from scratch
 
-    #new interface
+    # WRITING XML FROM SCRATCH
+    #m is a Module object; others are lxml.etree objects
+    # N is a node, L is a list, T is a etree, E is an element 
     m = Module(name="Object", totalSize=1) # new Object item from scratch
-    #m is Module object; 
-    #following objects are lxml.etree objects, the stuff I sometimes suffix with N
-    mi = m.moduleItem(hasAttachments="false", id="254808")
-    m.dataField(parent=mi, dataType="Clob", name="ObjTechnicalTermClb", value="Zupfinstrument")
-    m.systemField(parent=mi, dataType="Long", name="__id", value="254808")
 
-    rg = m.repeatableGroup(parent=mi, name=name, size=size)
-    rgi = m.repeatableGroupItem(parent=rg, id=id)
-    m.dataField(parent=rgi, dataType="Clob", name="ObjTechnicalTermClb", value="Zupfinstrument")
+    miN = m.moduleItem(hasAttachments="false", id="254808")
+    m.dataField(parent=miN, dataType="Clob", name="ObjTechnicalTermClb", value="Zupfinstrument")
+    m.systemField(parent=miN, dataType="Long", name="__id", value="254808")
+
+    rgN = m.repeatableGroup(parent=miN, name=name, size=size)
+    rgiN = m.repeatableGroupItem(parent=rgN, id=id)
+    m.dataField(parent=rgiN, dataType="Clob", name="ObjTechnicalTermClb", value="Zupfinstrument")
 
     for eachN in m.iter(parent=rg):
         m.print(eachN)
     
-    # Helpers
+    m.describe()
+       
+    # HELPERS
     m.toFile()
     m.toString()
     m.validate()
-    
-    # internally we store xml in etree object at self.etree
+
+    m._dropRG(parent=miN, name="ObjValuationGrp")
+    m._dropFields(parent=miN, type="systemField")
+    m._rmUuidsInReferenceItems(parent=miN)    
 """
 # xpath 1.0 and lxml don't empty string or None for default ns
 NSMAP = {"m": "http://www.zetcom.com/ria/ws/module"}
@@ -49,6 +54,7 @@ dataTypes = {"Clb": "Clob", "Dat": "Date", "Lnu": "Long", "Txt": "Varchar"}
 
 from lxml import etree
 from Helper import Helper
+
 
 class Module(Helper):
     def __init__(self, *, file=None, tree=None, xml=None, name=None):
@@ -72,6 +78,13 @@ class Module(Helper):
         """
         Remove, add or overwrite attributes in the element moduleItem.
         action: write or remove
+
+        Obsolete! -> let's just use attrib
+        for miN in m.iter():
+            a = miN.attrib
+            if uuid in a:
+                print("delete @uuid")
+                del a['uuid']
         """
         if parent is None:
             parent = self.etree
@@ -135,8 +148,8 @@ class Module(Helper):
         return mi
 
     def iter(self, *, parent=None):
-        #we could extract the xpath from parent and feed in the next step
-        #that would be an consistent interface
+        # we could extract the xpath from parent and feed in the next step
+        # that would be an consistent interface
         if parent is None:
             axpath = "/m:application/m:modules/m:module/m:moduleItem"
         else:
@@ -146,7 +159,6 @@ class Module(Helper):
         for itemN in itemsN:
             yield itemN
 
-    
     def moduleReference(self, *, parent, name, targetModule, multiplicity, size):
         """
         <moduleReference name="InvNumberSchemeRef" targetModule="InventoryNumber" multiplicity="N:1" size="1">
@@ -233,6 +245,35 @@ class Module(Helper):
             name=name,
         )
 
+    #
+    # getter and setter
+    #
+    def describe(self):
+        """
+        Reports module types and number of moduleItems per type. Works on self.etree.
+        Returns a dictionary like this: {'Object': 173, 'Person': 58, 'Multimedia': 608}
+        """
+        # report[type] = number_of_items
+        known_types = set()
+        report = dict()
+        moduleL = self.etree.xpath(
+            f"/m:application/m:modules/m:module",
+            namespaces=NSMAP,
+        )
+        for moduleN in moduleL:
+            moduleA = moduleN.attrib
+            known_types.add(moduleA["name"])
+
+        for type in known_types:
+            itemL = self.etree.xpath(
+                f"/m:application/m:modules/m:module[@name = '{type}']/m:moduleItem",
+                namespaces=NSMAP,
+            )
+            report[type] = len(itemL)
+        return report
+
+    #
+    # HELPER
     # quick and dirty
     def _rmUuidsInReferenceItems(self, *, parent=None):
         if parent is None:
@@ -264,41 +305,18 @@ class Module(Helper):
         for rgN in rgL:
             rgN.getparent().remove(rgN)
 
+
 if __name__ == "__main__":
+    import argparse
 
-    def load_file():
-        ml = ModuleList(file="../sdata/exhibitObjects/response.xml")
-        print(ml.attribute(name="size"))
-        print(ml.attribute(name="totalSize"))  # if no parent, assume self.etree
-        for mi in ml.iter(): 
-            ml.attribute(parent=mi, name="uuid", action="remove")
-            ml._rmUuidsInReferenceItems(parent=mi)
-            ml._dropFields(
-                parent=mi, type="virtualField"
-            )  # if no parent, assume self.etree
-            ml._dropFields(
-                parent=mi, type="systemField"
-            )  # if no parent, assume self.etree
-        ml.toFile(path="../sdata/exhibitObjects/response-simplified.xml")
-        ml.validate()
+    parser = argparse.ArgumentParser(description="Commandline frontend for Module.py")
+    parser.add_argument("-c", "--cmd", help="command", required=True)
+    parser.add_argument("-a", "--args", help="arguments", nargs="*")
+    args = parser.parse_args()
 
-    def from_scratch():
-        m = Module(name="Object")
-        mi = m.moduleItem(hasAttachments="false")
-        m.dataField(parent=mi, name="ObjTechnicalTermClb", value="Zupftrommel")
-        vr = m.vocabularyReference(
-            parent=mi, name="ObjCategoryVoc", id="30349", instanceName="ObjCategoryVgr"
-        )
-        m.vocabularyReferenceItem(parent=vr, id="3206642", name="Musikinstrument")
-        rg = m.repeatableGroup(parent=mi, name="ObjObjectNumberGrp", size="1")
-        rgi = m.repeatableGroupItem(parent=rg, id="20414895")
-        ml.dataField(parent=rgi, name="InventarNrSTxt", value="I C 7723")
-
-        for mi in ml.iter(): 
-            ml.print(mi)
-        ml.print()
-        ml.validate()
-        ml.toFile(path="fromScratch.xml")
-
-    load_file()
-    # from_scratch()
+    m = Module(file=args.args[0])
+    print(f"*args: {args}")
+    # print (args.cmd)
+    # print (args.args)
+    result = getattr(m, args.cmd)()
+    print(result)
