@@ -154,7 +154,10 @@ class Mink:
 
         # saving attachments
         self.info(f"Getting attachments; saving to {self.pix_dir}")
-        self.sar.saveAttachments(xml=mmX, dir=self.pix_dir)
+        try:
+            self.sar.saveAttachments(xml=mmX, dir=self.pix_dir)
+        except:
+            self.info("Error during saveAttachments")
         # todo we probably want to delete those files that are no longer attached to media
         # just to do a better update
 
