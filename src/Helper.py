@@ -32,9 +32,9 @@ class Helper:
         Validates a whole xml document of the type module.
         """
         if mode == "module":
-            xsdLoc = "../sdata/module_1_4.xsd"
+            xsdLoc = "../sdata/module_1_6.xsd"
         elif mode == "search":
-            xsdLoc = "../sdata/search_1_4.xsd"
+            xsdLoc = "../sdata/search_1_6.xsd"
         else:
             raise TypeError("Unknown validation mode")
         # more options for http access?
