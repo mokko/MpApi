@@ -100,6 +100,26 @@ class Mink:
                 f"WARNING: User-supplied job didn't match any job from the definition file!"
             )
 
+    #
+    # commands
+    #
+
+    def clean(self, args)
+        type = args[0]
+        id = args[1]
+        label = args[2]
+        # cleaning
+        clean_fn = self.project_dir.joinpath(f"{label}-clean-{type}{id}.xml")
+        if clean_fn.exists():
+            print(f"Getting clean from file cache {clean_fn}")
+            cleanX = self.xmlFromFile(path=clean_fn)
+        else:
+            self.info(f"Cleaning join, saving to {clean_fn}")
+            cleanX = self.sar.clean(inX=joinX)
+            self.xmlToFile(xml=cleanX, path=clean_fn)
+            self.info(" clean validates")
+        retun cleanX
+
     def getItem(self, args):
         """
         Expects list of two arguments: module and id;
@@ -119,34 +139,13 @@ class Mink:
             print("File exists already; no overwrite")
             return str(self.xmlFromFile(path=out_fn))
 
-    def getPackage(self, args):
-        """
-        Download object and related information (attachment, media, people).
-        Expects a type (exhibit or group) and a corresponding id
-        """
-        print(f"getPackage {args}")
-
+    def getActors(self,args):
         type = args[0]
         id = args[1]
         label = args[2]
         sar = self.sar
-        objX = None
-        mmX = None
         pkX = None
-        joinX = None
-        # getting objects
-        obj_fn = self.project_dir.joinpath(f"{label}-obj-{type}{id}.xml")
-        if obj_fn.exists():
-            print(f"Getting objects from file cache {obj_fn}")
-            objX = self.xmlFromFile(path=obj_fn)
-        else:
-            self.info(f"Getting objects from remote, saving to {obj_fn}")
-            r = sar.getObjectSet(type=type, id=id)
-            self.xmlToFile(xml=r.text, path=obj_fn)
-            objX = r.text
 
-        mmX = self.getMM(args)
-        # getting actors
         pk_fn = self.project_dir.joinpath(f"{label}-pk-{type}{id}.xml")
         if pk_fn.exists():
             print(f"Getting actors from file cache {pk_fn}")
@@ -156,30 +155,43 @@ class Mink:
             r = sar.getActorSet(type=type, id=id)
             self.xmlToFile(xml=r.text, path=pk_fn)
             pkX = r.text
+        return pkX
+        
+    def getObjects(self,args):
+        type = args[0]
+        id = args[1]
+        label = args[2]
+        sar = self.sar
+        objX = None
 
-        # joining
-        join_fn = self.project_dir.joinpath(f"{label}-join-{type}{id}.xml")
-        if join_fn.exists():
-            print(f"Getting join from file cache {join_fn}")
-            joinX = self.xmlFromFile(path=join_fn)
+        obj_fn = self.project_dir.joinpath(f"{label}-obj-{type}{id}.xml")
+        if obj_fn.exists():
+            print(f"Getting objects from file cache {obj_fn}")
+            objX = self.xmlFromFile(path=obj_fn)
         else:
-            self.info(f"Joining objects, media and actors, saving to {join_fn}")
-            joinX = sar.join(inL=[objX, mmX, pkX])
-            self.xmlToFile(xml=joinX, path=join_fn)
-        del objX, mmX, pkX  # saves some memory perhaps
+            self.info(f"Getting objects from remote, saving to {obj_fn}")
+            r = sar.getObjectSet(type=type, id=id)
+            self.xmlToFile(xml=r.text, path=obj_fn)
+            objX = r.text
+        return objX
 
-        # cleaning
-        clean_fn = self.project_dir.joinpath(f"{label}-clean-{type}{id}.xml")
-        if clean_fn.exists():
-            print(f"Getting clean from file cache {clean_fn}")
-            cleanX = self.xmlFromFile(path=clean_fn)
-        else:
-            self.info(f"Cleaning join, saving to {clean_fn}")
-            cleanX = sar.clean(inX=joinX)
-            self.xmlToFile(xml=cleanX, path=clean_fn)
-            self.info(" clean validates")
-        # del joinX #at this point not necessary
+    def getPackage(self, args):
+        """
+        Download object and related information (attachment, media, people),
+        join data together and clean it.
 
+        Expects a type (exhibit or group) and a corresponding id
+        """
+        print(f"getPackage {args}")
+
+        type = args[0]
+        id = args[1]
+        label = args[2]
+
+        join_fn = self.join(args)
+        cleanX = self.clean(args)
+        return cleanX
+        
     def getMedia (self,args):
         """ 
             get media records for exhibit or group, saving it to disk 
@@ -215,6 +227,26 @@ class Mink:
         # todo we probably want to delete those files that are no longer attached to media
         # just to do a better update
         return mmX
+
+    def join(self,args)
+        type = args[0]
+        id = args[1]
+        label = args[2]
+        sar = self.sar
+        joinX = None
+        objX = self.getObjects(args)
+        mmX = self.getMM(args)
+        pkX = self.getActors(args)
+        # joining
+        join_fn = self.project_dir.joinpath(f"{label}-join-{type}{id}.xml")
+        if join_fn.exists():
+            print(f"Getting join from file cache {join_fn}")
+            joinX = self.xmlFromFile(path=join_fn)
+        else:
+            self.info(f"Joining objects, media and actors, saving to {join_fn}")
+            joinX = sar.join(inL=[objX, mmX, pkX])
+            self.xmlToFile(xml=joinX, path=join_fn)
+        return join_fn
 
     #
     # PUBLIC AND PRIVATE HELPERS
