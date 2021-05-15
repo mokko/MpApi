@@ -232,19 +232,18 @@ class Mink:
         type = args[0]
         id = args[1]
         label = args[2]
-        sar = self.sar
         joinX = None
-        objX = self.getObjects(args)
-        mmX = self.getMedia(args)
-        pkX = self.getActors(args)
-        # joining
         join_fn = self.project_dir.joinpath(f"{label}-join-{type}{id}.xml")
         if join_fn.exists():
             print(f"Getting join from file cache {join_fn}")
             joinX = self.xmlFromFile(path=join_fn)
         else:
+            print(f"Making new join from {join_fn}")
+            objX = self.getObjects(args)
+            mmX = self.getMedia(args)
+            pkX = self.getActors(args)
             self.info(f"Joining objects, media and actors, saving to {join_fn}")
-            joinX = sar.join(inL=[objX, mmX, pkX])
+            joinX = self.sar.join(inL=[objX, mmX, pkX])
             self.xmlToFile(xml=joinX, path=join_fn)
         return join_fn
 
