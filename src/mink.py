@@ -101,10 +101,10 @@ class Mink:
             )
 
     #
-    # commands
+    # mink commands
     #
 
-    def clean(self, args)
+    def clean(self, args):
         type = args[0]
         id = args[1]
         label = args[2]
@@ -118,7 +118,7 @@ class Mink:
             cleanX = self.sar.clean(inX=joinX)
             self.xmlToFile(xml=cleanX, path=clean_fn)
             self.info(" clean validates")
-        retun cleanX
+        return cleanX
 
     def getItem(self, args):
         """
@@ -220,7 +220,7 @@ class Mink:
         # saving attachments
         self.info(f"Getting attachments; saving to {self.pix_dir}")
         try:
-            self.sar.saveAttachments(xml=mmX, dir=self.pix_dir)
+            self.sar.saveAttachments(xml=mmX, adir=self.pix_dir)
         except Exception as e:
             self.info("Error during saveAttachments")
             raise e
@@ -228,7 +228,7 @@ class Mink:
         # just to do a better update
         return mmX
 
-    def join(self,args)
+    def join(self,args):
         type = args[0]
         id = args[1]
         label = args[2]
