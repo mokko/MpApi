@@ -274,7 +274,7 @@ class Module(Helper):
 
     #
     # HELPER
-    # quick and dirty
+    # 
  
     def _dropFields(self, *, parent=None, type):
         """removes all virtualFields
