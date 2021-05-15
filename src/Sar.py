@@ -230,8 +230,15 @@ class Sar:  # methods in alphabetical order
         """
         For a set of multimedia moduleItems, download their attachments.
 
-        Expects a xml string and an directory to save the attachments to.
-        Attachments are saved to disk with {mulId}.{ext} filename.
+        Expects a xml string and a directory to save the attachments to.
+        Attachments are saved to disk with the filename {mulId}.{ext}.
+        
+        This is the new version that uses streaming to save Python memory ;-) 
+        Untested.
+        
+        Old version downloads all attachment (that have not yet been downloaded).
+        
+        New version should only download those with freigabe="Ja"
         """
         E = etree.fromstring(bytes(xml, "UTF-8"))
 
@@ -240,10 +247,13 @@ class Sar:  # methods in alphabetical order
             + "[@hasAttachments = 'true']",
             namespaces=NSMAP,
         )
+        #/m:repeatableGroup[@name ='MulApprovalGrp']/m:repeatableGroupItem/m:vocabularyReference
+        
         for itemN in itemsL:
-            itemA = itemN.attrib
+            itemA = itemN.attrib # A for attribute
             mmId = itemA["id"]
 
+            #Why do i get suffix from old filename? Is that really the best source?
             fn_old = itemN.xpath(
                 "m:dataField[@name = 'MulOriginalFileTxt']/m:value/text()",
                 namespaces=NSMAP,
@@ -253,12 +263,16 @@ class Sar:  # methods in alphabetical order
             fn = mmId + Path(fn_old).suffix
             mmPath = Path(dir).joinpath(fn)
 
-            if (
-                not mmPath.exists()
-            ):  # only d/l if doesn't exist yet, not sure if we want that
-                r = self.api.getAttachment(module="Multimedia", id=mmId)
-                with open(mmPath, "wb") as f:
-                    f.write(r.content)
+            print (f"attachment for Multimedia/{mmId}")
+            if mmPath.exists(): # only d/l if doesn't exist yet, not sure if we want that
+                pass
+                #print (f" exists already {mmPath}")
+            else:
+                print (f" getting {mmPath}")
+                self.api.saveAttachment(module="Multimedia", id=mmId, path=mmPath)
+                #r = self.api.getAttachment(module="Multimedia", id=mmId)
+                #with open(mmPath, "wb") as f:
+                #    f.write(r.content)
 
     def search(self, *, xml):
         """

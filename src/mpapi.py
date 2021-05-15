@@ -1,4 +1,5 @@
 import requests
+import logging
 from requests.auth import HTTPBasicAuth
 from requests.structures import CaseInsensitiveDict
 from lxml import etree  # currently only necessary for getSession
@@ -256,10 +257,44 @@ class MpApi:
         headers = self.headers  # is this a true copy?
         oldAccept = self.headers["Accept"]
         self.headers["Accept"] = "application/octet-stream"
+        print (url)
         r = requests.get(url, headers=self.headers, auth=self.auth)
         self.check_request(r)
         self.headers["Accept"] = oldAccept
         return r
+
+    def saveAttachment(self, *, module, id, path):
+        """
+        Streaming version of getAttachment that saves attachment directly to disk.
+        
+        Expects module (e.g. "Multimedia"), id and path (filename) to save attachment 
+        to.
+       
+        Returns nothing useful. UNTESTED!
+        """
+        url = f"{self.appURL}/module/{module}/{id}/attachment"
+
+        headers = self.headers  # is this a true copy?
+        oldAccept = self.headers["Accept"]
+        self.headers["Accept"] = "application/octet-stream"
+        r = requests.get(url, stream=True, headers=self.headers, auth=self.auth)
+        self.check_request(r) # todo: replace with r.raise_for_status()?
+        
+        with requests.get(url, stream=True, headers=self.headers, auth=self.auth) as r:
+            # occasionally I get 403 Forbidden for url error, although I dont know why, e.g. with
+            # https://museumplus-produktiv.spk-berlin.de:8181/MpWeb-mpBerlinStaatlicheMuseen/ria-ws/application/module/Multimedia/5825947/attachment
+            # so I slilently ignore error atm
+            # r.raise_for_status() 
+            if r.status_code == 200:
+                with open(path, 'wb') as f:
+                    for chunk in r.iter_content(chunk_size=8192): 
+                        f.write(chunk)
+            else:
+                msg = f"HTTP Error: {r.status_code} {r.text}"
+                logging.info(msg)
+                print(msg)
+                
+        self.headers["Accept"] = oldAccept
 
     def getThumbnail(self, *, module, __id):
         """

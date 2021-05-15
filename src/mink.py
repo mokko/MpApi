@@ -29,6 +29,10 @@ CLASS USAGE
 """
 import datetime
 import logging
+import sys
+import os
+sys.path.append(os.environ["PYTHONPATH"]) #what the heck?
+
 from Module import Module
 from Sar import Sar
 from pathlib import Path
@@ -136,31 +140,12 @@ class Mink:
             print(f"Getting objects from file cache {obj_fn}")
             objX = self.xmlFromFile(path=obj_fn)
         else:
-            self.info(f"Getting objects, saving to {obj_fn}")
+            self.info(f"Getting objects from remote, saving to {obj_fn}")
             r = sar.getObjectSet(type=type, id=id)
             self.xmlToFile(xml=r.text, path=obj_fn)
             objX = r.text
 
-        # getting media
-        mm_fn = self.project_dir.joinpath(f"{label}-mm-{type}{id}.xml")
-        if mm_fn.exists():
-            print(f"Getting media from file cache {mm_fn}")
-            mmX = self.xmlFromFile(path=mm_fn)
-        else:
-            self.info(f"Getting media, saving to {mm_fn}")
-            r = sar.getMediaSet(type=type, id=id)
-            self.xmlToFile(xml=r.text, path=mm_fn)
-            mmX = r.text
-
-        # saving attachments
-        self.info(f"Getting attachments; saving to {self.pix_dir}")
-        try:
-            self.sar.saveAttachments(xml=mmX, dir=self.pix_dir)
-        except:
-            self.info("Error during saveAttachments")
-        # todo we probably want to delete those files that are no longer attached to media
-        # just to do a better update
-
+        mmX = self.getMM(args)
         # getting actors
         pk_fn = self.project_dir.joinpath(f"{label}-pk-{type}{id}.xml")
         if pk_fn.exists():
@@ -194,6 +179,42 @@ class Mink:
             self.xmlToFile(xml=cleanX, path=clean_fn)
             self.info(" clean validates")
         # del joinX #at this point not necessary
+
+    def getMedia (self,args):
+        """ 
+            get media records for exhibit or group, saving it to disk 
+            get attachments for that set of media records saving them to disk
+            return media records as mmX
+
+            Let's make a separate method to facilitate debugging.
+        """
+        type = args[0]  # exhibit or group
+        id = args[1]    # id for exhibit or group
+        label = args[2]
+        sar = self.sar  # just shortcut
+        mmX = None      # 
+
+        # getting media
+        mm_fn = self.project_dir.joinpath(f"{label}-mm-{type}{id}.xml")
+        if mm_fn.exists():
+            print(f"Getting media from file cache {mm_fn}")
+            mmX = self.xmlFromFile(path=mm_fn)
+        else:
+            self.info(f"Getting media from remote, saving to {mm_fn}")
+            r = sar.getMediaSet(type=type, id=id)
+            self.xmlToFile(xml=r.text, path=mm_fn)
+            mmX = r.text
+
+        # saving attachments
+        self.info(f"Getting attachments; saving to {self.pix_dir}")
+        try:
+            self.sar.saveAttachments(xml=mmX, dir=self.pix_dir)
+        except Exception as e:
+            self.info("Error during saveAttachments")
+            raise e
+        # todo we probably want to delete those files that are no longer attached to media
+        # just to do a better update
+        return mmX
 
     #
     # PUBLIC AND PRIVATE HELPERS
@@ -264,7 +285,7 @@ if __name__ == "__main__":
         exec(f.read())
 
     parser = argparse.ArgumentParser(description="Commandline frontend for MpApi.py")
-    parser.add_argument("-j", "--job", help="job to run")
+    parser.add_argument("-j", "--job", help="job to run", required=True)
     parser.add_argument("-c", "--conf", help="config file", default="jobs.dsl")
     args = parser.parse_args()
 
