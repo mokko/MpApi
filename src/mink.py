@@ -116,6 +116,7 @@ class Mink:
         else:
             self.info(f"Cleaning join, saving to {clean_fn}")
             joinX = self.xmlFromFile(path=join_fn)
+            #self.info("starting sar.clean")
             cleanX = self.sar.clean(inX=joinX)
             print(" Write clean to file")
             self.xmlToFile(xml=cleanX, path=clean_fn)
@@ -140,6 +141,32 @@ class Mink:
             pkX = r.text
         return pkX
         
+    def getAttachments(self, args):
+        type = args[0]
+        id = args[1]
+        label = args[2]
+
+        mm_fn = self.project_dir.joinpath(f"{label}-mm-{type}{id}.xml")
+        mmX = self.xmlFromFile(path=mm_fn)
+
+        pix_dir = f"{self.pix_dir}_{label}"
+        if not Path(pix_dir).exists():
+            os.mkdir (pix_dir)
+        self.info(f"Getting attachments; saving to {pix_dir}")
+        try:
+            expected = self.sar.saveAttachments(xml=mmX, adir=pix_dir)
+        except Exception as e:
+            self.info("Error during saveAttachments")
+            raise e
+        # todo we probably want to delete those files that are no longer attached to media
+        # just to do a better update
+
+        for img in os.listdir(pix_dir):
+            img = Path(img).joinpath(img)
+            if img not in expected
+                print(f"image no longer attached, removing {img}")
+                #os.remove(img)
+
     def getItem(self, args):
         """
         Expects list of two arguments: module and id;
@@ -170,7 +197,6 @@ class Mink:
         type = args[0]  # exhibit or group
         id = args[1]    # id for exhibit or group
         label = args[2]
-        sar = self.sar  # just shortcut
         mmX = None      # 
 
         # getting media
@@ -180,19 +206,9 @@ class Mink:
             mmX = self.xmlFromFile(path=mm_fn)
         else:
             self.info(f"Getting media from remote, saving to {mm_fn}")
-            r = sar.getMediaSet(type=type, id=id)
+            r = self.sar.getMediaSet(type=type, id=id)
             self.xmlToFile(xml=r.text, path=mm_fn)
             mmX = r.text
-
-        # saving attachments
-        self.info(f"Getting attachments; saving to {self.pix_dir}")
-        try:
-            self.sar.saveAttachments(xml=mmX, adir=self.pix_dir)
-        except Exception as e:
-            self.info("Error during saveAttachments")
-            raise e
-        # todo we probably want to delete those files that are no longer attached to media
-        # just to do a better update
         return mmX
 
     def getObjects(self,args):
@@ -227,7 +243,10 @@ class Mink:
         label = args[2]
 
         join_fn = self.join(args)
-        cleanX = self.clean(args)
+        self.getAttachments(args)
+
+        cleanX = self.clean(args) # takes too long
+        #self.validate(path=join_fn) # doesn't validate b/c of bad uuid
         return cleanX
         
     def join(self,args):
@@ -252,6 +271,12 @@ class Mink:
     #
     # PUBLIC AND PRIVATE HELPERS
     #
+
+    def validate(self, *, path):
+        m = Module(file=path)
+        print("start validation ...")
+        m.validate()
+        print("OK")
 
     def info(self, msg):
         logging.info(msg)

@@ -42,7 +42,7 @@ class Helper:
         if not hasattr(self, "xsd"):
             self.xsd = etree.parse(xsdLoc)
         xmlschema = etree.XMLSchema(self.xsd)
-        xmlschema.assertValid(self.etree)  # dies is doesn't validate
+        xmlschema.assertValid(self.etree)  # dies if doesn't validate
 
     def fromFile(self, *, path):
         self.etree = etree.parse(str(path))

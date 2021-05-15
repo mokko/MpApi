@@ -21,10 +21,10 @@ USAGE:
     sr = Sar(baseURL=baseURL, user=user, pw=pw)
 
     #get stuff from single ids
-    r = sr.getItem(module="Objekt", id="1234")      # returns single item for any module
-    r = sr.getObjectSet(type="group", id="1234")  # Objekt items in given exhibit or group
-    r = sr.getMediaSet(type="exhibit", id="1234") # Media items for objects in given exhibit or group
+    r = sr.getItem(module="Objekt", id="1234")    # returns single item for any module
     r = sr.getActorSet(type="exhibit", id="1234") # Actor items for objects in given exhibit or group
+    r = sr.getMediaSet(type="exhibit", id="1234") # Media items for objects in given exhibit or group
+    r = sr.getObjectSet(type="group", id="1234")  # Object items in given exhibit or group
 
     #find out about the last search
     s = sr.searchRequest  # returns the last search request as xml, if any
@@ -76,12 +76,11 @@ class Sar:  # methods in alphabetical order
         for miN in m.iter():
             a = miN.attrib
             c += 1
-            #print(f" {c}: id {a['id']} {a}")
+            #print(f"sar.clean: {c}: id {a['id']} {a}")
             if "uuid" in a:
-                #print("delete @uuid")
                 del a["uuid"]
-            m._rmUuidsInReferenceItems(parent=miN)
-            m._dropRG(parent=miN, name="ObjValuationGrp")
+        m._rmUuidsInReferenceItems # takes too long
+        m._dropRG(name="ObjValuationGrp") # takes too long
         m.validate()
         return m.toString()
 
@@ -256,6 +255,8 @@ class Sar:  # methods in alphabetical order
         )
         print(f"xml has {len(itemsL)} records with attachment=True and Freigabe[@typ='SMB-Digital'] = Ja")
         
+        positives = set()
+        
         for itemN in itemsL:
             itemA = itemN.attrib # A for attribute
             mmId = itemA["id"]
@@ -268,12 +269,12 @@ class Sar:  # methods in alphabetical order
             )[0]  # assuming that there can be only one
             fn = mmId + Path(fn_old).suffix
             mmPath = Path(adir).joinpath(fn)
-
+            positives.add(mmPath)
             #print (f"attachment for Multimedia/{mmId}")
             if not mmPath.exists(): # only d/l if doesn't exist yet, not sure if we want that
                 print (f" getting {mmPath}")
                 self.api.saveAttachment(module="Multimedia", id=mmId, path=mmPath)
-                
+        return positves
 
     def search(self, *, xml):
         """
@@ -343,10 +344,3 @@ if __name__ == "__main__":
     s = Sar(baseURL=baseURL, pw=pw, user=user)
     userList = s.visibleActiveUsers()
     print (userList)
-    #m = Module(xml=r.text)
-    #print(f"{args}")
-    #print(args.cmd)
-    #print(args.args)
-
-    #result = getattr(m, args.cmd)(args.args)
-    # print (result)
