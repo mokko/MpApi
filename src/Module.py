@@ -275,16 +275,7 @@ class Module(Helper):
     #
     # HELPER
     # quick and dirty
-    def _rmUuidsInReferenceItems(self, *, parent=None):
-        if parent is None:
-            parent = self.etree
-        itemL = parent.xpath(
-            "//m:moduleReference/m:moduleReferenceItem/@uuid", namespaces=NSMAP
-        )
-        for eachN in itemL:
-            print (eachN)
-            eachN.attrib.pop("uuid", None)
-
+ 
     def _dropFields(self, *, parent=None, type):
         """removes all virtualFields
         Probably virtualFields dont help when changing existing items/records.
