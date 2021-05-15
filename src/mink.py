@@ -130,14 +130,14 @@ class Mink:
         module = args[0]
         id = args[1]
         out_fn = self.project_dir.joinpath(args[1] + ".xml")
-        if not out_fn.exists():
+        if out_fn.exists():
+            print("File exists already; no overwrite")
+            return str(self.xmlFromFile(path=out_fn))
+        else:
             self.info(f"GetItem module={module} id={id} out_fn={out_fn}")
             r = self.sar.getItem(module=module, id=id)
             self.xmlToFile(xml=r.text, path=out_fn)
             return r.text
-        else:
-            print("File exists already; no overwrite")
-            return str(self.xmlFromFile(path=out_fn))
 
     def getActors(self,args):
         type = args[0]
