@@ -279,9 +279,10 @@ class Module(Helper):
         if parent is None:
             parent = self.etree
         itemL = parent.xpath(
-            "//m:moduleReference/m:moduleReferenceItem", namespaces=NSMAP
+            "//m:moduleReference/m:moduleReferenceItem/@uuid", namespaces=NSMAP
         )
         for eachN in itemL:
+            print (eachN)
             eachN.attrib.pop("uuid", None)
 
     def _dropFields(self, *, parent=None, type):
@@ -305,7 +306,16 @@ class Module(Helper):
         for rgN in rgL:
             rgN.getparent().remove(rgN)
 
-
+    def _dropUUID(self):
+        """
+        Drop all @uuid attributes from the whole document.
+        """
+        itemL = self.etree.xpath(
+            "//m:*[@uuid]", namespaces=NSMAP
+        )
+        for eachN in itemL:
+            eachN.attrib.pop("uuid", None)
+    
 if __name__ == "__main__":
     import argparse
 

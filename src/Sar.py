@@ -72,15 +72,8 @@ class Sar:  # methods in alphabetical order
 
     def clean(self, *, inX):
         m = Module(xml=inX)
-        c = 0
-        for miN in m.iter():
-            a = miN.attrib
-            c += 1
-            #print(f"sar.clean: {c}: id {a['id']} {a}")
-            if "uuid" in a:
-                del a["uuid"]
-        m._rmUuidsInReferenceItems # takes too long
-        m._dropRG(name="ObjValuationGrp") # takes too long
+        m._dropUUID()
+        m._dropRG(name="ObjValuationGrp") 
         m.validate()
         return m.toString()
 
@@ -274,7 +267,7 @@ class Sar:  # methods in alphabetical order
             if not mmPath.exists(): # only d/l if doesn't exist yet, not sure if we want that
                 print (f" getting {mmPath}")
                 self.api.saveAttachment(module="Multimedia", id=mmId, path=mmPath)
-        return positves
+        return positives
 
     def search(self, *, xml):
         """

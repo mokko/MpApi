@@ -116,7 +116,6 @@ class Mink:
         else:
             self.info(f"Cleaning join, saving to {clean_fn}")
             joinX = self.xmlFromFile(path=join_fn)
-            #self.info("starting sar.clean")
             cleanX = self.sar.clean(inX=joinX)
             print(" Write clean to file")
             self.xmlToFile(xml=cleanX, path=clean_fn)
@@ -158,15 +157,16 @@ class Mink:
         except Exception as e:
             self.info("Error during saveAttachments")
             raise e
-        # todo we probably want to delete those files that are no longer attached to media
-        # just to do a better update
 
+        # do we want to delete those files that are no longer attached?
         for img in os.listdir(pix_dir):
-            img = Path(img).joinpath(img)
-            if img not in expected
+            img = Path(pix_dir).joinpath(img)
+            if img not in expected:
                 print(f"image no longer attached, removing {img}")
                 #os.remove(img)
 
+        #currently we dont get attachments that have changed, but keep the same mulId
+    
     def getItem(self, args):
         """
         Expects list of two arguments: module and id;
