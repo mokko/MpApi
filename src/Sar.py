@@ -235,9 +235,6 @@ class Sar:  # methods in alphabetical order
         
         New: Now uses streaming to save memory. 
         New: Download only attachments with Freigabe[Typ = "SMB-Freigabe"] = "Ja"    
-        Old version downloads all attachment (that have not yet been downloaded).
-        
-        New version should only download those with freigabe="Ja"
         """
         E = etree.fromstring(bytes(xml, "UTF-8"))
 

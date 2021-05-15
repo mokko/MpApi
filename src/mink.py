@@ -235,7 +235,7 @@ class Mink:
         sar = self.sar
         joinX = None
         objX = self.getObjects(args)
-        mmX = self.getMM(args)
+        mmX = self.getMedia(args)
         pkX = self.getActors(args)
         # joining
         join_fn = self.project_dir.joinpath(f"{label}-join-{type}{id}.xml")
