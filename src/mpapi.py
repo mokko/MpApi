@@ -281,18 +281,10 @@ class MpApi:
         self.check_request(r) # todo: replace with r.raise_for_status()?
         
         with requests.get(url, stream=True, headers=self.headers, auth=self.auth) as r:
-            # occasionally I get 403 Forbidden for url error, although I dont know why, e.g. with
-            # https://museumplus-produktiv.spk-berlin.de:8181/MpWeb-mpBerlinStaatlicheMuseen/ria-ws/application/module/Multimedia/5825947/attachment
-            # so I slilently ignore error atm
-            # r.raise_for_status() 
-            if r.status_code == 200:
-                with open(path, 'wb') as f:
-                    for chunk in r.iter_content(chunk_size=8192): 
-                        f.write(chunk)
-            else:
-                msg = f"HTTP Error: {r.status_code} {r.text}"
-                logging.info(msg)
-                print(msg)
+            r.raise_for_status() 
+            with open(path, 'wb') as f:
+                for chunk in r.iter_content(chunk_size=8192): 
+                    f.write(chunk)
                 
         self.headers["Accept"] = oldAccept
 
