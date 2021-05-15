@@ -108,36 +108,19 @@ class Mink:
         type = args[0]
         id = args[1]
         label = args[2]
-        # cleaning
+        join_fn = self.project_dir.joinpath(f"{label}-join-{type}{id}.xml")
         clean_fn = self.project_dir.joinpath(f"{label}-clean-{type}{id}.xml")
         if clean_fn.exists():
             print(f"Getting clean from file cache {clean_fn}")
             cleanX = self.xmlFromFile(path=clean_fn)
         else:
             self.info(f"Cleaning join, saving to {clean_fn}")
+            joinX = self.xmlFromFile(path=join_fn)
             cleanX = self.sar.clean(inX=joinX)
+            print(" Write clean to file")
             self.xmlToFile(xml=cleanX, path=clean_fn)
             self.info(" clean validates")
         return cleanX
-
-    def getItem(self, args):
-        """
-        Expects list of two arguments: module and id;
-        returns response.text as xml.
-
-        Makes a new response only if no cached requests already on disk.
-        """
-        module = args[0]
-        id = args[1]
-        out_fn = self.project_dir.joinpath(args[1] + ".xml")
-        if out_fn.exists():
-            print("File exists already; no overwrite")
-            return str(self.xmlFromFile(path=out_fn))
-        else:
-            self.info(f"GetItem module={module} id={id} out_fn={out_fn}")
-            r = self.sar.getItem(module=module, id=id)
-            self.xmlToFile(xml=r.text, path=out_fn)
-            return r.text
 
     def getActors(self,args):
         type = args[0]
@@ -157,41 +140,25 @@ class Mink:
             pkX = r.text
         return pkX
         
-    def getObjects(self,args):
-        type = args[0]
-        id = args[1]
-        label = args[2]
-        sar = self.sar
-        objX = None
+    def getItem(self, args):
+        """
+        Expects list of two arguments: module and id;
+        returns response.text as xml.
 
-        obj_fn = self.project_dir.joinpath(f"{label}-obj-{type}{id}.xml")
-        if obj_fn.exists():
-            print(f"Getting objects from file cache {obj_fn}")
-            objX = self.xmlFromFile(path=obj_fn)
+        Makes a new response only if no cached requests already on disk.
+        """
+        module = args[0]
+        id = args[1]
+        out_fn = self.project_dir.joinpath(args[1] + ".xml")
+        if out_fn.exists():
+            print("File exists already; no overwrite")
+            return str(self.xmlFromFile(path=out_fn))
         else:
-            self.info(f"Getting objects from remote, saving to {obj_fn}")
-            r = sar.getObjectSet(type=type, id=id)
-            self.xmlToFile(xml=r.text, path=obj_fn)
-            objX = r.text
-        return objX
+            self.info(f"GetItem module={module} id={id} out_fn={out_fn}")
+            r = self.sar.getItem(module=module, id=id)
+            self.xmlToFile(xml=r.text, path=out_fn)
+            return r.text
 
-    def getPackage(self, args):
-        """
-        Download object and related information (attachment, media, people),
-        join data together and clean it.
-
-        Expects a type (exhibit or group) and a corresponding id
-        """
-        print(f"getPackage {args}")
-
-        type = args[0]
-        id = args[1]
-        label = args[2]
-
-        join_fn = self.join(args)
-        cleanX = self.clean(args)
-        return cleanX
-        
     def getMedia (self,args):
         """ 
             get media records for exhibit or group, saving it to disk 
@@ -228,6 +195,41 @@ class Mink:
         # just to do a better update
         return mmX
 
+    def getObjects(self,args):
+        type = args[0]
+        id = args[1]
+        label = args[2]
+        sar = self.sar
+        objX = None
+
+        obj_fn = self.project_dir.joinpath(f"{label}-obj-{type}{id}.xml")
+        if obj_fn.exists():
+            print(f"Getting objects from file cache {obj_fn}")
+            objX = self.xmlFromFile(path=obj_fn)
+        else:
+            self.info(f"Getting objects from remote, saving to {obj_fn}")
+            r = sar.getObjectSet(type=type, id=id)
+            self.xmlToFile(xml=r.text, path=obj_fn)
+            objX = r.text
+        return objX
+
+    def getPackage(self, args):
+        """
+        Download object and related information (attachment, media, people),
+        join data together and clean it.
+
+        Expects a type (exhibit or group) and a corresponding id
+        """
+        print(f"getPackage {args}")
+
+        type = args[0]
+        id = args[1]
+        label = args[2]
+
+        join_fn = self.join(args)
+        cleanX = self.clean(args)
+        return cleanX
+        
     def join(self,args):
         type = args[0]
         id = args[1]
