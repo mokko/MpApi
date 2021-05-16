@@ -202,16 +202,21 @@ class Sar:  # methods in alphabetical order
                             lastModuleN.append(newItemN)
                     # else:
                     #    print ("None found!")
+
         for type in known_types:  # update totalSize for every type
             itemsL = firstET.xpath(
                 f"/m:application/m:modules/m:module[@name = '{type}']/m:moduleItem",
                 namespaces=NSMAP,
             )
-            moduleN = firstET.xpath(
-                f"/m:application/m:modules/m:module[@name = '{type}']", namespaces=NSMAP
-            )[0]
-            attributes = moduleN.attrib
-            attributes["totalSize"] = str(len(itemsL))
+            try:
+                moduleN = firstET.xpath(
+                    f"/m:application/m:modules/m:module[@name = '{type}']", namespaces=NSMAP
+                )[0]
+                attributes = moduleN.attrib
+                attributes["totalSize"] = str(len(itemsL))
+            except:
+                # it is no error when a file is empty and has no items that can be counted
+                
         # print(known_types)
         xml = etree.tostring(firstET, pretty_print=True, encoding="unicode")
         if not xml:
@@ -246,7 +251,7 @@ class Sar:  # methods in alphabetical order
             """,
             namespaces=NSMAP,
         )
-        print(f"xml has {len(itemsL)} records with attachment=True and Freigabe[@typ='SMB-Digital'] = Ja")
+        print(f" xml has {len(itemsL)} records with attachment=True and Freigabe[@typ='SMB-Digital'] = Ja")
         
         positives = set()
         
