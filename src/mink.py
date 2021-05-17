@@ -122,6 +122,10 @@ class Mink:
             self.info(" clean validates")
         return cleanX
 
+    def definition(self,args):
+        dfX = self.sar.definition()
+        self.xmlToFile(xml=dfX, path="definition.xml")
+
     def getActors(self,args):
         type = args[0]
         id = args[1]
@@ -151,7 +155,7 @@ class Mink:
         pix_dir = f"{self.pix_dir}_{label}"
         if not Path(pix_dir).exists():
             os.mkdir (pix_dir)
-        self.info(f" checking attachments; saving to {pix_dir}")
+        print(f" checking attachments; saving to {pix_dir}")
         try:
             expected = self.sar.saveAttachments(xml=mmX, adir=pix_dir)
         except Exception as e:
@@ -166,6 +170,21 @@ class Mink:
                 #os.remove(img)
 
         #currently we dont get attachments that have changed, but keep the same mulId
+    
+    def getExhibit(self,args):
+        type = args[0]
+        id = args[1]
+        label = args[2]
+        exh_fn = self.project_dir.joinpath(f"{label}-exh-{type}{id}.xml")
+        if exh_fn.exists():
+            print(f" getting actors from file cache {exh_fn}")
+            exhX = self.xmlFromFile(path=exh_fn)
+        else:
+            self.info(f" getting actors, saving to {exh_fn}")
+            r = self.sar.getItem(module="Exhibition", id=id)
+            self.xmlToFile(xml=r.text, path=exh_fn)
+            exhX = r.text
+        return exhX
     
     def getItem(self, args):
         """
@@ -259,11 +278,13 @@ class Mink:
             joinX = self.xmlFromFile(path=join_fn)
         else:
             print(f" making new join from {join_fn}")
+            
+            exhX = self.getExhibit(args)
             objX = self.getObjects(args)
             mmX = self.getMedia(args)
             pkX = self.getActors(args)
             self.info(f" joining objects, media and actors, saving to {join_fn}")
-            joinX = self.sar.join(inL=[objX, mmX, pkX])
+            joinX = self.sar.join(inL=[exhX, objX, mmX, pkX])
             self.xmlToFile(xml=joinX, path=join_fn)
         return join_fn
 

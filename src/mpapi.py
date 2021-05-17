@@ -1,5 +1,5 @@
 import requests
-import logging
+#import logging
 from requests.auth import HTTPBasicAuth
 from requests.structures import CaseInsensitiveDict
 from lxml import etree  # currently only necessary for getSession

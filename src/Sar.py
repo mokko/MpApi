@@ -77,13 +77,16 @@ class Sar:  # methods in alphabetical order
         m.validate()
         return m.toString()
 
+    def definition(self, *, module=None):
+        return self.api.getDefinition(module=module).text
+
     def getItem(self, *, module, id):
         """
         Get a single item of any module by id. Returns a request object.
         Doesn't set self.searchRequest.
         """
         self.searchRequest = None
-        return self.api.getItem(module="Multimedia", id=id)
+        return self.api.getItem(module=module, id=id)
 
     def getActorSet(self, *, type, id):
         """
@@ -214,7 +217,7 @@ class Sar:  # methods in alphabetical order
                 )[0]
                 attributes = moduleN.attrib
                 attributes["totalSize"] = str(len(itemsL))
-            except:
+            except: pass
                 # it is no error when a file is empty and has no items that can be counted
                 
         # print(known_types)
