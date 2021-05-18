@@ -76,8 +76,7 @@ class MpApi:
         """
         url = self.appURL + "/session"
         r = requests.get(url, headers=self.headers, auth=self.auth)
-
-        self.check_request(r)
+        r.raise_for_status()
 
         tree = self.ETfromString(r.text)
 
@@ -107,7 +106,7 @@ class MpApi:
         else:
             url = self.appURL + "/module/" + module + "/definition"
         r = requests.get(url, headers=self.headers, auth=self.auth)
-        self.check_request(r)
+        r.raise_for_status()
         return r
 
     #
@@ -135,7 +134,7 @@ class MpApi:
             raise TypeError("Unknown module")
         url = self.appURL + "/module/" + module[0] + "/search"
         r = requests.post(url, data=xml, headers=self.headers, auth=self.auth)
-        self.check_request(r)
+        r.raise_for_status()
         return r
 
     #
@@ -157,7 +156,7 @@ class MpApi:
         """
         url = f"{self.appURL}/module/{module}/{id}"
         r = requests.get(url, headers=self.headers, auth=self.auth)
-        self.check_request(r)
+        r.raise_for_status()
         return r
 
     def createItem(self, *, module, xml):
@@ -170,7 +169,7 @@ class MpApi:
         url = self.appURL + "/module/" + module
         r = requests.post(url, data=xml, headers=self.headers, auth=self.auth)
 
-        self.check_request(r)
+        r.raise_for_status()
         return r
 
     def updateItem(self, *, module, __id):
@@ -260,7 +259,7 @@ class MpApi:
         self.headers["Accept"] = "application/octet-stream"
         print(url)
         r = requests.get(url, headers=self.headers, auth=self.auth)
-        self.check_request(r)
+        r.raise_for_status()
         self.headers["Accept"] = oldAccept
         return r
 
@@ -279,7 +278,7 @@ class MpApi:
         oldAccept = self.headers["Accept"]
         self.headers["Accept"] = "application/octet-stream"
         r = requests.get(url, stream=True, headers=self.headers, auth=self.auth)
-        self.check_request(r)  # todo: replace with r.raise_for_status()?
+        r.raise_for_status()  # todo: replace with r.raise_for_status()?
 
         with requests.get(url, stream=True, headers=self.headers, auth=self.auth) as r:
             r.raise_for_status()
@@ -346,7 +345,7 @@ class MpApi:
         self.headers["Accept"] = "application/octet-stream"
         url = f"{self.appURL}/module/{module}/{itemId}/export/{exportId}"
         r = requests.get(url, headers=self.headers, auth=self.auth)
-        self.check_request(r)
+        r.raise_for_status()
         self.headers["Accept"] = oldAccept
         return r
 
@@ -366,10 +365,6 @@ class MpApi:
     def toFile(self, *, xml, path):
         with open(path, "w", encoding="UTF-8") as f:
             f.write(xml)
-
-    def check_request(self, r):
-        if r.status_code != 200:
-            raise TypeError(f"Request response status code: {r.status_code}")
 
 
 if __name__ == "__main__":

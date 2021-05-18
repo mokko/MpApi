@@ -272,7 +272,7 @@ class Mink:
         # self.validate(path=join_fn) # doesn't validate b/c of bad uuid
         return cleanX
 
-    def getRegistrar(self, args):
+    def getRegistry(self, args):
         type = args[0]
         id = args[1]
         label = args[2]
@@ -284,13 +284,12 @@ class Mink:
                 objX = self.xmlFromFile(path=reg_fn)
             else:
                 self.info(f" registry from remote, saving to {reg_fn}")
-                r = self.sar.getObjectSet(type=type, id=id)
+                r = self.sar.getRegistrySet(id=id)
                 self.xmlToFile(xml=r.text, path=reg_fn)
                 regX = r.text
             return regX
         else:
-            regX = None
-            return regX
+            return None
 
     def join(self, args):
         type = args[0]
@@ -308,12 +307,12 @@ class Mink:
             objX = self.getObjects(args)
             mmX = self.getMedia(args)
             pkX = self.getActors(args)
-            regX = self.getRegistrar(args)
+            regX = self.getRegistry(args) 
 
             self.info(
-                f" joining exhibit, objects, media registry and actors, saving to {join_fn}"
+                f" joining exhibit, objects, media, registry and actors, saving to {join_fn}"
             )
-            joinX = self.sar.join(inL=[exhX, objX, mmX, pkX, regx])
+            joinX = self.sar.join(inL=[exhX, objX, mmX, pkX]) #regX
             self.xmlToFile(xml=joinX, path=join_fn)
         return join_fn
 

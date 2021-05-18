@@ -156,6 +156,18 @@ class Sar:  # methods in alphabetical order
         self.searchRequest = s.toString()
         return self.api.search(xml=s.toString())
 
+    def getRegistrySet(self, *, id):
+        s = Search(module="Registrar")
+        s.addCriterion(
+            field="RegExhibitionRef.__id",
+            operator="equalsField",
+            value=id,
+        )
+        s.validate(mode="search")
+        print ("*************")
+        self.searchRequest = s.toString()
+        return self.api.search(xml=s.toString())
+
     def join(self, *, inL):
         """
         Expects several documents as lxml.etree objects to join them to one
