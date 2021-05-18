@@ -164,7 +164,6 @@ class Sar:  # methods in alphabetical order
             value=id,
         )
         s.validate(mode="search")
-        print ("*************")
         self.searchRequest = s.toString()
         return self.api.search(xml=s.toString())
 

@@ -281,7 +281,7 @@ class Mink:
             reg_fn = self.project_dir.joinpath(f"{label}-reg-{type}{id}.xml")
             if reg_fn.exists():
                 print(f" registry from file cache {reg_fn}")
-                objX = self.xmlFromFile(path=reg_fn)
+                regX = self.xmlFromFile(path=reg_fn)
             else:
                 self.info(f" registry from remote, saving to {reg_fn}")
                 r = self.sar.getRegistrySet(id=id)
@@ -310,9 +310,13 @@ class Mink:
             regX = self.getRegistry(args) 
 
             self.info(
-                f" joining exhibit, objects, media, registry and actors, saving to {join_fn}"
+                f" joining module files, saving to {join_fn}"
             )
-            joinX = self.sar.join(inL=[exhX, objX, mmX, pkX]) #regX
+            inL = [objX, mmX, pkX]
+            if type == "exhibit":
+                inL.append(exhX)
+                inL.append(regX)
+            joinX = self.sar.join(inL=inL)
             self.xmlToFile(xml=joinX, path=join_fn)
         return join_fn
 
