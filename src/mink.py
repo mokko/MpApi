@@ -31,7 +31,8 @@ import datetime
 import logging
 import sys
 import os
-sys.path.append(os.environ["PYTHONPATH"]) #what the heck?
+
+sys.path.append(os.environ["PYTHONPATH"])  # what the heck?
 
 from Module import Module
 from Sar import Sar
@@ -122,11 +123,11 @@ class Mink:
             self.info(" clean validates")
         return cleanX
 
-    def definition(self,args):
+    def definition(self, args):
         dfX = self.sar.definition()
         self.xmlToFile(xml=dfX, path="definition.xml")
 
-    def getActors(self,args):
+    def getActors(self, args):
         type = args[0]
         id = args[1]
         label = args[2]
@@ -135,15 +136,15 @@ class Mink:
 
         pk_fn = self.project_dir.joinpath(f"{label}-pk-{type}{id}.xml")
         if pk_fn.exists():
-            print(f" getting actors from file cache {pk_fn}")
+            print(f" actors from file cache {pk_fn}")
             pkX = self.xmlFromFile(path=pk_fn)
         else:
-            self.info(f" getting actors, saving to {pk_fn}")
+            self.info(f" actors, saving to {pk_fn}")
             r = sar.getActorSet(type=type, id=id)
             self.xmlToFile(xml=r.text, path=pk_fn)
             pkX = r.text
         return pkX
-        
+
     def getAttachments(self, args):
         type = args[0]
         id = args[1]
@@ -154,7 +155,7 @@ class Mink:
 
         pix_dir = f"{self.pix_dir}_{label}"
         if not Path(pix_dir).exists():
-            os.mkdir (pix_dir)
+            os.mkdir(pix_dir)
         print(f" checking attachments; saving to {pix_dir}")
         try:
             expected = self.sar.saveAttachments(xml=mmX, adir=pix_dir)
@@ -167,25 +168,29 @@ class Mink:
             img = Path(pix_dir).joinpath(img)
             if img not in expected:
                 print(f"image no longer attached, removing {img}")
-                #os.remove(img)
+                # os.remove(img)
 
-        #currently we dont get attachments that have changed, but keep the same mulId
-    
-    def getExhibit(self,args):
+        # currently we dont get attachments that have changed, but keep the same mulId
+
+    def getExhibit(self, args):
         type = args[0]
         id = args[1]
         label = args[2]
-        exh_fn = self.project_dir.joinpath(f"{label}-exh-{type}{id}.xml")
-        if exh_fn.exists():
-            print(f" getting actors from file cache {exh_fn}")
-            exhX = self.xmlFromFile(path=exh_fn)
+        if type == "exhibit":
+            exh_fn = self.project_dir.joinpath(f"{label}-exh-{type}{id}.xml")
+            if exh_fn.exists():
+                print(f" exhibition from file cache {exh_fn}")
+                exhX = self.xmlFromFile(path=exh_fn)
+            else:
+                self.info(f" exhibition from remote, saving to {exh_fn}")
+                r = self.sar.getItem(module="Exhibition", id=id)
+                self.xmlToFile(xml=r.text, path=exh_fn)
+                exhX = r.text
+            return exhX
         else:
-            self.info(f" getting actors, saving to {exh_fn}")
-            r = self.sar.getItem(module="Exhibition", id=id)
-            self.xmlToFile(xml=r.text, path=exh_fn)
-            exhX = r.text
-        return exhX
-    
+            regX = None
+            return regX
+
     def getItem(self, args):
         """
         Expects list of two arguments: module and id;
@@ -205,31 +210,31 @@ class Mink:
             self.xmlToFile(xml=r.text, path=out_fn)
             return r.text
 
-    def getMedia (self,args):
-        """ 
-            get media records for exhibit or group, saving it to disk 
-            get attachments for that set of media records saving them to disk
-            return media records as mmX
+    def getMedia(self, args):
+        """
+        get media records for exhibit or group, saving it to disk
+        get attachments for that set of media records saving them to disk
+        return media records as mmX
 
-            Let's make a separate method to facilitate debugging.
+        Let's make a separate method to facilitate debugging.
         """
         type = args[0]  # exhibit or group
-        id = args[1]    # id for exhibit or group
+        id = args[1]  # id for exhibit or group
         label = args[2]
-        mmX = None      # 
+        mmX = None  #
 
         mm_fn = self.project_dir.joinpath(f"{label}-mm-{type}{id}.xml")
         if mm_fn.exists():
             print(f" media from file cache {mm_fn}")
             mmX = self.xmlFromFile(path=mm_fn)
         else:
-            self.info(f" getting media from remote, saving to {mm_fn}")
+            self.info(f" media from remote, saving to {mm_fn}")
             r = self.sar.getMediaSet(type=type, id=id)
             self.xmlToFile(xml=r.text, path=mm_fn)
             mmX = r.text
         return mmX
 
-    def getObjects(self,args):
+    def getObjects(self, args):
         type = args[0]
         id = args[1]
         label = args[2]
@@ -241,7 +246,7 @@ class Mink:
             print(f" objects from file cache {obj_fn}")
             objX = self.xmlFromFile(path=obj_fn)
         else:
-            self.info(f" getting objects from remote, saving to {obj_fn}")
+            self.info(f" objects from remote, saving to {obj_fn}")
             r = sar.getObjectSet(type=type, id=id)
             self.xmlToFile(xml=r.text, path=obj_fn)
             objX = r.text
@@ -263,11 +268,31 @@ class Mink:
         join_fn = self.join(args)
         self.getAttachments(args)
 
-        cleanX = self.clean(args) # takes too long
-        #self.validate(path=join_fn) # doesn't validate b/c of bad uuid
+        cleanX = self.clean(args)  # takes too long
+        # self.validate(path=join_fn) # doesn't validate b/c of bad uuid
         return cleanX
-        
-    def join(self,args):
+
+    def getRegistrar(self, args):
+        type = args[0]
+        id = args[1]
+        label = args[2]
+
+        if type == "exhibit":
+            reg_fn = self.project_dir.joinpath(f"{label}-reg-{type}{id}.xml")
+            if reg_fn.exists():
+                print(f" registry from file cache {reg_fn}")
+                objX = self.xmlFromFile(path=reg_fn)
+            else:
+                self.info(f" registry from remote, saving to {reg_fn}")
+                r = self.sar.getObjectSet(type=type, id=id)
+                self.xmlToFile(xml=r.text, path=reg_fn)
+                regX = r.text
+            return regX
+        else:
+            regX = None
+            return regX
+
+    def join(self, args):
         type = args[0]
         id = args[1]
         label = args[2]
@@ -278,13 +303,17 @@ class Mink:
             joinX = self.xmlFromFile(path=join_fn)
         else:
             print(f" making new join from {join_fn}")
-            
+
             exhX = self.getExhibit(args)
             objX = self.getObjects(args)
             mmX = self.getMedia(args)
             pkX = self.getActors(args)
-            self.info(f" joining objects, media and actors, saving to {join_fn}")
-            joinX = self.sar.join(inL=[exhX, objX, mmX, pkX])
+            regX = self.getRegistrar(args)
+
+            self.info(
+                f" joining exhibit, objects, media registry and actors, saving to {join_fn}"
+            )
+            joinX = self.sar.join(inL=[exhX, objX, mmX, pkX, regx])
             self.xmlToFile(xml=joinX, path=join_fn)
         return join_fn
 
@@ -303,7 +332,8 @@ class Mink:
         print(msg)
 
     def _init_log(self):
-        log_fn = Path(self.project_dir).joinpath("report.log")
+        now = datetime.datetime.now()
+        log_fn = Path(self.project_dir).joinpath(now.strftime("%Y%m%d") + ".log")
         logging.basicConfig(
             datefmt="%Y%m%d %I:%M:%S %p",
             filename=log_fn,

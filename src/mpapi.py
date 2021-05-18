@@ -1,5 +1,6 @@
 import requests
-#import logging
+
+# import logging
 from requests.auth import HTTPBasicAuth
 from requests.structures import CaseInsensitiveDict
 from lxml import etree  # currently only necessary for getSession
@@ -257,7 +258,7 @@ class MpApi:
         headers = self.headers  # is this a true copy?
         oldAccept = self.headers["Accept"]
         self.headers["Accept"] = "application/octet-stream"
-        print (url)
+        print(url)
         r = requests.get(url, headers=self.headers, auth=self.auth)
         self.check_request(r)
         self.headers["Accept"] = oldAccept
@@ -266,10 +267,10 @@ class MpApi:
     def saveAttachment(self, *, module, id, path):
         """
         Streaming version of getAttachment that saves attachment directly to disk.
-        
-        Expects module (e.g. "Multimedia"), id and path (filename) to save attachment 
+
+        Expects module (e.g. "Multimedia"), id and path (filename) to save attachment
         to.
-       
+
         Returns nothing useful. UNTESTED!
         """
         url = f"{self.appURL}/module/{module}/{id}/attachment"
@@ -278,14 +279,14 @@ class MpApi:
         oldAccept = self.headers["Accept"]
         self.headers["Accept"] = "application/octet-stream"
         r = requests.get(url, stream=True, headers=self.headers, auth=self.auth)
-        self.check_request(r) # todo: replace with r.raise_for_status()?
-        
+        self.check_request(r)  # todo: replace with r.raise_for_status()?
+
         with requests.get(url, stream=True, headers=self.headers, auth=self.auth) as r:
-            r.raise_for_status() 
-            with open(path, 'wb') as f:
-                for chunk in r.iter_content(chunk_size=8192): 
+            r.raise_for_status()
+            with open(path, "wb") as f:
+                for chunk in r.iter_content(chunk_size=8192):
                     f.write(chunk)
-                
+
         self.headers["Accept"] = oldAccept
 
     def getThumbnail(self, *, module, __id):
@@ -349,8 +350,6 @@ class MpApi:
         self.headers["Accept"] = oldAccept
         return r
 
-
-
     def reportModuleItems(self, *, module, id):
         """
         Export multiple module items via the reporting system
@@ -382,7 +381,7 @@ if __name__ == "__main__":
     def save(content, path):
         with open(path, "wb") as f:
             f.write(r.content)
-        
+
     print(f"{baseURL}:{user}:{pw}")
     api = MpApi(baseURL=baseURL, user=user, pw=pw)
     r = api.reportModuleItem(module="Object", itemId="744767", exportId="45003")

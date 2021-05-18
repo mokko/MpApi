@@ -73,7 +73,7 @@ class Sar:  # methods in alphabetical order
     def clean(self, *, inX):
         m = Module(xml=inX)
         m._dropUUID()
-        m._dropRG(name="ObjValuationGrp") 
+        m._dropRG(name="ObjValuationGrp")
         m.validate()
         return m.toString()
 
@@ -213,13 +213,15 @@ class Sar:  # methods in alphabetical order
             )
             try:
                 moduleN = firstET.xpath(
-                    f"/m:application/m:modules/m:module[@name = '{type}']", namespaces=NSMAP
+                    f"/m:application/m:modules/m:module[@name = '{type}']",
+                    namespaces=NSMAP,
                 )[0]
                 attributes = moduleN.attrib
                 attributes["totalSize"] = str(len(itemsL))
-            except: pass
-                # it is no error when a file is empty and has no items that can be counted
-                
+            except:
+                pass
+            # it is no error when a file is empty and has no items that can be counted
+
         # print(known_types)
         xml = etree.tostring(firstET, pretty_print=True, encoding="unicode")
         if not xml:
@@ -232,9 +234,9 @@ class Sar:  # methods in alphabetical order
 
         Expects a xml string and a directory to save the attachments to.
         Attachments are saved to disk with the filename {mulId}.{ext}.
-        
-        New: Now uses streaming to save memory. 
-        New: Download only attachments with Freigabe[Typ = "SMB-Freigabe"] = "Ja"    
+
+        New: Now uses streaming to save memory.
+        New: Download only attachments with Freigabe[Typ = "SMB-Freigabe"] = "Ja"
         """
         E = etree.fromstring(bytes(xml, "UTF-8"))
 
@@ -254,26 +256,32 @@ class Sar:  # methods in alphabetical order
             """,
             namespaces=NSMAP,
         )
-        print(f" xml has {len(itemsL)} records with attachment=True and Freigabe[@typ='SMB-Digital'] = Ja")
-        
+        print(
+            f" xml has {len(itemsL)} records with attachment=True and Freigabe[@typ='SMB-Digital'] = Ja"
+        )
+
         positives = set()
-        
+
         for itemN in itemsL:
-            itemA = itemN.attrib # A for attribute
+            itemA = itemN.attrib  # A for attribute
             mmId = itemA["id"]
 
-            #Why do i get suffix from old filename? Is that really the best source?
-            #Seems that it is. I see no other field in RIA
+            # Why do i get suffix from old filename? Is that really the best source?
+            # Seems that it is. I see no other field in RIA
             fn_old = itemN.xpath(
                 "m:dataField[@name = 'MulOriginalFileTxt']/m:value/text()",
                 namespaces=NSMAP,
-            )[0]  # assuming that there can be only one
+            )[
+                0
+            ]  # assuming that there can be only one
             fn = mmId + Path(fn_old).suffix
             mmPath = Path(adir).joinpath(fn)
             positives.add(mmPath)
-            #print (f"attachment for Multimedia/{mmId}")
-            if not mmPath.exists(): # only d/l if doesn't exist yet, not sure if we want that
-                print (f" getting {mmPath}")
+            # print (f"attachment for Multimedia/{mmId}")
+            if (
+                not mmPath.exists()
+            ):  # only d/l if doesn't exist yet, not sure if we want that
+                print(f" getting {mmPath}")
                 self.api.saveAttachment(module="Multimedia", id=mmId, path=mmPath)
         return positives
 
@@ -290,17 +298,13 @@ class Sar:  # methods in alphabetical order
         Returns list of all visible active users
         """
         s = Search(module="User")
-        s.addCriterion(
-            field="UsrStatusBoo",
-            operator="equalsField",
-            value="True"
-        )
+        s.addCriterion(field="UsrStatusBoo", operator="equalsField", value="True")
         s.validate(mode="search")
         r = self.search(xml=s.toString())
         tree = etree.fromstring(bytes(r.text, "UTF-8"))
         emailL = tree.xpath(
             "/m:application/m:modules/m:module[@name = 'User']/m:moduleItem/m:dataField[@name = 'UsrEmailTxt']/m:value",
-            namespaces=NSMAP
+            namespaces=NSMAP,
         )
         ls = []
         for emailN in emailL:
@@ -344,4 +348,4 @@ if __name__ == "__main__":
 
     s = Sar(baseURL=baseURL, pw=pw, user=user)
     userList = s.visibleActiveUsers()
-    print (userList)
+    print(userList)

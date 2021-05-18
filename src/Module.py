@@ -274,8 +274,8 @@ class Module(Helper):
 
     #
     # HELPER
-    # 
- 
+    #
+
     def _dropFields(self, *, parent=None, type):
         """removes all virtualFields
         Probably virtualFields dont help when changing existing items/records.
@@ -301,12 +301,11 @@ class Module(Helper):
         """
         Drop all @uuid attributes from the whole document.
         """
-        itemL = self.etree.xpath(
-            "//m:*[@uuid]", namespaces=NSMAP
-        )
+        itemL = self.etree.xpath("//m:*[@uuid]", namespaces=NSMAP)
         for eachN in itemL:
             eachN.attrib.pop("uuid", None)
-    
+
+
 if __name__ == "__main__":
     import argparse
 
