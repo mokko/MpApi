@@ -48,7 +48,7 @@ USAGE:
     m._dropFields(parent=miN, type="systemField")
     m._rmUuidsInReferenceItems(parent=miN)    
 """
-# xpath 1.0 and lxml don't empty string or None for default ns
+# xpath 1.0 and lxml don't allow empty string or None for default ns
 NSMAP = {"m": "http://www.zetcom.com/ria/ws/module"}
 dataTypes = {"Clb": "Clob", "Dat": "Date", "Lnu": "Long", "Txt": "Varchar"}
 

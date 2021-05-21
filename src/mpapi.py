@@ -127,7 +127,7 @@ class MpApi:
         Perform an ad-hoc search for modules items
         POST http://.../ria-ws/application/module/{module}/search/
 
-        We'new getting the module from the xml to avoid mistakes from redundancy.
+        New: We're getting the module from the xml to avoid mistakes from redundancy.
         """
         tree = self.ETfromString(xml=xml)
         module = tree.xpath(
@@ -136,7 +136,7 @@ class MpApi:
         )
         if not module[0]:
             raise TypeError("Unknown module")
-        url = self.appURL + "/module/" + module[0] + "/search"
+        url = f"{self.appURL}/module/{module[0]}/search"
         r = requests.post(url, data=xml, headers=self.headers, auth=self.auth)
         r.raise_for_status()
         return r
@@ -175,7 +175,7 @@ class MpApi:
         r.raise_for_status()
         return r
 
-    def updateItem(self, *, module, id):
+    def updateItem(self, *, module, id, xml):
         """
         Update all fields of a module item
         PUT http://.../ria-ws/application/module/{module}/{__id}
@@ -202,6 +202,8 @@ class MpApi:
         """
         Update a single field of a module item
         PUT http://.../ria-ws/application/module/{module}/{__id}/{datafield}
+        
+        NB: We dont need a createField method since simple dataFields are always created.
         """
         url = f"{self.appURL}/module/{module}/{id}/{datafield}"
         r = requests.put(url, data=xml, headers=self.headers, auth=self.auth)
@@ -217,6 +219,9 @@ class MpApi:
         """
         Add a reference to a reference field within a repeatable group
         POST http://.../ria-ws/application/module/{module}/{__id}/{repeatableGroup}/{__groupId}/{reference}
+        
+        Remember that xml is different during downloads than for uploads.
+        Upload xml omitts, for example, formattedValues.
         """
         url = f"{self.appURL}/module/{module}/{id}/{repeatableGroup}/{groupId}/{reference}"
         r = requests.post(url, data=xml, headers=self.headers, auth=self.auth)

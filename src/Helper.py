@@ -30,6 +30,8 @@ class Helper:
     def validate(self, *, mode="module"):
         """
         Validates a whole xml document of the type module.
+        
+        Typde defaults to "module", "seach" being the other option currently implemented.
         """
         if mode == "module":
             xsdLoc = "../sdata/module_1_6.xsd"
