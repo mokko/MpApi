@@ -78,7 +78,7 @@ class MpApi:
         r = requests.get(url, headers=self.headers, auth=self.auth)
         r.raise_for_status()
 
-        tree = self.ETfromString(r.text)
+        tree = self.ETfromString(xml=r.text)
 
         key = tree.xpath(
             "/s:application/s:session/s:key/text()",
@@ -117,6 +117,10 @@ class MpApi:
         Run a pre-existing saved search
         POST http://.../ria-ws/application/module/{module}/search/savedQuery/{__id}
         """
+        url = f"{self.appURL}/module/{module}/search/savedQuery/{id}"
+        r = requests.post(url, data=xml, headers=self.headers, auth=self.auth)
+        r.raise_for_status()
+        return r
 
     def search(self, *, xml):
         """
@@ -168,71 +172,107 @@ class MpApi:
         """
         url = self.appURL + "/module/" + module
         r = requests.post(url, data=xml, headers=self.headers, auth=self.auth)
-
         r.raise_for_status()
         return r
 
-    def updateItem(self, *, module, __id):
+    def updateItem(self, *, module, id):
         """
         Update all fields of a module item
         PUT http://.../ria-ws/application/module/{module}/{__id}
         """
+        url = f"{self.appURL}/module/{module}/{id}"
+        r = requests.put(url, data=xml, headers=self.headers, auth=self.auth)
+        r.raise_for_status()
+        return r
 
-    def deleteItem(self, *, module, __id):
+    def deleteItem(self, *, module, id):
         """
         Delete a module item
         DELETE http://.../ria-ws/application/module/{module}/{__id}
         """
+        url = f"{self.appURL}/module/{module}/{id}"
+        r = requests.delete(url, headers=self.headers, auth=self.auth)
+        r.raise_for_status()
+        return r
 
     #
     # B.4 FIELDs
     #
-    def updateField(self, *, module, __id, datafield):
+    def updateField(self, *, module, id, datafield):
         """
         Update a single field of a module item
         PUT http://.../ria-ws/application/module/{module}/{__id}/{datafield}
         """
+        url = f"{self.appURL}/module/{module}/{id}/{datafield}"
+        r = requests.put(url, data=xml, headers=self.headers, auth=self.auth)
+        r.raise_for_status()
+        return r
 
     #
     # B.5 REPEATABLE GROUPS
     #
-    def createRerefence(
-        self, *, module, __id, repeatableGroup, __groupId, reference, xml
+    def createReference(
+        self, *, module, id, repeatableGroup, groupId, reference, xml
     ):
         """
         Add a reference to a reference field within a repeatable group
         POST http://.../ria-ws/application/module/{module}/{__id}/{repeatableGroup}/{__groupId}/{reference}
         """
+        url = f"{self.appURL}/module/{module}/{id}/{repeatableGroup}/{groupId}/{reference}"
+        r = requests.post(url, data=xml, headers=self.headers, auth=self.auth)
+        r.raise_for_status()
+        return r
 
-    def createRepeatableGroup(self, *, module, __id, repeatableGroup, xml):
+    def createRepeatableGroup(self, *, module, id, repeatableGroup, xml):
         """
         Create repeatable group / reference
         #POST http://.../ria-ws/application/module/{module}/{__id}/{repeatableGroup|reference}
+        eg. https://<host>/<application>/ria-ws/application/module/Address/29011/AdrContactGrp
         """
+        url = f"{self.appURL}/module/{module}/{id}/{repeatableGroup}"
+        r = requests.post(url, data=xml, headers=self.headers, auth=self.auth)
+        r.raise_for_status()
+        return r
 
-    def updateRepeatableGroup(self, *, module, __id, __referenceId):
+    def updateRepeatableGroup(self, *, module, id, referenceId):
         """
         Update all fields of repeatable groups / references
         PUT http://.../ria-ws/application/module/{module}/{__id}/{repeatableGroup|reference}/{__referenceId}
         """
+        url = f"{self.appURL}/module/{module}/{id}/{repeatableGroup}/{referenceId}"
+        r = requests.put(url, data=xml, headers=self.headers, auth=self.auth)
+        r.raise_for_status()
+        return r
 
-    def updateFieldInGroup(self, *, module, __id, __referenceId, datafield):
+    def updateFieldInGroup(self, *, module, id, referenceId, datafield):
         """
         Update a single data field of a repeatable group / reference
         PUT http://.../ria-ws/application/module/{module}/{__id}/{repeatableGroup|reference}/{__referenceId}/{datafield}
         """
+        url = f"{self.appURL}/module/{module}/{id}/{repeatableGroup}/{referenceId}/{datafield}"
+        r = requests.put(url, data=xml, headers=self.headers, auth=self.auth)
+        r.raise_for_status()
+        return r
 
-    def deleteRepeatableGroup(self, *, module, __id, __referenceId):
+    def deleteRepeatableGroup(self, *, module, id, referenceId):
         """
         Delete a complete repeatable group / reference
         DELETE http://.../ria-ws/application/module/{module}/{__id}/{repeatableGroup|reference}/{__referenceId}
         """
+        url = f"{self.appURL}/module/{module}/{id}/{repeatableGroup}/{referenceId}"
+        r = requests.delete(url, headers=self.headers, auth=self.auth)
+        r.raise_for_status()
+        return r
 
-    def deleteReferenceInGroup(self, *, module, __id, __groupId, __referenceId):
+    def deleteReferenceInGroup(self, *, module, id, groupId, referenceId):
         """
         Delete a reference contained within a repeatable group
         DELETE http://.../ria-ws/application/module/{module}/{__id}/{repeatableGroup}/{__groupId}/{reference}/{__referenceId}
         """
+        url = f"{self.appURL}/module/{module}/{id}/{repeatableGroup}/{groupId}/{reference}/{referenceId}"
+        r = requests.delete(url, headers=self.headers, auth=self.auth)
+        r.raise_for_status()
+        return r
 
     #
     # C ATTACHMENTs AND THUMBNAILs
@@ -360,7 +400,7 @@ class MpApi:
     #
 
     def ETfromString(self, *, xml):
-        return etree.fromstring(xml)  # bytes(xml, "UTF-8")
+        return etree.fromstring(bytes(xml, "UTF-8")) 
 
     def toFile(self, *, xml, path):
         with open(path, "w", encoding="UTF-8") as f:
