@@ -14,8 +14,8 @@ adir = Path(__file__).parent
 sys.path.append(str(adir))  # what the heck?
 from Sar import Sar
 
-apath="freigabe-temp.xml"
-nsmap={"m": "http://www.zetcom.com/ria/ws/module"}
+apath = "freigabe-temp.xml"
+nsmap = {"m": "http://www.zetcom.com/ria/ws/module"}
 
 class Freigabe:
     def __init__(self, *, id, type):

@@ -17,41 +17,12 @@ USAGE
     api.toFile(response=r, path="path/to/file.xml")
 
 Which are the modules our instance knows
-    - _SystemMessage
-    - _SystemCopyScheme
-    - _SystemJob
-
-    - Accessory
-    - Address
-    - AddressGroup
-    - CollectionActivity
-    - Conservation
-    - Contract
-    - Datasource
-    - DefDimension
-    - DefLiterature
-    - Exhibition
-    - Event
-    - Function
-    - FunctionGenerator
-    - InventoryNumber
-    - Literature
-    - Movement
-    - Multimedia: DigitalAsset
-    - MultimediaGroup
-    - Object
-    - ObjectGroup: Gruppe
-    - Ownership
-    - OrganisationUnit
-    - Place
-    - Parameter
-    - Registrar
-    - Person
-    - Search
-    - Task
-    - Template
-    - User
-    - UserGroup
+    - _SystemMessage, SystemCopyScheme, _SystemJob
+    - Accessory, Address, AddressGroup, CollectionActivity, Conservation, Contract
+    - Datasource, DefDimension, DefLiterature, Exhibition, Event, Function, FunctionGenerator
+    - InventoryNumber, Literature, Movement, Multimedia, MultimediaGroup, Object, ObjectGroup
+    - Ownership, OrganisationUnit, Place, Parameter, Registrar, Person, Search, Task, Template
+    - User, UserGroup
 SEE ALSO: 
     http://docs.zetcom.com/ws
 """

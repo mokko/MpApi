@@ -65,12 +65,14 @@ NSMAP = {
     "m": "http://www.zetcom.com/ria/ws/module",
 }
 
+ETparser = etree.XMLParser(remove_blank_text=True)
 
 class Sar:  # methods in alphabetical order
     def __init__(self, *, baseURL, user, pw):
         self.searchRequest = None  # attrib for search requests
         self.api = MpApi(baseURL=baseURL, user=user, pw=pw)
-
+        self.user = user
+        
     def clean(self, *, inX):
         m = Module(xml=inX)
         m._dropUUID()
@@ -306,57 +308,57 @@ class Sar:  # methods in alphabetical order
         return self.api.search(xml=xml)
 
     def smbfreigabe (self, *, module="Object", id):
-    """
-    Sets smbfreigabe to "Ja", but only if smbfreigabe doesn't exist yet.
-    
-    Also determines sensible sort value in case there are freigaben already. 
-    """
-    r = api.getItem(module=module, id=id)
-    #test if smbfreigabe already exists; if so, leave it alone
-    #else put add freigabe.
-    #curator can prevent automatic freigabe, by setting smbfreigabe explicitly to no
-    #which sort should i use? just lowest available number or min+1: some unique number
-    self._smbfreigabe(module=module, id=id, sort=sort)
+        """
+        Sets smbfreigabe to "Ja", but only if smbfreigabe doesn't exist yet.
+        
+        Also determines sensible sort value in case there are freigaben already. 
+        """
+        r = api.getItem(module=module, id=id)
+        #test if smbfreigabe already exists; if so, leave it alone
+        #else put add freigabe.
+        #curator can prevent automatic freigabe, by setting smbfreigabe explicitly to no
+        #which sort should i use? just lowest available number or min+1: some unique number
+        self._smbfreigabe(module=module, id=id, sort=sort)
 
     def _smbfreigabe (self, *, module="Object", id, sort=1):
-    """
-    Sets a freigabe for SMB for a given id. User is taken from credentials.
-    Todo:
-    - Curently, we setting sort = 1. We will want to test if field is empty in the future or 
-      rather already has a smbfreigabe. Then we will have to set a better sort value
-    """
-    today = datetime.date.today()
-    xml=f"""
-    <application xmlns="http://www.zetcom.com/ria/ws/module">
-      <modules>
-        <module name="{module}">
-          <moduleItem id="{id}">
-            <repeatableGroup name="ObjPublicationGrp">
-                <repeatableGroupItem>
-                    <dataField dataType="Date" name="ModifiedDateDat">
-                        <value>{today}</value>
-                    </dataField>
-                    <dataField dataType="Varchar" name="ModifiedByTxt">
-                        <value>{user}</value>
-                    </dataField>
-                    <dataField dataType="Long" name="SortLnu">
-                        <value>{sort}</value>
-                    </dataField>
-                   <vocabularyReference name="PublicationVoc" id="62649" instanceName="ObjPublicationVgr">
-                     <vocabularyReferenceItem id="1810139"/>
-                   </vocabularyReference>
-                   <vocabularyReference name="TypeVoc" id="62650" instanceName="ObjPublicationTypeVgr">
-                     <vocabularyReferenceItem id="2600647"/>
-                   </vocabularyReference>
-               </repeatableGroupItem>
-            </repeatableGroup>
-          </moduleItem>
-        </module>
-      </modules>
-    </application>"""
-    m = Module(xml=xml)
-    m.validate()
-    r = api.createRepeatableGroup(module=module, id=id, repeatableGroup="ObjPublicationGrp", xml=xml)
+        """
+        Sets a freigabe for SMB for a given id. User is taken from credentials.
+        Todo:
+        - Curently, we setting sort = 1. We will want to test if field is empty in the future or 
+          rather already has a smbfreigabe. Then we will have to set a better sort value
+        """
+        today = datetime.date.today()
+        xml=f"""
+        <application xmlns="http://www.zetcom.com/ria/ws/module">
+          <modules>
+            <module name="{module}">
+              <moduleItem id="{id}">
+                <repeatableGroup name="ObjPublicationGrp">
+                    <repeatableGroupItem>
+                        <dataField dataType="Date" name="ModifiedDateDat">
+                            <value>{today}</value>
+                        </dataField>
+                        <dataField dataType="Varchar" name="ModifiedByTxt">
+                            <value>{self.user}</value>
+                        </dataField>
+                        <dataField dataType="Long" name="SortLnu">
+                            <value>{sort}</value>
+                        </dataField>
+                       <vocabularyReference name="PublicationVoc" id="62649" instanceName="ObjPublicationVgr">
+                         <vocabularyReferenceItem id="1810139"/>
+                       </vocabularyReference>
+                       <vocabularyReference name="TypeVoc" id="62650" instanceName="ObjPublicationTypeVgr">
+                         <vocabularyReferenceItem id="2600647"/>
+                       </vocabularyReference>
+                   </repeatableGroupItem>
+                </repeatableGroup>
+              </moduleItem>
+            </module>
+          </modules>
+        </application>"""
+        m = Module(xml=xml)
+        m.validate()
+        r = self.api.createRepeatableGroup(module=module, id=id, repeatableGroup="ObjPublicationGrp", xml=xml)
 
 
     def visibleActiveUsers(self):
@@ -394,6 +396,8 @@ class Sar:  # methods in alphabetical order
     def EToString(self, *, tree):
         etree.tostring(tree, pretty_print=True, encoding="unicode")
 
+    def ETfromFile(self, *, path):
+        return etree.parse(str(path), ETparser)
 
 if __name__ == "__main__":
     import argparse
