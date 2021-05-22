@@ -172,7 +172,7 @@ class Sar:  # methods in alphabetical order
 
     def join(self, *, inL):
         """
-        Expects several documents as lxml.etree objects to join them to one
+        Expects several documents as xml strings to join them to one
         bigger document. Returns docN.
         """
         # print (inL)
