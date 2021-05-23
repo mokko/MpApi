@@ -1,5 +1,5 @@
 from lxml import etree
-
+from pathlib import Path
 
 class Helper:
     def toFile(self, *, path):
@@ -33,16 +33,18 @@ class Helper:
         
         Typde defaults to "module", "seach" being the other option currently implemented.
         """
+
+
         if mode == "module":
-            xsdLoc = "../sdata/module_1_6.xsd"
+            xsdLoc = Path(__file__).joinpath("../../sdata/module_1_6.xsd").resolve()
         elif mode == "search":
-            xsdLoc = "../sdata/search_1_6.xsd"
+            xsdLoc = Path(__file__).joinpath("../../sdata/search_1_6.xsd").resolve()
         else:
             raise TypeError("Unknown validation mode")
         # more options for http access?
 
         if not hasattr(self, "xsd"):
-            self.xsd = etree.parse(xsdLoc)
+            self.xsd = etree.parse(str(xsdLoc))
         xmlschema = etree.XMLSchema(self.xsd)
         xmlschema.assertValid(self.etree)  # dies if doesn't validate
 

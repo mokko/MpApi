@@ -33,6 +33,8 @@ import sys
 import os
 
 sys.path.append(os.environ["PYTHONPATH"])  # what the heck?
+credentials = "C:/m3/MpApi/sdata/credentials.py"
+
 
 from Module import Module
 from Sar import Sar
@@ -302,14 +304,14 @@ class Mink:
         else:
             print(f" making new join from {join_fn}")
 
-            exhX = self.getExhibit(args)
-            objX = self.getObjects(args)
-            mmX = self.getMedia(args)
             pkX = self.getActors(args)
+            exhX = self.getExhibit(args)
+            mmX = self.getMedia(args)
+            objX = self.getObjects(args)
             regX = self.getRegistry(args) 
 
             self.info(
-                f" joining module files, saving to {join_fn}"
+                f" joining modules, saving to {join_fn}"
             )
             inL = [objX, mmX, pkX]
             if type == "exhibit":
@@ -319,7 +321,7 @@ class Mink:
             self.xmlToFile(xml=joinX, path=join_fn)
         return join_fn
 
-    def pack(self, args)
+    def pack(self, args):
         """
         Pack (or join) all clean files into one bigger package. We act on all 
         *-clean-*.xml files in the current project directory and save to
@@ -371,7 +373,7 @@ class Mink:
         if not Path.is_dir(dir):
             Path.mkdir(dir, parents=True)
         self.project_dir = dir
-        self.pix_dir = dir.joinpath("..").joinpath("pix").resolve()
+        self.pix_dir = dir.joinpath("..").joinpath("pix")
 
     def xmlFromFile(self, *, path):
         with open(path, "r", encoding="utf8") as f:
@@ -408,7 +410,7 @@ class Mink:
 if __name__ == "__main__":
     import argparse
 
-    with open("../sdata/credentials.py") as f:
+    with open(credentials) as f:
         exec(f.read())
 
     parser = argparse.ArgumentParser(description="Commandline frontend for MpApi.py")
