@@ -319,6 +319,26 @@ class Mink:
             self.xmlToFile(xml=joinX, path=join_fn)
         return join_fn
 
+    def pack(self, args)
+        """
+        Pack (or join) all clean files into one bigger package. We act on all 
+        *-clean-*.xml files in the current project directory and save to
+        $label$date.xml in current working directory.
+        """
+        label = str(Path(".").resolve().parent.name)
+        date = str(Path(".").resolve().name)
+        pack_fn=self.project_dir.parent.joinpath(f"{label}{date}.xml").resolve()
+        if pack_fn.exists():
+            print (f"Pack file exists already, no overwrite: {pack_fn}") 
+        else:
+            print (f"Making new pack file: {pack_fn}") 
+            xmlL = list()
+            for file in self.project_dir.glob('*-clean-*.xml'):
+                print (f"Packing file {file}")
+                xmlL.append(sar.xmlFromFile(path=file))
+            xml = sar.join (inL=xmlL) 
+            self.sar.toFile(xml=xml, path=str(pack_fn))
+
     #
     # PUBLIC AND PRIVATE HELPERS
     #
