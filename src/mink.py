@@ -118,7 +118,6 @@ class Mink:
             self.info(f" cleaning join, saving to {clean_fn}")
             joinX = self.xmlFromFile(path=join_fn)
             cleanX = self.sar.clean(inX=joinX)
-            print(" Write clean to file")
             self.xmlToFile(xml=cleanX, path=clean_fn)
             self.info(" clean validates")
         return cleanX
@@ -139,7 +138,7 @@ class Mink:
             print(f" actors from file cache {pk_fn}")
             pkX = self.xmlFromFile(path=pk_fn)
         else:
-            self.info(f" actors, saving to {pk_fn}")
+            self.info(f" actors from remote, saving to {pk_fn}")
             r = sar.getActorSet(type=type, id=id)
             self.xmlToFile(xml=r.text, path=pk_fn)
             pkX = r.text
