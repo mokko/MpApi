@@ -54,6 +54,7 @@ Search | Module : make XML
 
 """
 import datetime
+import os # b/c Pathlib has troubles with windows network paths
 from Search import Search
 from MpApi import MpApi
 from lxml import etree
@@ -289,9 +290,9 @@ class Sar:  # methods in alphabetical order
                 0
             ]  # assuming that there can be only one
             fn = mmId + Path(fn_old).suffix
-            mmPath = Path(adir).joinpath(fn)
+            mmPath = Path(adir).joinpath(fn) # need resolve here!
+            #print(f"POSITIVE {mmPath}")
             positives.add(mmPath)
-            # print (f"attachment for Multimedia/{mmId}")
             if (
                 not mmPath.exists()
             ):  # only d/l if doesn't exist yet, not sure if we want that

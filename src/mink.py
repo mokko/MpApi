@@ -120,14 +120,14 @@ class Mink:
         join_fn = self.project_dir.joinpath(f"{label}-join-{type}{id}.xml")
         clean_fn = self.project_dir.joinpath(f"{label}-clean-{type}{id}.xml")
         if clean_fn.exists():
-            print(f" clean from file cache {clean_fn}")
+            print(f" clean from cache {clean_fn}")
             cleanX = self.xmlFromFile(path=clean_fn)
         else:
             self.info(f" cleaning join, saving to {clean_fn}")
             joinX = self.xmlFromFile(path=join_fn)
             cleanX = self.sar.clean(inX=joinX)
             self.xmlToFile(xml=cleanX, path=clean_fn)
-            self.info(" clean validates")
+            self.info(" clean validates") # validation is part of clean
         return cleanX
 
     def definition(self, args):
@@ -143,7 +143,7 @@ class Mink:
 
         pk_fn = self.project_dir.joinpath(f"{label}-pk-{type}{id}.xml")
         if pk_fn.exists():
-            print(f" actors from file cache {pk_fn}")
+            print(f" actors from cache {pk_fn}")
             pkX = self.xmlFromFile(path=pk_fn)
         else:
             self.info(f" actors from remote, saving to {pk_fn}")
@@ -172,12 +172,12 @@ class Mink:
 
         # do we want to delete those files that are no longer attached?
         for img in os.listdir(pix_dir):
-            img = Path(pix_dir).joinpath(img)
+            img = Path(pix_dir).joinpath(img) # need resolve here
             if img not in expected:
-                print(f"image no longer attached, removing {img}")
+                print(f"#image no longer attached, removing {img}")
                 # os.remove(img)
 
-        # currently we dont get attachments that have changed, but keep the same mulId
+        # currently we dont get attachments that have changed, but keep the same mulId, should be rare to impossible
 
     def getExhibit(self, args):
         type = args[0]
@@ -186,7 +186,7 @@ class Mink:
         if type == "exhibit":
             exh_fn = self.project_dir.joinpath(f"{label}-exh-{type}{id}.xml")
             if exh_fn.exists():
-                print(f" exhibition from file cache {exh_fn}")
+                print(f" exhibition from cache {exh_fn}")
                 exhX = self.xmlFromFile(path=exh_fn)
             else:
                 self.info(f" exhibition from remote, saving to {exh_fn}")
@@ -232,7 +232,7 @@ class Mink:
 
         mm_fn = self.project_dir.joinpath(f"{label}-mm-{type}{id}.xml")
         if mm_fn.exists():
-            print(f" media from file cache {mm_fn}")
+            print(f" media from cache {mm_fn}")
             mmX = self.xmlFromFile(path=mm_fn)
         else:
             self.info(f" media from remote, saving to {mm_fn}")
@@ -250,7 +250,7 @@ class Mink:
 
         obj_fn = self.project_dir.joinpath(f"{label}-obj-{type}{id}.xml")
         if obj_fn.exists():
-            print(f" objects from file cache {obj_fn}")
+            print(f" objects from cache {obj_fn}")
             objX = self.xmlFromFile(path=obj_fn)
         else:
             self.info(f" objects from remote, saving to {obj_fn}")
@@ -287,7 +287,7 @@ class Mink:
         if type == "exhibit":
             reg_fn = self.project_dir.joinpath(f"{label}-reg-{type}{id}.xml")
             if reg_fn.exists():
-                print(f" registry from file cache {reg_fn}")
+                print(f" registry from cache {reg_fn}")
                 regX = self.xmlFromFile(path=reg_fn)
             else:
                 self.info(f" registry from remote, saving to {reg_fn}")
@@ -305,7 +305,7 @@ class Mink:
         joinX = None
         join_fn = self.project_dir.joinpath(f"{label}-join-{type}{id}.xml")
         if join_fn.exists():
-            print(f" join from file cache {join_fn}")
+            print(f" join from cache {join_fn}")
             joinX = self.xmlFromFile(path=join_fn)
         else:
             print(f" making new join from {join_fn}")
@@ -332,6 +332,8 @@ class Mink:
         Pack (or join) all clean files into one bigger package. We act on all 
         *-clean-*.xml files in the current project directory and save to
         $label$date.xml in current working directory.
+        
+        Seems to work, but needs too much memory. I will try saxon next.
         """
         label = str(self.project_dir.parent.name)
         date = str(self.project_dir.name)
@@ -343,7 +345,8 @@ class Mink:
             xmlL = list()
             for file in self.project_dir.glob('*-clean-*.xml'):
                 print (f"Packing file {file}")
-                xmlL.append(self.sar.xmlFromFile(path=file))
+                xml = self.sar.xmlFromFile(path=file)
+                xmlL.append(xml)
             xml = self.sar.join (inL=xmlL) 
             self.sar.toFile(xml=xml, path=str(pack_fn))
 
@@ -379,7 +382,7 @@ class Mink:
         if not Path.is_dir(dir):
             Path.mkdir(dir, parents=True)
         self.project_dir = dir
-        self.pix_dir = dir.joinpath("..").joinpath("pix")
+        self.pix_dir = dir.parent.joinpath("pix")
 
     def xmlFromFile(self, *, path):
         with open(path, "r", encoding="utf8") as f:
