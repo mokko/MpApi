@@ -52,15 +52,18 @@ NSMAP = {
 
 class Mink:
     def __init__(self, *, conf, job, baseURL, user, pw):
-        self.job = job
         self.sar = Sar(baseURL=baseURL, user=user, pw=pw)
-
+        self.conf = conf
+        self._parse_conf(job=job)
+        
+    def _parse_conf(self, *, job):
+        self.job = job
         self.current_job = None  # definition in conf file
         cmd = []
         args = []
         any_job = False
         # pretty ugly dsl parser...
-        with open(conf, mode="r") as file:
+        with open(self.conf, mode="r") as file:
             c = 0  # line counter
             error = 0
             for line in file:
@@ -106,6 +109,9 @@ class Mink:
     #
     # mink commands
     #
+
+    def all(self, args):
+        self._parse_conf(job=args[0])
 
     def clean(self, args):
         type = args[0]
@@ -327,9 +333,9 @@ class Mink:
         *-clean-*.xml files in the current project directory and save to
         $label$date.xml in current working directory.
         """
-        label = str(Path(".").resolve().parent.name)
-        date = str(Path(".").resolve().name)
-        pack_fn=self.project_dir.parent.joinpath(f"{label}{date}.xml").resolve()
+        label = str(self.project_dir.parent.name)
+        date = str(self.project_dir.name)
+        pack_fn=self.project_dir.joinpath(f"../../{label}{date}.xml")
         if pack_fn.exists():
             print (f"Pack file exists already, no overwrite: {pack_fn}") 
         else:
@@ -337,8 +343,8 @@ class Mink:
             xmlL = list()
             for file in self.project_dir.glob('*-clean-*.xml'):
                 print (f"Packing file {file}")
-                xmlL.append(sar.xmlFromFile(path=file))
-            xml = sar.join (inL=xmlL) 
+                xmlL.append(self.sar.xmlFromFile(path=file))
+            xml = self.sar.join (inL=xmlL) 
             self.sar.toFile(xml=xml, path=str(pack_fn))
 
     #
