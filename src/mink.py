@@ -340,7 +340,7 @@ class Mink:
         """
         label = str(self.project_dir.parent.name)
         date = str(self.project_dir.name)
-        pack_fn=self.project_dir.joinpath(f"../../{label}{date}.xml")
+        pack_fn=self.project_dir.joinpath(f"../{label}{date}.xml")
         if pack_fn.exists():
             print (f"Pack file exists already, no overwrite: {pack_fn}") 
         else:
