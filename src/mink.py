@@ -117,7 +117,7 @@ class Mink:
         type = args[0]
         id = args[1]
         label = args[2]
-        join_fn = self.project_dir.joinpath(f"{label}-join-{type}{id}.xml")
+        join_fn = self.project_dir.joinpath(f"parts/{label}-join-{type}{id}.xml")
         clean_fn = self.project_dir.joinpath(f"{label}-clean-{type}{id}.xml")
         if clean_fn.exists():
             print(f" clean from cache {clean_fn}")
@@ -141,7 +141,7 @@ class Mink:
         sar = self.sar
         pkX = None
 
-        pk_fn = self.project_dir.joinpath(f"{label}-pk-{type}{id}.xml")
+        pk_fn = self.project_dir.joinpath(f"parts/{label}-pk-{type}{id}.xml")
         if pk_fn.exists():
             print(f" actors from cache {pk_fn}")
             pkX = self.xmlFromFile(path=pk_fn)
@@ -157,7 +157,7 @@ class Mink:
         id = args[1]
         label = args[2]
 
-        mm_fn = self.project_dir.joinpath(f"{label}-mm-{type}{id}.xml")
+        mm_fn = self.project_dir.joinpath(f"parts/{label}-mm-{type}{id}.xml")
         mmX = self.xmlFromFile(path=mm_fn)
 
         pix_dir = f"{self.pix_dir}_{label}"
@@ -184,7 +184,7 @@ class Mink:
         id = args[1]
         label = args[2]
         if type == "exhibit":
-            exh_fn = self.project_dir.joinpath(f"{label}-exh-{type}{id}.xml")
+            exh_fn = self.project_dir.joinpath(f"parts/{label}-exh-{type}{id}.xml")
             if exh_fn.exists():
                 print(f" exhibition from cache {exh_fn}")
                 exhX = self.xmlFromFile(path=exh_fn)
@@ -230,7 +230,7 @@ class Mink:
         label = args[2]
         mmX = None  #
 
-        mm_fn = self.project_dir.joinpath(f"{label}-mm-{type}{id}.xml")
+        mm_fn = self.project_dir.joinpath(f"parts/{label}-mm-{type}{id}.xml")
         if mm_fn.exists():
             print(f" media from cache {mm_fn}")
             mmX = self.xmlFromFile(path=mm_fn)
@@ -248,7 +248,7 @@ class Mink:
         sar = self.sar
         objX = None
 
-        obj_fn = self.project_dir.joinpath(f"{label}-obj-{type}{id}.xml")
+        obj_fn = self.project_dir.joinpath(f"parts/{label}-obj-{type}{id}.xml")
         if obj_fn.exists():
             print(f" objects from cache {obj_fn}")
             objX = self.xmlFromFile(path=obj_fn)
@@ -285,7 +285,7 @@ class Mink:
         label = args[2]
 
         if type == "exhibit":
-            reg_fn = self.project_dir.joinpath(f"{label}-reg-{type}{id}.xml")
+            reg_fn = self.project_dir.joinpath(f"parts/{label}-reg-{type}{id}.xml")
             if reg_fn.exists():
                 print(f" registry from cache {reg_fn}")
                 regX = self.xmlFromFile(path=reg_fn)
@@ -303,7 +303,10 @@ class Mink:
         id = args[1]
         label = args[2]
         joinX = None
-        join_fn = self.project_dir.joinpath(f"{label}-join-{type}{id}.xml")
+        adir = self.project_dir.joinpath("parts")
+        if not Path.is_dir(adir):
+            Path.mkdir(adir, parents=True)        
+        join_fn = self.project_dir.joinpath(f"parts/{label}-join-{type}{id}.xml")
         if join_fn.exists():
             print(f" join from cache {join_fn}")
             joinX = self.xmlFromFile(path=join_fn)
@@ -385,6 +388,7 @@ class Mink:
         self.pix_dir = dir.parent.joinpath("pix")
 
     def xmlFromFile(self, *, path):
+        #print (f"PATH {path}")
         with open(path, "r", encoding="utf8") as f:
             xml = f.read()
         return xml
