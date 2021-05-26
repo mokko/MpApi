@@ -413,7 +413,7 @@ class Mink:
 
     def etreeToFile(self, *, ET, path):
         ET.write(
-            str(path), pretty_print=True, encoding="UTF-8"
+            str(path), pretty_print=True, xml_declaration=True, encoding="UTF-8"
         )  # encoding is important!
 
     def etreePrint(self, *, ET):
