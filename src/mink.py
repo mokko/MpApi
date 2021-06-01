@@ -141,6 +141,10 @@ class Mink:
         sar = self.sar
         pkX = None
 
+        adir = self.project_dir.joinpath("parts")
+        if not Path.is_dir(adir):
+            Path.mkdir(adir, parents=True)        
+
         pk_fn = self.project_dir.joinpath(f"parts/{label}-pk-{type}{id}.xml")
         if pk_fn.exists():
             print(f" actors from cache {pk_fn}")
@@ -183,6 +187,10 @@ class Mink:
         type = args[0]
         id = args[1]
         label = args[2]
+        adir = self.project_dir.joinpath("parts")
+        if not Path.is_dir(adir):
+            Path.mkdir(adir, parents=True)        
+
         if type == "exhibit":
             exh_fn = self.project_dir.joinpath(f"parts/{label}-exh-{type}{id}.xml")
             if exh_fn.exists():
@@ -230,6 +238,10 @@ class Mink:
         label = args[2]
         mmX = None  #
 
+        adir = self.project_dir.joinpath("parts")
+        if not Path.is_dir(adir):
+            Path.mkdir(adir, parents=True)        
+
         mm_fn = self.project_dir.joinpath(f"parts/{label}-mm-{type}{id}.xml")
         if mm_fn.exists():
             print(f" media from cache {mm_fn}")
@@ -247,6 +259,10 @@ class Mink:
         label = args[2]
         sar = self.sar
         objX = None
+
+        adir = self.project_dir.joinpath("parts")
+        if not Path.is_dir(adir):
+            Path.mkdir(adir, parents=True)        
 
         obj_fn = self.project_dir.joinpath(f"parts/{label}-obj-{type}{id}.xml")
         if obj_fn.exists():
