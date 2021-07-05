@@ -372,6 +372,302 @@ class MpApi:
         """
 
     #
+    # NEW NATIVE VOCABULARY MODULE (can also do json)
+    #
+    # Labels, Node Classes, TermClassLabel, Node, Term, nodeParents, nodeRelations    
+    # get
+    # add
+    # (update)
+    # delete
+    def vInfo (self, *, instanceName, id=None): 
+        """
+        Shows the vocabulary instance information for the give vocabulary.
+        GET http://.../ria-ws/application/vocabulary/instances/{instanceName}
+        GET http://../ria-ws/application/vocabulary/instances/{instanceName}/nodes/{__id}
+        """
+        url = f"{self.appURL}/vocabulary/instances/{instanceName}"
+        if id is not None:
+            url = url + "/nodes/{id}"
+        r = requests.get(url, headers=self.headers, auth=self.auth)
+        r.raise_for_status()
+        return r
+    
+    def vGetNodes (self, *, instanceName, offset=0, limit=100, termContent=None, 
+                   status=None, nodeName=None ):
+        """
+        The request returns available vocabulary nodes of the vocabulary instance.
+        GET http://.../ria-ws/application/vocabulary/instances/{instanceName}/nodes/search
+        Todo: json response
+        """
+        url = f"{self.appURL}/vocabulary/instances/{instanceName}/nodes/search"
+        params = {
+            "offset": offset,
+            "limit": limit
+        }
+        #for each in termContent, status, nodeName:              
+        if termContent is not None:
+            params["termContent"] = termContent
+        if status is not None:
+            params["status"] = status
+        if nodeName is not None:
+            params["nodeName"] = nodeName
+        r = requests.get(url, headers=self.headers, auth=self.auth, params=params)
+        return r
+
+    def vUpdate (self, *, instanceName, xml):
+        """
+        Update Vocabulary Instance
+        PUT https://.../ria-ws/application/vocabulary/instances/{instanceName}
+        Request body definition: instance element from vocabulary_1_1.xsd
+        """
+        url = f"{self.appURL}/vocabulary/instances/{instanceName}"
+        r = requests.put(url, headers=self.headers, auth=self.auth, data=xml)
+        return r
+
+    #LABELS
+    def vGetLabels (self, *, instanceName):
+        """
+        Get Vocabulary Instance labels
+        GET https://.../ria-ws/application/vocabulary/instances/{instanceName}/labels
+        """
+        url = f"{self.appURL}/vocabulary/instances/{instanceName}/labels"
+        r = requests.get(url, headers=self.headers, auth=self.auth)
+        return r
+    
+    def vAddLabel (self, *, instanceName, xml):
+        """
+        Add Vocabulary Instance label
+        POST https://.../ria-ws/application/vocabulary/instances/{instanceName}/labels
+        """
+        url = f"{self.appURL}/vocabulary/instances/{instanceName}/labels"
+        r = requests.post(url, headers=self.headers, auth=self.auth, data=xml)
+        return r
+
+    def vDelLabel (self, *, instanceName, language):
+        """
+        Delete Vocabulary Instance label
+        DELETE https://.../ria-ws/application/vocabulary/instances/{instanceName}/labels/{language}
+        """
+        url = f"{self.appURL}/vocabulary/instances/{instanceName}/labels/{language}"
+        r = requests.delete(url, headers=self.headers, auth=self.auth)
+        return r
+    
+    #NODE CLASSES    
+    def vGetNodeClasses (self, *, instanceName):
+        """
+        Get Vocabulary Instance Node Classes
+        GET https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodeClasses
+        """
+        url = f"{self.appURL}/vocabulary/instances/{instanceName}/nodeClasses"
+        r = requests.get(url, headers=self.headers, auth=self.auth)
+        return r
+
+    def vAddNodeClass (self, *, instanceName, xml):
+        """
+        Add Vocabulary Instance Node Class
+        POST https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodeClasses
+        """
+        url = f"{self.appURL}/vocabulary/instances/{instanceName}/nodeClasses"
+        r = requests.post(url, headers=self.headers, auth=self.auth, data=xml)
+        return r
+
+    def vAddNodeClassLabel (self, *, instanceName, className, xml):
+        """
+        Add Vocabulary Instance Node Class Label
+        POST https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodeClasses/{className}/labels
+        """
+        url = f"{self.appURL}/vocabulary/instances/{instanceName}/nodeClasses/{className}/labels"
+        r = requests.post(url, headers=self.headers, auth=self.auth, data=xml)
+        return r
+
+    def vDelNodeClassLabel (self, *, instanceName, className, language):
+        """
+        Delete Vocabulary Instance Node Class Label
+        DELETE https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodeClasses/{className}/labels/{language}
+        """
+        url = f"{self.appURL}/vocabulary/instances/{instanceName}/nodeClasses/{className}/labels/{language}"
+        r = requests.delete(url, headers=self.headers, auth=self.auth)
+        return r
+        
+    def vDelNodeClass (self, *, instanceName, className):
+        """
+        Delete Vocabulary Instance Node Class
+        DELETE https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodeClasses/{className}
+        """
+        url = f"{self.appURL}/vocabulary/instances/{instanceName}/nodeClasses/{className}"
+        r = requests.delete(url, headers=self.headers, auth=self.auth)
+        return r
+
+    #TERM CLASSES
+    def vGetTermClasses (self, *, instanceName):
+        """
+        Get Vocabulary Instance Term Classes
+        GET https://.../ria-ws/application/vocabulary/instances/{instanceName}/termClasses
+        """
+        url = f"{self.appURL}/vocabulary/instances/{instanceName}/termClasses"
+        r = requests.get(url, headers=self.headers, auth=self.auth)
+        return r
+
+    def vAddTermClass (self, *, instanceName, xml):
+        """
+        Add Vocabulary Instance Term Class
+        POST https://.../ria-ws/application/vocabulary/instances/{instanceName}/termClasses        
+        """
+        url = f"{self.appURL}/vocabulary/instances/{instanceName}/termClasses"
+        r = requests.post(url, headers=self.headers, auth=self.auth, data=xml)
+        return r
+
+    def vDelTermClass (self, *, instanceName, className):
+        """
+        Delete Vocabulary Instance Term Class
+        DELETE https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodeClasses/{className}
+        """
+        url = f"{self.appURL}/vocabulary/instances/{instanceName}/nodeClasses/{className}"
+        r = requests.delete(url, headers=self.headers, auth=self.auth)
+        return r
+
+    #TermClassLabel
+    def vAddTermClassLabel (self, *, instanceName, className, xml):
+        """
+        Add Vocabulary Instance Term Class Label
+        POST https://.../ria-ws/application/vocabulary/instances/{instanceName}/termClasses/{className}/labels
+        """
+        url = f"{self.appURL}/vocabulary/instances/{instanceName}/termClasses/{className}/labels"
+        r = requests.post(url, headers=self.headers, auth=self.auth, data=xml)
+        return r
+
+    def vDelTermClassLabel (self, *, instanceName, className, language):
+        """
+        Delete Vocabulary Instance Term Class Label
+        DELETE https://.../ria-ws/application/vocabulary/instances/{instanceName}/termClasses/{className}/labels/{language}    
+        """
+        url = f"{self.appURL}/vocabulary/instances/{instanceName}/termClasses/{className}/labels/{language}"
+        r = requests.delete(url, headers=self.headers, auth=self.auth)
+        return r
+
+    #vocabularyNode
+    def vNodeByIdentifier(self, *, instanceName, id):
+        """
+        Get Vocabulary Node by identifier
+        GET https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodes/{id}
+        """
+        url = f"{self.appURL}/vocabulary/instances/{instanceName}/nodes/{id}"
+        r = requests.get(url, headers=self.headers, auth=self.auth)
+        return r
+
+    def vAddNode (self, *, instanceName, xml):
+        """
+        Add Vocabulary Node
+        POST https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodes
+        """
+        url = f"{self.appURL}/vocabulary/instances/{instanceName}/nodes"
+        r = requests.post(url, headers=self.headers, auth=self.auth, data=xml)
+        return r
+    
+    def vDelNode (self, *, instanceName, id):
+        """
+        Delete Vocabulary Node
+        DELETE https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodes/{id}
+        """
+        url = f"{self.appURL}/vocabulary/instances/{instanceName}/nodes/{id}"
+        r = requests.delete(url, headers=self.headers, auth=self.auth)
+        return r
+
+    def vUpdateNode (self, *, instanceName, id, xml):
+        """
+        Update Vocabulary Node
+        PUT https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodes/{id}
+        """
+        url = f"{self.appURL}/vocabulary/instances/{instanceName}/nodes/{id}"
+        r = requests.put(url, headers=self.headers, auth=self.auth, data=xml)
+        return r
+
+    #TERM
+    def vAddTerm (self, *, instanceName, nodeId, xml):
+        """
+        Add Vocabulary Term
+        POST https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodes/{nodeId}/terms
+        """
+        url = f"{self.appURL}/vocabulary/instances/{instanceName}/nodes/{nodeId}/terms"
+        r = requests.post(url, headers=self.headers, auth=self.auth, data=xml)
+        return r
+    
+    def vUpdateTerm (self, *, instanceName, nodeId, termId, xml):
+        """
+        Update Vocabulary Term
+        PUT https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodes/{nodeId}/terms/{termId}
+        """
+        url = f"{self.appURL}/vocabulary/instances/{instanceName}/nodes/{nodeId}/terms/{termId}"
+        r = requests.put(url, headers=self.headers, auth=self.auth, data=xml)
+        return r
+
+    def vDelTerm (self, *, instanceName, nodeId, termId):
+        """
+        Delete Vocabulary Term
+        DELETE https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodes/{nodeId}/terms/{termId}
+        """
+        url = f"{self.appURL}/vocabulary/instances/{instanceName}/nodes/{nodeId}/terms/{termId}"
+        r = requests.delete(url, headers=self.headers, auth=self.auth)
+        return r
+
+    #NodeParent
+    def vNodeParents (self, instanceName, nodeId):
+        """
+        Get Vocabulary Node Parents / Default Node Relations
+        GET https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodes/{nodeId}/parents/        
+        (I am assuming the trailing slash is a typo.)
+        """
+        url = f"{self.appURL}/vocabulary/instances/{instanceName}/nodes/{nodeId}/parents"
+        r = requests.delete(url, headers=self.headers, auth=self.auth)
+        return r
+
+    def vAddNodeParent (self, instanceName, nodeId, xml):
+        """
+        Add Vocabulary Node Parent / Default Node Relations
+        POST https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodes/{nodeId}/parents/
+        """
+        url = f"{self.appURL}/vocabulary/instances/{instanceName}/nodes/{nodeId}/parents"
+        r = requests.post(url, headers=self.headers, auth=self.auth, data=xml)
+        return r
+
+    def vDelNodeParent (self, instanceName, nodeId, parentNodeId):
+        """
+        Delete Vocabulary Node Parent / Default Node Relations
+        DELETE https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodes/{nodeId}/parents/{parentNodeId}
+        """
+        url = f"{self.appURL}/vocabulary/instances/{instanceName}/nodes/{nodeId}/parents/{parentNodeId}"
+        r = requests.delete(url, headers=self.headers, auth=self.auth)
+        return r
+
+    #nodeRelations
+    def vNodeRelations (self, instanceName, nodeId):
+        """
+        Get Vocabulary Node Relations / Advanced Node Relations
+        GET https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodes/{nodeId}/relations/
+        """
+        url = f"{self.appURL}/vocabulary/instances/{instanceName}/nodes/{nodeId}/relations"
+        r = requests.get(url, headers=self.headers, auth=self.auth)
+        return r
+
+    def vAddNodeRelation (self, instanceName, nodeId, xml):
+        """
+        Add Vocabulary Node Relation / Advanced Node Relations
+        POST https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodes/{nodeId}/relations/
+        """
+        url = f"{self.appURL}/vocabulary/instances/{instanceName}/nodes/{nodeId}/relations"
+        r = requests.get(url, headers=self.headers, auth=self.auth, data=xml)
+        return r
+
+    def vDelNodeRelation (self, instanceName, nodeId, relationId):
+        """
+        Delete Vocabulary Node Relation / Advanced Node Relations
+        DELETE https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodes/{nodeId}/parents/{relationId}
+        """
+        url = f"{self.appURL}/vocabulary/instances/{instanceName}/nodes/{nodeId}parents/{relationId}"
+        r = requests.delete(url, headers=self.headers, auth=self.auth)
+        return r
+        
+    #    
     # HELPERS
     #
 
