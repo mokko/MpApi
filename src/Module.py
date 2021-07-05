@@ -48,7 +48,7 @@ USAGE:
     m._dropFields(parent=miN, type="systemField")
     m._rmUuidsInReferenceItems(parent=miN)    
 """
-# xpath 1.0 and lxml don't empty string or None for default ns
+# xpath 1.0 and lxml don't allow empty string or None for default ns
 NSMAP = {"m": "http://www.zetcom.com/ria/ws/module"}
 dataTypes = {"Clb": "Clob", "Dat": "Date", "Lnu": "Long", "Txt": "Varchar"}
 
@@ -274,15 +274,7 @@ class Module(Helper):
 
     #
     # HELPER
-    # quick and dirty
-    def _rmUuidsInReferenceItems(self, *, parent=None):
-        if parent is None:
-            parent = self.etree
-        itemL = parent.xpath(
-            "//m:moduleReference/m:moduleReferenceItem", namespaces=NSMAP
-        )
-        for eachN in itemL:
-            eachN.attrib.pop("uuid", None)
+    #
 
     def _dropFields(self, *, parent=None, type):
         """removes all virtualFields
@@ -304,6 +296,14 @@ class Module(Helper):
         rgL = parent.xpath(f"//m:repeatableGroup[@name ='{name}']", namespaces=NSMAP)
         for rgN in rgL:
             rgN.getparent().remove(rgN)
+
+    def _dropUUID(self):
+        """
+        Drop all @uuid attributes from the whole document.
+        """
+        itemL = self.etree.xpath("//m:*[@uuid]", namespaces=NSMAP)
+        for eachN in itemL:
+            eachN.attrib.pop("uuid", None)
 
 
 if __name__ == "__main__":

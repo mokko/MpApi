@@ -4,7 +4,7 @@ bundles multiple requests together in one method, typically searches and respons
 
 I introduce it mainly to clean up the code of the Mink class, so that Mink has to deal less 
 with xml and Sar.py can be tested easier. (Conversely, that means that mink parses DSL config 
-file, writes files, logs report. 
+file, writes files, logs report.) 
 
 Sar typically returns a requests reponse (r) which contains xml in r.text or binary in
 r.content. 
@@ -21,10 +21,10 @@ USAGE:
     sr = Sar(baseURL=baseURL, user=user, pw=pw)
 
     #get stuff from single ids
-    r = sr.getItem(module="Objekt", id="1234")      # returns single item for any module
-    r = sr.getObjectSet(type="group", id="1234")  # Objekt items in given exhibit or group
-    r = sr.getMediaSet(type="exhibit", id="1234") # Media items for objects in given exhibit or group
+    r = sr.getItem(module="Objekt", id="1234")    # returns single item for any module
     r = sr.getActorSet(type="exhibit", id="1234") # Actor items for objects in given exhibit or group
+    r = sr.getMediaSet(type="exhibit", id="1234") # Media items for objects in given exhibit or group
+    r = sr.getObjectSet(type="group", id="1234")  # Object items in given exhibit or group
 
     #find out about the last search
     s = sr.searchRequest  # returns the last search request as xml, if any
@@ -53,6 +53,8 @@ Search | Module : make XML
 
 
 """
+import datetime
+import os # b/c Pathlib has troubles with windows network paths
 from Search import Search
 from MpApi import MpApi
 from lxml import etree
@@ -64,26 +66,23 @@ NSMAP = {
     "m": "http://www.zetcom.com/ria/ws/module",
 }
 
+ETparser = etree.XMLParser(remove_blank_text=True)
 
 class Sar:  # methods in alphabetical order
     def __init__(self, *, baseURL, user, pw):
         self.searchRequest = None  # attrib for search requests
         self.api = MpApi(baseURL=baseURL, user=user, pw=pw)
-
+        self.user = user
+        
     def clean(self, *, inX):
         m = Module(xml=inX)
-        c = 0
-        for miN in m.iter():
-            a = miN.attrib
-            c += 1
-            #print(f" {c}: id {a['id']} {a}")
-            if "uuid" in a:
-                #print("delete @uuid")
-                del a["uuid"]
-            m._rmUuidsInReferenceItems(parent=miN)
-            m._dropRG(parent=miN, name="ObjValuationGrp")
+        m._dropUUID()
+        m._dropRG(name="ObjValuationGrp")
         m.validate()
         return m.toString()
+
+    def definition(self, *, module=None):
+        return self.api.getDefinition(module=module).text
 
     def getItem(self, *, module, id):
         """
@@ -91,7 +90,7 @@ class Sar:  # methods in alphabetical order
         Doesn't set self.searchRequest.
         """
         self.searchRequest = None
-        return self.api.getItem(module="Multimedia", id=id)
+        return self.api.getItem(module=module, id=id)
 
     def getActorSet(self, *, type, id):
         """
@@ -161,6 +160,17 @@ class Sar:  # methods in alphabetical order
         self.searchRequest = s.toString()
         return self.api.search(xml=s.toString())
 
+    def getRegistrySet(self, *, id):
+        s = Search(module="Registrar")
+        s.addCriterion(
+            field="RegExhibitionRef.__id",
+            operator="equalsField",
+            value=id,
+        )
+        s.validate(mode="search")
+        self.searchRequest = s.toString()
+        return self.api.search(xml=s.toString())
+
     def join(self, *, inL):
         """
         Expects several documents as lxml.etree objects to join them to one bigger 
@@ -210,43 +220,72 @@ class Sar:  # methods in alphabetical order
                             lastModuleN.append(newItemN)
                     # else:
                     #    print ("None found!")
+
         for type in known_types:  # update totalSize for every type
             itemsL = firstET.xpath(
                 f"/m:application/m:modules/m:module[@name = '{type}']/m:moduleItem",
                 namespaces=NSMAP,
             )
-            moduleN = firstET.xpath(
-                f"/m:application/m:modules/m:module[@name = '{type}']", namespaces=NSMAP
-            )[0]
-            attributes = moduleN.attrib
-            attributes["totalSize"] = str(len(itemsL))
+            try:
+                moduleN = firstET.xpath(
+                    f"/m:application/m:modules/m:module[@name = '{type}']",
+                    namespaces=NSMAP,
+                )[0]
+                attributes = moduleN.attrib
+                attributes["totalSize"] = str(len(itemsL))
+            except:
+                pass
+            # it is no error when a file is empty and has no items that can be counted
+
         # print(known_types)
         xml = etree.tostring(firstET, pretty_print=True, encoding="unicode")
         if not xml:
             raise TypeError("Join failed")
         return xml
 
-    def saveAttachments(self, *, xml, dir):
+    def saveAttachments(self, *, xml, adir):
         """
         For a set of multimedia moduleItems, download their attachments.
         
         Typcially will process moduleItems of type multimeida (aka media). But
         could theoretically also work on different types.
 
-        Expects a xml string and an directory to save the attachments to.
-        Attachments are saved to disk with {mulId}.{ext} filename.
+        Expects a xml string and a directory to save the attachments to.
+        Attachments are saved to disk with the filename {mulId}.{ext}.
+
+        New: Now uses streaming to save memory.
+        New: Download only attachments with Freigabe[Typ = "SMB-Freigabe"] = "Ja"
         """
         E = etree.fromstring(bytes(xml, "UTF-8"))
 
         itemsL = E.xpath(
-            "/m:application/m:modules/m:module[@name='Multimedia']/m:moduleItem"
-            + "[@hasAttachments = 'true']",
+            """
+            /m:application/m:modules/m:module[@name='Multimedia']
+            /m:moduleItem[@hasAttachments = 'true']
+            /m:repeatableGroup[@name = 'MulApprovalGrp']
+            /m:repeatableGroupItem
+            /m:vocabularyReference[@name = 'TypeVoc']
+            /m:vocabularyReferenceItem[@name = 'SMB-digital'] 
+            /../../..
+            /m:repeatableGroupItem
+            /m:vocabularyReference[@name = 'ApprovalVoc']
+            /m:vocabularyReferenceItem[@name = 'Ja'] 
+            /../../../..            
+            """,
             namespaces=NSMAP,
         )
+        print(
+            f" xml has {len(itemsL)} records with attachment=True and Freigabe[@typ='SMB-Digital'] = Ja"
+        )
+
+        positives = set()
+
         for itemN in itemsL:
-            itemA = itemN.attrib
+            itemA = itemN.attrib  # A for attribute
             mmId = itemA["id"]
 
+            # Why do i get suffix from old filename? Is that really the best source?
+            # Seems that it is. I see no other field in RIA
             fn_old = itemN.xpath(
                 "m:dataField[@name = 'MulOriginalFileTxt']/m:value/text()",
                 namespaces=NSMAP,
@@ -254,14 +293,15 @@ class Sar:  # methods in alphabetical order
                 0
             ]  # assuming that there can be only one
             fn = mmId + Path(fn_old).suffix
-            mmPath = Path(dir).joinpath(fn)
-
+            mmPath = Path(adir).joinpath(fn) # need resolve here!
+            #print(f"POSITIVE {mmPath}")
+            positives.add(mmPath)
             if (
                 not mmPath.exists()
             ):  # only d/l if doesn't exist yet, not sure if we want that
-                r = self.api.getAttachment(module="Multimedia", id=mmId)
-                with open(mmPath, "wb") as f:
-                    f.write(r.content)                
+                print(f" getting {mmPath}")
+                self.api.saveAttachment(module="Multimedia", id=mmId, path=mmPath)
+        return positives
 
     def search(self, *, xml):
         """
@@ -271,6 +311,60 @@ class Sar:  # methods in alphabetical order
         self.searchRequest = xml
         return self.api.search(xml=xml)
 
+    def smbfreigabe (self, *, module="Object", id):
+        """
+        Sets smbfreigabe to "Ja", but only if smbfreigabe doesn't exist yet.
+        
+        Also determines sensible sort value in case there are freigaben already. 
+        """
+        r = api.getItem(module=module, id=id)
+        #test if smbfreigabe already exists; if so, leave it alone
+        #else put add freigabe.
+        #curator can prevent automatic freigabe, by setting smbfreigabe explicitly to no
+        #which sort should i use? just lowest available number or min+1: some unique number
+        self._smbfreigabe(module=module, id=id, sort=sort)
+
+    def _smbfreigabe (self, *, module="Object", id, sort=1):
+        """
+        Sets a freigabe for SMB for a given id. User is taken from credentials.
+        Todo:
+        - Curently, we setting sort = 1. We will want to test if field is empty in the future or 
+          rather already has a smbfreigabe. Then we will have to set a better sort value
+        """
+        today = datetime.date.today()
+        xml=f"""
+        <application xmlns="http://www.zetcom.com/ria/ws/module">
+          <modules>
+            <module name="{module}">
+              <moduleItem id="{id}">
+                <repeatableGroup name="ObjPublicationGrp">
+                    <repeatableGroupItem>
+                        <dataField dataType="Date" name="ModifiedDateDat">
+                            <value>{today}</value>
+                        </dataField>
+                        <dataField dataType="Varchar" name="ModifiedByTxt">
+                            <value>{self.user}</value>
+                        </dataField>
+                        <dataField dataType="Long" name="SortLnu">
+                            <value>{sort}</value>
+                        </dataField>
+                       <vocabularyReference name="PublicationVoc" id="62649" instanceName="ObjPublicationVgr">
+                         <vocabularyReferenceItem id="1810139"/>
+                       </vocabularyReference>
+                       <vocabularyReference name="TypeVoc" id="62650" instanceName="ObjPublicationTypeVgr">
+                         <vocabularyReferenceItem id="2600647"/>
+                       </vocabularyReference>
+                   </repeatableGroupItem>
+                </repeatableGroup>
+              </moduleItem>
+            </module>
+          </modules>
+        </application>"""
+        m = Module(xml=xml)
+        m.validate()
+        r = self.api.createRepeatableGroup(module=module, id=id, repeatableGroup="ObjPublicationGrp", xml=xml)
+
+
     def visibleActiveUsers(self):
         """
         Returns list of active users' emails that are visible to the user who logging in through 
@@ -279,17 +373,13 @@ class Sar:  # methods in alphabetical order
         Returns a Python list (and not a requests objects).
         """
         s = Search(module="User")
-        s.addCriterion(
-            field="UsrStatusBoo",
-            operator="equalsField",
-            value="True"
-        )
+        s.addCriterion(field="UsrStatusBoo", operator="equalsField", value="True")
         s.validate(mode="search")
         r = self.search(xml=s.toString())
         tree = etree.fromstring(bytes(r.text, "UTF-8"))
         emailL = tree.xpath(
             "/m:application/m:modules/m:module[@name = 'User']/m:moduleItem/m:dataField[@name = 'UsrEmailTxt']/m:value",
-            namespaces=NSMAP
+            namespaces=NSMAP,
         )
         ls = []
         for emailN in emailL:
@@ -313,6 +403,8 @@ class Sar:  # methods in alphabetical order
     def EToString(self, *, tree):
         etree.tostring(tree, pretty_print=True, encoding="unicode") # so as not to return bytes
 
+    def ETfromFile(self, *, path):
+        return etree.parse(str(path), ETparser)
 
 if __name__ == "__main__":
     import argparse
@@ -333,11 +425,4 @@ if __name__ == "__main__":
 
     s = Sar(baseURL=baseURL, pw=pw, user=user)
     userList = s.visibleActiveUsers()
-    print (userList)
-    #m = Module(xml=r.text)
-    #print(f"{args}")
-    #print(args.cmd)
-    #print(args.args)
-
-    #result = getattr(m, args.cmd)(args.args)
-    # print (result)
+    print(userList)
