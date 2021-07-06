@@ -695,7 +695,6 @@ class MpApi:
         url = f"{self.appURL}/vocabulary/instances/{instanceName}/nodes/{nodeId}parents/{relationId}"
         r = requests.delete(url, headers=self.headers, auth=self.auth)
         return r
-        
     #    
     # HELPERS
     #

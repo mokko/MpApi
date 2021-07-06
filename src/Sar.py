@@ -242,8 +242,7 @@ class Sar:  # methods in alphabetical order
                 attributes = moduleN.attrib
                 attributes["totalSize"] = str(len(itemsL))
             except:
-                pass
-            # it is no error when a file is empty and has no items that can be counted
+                pass # it is not an error if a file is has no items that can be counted
 
         # print(known_types)
         xml = etree.tostring(firstET, pretty_print=True, encoding="unicode")
@@ -320,15 +319,13 @@ class Sar:  # methods in alphabetical order
 
     def setSmbfreigabe (self, *, module="Object", id):
         """
-        Sets smbfreigabe to "Ja", but only if smbfreigabe doesn't exist yet.
+        Sets smbfreigabe to "Ja", but only if smbfreigabe doesn't exist yet. Typically,
+        acts on object level.
         
-        Also determines sensible sort value in case there are freigaben already. 
+        Should also determine sensible sort value in case there are freigaben already. 
         """
         r = api.getItem(module=module, id=id)
         #test if smbfreigabe already exists; if so, leave it alone
-        #else put add freigabe.
-        #curator can prevent automatic freigabe, by setting smbfreigabe explicitly to no
-        #which sort should i use? just lowest available number or min+1: some unique number
         self._smbfreigabe(module=module, id=id, sort=sort)
 
     def _smbfreigabe (self, *, module="Object", id, sort=1):
@@ -370,29 +367,6 @@ class Sar:  # methods in alphabetical order
         m = Module(xml=xml)
         m.validate()
         r = self.api.createRepeatableGroup(module=module, id=id, repeatableGroup="ObjPublicationGrp", xml=xml)
-
-
-    def visibleActiveUsers(self):
-        """
-        Returns list of active users' emails that are visible to the user who logging in through 
-        the api.
-        
-        Returns a Python list (and not a requests objects).
-        """
-        s = Search(module="User")
-        s.addCriterion(field="UsrStatusBoo", operator="equalsField", value="True")
-        s.validate(mode="search")
-        r = self.search(xml=s.toString())
-        tree = etree.fromstring(bytes(r.text, "UTF-8"))
-        emailL = tree.xpath(
-            "/m:application/m:modules/m:module[@name = 'User']/m:moduleItem/m:dataField[@name = 'UsrEmailTxt']/m:value",
-            namespaces=NSMAP,
-        )
-        ls = []
-        for emailN in emailL:
-            if emailN.text != "@smb.spk-berlin.de":
-                ls.append(emailN.text)
-        return ls # "; ".join(ls)
 
     # Helper
     def xmlFromFile(self, *, path):
