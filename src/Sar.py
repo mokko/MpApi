@@ -1,10 +1,10 @@
 """
 Sar stands for "search and response". It's a higher level interface on top of MpApi that 
-bundles multiple requests together in one method, typically searches and responses. 
+bundles multiple requests in one method, typically a search and a response. 
 
 I introduce it mainly to clean up the code of the Mink class, so that Mink has to deal less 
-with xml and Sar.py can be tested easier. (Conversely, that means that mink parses DSL config 
-file, writes files, logs report.) 
+with xml and Sar.py can be tested easier. (Conversely, that means that mink parses DSL 
+config file, writes files, logs report.) 
 
 Sar typically returns a requests reponse (r) which contains xml in r.text or binary in
 r.content. 
@@ -12,47 +12,47 @@ r.content.
 Do we expose etree stuff to the user at all? Perhaps not. Let's just use xml strings
 everywhere, even if that has a performance penality. 
 
-A set is an xml containing a set of items.
+A set is an xml containing a set of items, typically moduleItems.
 
 USAGE:
     import Sar from Sar
-    import Module from Module
     import Search from Search
+    #import Module from Module
     sr = Sar(baseURL=baseURL, user=user, pw=pw)
 
-    #get stuff from single ids
+    #get stuff from single ids; returns request object
     r = sr.getItem(module="Objekt", id="1234")    # returns single item for any module
-    r = sr.getActorSet(type="exhibit", id="1234") # Actor items for objects in given exhibit or group
-    r = sr.getMediaSet(type="exhibit", id="1234") # Media items for objects in given exhibit or group
-    r = sr.getObjectSet(type="group", id="1234")  # Object items in given exhibit or group
+    r = sr.getActorSet(type="exhibit", id="1234") # Actor items for objects in given exhibit/group
+    r = sr.getMediaSet(type="exhibit", id="1234") # Media items for objects in given exhibit/group
+    r = sr.getObjectSet(type="group", id="1234")  # Object items in given exhibit/group
+    r = sr.getRegistrySet(type="exhibit", id="1234") # Registrar items 
 
-    #find out about the last search
-    s = sr.searchRequest  # returns the last search request as xml, if any
-
-    #request results for a search request
+    #search
     s = Search()
     r = sr.search (xml=s.toString())
 
-    #do something with sets
-    for content in attachmentsIter(set=xml):
-        # do something with content 
+    #general purpose
+    clean_xml = sr.clean(inX=xml) # clean up xml so it validates and has less sensitive info
+    xml = sr.definition(module="Objects")
+    new_xml = sr.join([xml1, xml2])
+    sr.visibleActiveUsers() # returns list of all users visible to user curently logged in
     
-    #to do stuff with the moduleItems use Module
-    m = Module(xml=r.text)
+    #attachments
+    sr.saveAttachments(xml=xml, adir=dir) # for moduleItems in xml download attachments and 
+        # save to as adir/{mulId}.{ext}, only d/l media with smbfreigabe.
+        # policy="mulId.ext"
+        # policy="oldname"
+
+    #modify data
+    sr.setSmbfreigabe (module="Object", id="1234") # sets smbfreigabe if doesn't exist yet.
     
-    #Helpers                   # quite different sort of stuff, could go to soemewhere else?
-    joinZml(globber, out_fn)   # writes result to file
-    xml = cleanZml (xml)       # clean up xml so it validates and contains less sensitive info
-
-    sr.toFile(xml, path)
-    
-
-Sar : higher level operations with xml
-MpApi : basic API operations 
-Search | Module : make XML
-
-
+    #helpers                   
+    xml = sr.xmlFromFile (path=path)
+    sr.toFile(xml=xml, path=path)
+    xml = sr.EToString (tree=tree)
+    ET = sr.ETfromFile (path=path)
 """
+
 import datetime
 import os # b/c Pathlib has troubles with windows network paths
 from Search import Search
@@ -70,11 +70,21 @@ ETparser = etree.XMLParser(remove_blank_text=True)
 
 class Sar:  # methods in alphabetical order
     def __init__(self, *, baseURL, user, pw):
-        self.searchRequest = None  # attrib for search requests
+        """
+        Earlier version stored last search in searchRequest. Eliminated b/c too
+        bothersome and I didn't need it.
+        """
         self.api = MpApi(baseURL=baseURL, user=user, pw=pw)
         self.user = user
         
     def clean(self, *, inX):
+        """
+        Drop uuid fields b/c they sometimes don't validate (Zetcom bug)
+        Drop Werte und Versicherung to not spill our guts
+        Also validates.
+        
+        Expects xml as string and returns xml as string.
+        """
         m = Module(xml=inX)
         m._dropUUID()
         m._dropRG(name="ObjValuationGrp")
@@ -82,19 +92,21 @@ class Sar:  # methods in alphabetical order
         return m.toString()
 
     def definition(self, *, module=None):
+        """
+        Gets definition from server and returns it as xml string.
+        """
         return self.api.getDefinition(module=module).text
 
     def getItem(self, *, module, id):
         """
-        Get a single item of any module by id. Returns a request object.
-        Doesn't set self.searchRequest.
+        Get a single item of specified module by id. Returns a request object.
         """
-        self.searchRequest = None
         return self.api.getItem(module=module, id=id)
 
     def getActorSet(self, *, type, id):
         """
-        Get actors
+        Get a set of actors from an exhibit or group.
+        Type is either "exhibit" or "group".
         """
         s = Search(module="Person")
         if type == "exhibit":
@@ -111,13 +123,12 @@ class Sar:  # methods in alphabetical order
             )
         else:
             raise ValueError("Unknown type! {type}")
-        self.searchRequest = s.toString()
         return self.api.search(xml=s.toString())
 
     def getMediaSet(self, *, id, type):
         """
         Get a set multimedia items for exhibits or groups containing objects; returns a
-        requests object with a set of items.
+        requests object with a set of items. Returns request object.
         """
         s = Search(module="Multimedia")
         if type == "exhibit":
@@ -134,13 +145,12 @@ class Sar:  # methods in alphabetical order
             )
         else:
             raise ValueError("Unknown type! {type}")
-        self.searchRequest = s.toString()
         return self.api.search(xml=s.toString())
 
     def getObjectSet(self, *, id, type):
         """
         Get object items for exhibits or groups; expects id and type. Type is either
-        "exhibit" or "group". Returns the request. Also sets searchRequest.
+        "exhibit" or "group". Returns the request. 
         """
 
         s = Search(module="Object")
@@ -157,7 +167,6 @@ class Sar:  # methods in alphabetical order
         else:
             raise ValueError("Unknown type! {type}")
         s.validate(mode="search")
-        self.searchRequest = s.toString()
         return self.api.search(xml=s.toString())
 
     def getRegistrySet(self, *, id):
@@ -168,13 +177,12 @@ class Sar:  # methods in alphabetical order
             value=id,
         )
         s.validate(mode="search")
-        self.searchRequest = s.toString()
         return self.api.search(xml=s.toString())
 
     def join(self, *, inL):
         """
-        Expects several documents as lxml.etree objects to join them to one bigger 
-        document. Returns docN.
+        Expects several documents as xml string to join them to one bigger 
+        document. Returns xml string.
         """
         # print (inL)
         known_types = set()
@@ -308,10 +316,9 @@ class Sar:  # methods in alphabetical order
         Send a request to the api and return the response. Expects a search in xml
         (Same as in MpApi).
         """
-        self.searchRequest = xml
         return self.api.search(xml=xml)
 
-    def smbfreigabe (self, *, module="Object", id):
+    def setSmbfreigabe (self, *, module="Object", id):
         """
         Sets smbfreigabe to "Ja", but only if smbfreigabe doesn't exist yet.
         
