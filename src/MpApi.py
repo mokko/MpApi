@@ -304,25 +304,43 @@ class MpApi:
 
         self.headers["Accept"] = oldAccept
 
-    def getThumbnail(self, *, module, __id):
+    def getThumbnail(self, *, module, id, path):
         """
         Get the thumbnail of a module item attachment
         GET http://.../ria-ws/application/module/{module}/{__id}/thumbnail
         """
-
-    def updateAttachment(self, *, module, __id):
+        url = f"{self.appURL}/module/{module}/{id}/thumbnail"
+        r.raise_for_status()  # todo: replace with r.raise_for_status()?
+        oldAccept = self.headers["Accept"]
+        self.headers["Accept"] = "application/octet-stream"
+        r = requests.get(url, headers=self.headers, auth=self.auth)
+        r.raise_for_status()
+        self.headers["Accept"] = oldAccept
+        return r # r.content
+        
+    def updateAttachment(self, *, module, id, path):
         """
         Add or update the attachment of a module item, as a base64 encoded XML
         Add or update the attachment of a module item, as a binary stream
         PUT http://.../ria-ws/application/module/{module}/{__id}/attachment
+        Untested
         """
+        url = f"{self.appURL}/module/{module}/{id}/attachment"
+        with open(path, mode="rb") as f:
+            file = f.read()
+        r = requests.put(url, headers=self.headers, auth=self.auth, data=file)
+        r.raise_for_status()
+        return r
 
-    def deleteAttachment(self, *, module, __id):
+    def deleteAttachment(self, *, module, id):
         """
         Delete the attachment of a module item
         DELETE http://.../ria-ws/application/module/{module}/{__id}/attachment
         """
-
+        url = f"{self.appURL}/module/{module}/{id}/attachment"
+        r = requests.delete(url, headers=self.headers, auth=self.auth)
+        r.raise_for_status()
+        return r
     #
     # D RESPONSE orgunit
     #
@@ -332,6 +350,10 @@ class MpApi:
         GET http://.../ria-ws/application/module/{module}/orgunit
         Response body definition: orgunit_1_0.xsd
         """
+        url = f"{self.appURL}/module/{module}/orgunit"
+        r = requests.get(url, headers=self.headers, auth=self.auth)
+        r.raise_for_status()
+        return r
 
     #
     # EXPORT aka report -> LATER
@@ -348,6 +370,11 @@ class MpApi:
         there is at least one export available. If there is no export for the module
         status code 204 (No Content) will be returned.
         """
+        url = f"{self.appURL}/module/{module}/export"
+        r = requests.get(url, headers=self.headers, auth=self.auth)
+        r.raise_for_status()
+        return r
+
 
     def reportModuleItem(self, *, module, itemId, exportId):
         """
@@ -365,20 +392,22 @@ class MpApi:
         self.headers["Accept"] = oldAccept
         return r
 
-    def reportModuleItems(self, *, module, id):
+    def reportModuleItems(self, *, module, id, xml):
         """
         Export multiple module items via the reporting system
         POST http://.../ria-ws/application/module/{module}/export/{id}
         """
+        url = f"{self.appURL}/module/{module}/export/{id}"
+        r = requests.post(url, headers=self.headers, auth=self.auth, data=xml)
+        r.raise_for_status()
+        return r
 
     #
     # NEW NATIVE VOCABULARY MODULE (can also do json)
     #
     # Labels, Node Classes, TermClassLabel, Node, Term, nodeParents, nodeRelations    
-    # get
-    # add
-    # (update)
-    # delete
+    # get, add, delete and sometimes update
+    # 
     def vInfo (self, *, instanceName, id=None): 
         """
         Shows the vocabulary instance information for the give vocabulary.
