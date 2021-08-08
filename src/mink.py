@@ -178,8 +178,8 @@ class Mink:
         for img in os.listdir(pix_dir):
             img = Path(pix_dir).joinpath(img) # need resolve here
             if img not in expected:
-                print(f"#image no longer attached, removing {img}")
-                # os.remove(img)
+                print(f"image no longer attached, removing {img}")
+                os.remove(img)
 
         # currently we dont get attachments that have changed, but keep the same mulId, should be rare to impossible
 
@@ -356,7 +356,7 @@ class Mink:
         """
         label = str(self.project_dir.parent.name)
         date = str(self.project_dir.name)
-        pack_fn=self.project_dir.joinpath(f"../{label}{date}.xml")
+        pack_fn = self.project_dir.joinpath(f"../{label}{date}.xml").resolve()
         if pack_fn.exists():
             print (f"Pack file exists already, no overwrite: {pack_fn}") 
         else:

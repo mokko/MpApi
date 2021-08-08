@@ -1,8 +1,14 @@
-#pushd \\pk.de\smb\Mediadaten\Projekte\EM\HF-Export
 """
-Read 
+For a given zpx file, prepare statistics
+ 
 USAGE
     stats.py -i HFobjekte20210523.xml
+
+Number of Object records
+
+No HF Location
+
+pushd \\pk.de\smb\Mediadaten\Projekte\EM\HF-Export
 
 """
 import argparse

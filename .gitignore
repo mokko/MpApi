@@ -8,5 +8,6 @@ bak/*
 dist/*
 build/*
 sdata/*
+sdata2/*
 test/sdata/*
 src/MpApi_M3.egg-info/*
