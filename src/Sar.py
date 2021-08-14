@@ -188,8 +188,6 @@ class Sar:  # methods in alphabetical order
         known_types = set()
         firstET = None
         for xml in inL:
-            print ("!!!")
-            print (xml)
             tree = etree.fromstring(bytes(xml, "UTF-8"))
             moduleL = tree.xpath(
                 f"/m:application/m:modules/m:module",

@@ -32,8 +32,10 @@ import logging
 import sys
 import os
 
-sys.path.append(os.environ["PYTHONPATH"])  # what the heck?
-credentials = "C:/m3/MpApi/sdata/credentials.py"
+# what the heck?
+if "PYTHONPATH" in os.environ:
+    sys.path.append(os.environ["PYTHONPATH"])  
+credentials = "credentials.py" # expect credentials in pwd
 
 
 from Module import Module
@@ -48,7 +50,6 @@ NSMAP = {
     "s": "http://www.zetcom.com/ria/ws/module/search",
     "m": "http://www.zetcom.com/ria/ws/module",
 }
-
 
 class Mink:
     def __init__(self, *, conf, job, baseURL, user, pw):
@@ -254,6 +255,9 @@ class Mink:
         return mmX
 
     def getObjects(self, args):
+        """
+            expects [type, id] where type can any module (Object, Multimedia ...)
+        """
         type = args[0]
         id = args[1]
         label = args[2]
