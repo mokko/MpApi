@@ -5,12 +5,12 @@ I am using MpApi from the MS DOS Command console in Windows that you can run wit
 
 ## Prerequisites
 * a modern Python 3.x, https://www.python.org/downloads/
-* pip, a package installer that comes with python
+* pip, a package installer that normales comes as part of Python
 * several Python packages, see below
 
 # Recommended:
-* git or git for win.  
-  I am using the portable version. https://git-scm.com/download/win
+* git, e.g. https://git-scm.com/download/win
+  I am using the portable version. 
 
 # Required Python Packages
 * lxml
