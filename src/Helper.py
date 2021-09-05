@@ -1,6 +1,7 @@
 from lxml import etree
 from pathlib import Path
 
+
 class Helper:
     def toFile(self, *, path):
 
@@ -30,10 +31,9 @@ class Helper:
     def validate(self, *, mode="module"):
         """
         Validates a whole xml document of the type module.
-        
+
         Typde defaults to "module", "seach" being the other option currently implemented.
         """
-
 
         if mode == "module":
             xsdLoc = Path(__file__).joinpath("../../sdata/module_1_6.xsd").resolve()

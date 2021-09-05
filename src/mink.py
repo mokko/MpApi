@@ -34,8 +34,8 @@ import os
 
 # what the heck?
 if "PYTHONPATH" in os.environ:
-    sys.path.append(os.environ["PYTHONPATH"])  
-credentials = "credentials.py" # expect credentials in pwd
+    sys.path.append(os.environ["PYTHONPATH"])
+credentials = "credentials.py"  # expect credentials in pwd
 
 
 from Module import Module
@@ -51,12 +51,13 @@ NSMAP = {
     "m": "http://www.zetcom.com/ria/ws/module",
 }
 
+
 class Mink:
     def __init__(self, *, conf, job, baseURL, user, pw):
         self.sar = Sar(baseURL=baseURL, user=user, pw=pw)
         self.conf = conf
         self._parse_conf(job=job)
-        
+
     def _parse_conf(self, *, job):
         self.job = job
         self.current_job = None  # definition in conf file
@@ -128,7 +129,7 @@ class Mink:
             joinX = self.xmlFromFile(path=join_fn)
             cleanX = self.sar.clean(inX=joinX)
             self.xmlToFile(xml=cleanX, path=clean_fn)
-            self.info(" clean validates") # validation is part of clean
+            self.info(" clean validates")  # validation is part of clean
         return cleanX
 
     def definition(self, args):
@@ -144,7 +145,7 @@ class Mink:
 
         adir = self.project_dir.joinpath("parts")
         if not Path.is_dir(adir):
-            Path.mkdir(adir, parents=True)        
+            Path.mkdir(adir, parents=True)
 
         pk_fn = self.project_dir.joinpath(f"parts/{label}-pk-{type}{id}.xml")
         if pk_fn.exists():
@@ -177,7 +178,7 @@ class Mink:
 
         # do we want to delete those files that are no longer attached?
         for img in os.listdir(pix_dir):
-            img = Path(pix_dir).joinpath(img) # need resolve here
+            img = Path(pix_dir).joinpath(img)  # need resolve here
             if img not in expected:
                 print(f"image no longer attached, removing {img}")
                 os.remove(img)
@@ -190,7 +191,7 @@ class Mink:
         label = args[2]
         adir = self.project_dir.joinpath("parts")
         if not Path.is_dir(adir):
-            Path.mkdir(adir, parents=True)        
+            Path.mkdir(adir, parents=True)
 
         if type == "exhibit":
             exh_fn = self.project_dir.joinpath(f"parts/{label}-exh-{type}{id}.xml")
@@ -241,7 +242,7 @@ class Mink:
 
         adir = self.project_dir.joinpath("parts")
         if not Path.is_dir(adir):
-            Path.mkdir(adir, parents=True)        
+            Path.mkdir(adir, parents=True)
 
         mm_fn = self.project_dir.joinpath(f"parts/{label}-mm-{type}{id}.xml")
         if mm_fn.exists():
@@ -256,7 +257,7 @@ class Mink:
 
     def getObjects(self, args):
         """
-            expects [type, id] where type can any module (Object, Multimedia ...)
+        expects [type, id] where type can any module (Object, Multimedia ...)
         """
         type = args[0]
         id = args[1]
@@ -266,7 +267,7 @@ class Mink:
 
         adir = self.project_dir.joinpath("parts")
         if not Path.is_dir(adir):
-            Path.mkdir(adir, parents=True)        
+            Path.mkdir(adir, parents=True)
 
         obj_fn = self.project_dir.joinpath(f"parts/{label}-obj-{type}{id}.xml")
         if obj_fn.exists():
@@ -325,7 +326,7 @@ class Mink:
         joinX = None
         adir = self.project_dir.joinpath("parts")
         if not Path.is_dir(adir):
-            Path.mkdir(adir, parents=True)        
+            Path.mkdir(adir, parents=True)
         join_fn = self.project_dir.joinpath(f"parts/{label}-join-{type}{id}.xml")
         if join_fn.exists():
             print(f" join from cache {join_fn}")
@@ -337,11 +338,9 @@ class Mink:
             exhX = self.getExhibit(args)
             mmX = self.getMedia(args)
             objX = self.getObjects(args)
-            regX = self.getRegistry(args) 
+            regX = self.getRegistry(args)
 
-            self.info(
-                f" joining modules, saving to {join_fn}"
-            )
+            self.info(f" joining modules, saving to {join_fn}")
             inL = [objX, mmX, pkX]
             if type == "exhibit":
                 inL.append(exhX)
@@ -352,25 +351,25 @@ class Mink:
 
     def pack(self, args):
         """
-        Pack (or join) all clean files into one bigger package. We act on all 
+        Pack (or join) all clean files into one bigger package. We act on all
         *-clean-*.xml files in the current project directory and save to
         $label$date.xml in current working directory.
-        
+
         Seems to work, but needs too much memory. I will try saxon next.
         """
         label = str(self.project_dir.parent.name)
         date = str(self.project_dir.name)
         pack_fn = self.project_dir.joinpath(f"../{label}{date}.xml").resolve()
         if pack_fn.exists():
-            print (f"Pack file exists already, no overwrite: {pack_fn}") 
+            print(f"Pack file exists already, no overwrite: {pack_fn}")
         else:
-            print (f"Making new pack file: {pack_fn}") 
+            print(f"Making new pack file: {pack_fn}")
             xmlL = list()
-            for file in self.project_dir.glob('*-clean-*.xml'):
-                print (f"Packing file {file}")
+            for file in self.project_dir.glob("*-clean-*.xml"):
+                print(f"Packing file {file}")
                 xml = self.sar.xmlFromFile(path=file)
                 xmlL.append(xml)
-            xml = self.sar.join (inL=xmlL) 
+            xml = self.sar.join(inL=xmlL)
             self.sar.toFile(xml=xml, path=str(pack_fn))
 
     #
@@ -408,13 +407,13 @@ class Mink:
         self.pix_dir = dir.parent.joinpath("pix")
 
     def xmlFromFile(self, *, path):
-        #print (f"PATH {path}")
+        # print (f"PATH {path}")
         with open(path, "r", encoding="utf8") as f:
             xml = f.read()
         return xml
 
     def xmlToEtree(self, *, xml):
-        tree = etree.fromstring(bytes(xml, "utf-8"), ETparser) #unicode
+        tree = etree.fromstring(bytes(xml, "utf-8"), ETparser)  # unicode
         # etree.indent(tree)
         return etree.ElementTree(tree)
 

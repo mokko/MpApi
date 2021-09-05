@@ -173,7 +173,7 @@ class MpApi:
         """
         Update a single field of a module item
         PUT http://.../ria-ws/application/module/{module}/{__id}/{datafield}
-        
+
         NB: We dont need a createField method since simple dataFields are always created.
         """
         url = f"{self.appURL}/module/{module}/{id}/{datafield}"
@@ -184,13 +184,11 @@ class MpApi:
     #
     # B.5 REPEATABLE GROUPS
     #
-    def createReference(
-        self, *, module, id, repeatableGroup, groupId, reference, xml
-    ):
+    def createReference(self, *, module, id, repeatableGroup, groupId, reference, xml):
         """
         Add a reference to a reference field within a repeatable group
         POST http://.../ria-ws/application/module/{module}/{__id}/{repeatableGroup}/{__groupId}/{reference}
-        
+
         Remember that xml is different during downloads than for uploads.
         Upload xml omitts, for example, formattedValues.
         """
@@ -316,8 +314,8 @@ class MpApi:
         r = requests.get(url, headers=self.headers, auth=self.auth)
         r.raise_for_status()
         self.headers["Accept"] = oldAccept
-        return r # r.content
-        
+        return r  # r.content
+
     def updateAttachment(self, *, module, id, path):
         """
         Add or update the attachment of a module item, as a base64 encoded XML
@@ -341,6 +339,7 @@ class MpApi:
         r = requests.delete(url, headers=self.headers, auth=self.auth)
         r.raise_for_status()
         return r
+
     #
     # D RESPONSE orgunit
     #
@@ -375,7 +374,6 @@ class MpApi:
         r.raise_for_status()
         return r
 
-
     def reportModuleItem(self, *, module, itemId, exportId):
         """
         Export a single module item via the reporting system
@@ -405,10 +403,10 @@ class MpApi:
     #
     # NEW NATIVE VOCABULARY MODULE (can also do json)
     #
-    # Labels, Node Classes, TermClassLabel, Node, Term, nodeParents, nodeRelations    
+    # Labels, Node Classes, TermClassLabel, Node, Term, nodeParents, nodeRelations
     # get, add, delete and sometimes update
-    # 
-    def vInfo (self, *, instanceName, id=None): 
+    #
+    def vInfo(self, *, instanceName, id=None):
         """
         Shows the vocabulary instance information for the give vocabulary.
         GET http://.../ria-ws/application/vocabulary/instances/{instanceName}
@@ -420,20 +418,25 @@ class MpApi:
         r = requests.get(url, headers=self.headers, auth=self.auth)
         r.raise_for_status()
         return r
-    
-    def vGetNodes (self, *, instanceName, offset=0, limit=100, termContent=None, 
-                   status=None, nodeName=None ):
+
+    def vGetNodes(
+        self,
+        *,
+        instanceName,
+        offset=0,
+        limit=100,
+        termContent=None,
+        status=None,
+        nodeName=None,
+    ):
         """
         The request returns available vocabulary nodes of the vocabulary instance.
         GET http://.../ria-ws/application/vocabulary/instances/{instanceName}/nodes/search
         Todo: json response
         """
         url = f"{self.appURL}/vocabulary/instances/{instanceName}/nodes/search"
-        params = {
-            "offset": offset,
-            "limit": limit
-        }
-        #for each in termContent, status, nodeName:              
+        params = {"offset": offset, "limit": limit}
+        # for each in termContent, status, nodeName:
         if termContent is not None:
             params["termContent"] = termContent
         if status is not None:
@@ -443,7 +446,7 @@ class MpApi:
         r = requests.get(url, headers=self.headers, auth=self.auth, params=params)
         return r
 
-    def vUpdate (self, *, instanceName, xml):
+    def vUpdate(self, *, instanceName, xml):
         """
         Update Vocabulary Instance
         PUT https://.../ria-ws/application/vocabulary/instances/{instanceName}
@@ -453,8 +456,8 @@ class MpApi:
         r = requests.put(url, headers=self.headers, auth=self.auth, data=xml)
         return r
 
-    #LABELS
-    def vGetLabels (self, *, instanceName):
+    # LABELS
+    def vGetLabels(self, *, instanceName):
         """
         Get Vocabulary Instance labels
         GET https://.../ria-ws/application/vocabulary/instances/{instanceName}/labels
@@ -462,8 +465,8 @@ class MpApi:
         url = f"{self.appURL}/vocabulary/instances/{instanceName}/labels"
         r = requests.get(url, headers=self.headers, auth=self.auth)
         return r
-    
-    def vAddLabel (self, *, instanceName, xml):
+
+    def vAddLabel(self, *, instanceName, xml):
         """
         Add Vocabulary Instance label
         POST https://.../ria-ws/application/vocabulary/instances/{instanceName}/labels
@@ -472,7 +475,7 @@ class MpApi:
         r = requests.post(url, headers=self.headers, auth=self.auth, data=xml)
         return r
 
-    def vDelLabel (self, *, instanceName, language):
+    def vDelLabel(self, *, instanceName, language):
         """
         Delete Vocabulary Instance label
         DELETE https://.../ria-ws/application/vocabulary/instances/{instanceName}/labels/{language}
@@ -480,9 +483,9 @@ class MpApi:
         url = f"{self.appURL}/vocabulary/instances/{instanceName}/labels/{language}"
         r = requests.delete(url, headers=self.headers, auth=self.auth)
         return r
-    
-    #NODE CLASSES    
-    def vGetNodeClasses (self, *, instanceName):
+
+    # NODE CLASSES
+    def vGetNodeClasses(self, *, instanceName):
         """
         Get Vocabulary Instance Node Classes
         GET https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodeClasses
@@ -491,7 +494,7 @@ class MpApi:
         r = requests.get(url, headers=self.headers, auth=self.auth)
         return r
 
-    def vAddNodeClass (self, *, instanceName, xml):
+    def vAddNodeClass(self, *, instanceName, xml):
         """
         Add Vocabulary Instance Node Class
         POST https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodeClasses
@@ -500,7 +503,7 @@ class MpApi:
         r = requests.post(url, headers=self.headers, auth=self.auth, data=xml)
         return r
 
-    def vAddNodeClassLabel (self, *, instanceName, className, xml):
+    def vAddNodeClassLabel(self, *, instanceName, className, xml):
         """
         Add Vocabulary Instance Node Class Label
         POST https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodeClasses/{className}/labels
@@ -509,7 +512,7 @@ class MpApi:
         r = requests.post(url, headers=self.headers, auth=self.auth, data=xml)
         return r
 
-    def vDelNodeClassLabel (self, *, instanceName, className, language):
+    def vDelNodeClassLabel(self, *, instanceName, className, language):
         """
         Delete Vocabulary Instance Node Class Label
         DELETE https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodeClasses/{className}/labels/{language}
@@ -517,18 +520,20 @@ class MpApi:
         url = f"{self.appURL}/vocabulary/instances/{instanceName}/nodeClasses/{className}/labels/{language}"
         r = requests.delete(url, headers=self.headers, auth=self.auth)
         return r
-        
-    def vDelNodeClass (self, *, instanceName, className):
+
+    def vDelNodeClass(self, *, instanceName, className):
         """
         Delete Vocabulary Instance Node Class
         DELETE https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodeClasses/{className}
         """
-        url = f"{self.appURL}/vocabulary/instances/{instanceName}/nodeClasses/{className}"
+        url = (
+            f"{self.appURL}/vocabulary/instances/{instanceName}/nodeClasses/{className}"
+        )
         r = requests.delete(url, headers=self.headers, auth=self.auth)
         return r
 
-    #TERM CLASSES
-    def vGetTermClasses (self, *, instanceName):
+    # TERM CLASSES
+    def vGetTermClasses(self, *, instanceName):
         """
         Get Vocabulary Instance Term Classes
         GET https://.../ria-ws/application/vocabulary/instances/{instanceName}/termClasses
@@ -537,26 +542,28 @@ class MpApi:
         r = requests.get(url, headers=self.headers, auth=self.auth)
         return r
 
-    def vAddTermClass (self, *, instanceName, xml):
+    def vAddTermClass(self, *, instanceName, xml):
         """
         Add Vocabulary Instance Term Class
-        POST https://.../ria-ws/application/vocabulary/instances/{instanceName}/termClasses        
+        POST https://.../ria-ws/application/vocabulary/instances/{instanceName}/termClasses
         """
         url = f"{self.appURL}/vocabulary/instances/{instanceName}/termClasses"
         r = requests.post(url, headers=self.headers, auth=self.auth, data=xml)
         return r
 
-    def vDelTermClass (self, *, instanceName, className):
+    def vDelTermClass(self, *, instanceName, className):
         """
         Delete Vocabulary Instance Term Class
         DELETE https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodeClasses/{className}
         """
-        url = f"{self.appURL}/vocabulary/instances/{instanceName}/nodeClasses/{className}"
+        url = (
+            f"{self.appURL}/vocabulary/instances/{instanceName}/nodeClasses/{className}"
+        )
         r = requests.delete(url, headers=self.headers, auth=self.auth)
         return r
 
-    #TermClassLabel
-    def vAddTermClassLabel (self, *, instanceName, className, xml):
+    # TermClassLabel
+    def vAddTermClassLabel(self, *, instanceName, className, xml):
         """
         Add Vocabulary Instance Term Class Label
         POST https://.../ria-ws/application/vocabulary/instances/{instanceName}/termClasses/{className}/labels
@@ -565,16 +572,16 @@ class MpApi:
         r = requests.post(url, headers=self.headers, auth=self.auth, data=xml)
         return r
 
-    def vDelTermClassLabel (self, *, instanceName, className, language):
+    def vDelTermClassLabel(self, *, instanceName, className, language):
         """
         Delete Vocabulary Instance Term Class Label
-        DELETE https://.../ria-ws/application/vocabulary/instances/{instanceName}/termClasses/{className}/labels/{language}    
+        DELETE https://.../ria-ws/application/vocabulary/instances/{instanceName}/termClasses/{className}/labels/{language}
         """
         url = f"{self.appURL}/vocabulary/instances/{instanceName}/termClasses/{className}/labels/{language}"
         r = requests.delete(url, headers=self.headers, auth=self.auth)
         return r
 
-    #vocabularyNode
+    # vocabularyNode
     def vNodeByIdentifier(self, *, instanceName, id):
         """
         Get Vocabulary Node by identifier
@@ -584,7 +591,7 @@ class MpApi:
         r = requests.get(url, headers=self.headers, auth=self.auth)
         return r
 
-    def vAddNode (self, *, instanceName, xml):
+    def vAddNode(self, *, instanceName, xml):
         """
         Add Vocabulary Node
         POST https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodes
@@ -592,8 +599,8 @@ class MpApi:
         url = f"{self.appURL}/vocabulary/instances/{instanceName}/nodes"
         r = requests.post(url, headers=self.headers, auth=self.auth, data=xml)
         return r
-    
-    def vDelNode (self, *, instanceName, id):
+
+    def vDelNode(self, *, instanceName, id):
         """
         Delete Vocabulary Node
         DELETE https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodes/{id}
@@ -602,7 +609,7 @@ class MpApi:
         r = requests.delete(url, headers=self.headers, auth=self.auth)
         return r
 
-    def vUpdateNode (self, *, instanceName, id, xml):
+    def vUpdateNode(self, *, instanceName, id, xml):
         """
         Update Vocabulary Node
         PUT https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodes/{id}
@@ -611,8 +618,8 @@ class MpApi:
         r = requests.put(url, headers=self.headers, auth=self.auth, data=xml)
         return r
 
-    #TERM
-    def vAddTerm (self, *, instanceName, nodeId, xml):
+    # TERM
+    def vAddTerm(self, *, instanceName, nodeId, xml):
         """
         Add Vocabulary Term
         POST https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodes/{nodeId}/terms
@@ -620,8 +627,8 @@ class MpApi:
         url = f"{self.appURL}/vocabulary/instances/{instanceName}/nodes/{nodeId}/terms"
         r = requests.post(url, headers=self.headers, auth=self.auth, data=xml)
         return r
-    
-    def vUpdateTerm (self, *, instanceName, nodeId, termId, xml):
+
+    def vUpdateTerm(self, *, instanceName, nodeId, termId, xml):
         """
         Update Vocabulary Term
         PUT https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodes/{nodeId}/terms/{termId}
@@ -630,7 +637,7 @@ class MpApi:
         r = requests.put(url, headers=self.headers, auth=self.auth, data=xml)
         return r
 
-    def vDelTerm (self, *, instanceName, nodeId, termId):
+    def vDelTerm(self, *, instanceName, nodeId, termId):
         """
         Delete Vocabulary Term
         DELETE https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodes/{nodeId}/terms/{termId}
@@ -639,27 +646,31 @@ class MpApi:
         r = requests.delete(url, headers=self.headers, auth=self.auth)
         return r
 
-    #NodeParent
-    def vNodeParents (self, instanceName, nodeId):
+    # NodeParent
+    def vNodeParents(self, instanceName, nodeId):
         """
         Get Vocabulary Node Parents / Default Node Relations
-        GET https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodes/{nodeId}/parents/        
+        GET https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodes/{nodeId}/parents/
         (I am assuming the trailing slash is a typo.)
         """
-        url = f"{self.appURL}/vocabulary/instances/{instanceName}/nodes/{nodeId}/parents"
+        url = (
+            f"{self.appURL}/vocabulary/instances/{instanceName}/nodes/{nodeId}/parents"
+        )
         r = requests.delete(url, headers=self.headers, auth=self.auth)
         return r
 
-    def vAddNodeParent (self, instanceName, nodeId, xml):
+    def vAddNodeParent(self, instanceName, nodeId, xml):
         """
         Add Vocabulary Node Parent / Default Node Relations
         POST https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodes/{nodeId}/parents/
         """
-        url = f"{self.appURL}/vocabulary/instances/{instanceName}/nodes/{nodeId}/parents"
+        url = (
+            f"{self.appURL}/vocabulary/instances/{instanceName}/nodes/{nodeId}/parents"
+        )
         r = requests.post(url, headers=self.headers, auth=self.auth, data=xml)
         return r
 
-    def vDelNodeParent (self, instanceName, nodeId, parentNodeId):
+    def vDelNodeParent(self, instanceName, nodeId, parentNodeId):
         """
         Delete Vocabulary Node Parent / Default Node Relations
         DELETE https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodes/{nodeId}/parents/{parentNodeId}
@@ -668,8 +679,8 @@ class MpApi:
         r = requests.delete(url, headers=self.headers, auth=self.auth)
         return r
 
-    #nodeRelations
-    def vNodeRelations (self, instanceName, nodeId):
+    # nodeRelations
+    def vNodeRelations(self, instanceName, nodeId):
         """
         Get Vocabulary Node Relations / Advanced Node Relations
         GET https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodes/{nodeId}/relations/
@@ -678,7 +689,7 @@ class MpApi:
         r = requests.get(url, headers=self.headers, auth=self.auth)
         return r
 
-    def vAddNodeRelation (self, instanceName, nodeId, xml):
+    def vAddNodeRelation(self, instanceName, nodeId, xml):
         """
         Add Vocabulary Node Relation / Advanced Node Relations
         POST https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodes/{nodeId}/relations/
@@ -687,7 +698,7 @@ class MpApi:
         r = requests.get(url, headers=self.headers, auth=self.auth, data=xml)
         return r
 
-    def vDelNodeRelation (self, instanceName, nodeId, relationId):
+    def vDelNodeRelation(self, instanceName, nodeId, relationId):
         """
         Delete Vocabulary Node Relation / Advanced Node Relations
         DELETE https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodes/{nodeId}/parents/{relationId}
@@ -695,12 +706,13 @@ class MpApi:
         url = f"{self.appURL}/vocabulary/instances/{instanceName}/nodes/{nodeId}parents/{relationId}"
         r = requests.delete(url, headers=self.headers, auth=self.auth)
         return r
-    #    
+
+    #
     # HELPERS
     #
 
     def ETfromString(self, *, xml):
-        return etree.fromstring(bytes(xml, "UTF-8")) 
+        return etree.fromstring(bytes(xml, "UTF-8"))
 
     def toFile(self, *, xml, path):
         with open(path, "w", encoding="UTF-8") as f:

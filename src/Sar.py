@@ -54,7 +54,7 @@ USAGE:
 """
 
 import datetime
-import os # b/c Pathlib has troubles with windows network paths
+import os  # b/c Pathlib has troubles with windows network paths
 from Search import Search
 from MpApi import MpApi
 from lxml import etree
@@ -68,6 +68,7 @@ NSMAP = {
 
 ETparser = etree.XMLParser(remove_blank_text=True)
 
+
 class Sar:  # methods in alphabetical order
     def __init__(self, *, baseURL, user, pw):
         """
@@ -76,13 +77,13 @@ class Sar:  # methods in alphabetical order
         """
         self.api = MpApi(baseURL=baseURL, user=user, pw=pw)
         self.user = user
-        
+
     def clean(self, *, inX):
         """
         Drop uuid fields b/c they sometimes don't validate (Zetcom bug)
         Drop Werte und Versicherung to not spill our guts
         Also validates.
-        
+
         Expects xml as string and returns xml as string.
         """
         m = Module(xml=inX)
@@ -150,7 +151,7 @@ class Sar:  # methods in alphabetical order
     def getObjectSet(self, *, id, type):
         """
         Get object items for exhibits or groups; expects id and type. Type is either
-        "exhibit" or "group". Returns the request. 
+        "exhibit" or "group". Returns the request.
         """
 
         s = Search(module="Object")
@@ -181,7 +182,7 @@ class Sar:  # methods in alphabetical order
 
     def join(self, *, inL):
         """
-        Expects several documents as xml string to join them to one bigger 
+        Expects several documents as xml string to join them to one bigger
         document. Returns xml string.
         """
         # print (inL)
@@ -242,7 +243,7 @@ class Sar:  # methods in alphabetical order
                 attributes = moduleN.attrib
                 attributes["totalSize"] = str(len(itemsL))
             except:
-                pass # it is not an error if a file is has no items that can be counted
+                pass  # it is not an error if a file is has no items that can be counted
 
         # print(known_types)
         xml = etree.tostring(firstET, pretty_print=True, encoding="unicode")
@@ -253,7 +254,7 @@ class Sar:  # methods in alphabetical order
     def saveAttachments(self, *, xml, adir):
         """
         For a set of multimedia moduleItems, download their attachments.
-        
+
         Typcially will process moduleItems of type multimeida (aka media). But
         could theoretically also work on different types.
 
@@ -300,8 +301,8 @@ class Sar:  # methods in alphabetical order
                 0
             ]  # assuming that there can be only one
             fn = mmId + Path(fn_old).suffix
-            mmPath = Path(adir).joinpath(fn) # need resolve here!
-            #print(f"POSITIVE {mmPath}")
+            mmPath = Path(adir).joinpath(fn)  # need resolve here!
+            # print(f"POSITIVE {mmPath}")
             positives.add(mmPath)
             if (
                 not mmPath.exists()
@@ -317,26 +318,26 @@ class Sar:  # methods in alphabetical order
         """
         return self.api.search(xml=xml)
 
-    def setSmbfreigabe (self, *, module="Object", id):
+    def setSmbfreigabe(self, *, module="Object", id):
         """
         Sets smbfreigabe to "Ja", but only if smbfreigabe doesn't exist yet. Typically,
         acts on object level.
-        
-        Should also determine sensible sort value in case there are freigaben already. 
+
+        Should also determine sensible sort value in case there are freigaben already.
         """
         r = api.getItem(module=module, id=id)
-        #test if smbfreigabe already exists; if so, leave it alone
+        # test if smbfreigabe already exists; if so, leave it alone
         self._smbfreigabe(module=module, id=id, sort=sort)
 
-    def _smbfreigabe (self, *, module="Object", id, sort=1):
+    def _smbfreigabe(self, *, module="Object", id, sort=1):
         """
         Sets a freigabe for SMB for a given id. User is taken from credentials.
         Todo:
-        - Curently, we setting sort = 1. We will want to test if field is empty in the future or 
+        - Curently, we setting sort = 1. We will want to test if field is empty in the future or
           rather already has a smbfreigabe. Then we will have to set a better sort value
         """
         today = datetime.date.today()
-        xml=f"""
+        xml = f"""
         <application xmlns="http://www.zetcom.com/ria/ws/module">
           <modules>
             <module name="{module}">
@@ -366,7 +367,9 @@ class Sar:  # methods in alphabetical order
         </application>"""
         m = Module(xml=xml)
         m.validate()
-        r = self.api.createRepeatableGroup(module=module, id=id, repeatableGroup="ObjPublicationGrp", xml=xml)
+        r = self.api.createRepeatableGroup(
+            module=module, id=id, repeatableGroup="ObjPublicationGrp", xml=xml
+        )
 
     # Helper
     def xmlFromFile(self, *, path):
@@ -382,10 +385,13 @@ class Sar:  # methods in alphabetical order
         )  # appears to write Element
 
     def EToString(self, *, tree):
-        etree.tostring(tree, pretty_print=True, encoding="unicode") # so as not to return bytes
+        etree.tostring(
+            tree, pretty_print=True, encoding="unicode"
+        )  # so as not to return bytes
 
     def ETfromFile(self, *, path):
         return etree.parse(str(path), ETparser)
+
 
 if __name__ == "__main__":
     import argparse
