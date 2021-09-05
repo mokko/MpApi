@@ -1,9 +1,10 @@
 """
-- For an exhibit or a group, get the objects in that set. 
-- walk thru the moduleItems
-- test for smbfreigabe. If no entry on smbfreigabe, set it
+For an exhibit or a group, set the smbfreigabe in the object records
+Only set freigabe if smbfreigabe doesn't exist yet
 
-smbfreigabe.py --type exhib --id 20222
+smbfreigabe.py --type exhibit --id 20222
+
+Should we implement logging?
 """
 
 import argparse
