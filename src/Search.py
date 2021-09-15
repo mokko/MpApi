@@ -9,7 +9,7 @@ We're using a different lingo here than Zetcom. For us an expert search can
 contain different criteria. Criteria have three components
 - a field (e.g. __id)
 - an operator (e.g. isNull)
-- and a value (e.g.
+- and a value (e.g. 123)
 
 With some operators, such as isNull, no value is needed/allowed.
 
@@ -110,12 +110,32 @@ class Search(Helper):
         # expertN = self.etree.xpath(
         #    "/s:application/s:modules/s:module/s:search/s:expert",
         #    namespaces=NSMAP)
-        etree.SubElement(
-            parentN,
-            "{http://www.zetcom.com/ria/ws/module/search}" + operator,
-            fieldPath=field,
-            operand=value,
-        )
+        if value is None:
+            etree.SubElement(
+                parentN,
+                "{http://www.zetcom.com/ria/ws/module/search}" + operator,
+                fieldPath=field,
+            )
+        else:
+            etree.SubElement(
+                parentN,
+                "{http://www.zetcom.com/ria/ws/module/search}" + operator,
+                fieldPath=field,
+                operand=value,
+            )
+
+    def addField(self, *, field):
+        try:
+            selectN = self.etree.xpath(
+                "/s:application/s:modules/s:module/s:search/s:select", namespaces=NSMAP
+            )[0]
+        except:
+            expertN = self.etree.xpath(
+                "/s:application/s:modules/s:module/s:search/s:expert", namespaces=NSMAP
+            )[0]
+            selectN = etree.Element("{http://www.zetcom.com/ria/ws/module/search}select")
+            expertN.addprevious(selectN)
+        etree.SubElement(selectN, "{http://www.zetcom.com/ria/ws/module/search}field", fieldPath=field)
 
     #
     # conjunctions
@@ -150,14 +170,14 @@ class Search(Helper):
                 if len(alist) >= amax:
                     amax = len(alist)
                     parentN = eachN
-        # print("parentN" + tree.getelementpath(parentN))
+        #print("!parentN" + tree.getelementpath(parentN))
         return parentN
 
     def _addConjunction(self, kind, modifier=False):
         """
         kind is either "and", "or" or "not"
         if modifier is True, new conjunction is added after the last;
-        if modifier is False, it is a subelement
+        if modifier is False, it is a subelement.
         """
         parentN = self._findParent()
 
