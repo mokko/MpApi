@@ -53,6 +53,7 @@ class Replace (Cycle, Check, Act):
         self.api = MpApi(baseURL=baseURL, user=user, pw=pw)
         self.lazy = lazy
         self.act = act
+        self.user = user # for _smbfreigabe
         self.NSMAP = {
             "s" : "http://www.zetcom.com/ria/ws/module/search",
             "m" : "http://www.zetcom.com/ria/ws/module",
@@ -63,8 +64,10 @@ class Replace (Cycle, Check, Act):
 
         logging.basicConfig(
             datefmt="%Y%m%d %I:%M:%S %p",
+            format='%(asctime)s %(message)s',
             filename="dbchanges.log",
             filemode="a",  # append 
+            level=logging.INFO
         )
 
 if __name__ == "__main__":

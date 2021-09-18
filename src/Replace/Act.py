@@ -1,5 +1,6 @@
 import datetime
 import logging
+from lxml import etree
 from Module import Module
 
 class Act: 
@@ -83,7 +84,7 @@ class Act:
         #print(type(xml))
         #print (xml)
         print (f"\tUPDATING ONLINE DESC for {id}")
-        print (f"refId {refId}")
+        #print (f"refId {refId}")
 
         m = Module(tree=ET)
         m.validate()
@@ -94,7 +95,7 @@ class Act:
             )
             #print (r)
             r.raise_for_status()
-            logging.info(f"objId {objId}: update onlineDescription")
+            logging.info(f"objId {id}: update onlineDescription")
 
 
     def setSmbfreigabe(self, *, module="Object", id):
@@ -150,7 +151,7 @@ class Act:
             module=module, id=id, repeatableGroup="ObjPublicationGrp", xml=xml
         )
         r.raise_for_status()
-        logging.info(f"objId {objId}: set smbfreigabe")
+        logging.info(f"objId {id}: set smbfreigabe")
 
     def _new_doc (self, *, module, id):
         """

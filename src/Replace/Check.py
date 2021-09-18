@@ -15,7 +15,7 @@ class Check:
             print("   no smbfreigabe yet")
             if self.act is True:
                 print (f"\tSETTING smbfreigabe for {id}")
-                self.sar._smbfreigabe(id=id, sort=1)
+                self._smbfreigabe(id=id, sort=1)
         else:
             print("   smbfreigabe=Ja exists")
 
@@ -42,10 +42,10 @@ class Check:
                     print ("\tfound marker, no change necessary")
 
             if found == 0:
-                print ("   marker not in online desc")
+                print ("   marker not in online desc, ADDING MY MARK")
                 if self.act is True:
                     self.updateOnlineDescription(node=rGrp[0], id=id, marker=marker)
         else:
-            print("   no online description yet, adding my mark")
+            print("   no online description yet, ADDING MY MARK")
             if self.act is True:
                 xml = self.createOnlineDescription(objId=id) 
