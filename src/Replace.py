@@ -101,7 +101,7 @@ if __name__ == "__main__":
 
     print ("baseURL: " + baseURL)
     replacer = Replace(baseURL=baseURL, pw=pw, user=user, lazy=args.lazy, act=args.act)
-    replacer.perLocId (locId="4220580") 
-    #for room in STOs:
-    #    replacer.locationCycle(locId=STOs[room])
+    #replacer.perLocId (locId="4220580") 
+    for room in STOs:
+        replacer.perLocId(locId=str(STOs[room]))
 

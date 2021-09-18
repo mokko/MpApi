@@ -42,7 +42,7 @@ class Check:
                     print ("\tfound marker, no change necessary")
 
             if found == 0:
-                print ("   marker not in online desc, ADDING MY MARK")
+                print ("   marker not in online descs")
                 if self.act is True:
                     self.updateOnlineDescription(node=rGrp[0], id=id, marker=marker)
         else:

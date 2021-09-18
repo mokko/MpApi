@@ -15,15 +15,14 @@ class Cycle:
         Lazy mode can lead to duplicate changes in the db, so CAUTION advised.
         """
         
-        out_fn = f"loc{locId}.xml" # STOid
+        out_fn = f"loc{locId}.xml" # 
         needle = "[SM8HF]"
-        
        
         if self.lazy is True and Path(out_fn).exists():
             print (f"Loading response for locId {locId} from file")
             ET = self.sar.ETfromFile(path=out_fn) 
         else: 
-            print (f"New search for STOid {locId}")
+            print (f"New search for locId {locId}")
             rXML = self._locSearch(locId=locId, limit=limit)
             self.sar.toFile(xml=rXML, path=out_fn) # temp file for debugging
             ET = etree.fromstring(bytes(rXML, "UTF-8"))
@@ -44,7 +43,7 @@ class Cycle:
             make a new search, execute it and return results that list all Object
             records in one location as xml.
         """
-        s = Search(module="Object", limit=limit) #Dont forget limits!
+        s = Search(module="Object", limit=limit) 
         #experiment with fields
         #s.addField(field="__id")
         #s.addField(field="ObjCurrentLocationVoc")
@@ -60,5 +59,6 @@ class Cycle:
         #s.print()
         s.validate(mode="search")
         r = self.sar.search (xml=s.toString())
-        print (r)
+        #r.raise_for_status() # is built into api.search
+        #print (r)
         return r.text
