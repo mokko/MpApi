@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 How do we define the set of records?
 
@@ -49,24 +48,24 @@ credentials = "emem1.py"  # in pwd
 
 class Replace (Cycle, Check, Act):
     def __init__(self, *, baseURL, user, pw, lazy=False, act=False):
-        self.sar = Sar(baseURL=baseURL, user=user, pw=pw)
         self.api = MpApi(baseURL=baseURL, user=user, pw=pw)
-        self.lazy = lazy
+        self.sar = Sar(baseURL=baseURL, user=user, pw=pw)
         self.act = act
+        self.lazy = lazy
         self.user = user # for _smbfreigabe
         self.NSMAP = {
             "s" : "http://www.zetcom.com/ria/ws/module/search",
             "m" : "http://www.zetcom.com/ria/ws/module",
         }
 
-        print (f"LAZY: {self.lazy}")
         print (f"ACT: {self.act}")
+        print (f"LAZY: {self.lazy}")
 
         logging.basicConfig(
             datefmt="%Y%m%d %I:%M:%S %p",
-            format='%(asctime)s %(message)s',
+            format='[%(asctime)s %(message)s]',
             filename="dbchanges.log",
-            filemode="a",  # append 
+            filemode="a", # append 
             level=logging.INFO
         )
 
@@ -77,7 +76,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Command line frontend for Replace.py")
     parser.add_argument("-l","--lazy", help="lazy modes reads search results from a file cache, for debugging", action='store_true')
-    parser.add_argument("-a","--act", help="without act, only show what would be changed, don't actually change the db", action='store_true')
+    parser.add_argument("-a","--act", help="inclue action, without it only show what would be changed", action='store_true')
     args = parser.parse_args()
 
     STOs = {
