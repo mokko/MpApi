@@ -184,7 +184,7 @@ class MpApi:
     #
     # B.5 REPEATABLE GROUPS
     #
-    def createReference(self, *, module, id, repeatableGroup, groupId, reference, xml):
+    def createReference(self, *, module, id, groupId, reference, repeatableGroup, xml):
         """
         Add a reference to a reference field within a repeatable group
         POST http://.../ria-ws/application/module/{module}/{__id}/{repeatableGroup}/{__groupId}/{reference}
@@ -208,17 +208,18 @@ class MpApi:
         r.raise_for_status()
         return r
 
-    def updateRepeatableGroup(self, *, module, id, referenceId):
+    def updateRepeatableGroup(self, *, module, id, referenceId, repeatableGroup, xml):
         """
         Update all fields of repeatable groups / references
         PUT http://.../ria-ws/application/module/{module}/{__id}/{repeatableGroup|reference}/{__referenceId}
         """
         url = f"{self.appURL}/module/{module}/{id}/{repeatableGroup}/{referenceId}"
+        #xml = xml.encode()
         r = requests.put(url, data=xml, headers=self.headers, auth=self.auth)
         r.raise_for_status()
         return r
 
-    def updateFieldInGroup(self, *, module, id, referenceId, datafield):
+    def updateFieldInGroup(self, *, module, id, referenceId, datafield, repeatableGroup):
         """
         Update a single data field of a repeatable group / reference
         PUT http://.../ria-ws/application/module/{module}/{__id}/{repeatableGroup|reference}/{__referenceId}/{datafield}
@@ -228,7 +229,7 @@ class MpApi:
         r.raise_for_status()
         return r
 
-    def deleteRepeatableGroup(self, *, module, id, referenceId):
+    def deleteRepeatableGroup(self, *, module, id, referenceId, repeatableGroup):
         """
         Delete a complete repeatable group / reference
         DELETE http://.../ria-ws/application/module/{module}/{__id}/{repeatableGroup|reference}/{__referenceId}
@@ -238,7 +239,7 @@ class MpApi:
         r.raise_for_status()
         return r
 
-    def deleteReferenceInGroup(self, *, module, id, groupId, referenceId):
+    def deleteReferenceInGroup(self, *, module, id, groupId, referenceId, repeatableGroup):
         """
         Delete a reference contained within a repeatable group
         DELETE http://.../ria-ws/application/module/{module}/{__id}/{repeatableGroup}/{__groupId}/{reference}/{__referenceId}

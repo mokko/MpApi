@@ -18,7 +18,7 @@ USAGE:
     # CONSTRUCTION: 4 ways to make a moduleList
     m = Module(file="path.xml")  # load from disc
     m = Module(xml=xml)          # from xml string
-    m = Module(etree=lxml.etree) # from lxml.etree object
+    m = Module(tree=lxml.etree) # from lxml.etree object
     m = Module(name="Object", totalSize=1) # new Object item from scratch
 
     # WRITING XML FROM SCRATCH
