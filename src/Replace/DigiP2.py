@@ -26,7 +26,6 @@ import logging
 if "PYTHONPATH" in os.environ:
     sys.path.append(os.environ["PYTHONPATH"])
 
-from Module import Module
 from Search import Search
 from Sar import Sar
 from MpApi import MpApi
@@ -87,19 +86,16 @@ class DigiP2:
               <moduleItem id="{id}">
                 <repeatableGroup name="MulApprovalGrp">
                     <repeatableGroupItem>
-                        <dataField dataType="Date" name="ModifiedDateDat">
-                            <value>{today}</value>
-                        </dataField>
                         <dataField dataType="Varchar" name="ModifiedByTxt">
                             <value>{user}</value>
                         </dataField>
-                        <dataField dataType="Long" name="SortLnu">
-                            <value>{sort}</value>
+                        <dataField dataType="Date" name="ModifiedDateDat">
+                            <value>{today}</value>
                         </dataField>
-                       <vocabularyReference name="TypeVoc" id="62650" instanceName="MulApprovalTypeVgr">
-                         <vocabularyReferenceItem id="2600647"/>
+                       <vocabularyReference name="TypeVoc" id="58635" instanceName="MulApprovalTypeVgr">
+                         <vocabularyReferenceItem id="1816002"/>
                        </vocabularyReference>
-                       <vocabularyReference name="ApprovalVoc" id="1816002" instanceName="MulApprovalVgr">
+                       <vocabularyReference name="ApprovalVoc" id="58634" instanceName="MulApprovalVgr">
                          <vocabularyReferenceItem id="4160027"/>
                        </vocabularyReference>
                    </repeatableGroupItem>

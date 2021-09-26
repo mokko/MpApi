@@ -98,7 +98,7 @@ class Replace:
         onItem = plugin.onItem() # callback for onItem also comes from plugin. 
         for payload in replacer.loop(xpath=xpath, onItem=onItem):
             if args.act is True:
-                print ("ABOUT TO ACT")
+                print (f"ABOUT TO ACT {payload['xml']}")
                 m = Module(xml=payload["xml"])
                 m.validate()
                 if payload["type"] == "createRepeatableGroup":
