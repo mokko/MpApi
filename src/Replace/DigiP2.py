@@ -21,21 +21,9 @@ Interface: I am looking for a decent easy-to-implement interface
 import os
 import sys
 import datetime
-import logging
-
-if "PYTHONPATH" in os.environ:
-    sys.path.append(os.environ["PYTHONPATH"])
 
 from Search import Search
-from Sar import Sar
-from MpApi import MpApi
-from lxml import etree
 from pathlib import Path
-
-NSMAP = {
-    "s" : "http://www.zetcom.com/ria/ws/module/search",
-    "m" : "http://www.zetcom.com/ria/ws/module",
-}
 
 
 class DigiP2:
@@ -64,7 +52,7 @@ class DigiP2:
         return query 
 
     def onItem(self):
-        return self.setAssetFreigabe # does this return a callback?
+        return self.setAssetFreigabe # returns a callback
 
     def setAssetFreigabe(self, *, node, user):
         """
@@ -114,8 +102,4 @@ class DigiP2:
             "success": f"{module} {id}: set asset smbfreigabe" 
         }
 
-        return payload
-        
-
-        
-
+        return payload 
