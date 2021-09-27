@@ -26,7 +26,7 @@ from Search import Search
 from pathlib import Path
 
 
-class DigiP2:
+class DigiP:
     def loop (self):
         return "/m:application/m:modules/m:module[@name = 'Multimedia']/m:moduleItem" 
     
