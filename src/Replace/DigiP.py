@@ -18,20 +18,19 @@ Interface: I am looking for a decent easy-to-implement interface
     setAssetFreigabe.
 """
 
-import os
-import sys
 import datetime
 
 from Search import Search
-from pathlib import Path
-
 
 class DigiP:
+    def input (self):
+        return {"locId": "4220557"}
+
+
     def loop (self):
         return "/m:application/m:modules/m:module[@name = 'Multimedia']/m:moduleItem" 
     
-    def search(self, limit=-1):
-        locId = "4220557"
+    def search(self, limit=-1, id):
         query = Search(module="Multimedia", limit=limit) 
         query.AND()
         query.addCriterion(

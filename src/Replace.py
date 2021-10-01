@@ -3,25 +3,6 @@ SEARCH/REPLACE TOOL for RIA.
 I am still looking for an intermdiary, but a decent and easy-to-implement 
 interface for the short-term future.
 
-STOs = {
-    #Westflügel, Westspange Eröffnung
-    "O1.189.01.K1 M13": 4220560,
-    "O2.017.B2 M37": 4220571,
-    "O2.019.P3 M39": 4220580,
-    "O2.029.B3 M15": 4220589,
-    "O2.037.B3 M16": 4220679,
-    "O2.124.K1 M14": 4220743,
-    "O2.133.K2 M12": 4220744,
-    "O2.160.02.B2 SM Afrika": 4220747,
-    "O3.014.B2 M61": 4220964,
-    "O3.021.B3 M44": 4220994,
-    "O3.090.K1 M43StuSamZ-Asien": 4221084,
-    "O3.097.K2 M42": 4221123,
-    "O3.125.02.B2 M60": 4221168,
-    "O3.126.P3 M62": 4221189,
-    "O3.127.01.B3 M45": 4221214,
-}
-
 """
 
 import logging
@@ -37,6 +18,7 @@ if "PYTHONPATH" in os.environ:
 from Sar import Sar
 from MpApi import MpApi
 from Module import Module
+from Search import Search
 
 credentials = "credentials.py"  # in pwd
 #credentials = "vierteInstanz.py" 
@@ -92,36 +74,62 @@ class Replace:
         """    
             should probably go into the class
         """
-        query = plugin.search(limit=limit)  # plugin returns the search object
-        replacer.search(query=query)  # save result in self.ET and write to disk for debugging
-        xpath = plugin.loop()    # plugin provides xpath for the loop
-        onItem = plugin.onItem() # callback for onItem also comes from plugin. 
-        for payload in replacer.loop(xpath=xpath, onItem=onItem):
-            if args.act is True:
-                print (f"ABOUT TO ACT {payload['xml']}")
-                m = Module(xml=payload["xml"])
-                m.validate()
-                if payload["type"] == "createRepeatableGroup":
-                    r = self.api.createRepeatableGroup(
-                        module=payload["module"], id=payload["id"], repeatableGroup=payload["repeatableGroup"], xml=payload["xml"]
-                    )
-                    r.raise_for_status()
-                    logging.info(payload["success"])
+        input = plugin.input()
+        limit = int(limit)
+        count = int(0)
+        for key in input:
+            print (f"INPUT {key}")
+            query = plugin.search(id=input[key]) 
+            query.validate(mode="search")
+            # should validate the query inside replacer? Probably yes  
+            replacer.search(query=query, id=input[key])  
+            xpath = plugin.loop()
+            onItem = plugin.onItem()
+            for payload in replacer.loop(xpath=xpath, onItem=onItem):
+                #print (f"WOULD ACT {payload['xml']}")
+                if "xml" in payload: # it's possible that payload is empty, but it has to exist
+                    m = Module(xml=payload["xml"])
+                    m.validate()
+                    count += 1
+                    if args.act is True:
+                        if payload["type"] == "createRepeatableGroup":
+                            r = self.api.createRepeatableGroup(
+                                module=payload["module"], 
+                                id=payload["id"], 
+                                repeatableGroup=payload["repeatableGroup"], 
+                                xml=payload["xml"]
+                            )
+                        elif payload["type"] == "updateRepeatableGroup":
+                            r = self.api.updateRepeatableGroup(
+                                module=payload["module"], 
+                                id=payload["id"], 
+                                repeatableGroup=payload["repeatableGroup"], 
+                                xml=payload["xml"],
+                                referenceId=refId
+                            )
+                        else:
+                            raise TypeError ("UNKNOWN PAYLOAD TYPE")
+                        r.raise_for_status()
+                        logging.info(payload["success"])
+                    if count >= limit:
+                        print (f"Limit of {limit} reached, aborting")
+                        return  # break for loop
+        print (f"count: {count}")           
 
-    def search(self, *, query):
-        out_fn="temp.zml.xml"
+    def search(self, *, query, id):
+        out_fn=f"temp{id}.zml.xml"
         if self.lazy is True and Path(out_fn).exists():
             print (f"Loading response for temp file {out_fn}")
             self.ET = self.sar.ETfromFile(path=out_fn) 
         else: 
-            print (f"New search")
-            print (query.toString())
-            print ("About to validate search ...", end="")
+            #print (f"New search")
+            #print (query.toString())
+            #print ("About to validate search ...", end="")
             query.validate(mode="search")
-            print ("ok")
+            #print ("ok")
             response = self.sar.search (xml=query.toString()) # replace with self.api?
             #response.raise_for_status() # is built into api.search
-            print (f"Writing response to temp file: {out_fn}")
+            print (f" writing response to temp file: {out_fn}")
             self.sar.toFile(xml=response.text, path=out_fn) # replace with self.api?
             self.ET = etree.fromstring(bytes(response.text, "UTF-8"))
 
