@@ -70,13 +70,16 @@ class WestMarker:
             field="__orgUnit", 
             value="AKuPrimarverpackungen", # 1632806EM-Primärverpackungen
         )
-        query.NOT(modifier=True)
+        query.NOT()
         query.addCriterion(
             operator="contains", 
             field="ObjTextOnlineGrp.TextHTMLClb",
             value="SM8HF", 
         )
-        query.print()
+        query.addField(field="ObjTextOnlineGrp.repeatableGroupItem")
+        query.addField(field="ObjTextOnlineGrp.TextHTMLClb")
+        query.addField(field="ObjTextOnlineGrp.TextClb")
+        #query.print()
         return query
 
     def onItem(self):
@@ -168,11 +171,13 @@ class WestMarker:
         #we have already parsed it once and determined it has doesn't have marker
         #now we need to add the marker to the first repeatableGroupItem
 
+        module = "Object"
+        rGrpName = "ObjTextOnlineGrp"
         #creating a new document for upload
         outer = f"""
         <application xmlns="http://www.zetcom.com/ria/ws/module">
             <modules>
-                <module name="Object">
+                <module name="{module}">
                     <moduleItem id="{id}">
                     </moduleItem>
                 </module>

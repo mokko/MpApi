@@ -143,3 +143,31 @@ def test_six():
     s.toFile(path="search.tmp.xml")
     assert s.validate(mode="search") is True
 
+def test_seven(): # addField
+    s = Search()
+    s.AND()
+    s.addCriterion(
+        operator="equalsField", 
+        field="ObjCurrentLocationVoc",
+        value="4220560", # O1.189.01.K1 M13
+    )
+    s.addCriterion(
+        operator="notEqualsField", # notEqualsTerm
+        field="ObjPublicationGrp.TypeVoc",
+        value="2600647", # use id? Daten freigegeben für SMB-digital
+    )
+    s.addCriterion(
+        operator="notEqualsField", # notEqualsTerm
+        field="__orgUnit", #__orgUnit is not allowed in Zetcom's own search.xsd 
+        value="EMPrimarverpackungen", # 1632806EM-Primärverpackungen
+    )
+    s.NOT()
+    s.addCriterion(
+        operator="contains", 
+        field="ObjTextOnlineGrp.TextHTMLClb",
+        value="SM8HF", 
+    )
+    s.addField(field="__id")
+    #s.print()
+    s.toFile(path="search.tmp.xml")
+    assert s.validate(mode="search") is True

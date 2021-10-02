@@ -111,7 +111,7 @@ class Replace:
                             raise TypeError ("UNKNOWN PAYLOAD TYPE")
                         r.raise_for_status()
                         logging.info(payload["success"])
-                    if count >= limit:
+                    if limit != -1 and count >= limit:
                         print (f"Limit of {limit} reached, aborting")
                         return  # break for loop
         print (f"count: {count}")           
