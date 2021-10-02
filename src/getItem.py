@@ -30,5 +30,5 @@ if __name__ == "__main__":
     client = MpApi(baseURL=baseURL, user=user, pw=pw)
     r = client.getItem(module=args.module,id=args.id)
     out_fn = f"{args.module}{args.id}.xml"
-    print ("Writing to {out_fn}")
+    print (f"Writing to {out_fn}")
     client.toFile(xml=r.text, path=out_fn)
