@@ -80,9 +80,14 @@ allowedOperators = {
 
 
 class Search(Helper):
-    def __init__(self, *, module=None, limit=-1, offset=0, fromFile=None):
+    def __init__(self, *, module=None, limit=-1, offset=0, fromFile=None, fromString=None):
+        """
+            Currently, limit, offset and module are ignored if fromFile or fromString are used.
+        """
 
-        if fromFile is not None:
+        if fromString is not None:
+            self.fromString(xml=fromString)
+        elif fromFile is not None:
             self.etree = etree.parse(str(fromFile))
         else:
             xml = f"""<application 
@@ -101,24 +106,23 @@ class Search(Helper):
             </application>"""
             parser = etree.XMLParser(remove_blank_text=True)
             self.etree = etree.fromstring(xml, parser)
+            self.lastN = self.etree.xpath(
+                "/s:application/s:modules/s:module/s:search/s:expert", namespaces=NSMAP
+            )[0]
 
     def addCriterion(self, *, operator, field, value=None):
         if operator not in allowedOperators:
             raise TypeError(f"Unknown operator: '{operator}'")
 
-        parentN = self._findParent()
-        # expertN = self.etree.xpath(
-        #    "/s:application/s:modules/s:module/s:search/s:expert",
-        #    namespaces=NSMAP)
         if value is None:
             etree.SubElement(
-                parentN,
+                self.lastN,
                 "{http://www.zetcom.com/ria/ws/module/search}" + operator,
                 fieldPath=field,
             )
         else:
             etree.SubElement(
-                parentN,
+                self.lastN,
                 "{http://www.zetcom.com/ria/ws/module/search}" + operator,
                 fieldPath=field,
                 operand=value,
@@ -141,53 +145,31 @@ class Search(Helper):
     # conjunctions
     #
 
-    def AND(self, *, modifier=False):
-        self._addConjunction("and", modifier)
+    def AND(self):
+        self._addConjunction("and")
 
-    def OR(self, *, modifier=False):
-        self._addConjunction("or", modifier)
+    def OR(self):
+        self._addConjunction("or")
 
-    def NOT(self, *, modifier=False):
-        self._addConjunction("not", modifier)
+    def NOT(self):
+        self._addConjunction("not")
 
     #
     # private helpers
     #
 
-    def _findParent(self):
-        conjN = self.etree.xpath("//s:and|//s:and|//s:or", namespaces=NSMAP)
-
-        tree = etree.ElementTree(self.etree)
-        if len(conjN) == 0:
-            parentN = self.etree.xpath(
-                "/s:application/s:modules/s:module/s:search/s:expert", namespaces=NSMAP
-            )[0]
-        else:
-            amax = 0
-            for eachN in conjN:
-                epath = tree.getelementpath(eachN)
-                alist = epath.split("/")
-                if len(alist) >= amax:
-                    amax = len(alist)
-                    parentN = eachN
-        #print("!parentN" + tree.getelementpath(parentN))
-        return parentN
-
-    def _addConjunction(self, kind, modifier=False):
+    def _addConjunction(self, type):
         """
-        kind is either "and", "or" or "not"
-        if modifier is True, new conjunction is added after the last;
-        if modifier is False, it is a subelement.
+        kind is "and", "or" or "not"
+        either places conjunction under expert or under last conjunction that has been added.
         """
-        parentN = self._findParent()
+        allowed_types = ["and", "or", "not"]
+        if type not in allowed_types:
+            raise TypeError ("conjunction type NOT ALLOWED")
 
-        if modifier is False:
-            etree.SubElement(
-                parentN, "{http://www.zetcom.com/ria/ws/module/search}" + kind
-            )
-        else:
-            conjN = etree.Element("{http://www.zetcom.com/ria/ws/module/search}" + kind)
-            parentN.addnext(conjN)
+        self.lastN = etree.SubElement(
+            self.lastN, "{http://www.zetcom.com/ria/ws/module/search}" + type 
+        )
 
 
 if __name__ == "__main__":

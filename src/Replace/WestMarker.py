@@ -70,14 +70,13 @@ class WestMarker:
             field="__orgUnit", 
             value="AKuPrimarverpackungen", # 1632806EM-Primärverpackungen
         )
-        #query.NOT
-        #query.addCriterion(
-        #    operator="contains", 
-        #    field="ObjCurrentLocationVoc",
-        #    value="SM8HF", 
-        #)
-        #query.print()
-        query.validate(mode="search")
+        query.NOT(modifier=True)
+        query.addCriterion(
+            operator="contains", 
+            field="ObjTextOnlineGrp.TextHTMLClb",
+            value="SM8HF", 
+        )
+        query.print()
         return query
 
     def onItem(self):

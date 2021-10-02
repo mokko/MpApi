@@ -47,6 +47,11 @@ class Helper:
             self.xsd = etree.parse(str(xsdLoc))
         xmlschema = etree.XMLSchema(self.xsd)
         xmlschema.assertValid(self.etree)  # dies if doesn't validate
+        return True
 
     def fromFile(self, *, path):
         self.etree = etree.parse(str(path))
+
+    def fromString(self, *, xml):
+        parser = etree.XMLParser(remove_blank_text=True)
+        self.etree = etree.fromstring(xml, parser)
