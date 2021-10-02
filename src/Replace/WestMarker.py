@@ -70,12 +70,14 @@ class WestMarker:
             field="__orgUnit", 
             value="AKuPrimarverpackungen", # 1632806EM-Primärverpackungen
         )
-        query.NOT()
-        query.addCriterion(
-            operator="contains", 
-            field="ObjTextOnlineGrp.TextHTMLClb",
-            value="SM8HF", 
-        )
+        #query.NOT() 
+        #query.addCriterion( # doesn't find records without ObjTextOnlineGrp, while "enthält nicht" in the Gui does find empty records
+        #    operator="contains", 
+        #    field="ObjTextOnlineGrp.TextHTMLClb",
+        #    value="SM8HF", 
+        #)
+        #query.OR() 
+        # then we have to download all records and test them manually
         query.addField(field="ObjTextOnlineGrp.repeatableGroupItem")
         query.addField(field="ObjTextOnlineGrp.TextHTMLClb")
         query.addField(field="ObjTextOnlineGrp.TextClb")

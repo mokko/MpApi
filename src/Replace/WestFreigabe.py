@@ -66,6 +66,10 @@ class WestFreigabe:
             field="__orgUnit", 
             value="AKuPrimarverpackungen", # 1632806EM-Primärverpackungen
         )
+        query.addField(field="ObjPublicationGrp")
+        query.addField(field="ObjPublicationGrp.repeatableGroupItem")
+        query.addField(field="ObjPublicationGrp.PublicationVoc")
+        query.addField(field="ObjPublicationGrp.TypeVoc")
         #query.print()
         return query
         
