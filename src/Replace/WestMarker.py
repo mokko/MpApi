@@ -155,10 +155,10 @@ class WestMarker:
         payload = {
             "type": "createRepeatableGroup",
             "module": module,
-            "id": id,
+            "id": objId,
             "repeatableGroup": rGrpName,
             "xml": xml,
-            "success": f"{module} {id}: new online description w/ marker"  
+            "success": f"{module} {objId}: new online description w/ marker"  
         }
         return payload
 

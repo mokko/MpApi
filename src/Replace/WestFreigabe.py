@@ -84,9 +84,8 @@ class WestFreigabe:
 
     def setObjectFreigabe(self, *, node, user):
         """
-            This is payload. Untested.
             We're inside Objects's nodeItem here
-            We have already filtered out cases SMBFreigabe exists already  
+            We have already filtered out cases where SMBFreigabe exists already  
         """
         #print (node)
 
