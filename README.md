@@ -11,7 +11,10 @@ Frontends and CLI utils
 * getItem.py - just download one moduleItem to your taste
 * Replace.py - mechanism for mass search/replace tasks (still early in development, alpha status)
 
-Requirements:
+Example Plugins for Replace.py
+* see Replace/*
+
+Requirements
 * lxml
 * request
 * ?
