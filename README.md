@@ -2,7 +2,11 @@
 
 API Specification: http://docs.zetcom.com/ws
 
-* MpApi.py   - client library
+Libraries
+* MpApi.py   - low level client 
+* Sar.py     - search and response; slightly higher level client
+
+Frontends and CLI utils
 * mink.py    - command line frontend for MpApi; write your own jobs in jobs.dsl
 * getItem.py - just download one moduleItem to your taste
 * Replace.py - mechanism for mass search/replace tasks (still early in development, alpha status)
@@ -10,3 +14,4 @@ API Specification: http://docs.zetcom.com/ws
 Requirements:
 * lxml
 * request
+* ?
