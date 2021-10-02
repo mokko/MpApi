@@ -18,9 +18,12 @@ or, not).
 
 USAGE
     s = mpSearch(module="Object", limit=-1, offset=0)
-    s.AND
-    s.addCriterion (operator="equalsValue", field="__id", value="1234")
-    s.addCriterion (operator="equalsValue", field="__id", value="1234")
+    s.AND()
+    s.addCriterion(operator="equalsValue", field="__id", value="1234")
+    s.addCriterion(operator="equalsValue", field="__id", value="1234")
+
+    #if you only want certain fields back, list them
+    s.addField()
 
 #helpers
     print(s.toString())
@@ -146,19 +149,19 @@ class Search(Helper):
     #
 
     def AND(self):
-        self._addConjunction("and")
+        self._addConjunction(type="and")
 
     def OR(self):
-        self._addConjunction("or")
+        self._addConjunction(type="or")
 
     def NOT(self):
-        self._addConjunction("not")
+        self._addConjunction(type="not")
 
     #
     # private helpers
     #
 
-    def _addConjunction(self, type):
+    def _addConjunction(self, *, type):
         """
         kind is "and", "or" or "not"
         either places conjunction under expert or under last conjunction that has been added.
