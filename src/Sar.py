@@ -21,12 +21,10 @@ USAGE:
     sr = Sar(baseURL=baseURL, user=user, pw=pw)
 
     #get stuff from single ids; returns request object
-    r = sr.getItem(module="Objekt", id="1234")    # returns single item for any module
-    r = sr.getActorSet(type="exhibit", id="1234") # Actor items for objects in given exhibit/group
-    r = sr.getMediaSet(type="exhibit", id="1234") # Media items for objects in given exhibit/group
-    r = sr.getObjectSet(type="group", id="1234")  # Object items in given exhibit/group
-    r = sr.getRegistrySet(type="exhibit", id="1234") # Registrar items 
-
+    #NEW INTERFACE
+    r = sr.getByGroup(module=module, id=groupId)
+    r = sr.getByExhibit(module=module, id=exhibitId)
+    r = sr.getByLocation(module=module, id=locId)
     #search
     s = Search()
     r = sr.search (xml=s.toString())
@@ -43,8 +41,7 @@ USAGE:
         # policy="mulId.ext"
         # policy="oldname"
 
-    #modify data
-    sr.setSmbfreigabe (module="Object", id="1234") # sets smbfreigabe if doesn't exist yet.
+    #modify data -> not in SAR.py
     
     #helpers                   
     xml = sr.xmlFromFile (path=path)
@@ -103,81 +100,40 @@ class Sar:  # methods in alphabetical order
         """
         return self.api.getItem(module=module, id=id)
 
-    def getActorSet(self, *, type, id):
-        """
-        Get a set of actors from an exhibit or group.
-        Type is either "exhibit" or "group".
-        """
-        s = Search(module="Person")
-        if type == "exhibit":
-            s.addCriterion(
-                field="PerObjectRef.ObjRegistrarRef.RegExhibitionRef.__id",
-                operator="equalsField",
-                value=id,
-            )
-        elif type == "group":
-            s.addCriterion(
-                field="PerObjectRef.ObjObjectGroupsRef.__id",
-                operator="equalsField",
-                value=id,
-            )
-        else:
-            raise ValueError("Unknown type! {type}")
-        return self.api.search(xml=s.toString())
-
-    def getMediaSet(self, *, id, type):
-        """
-        Get a set multimedia items for exhibits or groups containing objects; returns a
-        requests object with a set of items. Returns request object.
-        """
-        s = Search(module="Multimedia")
-        if type == "exhibit":
-            s.addCriterion(
-                field="MulObjectRef.ObjRegistrarRef.RegExhibitionRef.__id",
-                operator="equalsField",
-                value=id,
-            )
-        elif type == "group":
-            s.addCriterion(
-                field="MulObjectRef.ObjObjectGroupsRef.__id",
-                operator="equalsField",
-                value=id,
-            )
-        else:
-            raise ValueError("Unknown type! {type}")
-        return self.api.search(xml=s.toString())
-
-    def getObjectSet(self, *, id, type):
-        """
-        Get object items for exhibits or groups; expects id and type. Type is either
-        "exhibit" or "group". Returns the request.
-        """
-
-        s = Search(module="Object")
-        if type == "exhibit":
-            s.addCriterion(
-                field="ObjRegistrarRef.RegExhibitionRef.__id",
-                operator="equalsField",
-                value=id,
-            )
-        elif type == "group":
-            s.addCriterion(
-                field="ObjObjectGroupsRef.__id", operator="equalsField", value=id
-            )
-        else:
-            raise ValueError("Unknown type! {type}")
-        s.validate(mode="search")
-        return self.api.search(xml=s.toString())
-
-    def getRegistrySet(self, *, id):
-        s = Search(module="Registrar")
+    def _getBy(self, *, module, id, field):
+        s = Search(module=module)
         s.addCriterion(
-            field="RegExhibitionRef.__id",
+            field=field,
             operator="equalsField",
             value=id,
         )
         s.validate(mode="search")
         return self.api.search(xml=s.toString())
+
+    def getByExhibit(self, *, id, module):
+        fields = {
+            "Multimedia" : "MulObjectRef.ObjRegistrarRef.RegExhibitionRef.__id",
+            "Object" : "ObjRegistrarRef.RegExhibitionRef.__id",
+            "Person" : "PerObjectRef.ObjRegistrarRef.RegExhibitionRef.__id",
+            "Registrar" : "RegExhibitionRef.__id"
+        }
+        return self._getBy(module=module, id=id, field=fields[module])
+
+    def getByGroup(self, *, id, module):
+        fields = {
+            "Multimedia" : "MulObjectRef.ObjObjectGroupsRef.__id",
+            "Object" : "ObjObjectGroupsRef.__id",
+            "Person" :"PerObjectRef.ObjObjectGroupsRef.__id",
+        }
+        return self._getBy(module=module, id=id, field=fields[module])
+
+    def getByLocation(self, *, id, module):
+        fields = {
+            "Multimedia" : "MulObjectRef.ObjCurrentLocationVoc",
+            "Object" : "ObjCurrentLocationVoc",
+            "Person" :"PerObjectRef.ObjCurrentLocationVoc",
+        }
+        return self._getBy(module=module, id=id, field=fields[module])
 
     def join(self, *, inL):
         """

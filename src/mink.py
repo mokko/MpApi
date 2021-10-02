@@ -153,7 +153,10 @@ class Mink:
             pkX = self.xmlFromFile(path=pk_fn)
         else:
             self.info(f" actors from remote, saving to {pk_fn}")
-            r = sar.getActorSet(type=type, id=id)
+            if type == "exhibit":
+                r = sar.getByExhibit(module="Person", id=id)
+            else:
+                r = sar.getByGroup(module="Person", id=id)
             self.xmlToFile(xml=r.text, path=pk_fn)
             pkX = r.text
         return pkX
@@ -250,7 +253,12 @@ class Mink:
             mmX = self.xmlFromFile(path=mm_fn)
         else:
             self.info(f" media from remote, saving to {mm_fn}")
-            r = self.sar.getMediaSet(type=type, id=id)
+            #r = self.sar.getMediaSet(type=type, id=id)
+            if type == "exhibit":
+                r = self.sar.getByExhibit(module="Multimedia", id=id)
+            else:
+                r = self.sar.getByGroup(module="Multimedia", id=id)
+            
             self.xmlToFile(xml=r.text, path=mm_fn)
             mmX = r.text
         return mmX
@@ -275,7 +283,11 @@ class Mink:
             objX = self.xmlFromFile(path=obj_fn)
         else:
             self.info(f" objects from remote, saving to {obj_fn}")
-            r = sar.getObjectSet(type=type, id=id)
+            #r = sar.getObjectSet(type=type, id=id)
+            if type == "exhibit":
+                r = sar.getByExhibit(module="Object", id=id)
+            else:
+                r = sar.getByGroup(module="Object", id=id)
             self.xmlToFile(xml=r.text, path=obj_fn)
             objX = r.text
         return objX
@@ -312,7 +324,7 @@ class Mink:
                 regX = self.xmlFromFile(path=reg_fn)
             else:
                 self.info(f" registry from remote, saving to {reg_fn}")
-                r = self.sar.getRegistrySet(id=id)
+                r = self.sar.getByExhibit(id=id, module="Registrar")
                 self.xmlToFile(xml=r.text, path=reg_fn)
                 regX = r.text
             return regX

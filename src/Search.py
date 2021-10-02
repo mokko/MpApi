@@ -28,7 +28,7 @@ USAGE
 #helpers
     print(s.toString())
     s.toFile(path="out.xml")
-    s.validate()
+    s.validate(mode="search")
     
 self.etree stores the lxml object containing the xml document.
 
