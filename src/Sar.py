@@ -65,7 +65,7 @@ NSMAP = {
 ETparser = etree.XMLParser(remove_blank_text=True)
 
 
-class Sar:  # methods in alphabetical order
+class Sar:  # methods (mosly) in alphabetical order
     def __init__(self, *, baseURL, user, pw):
         """
         Earlier version stored last search in searchRequest. Eliminated b/c too
@@ -111,12 +111,20 @@ class Sar:  # methods in alphabetical order
         return self.api.search(xml=s.toString())
 
     def getByExhibit(self, *, id, module):
+        # Multimedia records from objects that are in a certain exhibit
+        # Object records that are in a certain exhibit
+        # Persons associated with objects that are in a certain exhibit
+        # Registrar records of objects in a certain exhibit
+        # Exhibit record (singular) with a certain id
         fields = {
+            "Exhibition" : "__id", # we only need the key, value is ignored
             "Multimedia" : "MulObjectRef.ObjRegistrarRef.RegExhibitionRef.__id",
             "Object" : "ObjRegistrarRef.RegExhibitionRef.__id",
             "Person" : "PerObjectRef.ObjRegistrarRef.RegExhibitionRef.__id",
             "Registrar" : "RegExhibitionRef.__id"
         }
+        if module == "Exhibition": # api.getItem should be faster than sar
+            return self.api.getItem(module=module, id=id) 
         return self._getBy(module=module, id=id, field=fields[module])
 
     def getByGroup(self, *, id, module):
@@ -137,8 +145,10 @@ class Sar:  # methods in alphabetical order
 
     def join(self, *, inL):
         """
-        Expects several documents as xml string to join them to one bigger
-        document. Returns xml string.
+        Expects a LIST of several documents as xml string and joins them to one 
+        bigger document. Returns xml string.
+
+        This method is lxml-based, so it works in memory.
         """
         # print (inL)
         known_types = set()
@@ -268,13 +278,14 @@ class Sar:  # methods in alphabetical order
 
     def search(self, *, xml):
         """
-        Send a request to the api and return the response. Expects a search in xml
-        (Same as in MpApi).
+        Send a request to the api and return the response. Expects an search as 
+        xml string in xml. (Same as in MpApi).
         """
         return self.api.search(xml=xml)
 
-
+    #
     # Helper
+    #
     def xmlFromFile(self, *, path):
         with open(path, "r", encoding="UTF-8") as f:
             xml = f.read()
