@@ -65,6 +65,7 @@ class Mink:
         args = []
         any_job = False
         # pretty ugly dsl parser...
+        # todo: ignore empty line
         with open(self.conf, mode="r") as file:
             c = 0  # line counter
             error = 0
@@ -134,42 +135,19 @@ class Mink:
 
     def definition(self, args):
         dfX = self.sar.definition()
+        print ("Writing to definition.xml")
         self.xmlToFile(xml=dfX, path="definition.xml")
-
-    def getActors(self, args):
-        type = args[0]
-        id = args[1]
-        label = args[2]
-        sar = self.sar
-        pkX = None
-
-        adir = self.project_dir.joinpath("parts")
-        if not Path.is_dir(adir):
-            Path.mkdir(adir, parents=True)
-
-        pk_fn = self.project_dir.joinpath(f"parts/{label}-pk-{type}{id}.xml")
-        if pk_fn.exists():
-            print(f" actors from cache {pk_fn}")
-            pkX = self.xmlFromFile(path=pk_fn)
-        else:
-            self.info(f" actors from remote, saving to {pk_fn}")
-            if type == "exhibit":
-                r = sar.getByExhibit(module="Person", id=id)
-            else:
-                r = sar.getByGroup(module="Person", id=id)
-            self.xmlToFile(xml=r.text, path=pk_fn)
-            pkX = r.text
-        return pkX
 
     def getAttachments(self, args):
         type = args[0]
         id = args[1]
         label = args[2]
 
-        mm_fn = self.project_dir.joinpath(f"parts/{label}-mm-{type}{id}.xml")
+        #pretty dirty: assumes that getMedia has been done before
+        mm_fn = self.project_dir.joinpath(f"parts/{label}-Multimedia-{type}{id}.xml")
         mmX = self.xmlFromFile(path=mm_fn)
 
-        pix_dir = f"{self.pix_dir}_{label}"
+        pix_dir = f"{self.pix_dir}_{label}" # this is a new dir, cannot be made earlier
         if not Path(pix_dir).exists():
             os.mkdir(pix_dir)
         print(f" checking attachments; saving to {pix_dir}")
@@ -186,30 +164,11 @@ class Mink:
                 print(f"image no longer attached, removing {img}")
                 os.remove(img)
 
-        # currently we dont get attachments that have changed, but keep the same mulId, should be rare to impossible
+        # currently we dont get attachments that have changed, but keep the same mulId, 
+        # that case should be rare 
 
     def getExhibit(self, args):
-        type = args[0]
-        id = args[1]
-        label = args[2]
-        adir = self.project_dir.joinpath("parts")
-        if not Path.is_dir(adir):
-            Path.mkdir(adir, parents=True)
-
-        if type == "exhibit":
-            exh_fn = self.project_dir.joinpath(f"parts/{label}-exh-{type}{id}.xml")
-            if exh_fn.exists():
-                print(f" exhibition from cache {exh_fn}")
-                exhX = self.xmlFromFile(path=exh_fn)
-            else:
-                self.info(f" exhibition from remote, saving to {exh_fn}")
-                r = self.sar.getItem(module="Exhibition", id=id)
-                self.xmlToFile(xml=r.text, path=exh_fn)
-                exhX = r.text
-            return exhX
-        else:
-            regX = None
-            return regX
+        return self._getPart(id=args[1], label=args[2], module="Exhibition", type=args[0])
 
     def getItem(self, args):
         """
@@ -222,10 +181,10 @@ class Mink:
         id = args[1]
         out_fn = self.project_dir.joinpath(args[1] + ".xml")
         if out_fn.exists():
-            print("File exists already; no overwrite")
+            print(f" Item from cache {out_fn}")
             return str(self.xmlFromFile(path=out_fn))
         else:
-            self.info(f"GetItem module={module} id={id} out_fn={out_fn}")
+            self.info(f"getItem module={module} id={id} out_fn={out_fn}")
             r = self.sar.getItem(module=module, id=id)
             self.xmlToFile(xml=r.text, path=out_fn)
             return r.text
@@ -236,63 +195,16 @@ class Mink:
         get attachments for that set of media records saving them to disk
         return media records as mmX
 
-        Let's make a separate method to facilitate debugging.
         """
-        type = args[0]  # exhibit or group
-        id = args[1]  # id for exhibit or group
-        label = args[2]
-        mmX = None  #
-
-        adir = self.project_dir.joinpath("parts")
-        if not Path.is_dir(adir):
-            Path.mkdir(adir, parents=True)
-
-        mm_fn = self.project_dir.joinpath(f"parts/{label}-mm-{type}{id}.xml")
-        if mm_fn.exists():
-            print(f" media from cache {mm_fn}")
-            mmX = self.xmlFromFile(path=mm_fn)
-        else:
-            self.info(f" media from remote, saving to {mm_fn}")
-            #r = self.sar.getMediaSet(type=type, id=id)
-            if type == "exhibit":
-                r = self.sar.getByExhibit(module="Multimedia", id=id)
-            else:
-                r = self.sar.getByGroup(module="Multimedia", id=id)
-            
-            self.xmlToFile(xml=r.text, path=mm_fn)
-            mmX = r.text
-        return mmX
+        return self._getPart(id=args[1], label=args[2], module="Multimedia", type=args[0])
 
     def getObjects(self, args):
         """
         expects [type, id] where type can any module (Object, Multimedia ...)
         """
-        type = args[0]
-        id = args[1]
-        label = args[2]
-        sar = self.sar
-        objX = None
+        return self._getPart(id=args[1], label=args[2], module="Object", type=args[0])
 
-        adir = self.project_dir.joinpath("parts")
-        if not Path.is_dir(adir):
-            Path.mkdir(adir, parents=True)
-
-        obj_fn = self.project_dir.joinpath(f"parts/{label}-obj-{type}{id}.xml")
-        if obj_fn.exists():
-            print(f" objects from cache {obj_fn}")
-            objX = self.xmlFromFile(path=obj_fn)
-        else:
-            self.info(f" objects from remote, saving to {obj_fn}")
-            #r = sar.getObjectSet(type=type, id=id)
-            if type == "exhibit":
-                r = sar.getByExhibit(module="Object", id=id)
-            else:
-                r = sar.getByGroup(module="Object", id=id)
-            self.xmlToFile(xml=r.text, path=obj_fn)
-            objX = r.text
-        return objX
-
-    def getPackage(self, args):
+    def getPack(self, args):
         """
         Download object and related information (attachment, media, people),
         join data together and clean it.
@@ -301,9 +213,9 @@ class Mink:
         """
         print(f"GET PACKAGE {args}")
 
-        type = args[0]
-        id = args[1]
-        label = args[2]
+        #type = args[0]
+        #id = args[1]
+        #label = args[2]
 
         join_fn = self.join(args)
         self.getAttachments(args)
@@ -312,53 +224,42 @@ class Mink:
         # self.validate(path=join_fn) # doesn't validate b/c of bad uuid
         return cleanX
 
-    def getRegistry(self, args):
-        type = args[0]
-        id = args[1]
-        label = args[2]
+    def getPersons(self, args):
+        return self._getPart(id=args[1], label=args[2], module="Person", type=args[0])
 
-        if type == "exhibit":
-            reg_fn = self.project_dir.joinpath(f"parts/{label}-reg-{type}{id}.xml")
-            if reg_fn.exists():
-                print(f" registry from cache {reg_fn}")
-                regX = self.xmlFromFile(path=reg_fn)
-            else:
-                self.info(f" registry from remote, saving to {reg_fn}")
-                r = self.sar.getByExhibit(id=id, module="Registrar")
-                self.xmlToFile(xml=r.text, path=reg_fn)
-                regX = r.text
-            return regX
-        else:
-            return None
-
+    def getRegistrar(self, args):
+        return self._getPart(id=args[1], label=args[2], module="Registrar", type=args[0])
+    
     def join(self, args):
         type = args[0]
         id = args[1]
         label = args[2]
         joinX = None
-        adir = self.project_dir.joinpath("parts")
-        if not Path.is_dir(adir):
-            Path.mkdir(adir, parents=True)
-        join_fn = self.project_dir.joinpath(f"parts/{label}-join-{type}{id}.xml")
+        parts_dir = self.project_dir.joinpath("parts")
+        #parts_dir now made during _mkdirs()
+        #if not Path.is_dir(parts_dir):
+        #    Path.mkdir(parts_dir, parents=True)
+        join_fn = parts_dir.joinpath(f"{label}-join-{type}{id}.xml")
         if join_fn.exists():
             print(f" join from cache {join_fn}")
             joinX = self.xmlFromFile(path=join_fn)
         else:
             print(f" making new join from {join_fn}")
 
-            pkX = self.getActors(args)
-            exhX = self.getExhibit(args)
-            mmX = self.getMedia(args)
-            objX = self.getObjects(args)
-            regX = self.getRegistry(args)
+        #module for target and type refers to the type of selection 
+        pkX = self._getPart(module="Person", id=id, type=type, label=label)
+        mmX = self._getPart(module="Multimedia", id=id, type=type, label=label)
+        objX = self._getPart(module="Object", id=id, type=type, label=label)
 
-            self.info(f" joining modules, saving to {join_fn}")
-            inL = [objX, mmX, pkX]
-            if type == "exhibit":
-                inL.append(exhX)
-                inL.append(regX)
-            joinX = self.sar.join(inL=inL)
-            self.xmlToFile(xml=joinX, path=join_fn)
+        self.info(f" joining modules, saving to {join_fn}")
+        inL = [objX, mmX, pkX]
+        if type == "exhibit":
+            exhX = self._getPart(module="Exhibition", id=id, type=type, label=label)
+            regX = self._getPart(module="Registrar", id=id, type=type, label=label)
+            inL.append(exhX)
+            inL.append(regX)
+        joinX = self.sar.join(inL=inL)
+        self.xmlToFile(xml=joinX, path=join_fn)
         return join_fn
 
     def pack(self, args):
@@ -388,16 +289,6 @@ class Mink:
     # PUBLIC AND PRIVATE HELPERS
     #
 
-    def validate(self, *, path):
-        m = Module(file=path)
-        print(" start validation ...")
-        m.validate()
-        print("OK")
-
-    def info(self, msg):
-        logging.info(msg)
-        print(msg)
-
     def _init_log(self):
         now = datetime.datetime.now()
         log_fn = Path(self.project_dir).joinpath(now.strftime("%Y%m%d") + ".log")
@@ -410,6 +301,25 @@ class Mink:
             format="%(asctime)s: %(message)s",
         )
 
+    def _getPart(self, *, id, label, module, type):
+        #type is either loc, exhibit or group
+        fn = self.project_dir.joinpath(f"parts/{label}-{module}-{type}{id}.xml")
+        if fn.exists():
+            print(f" {module} from cache {fn}")
+            return self.xmlFromFile(path=fn)
+        else:
+            self.info(f" {module} from remote, saving to {fn}")
+            if type == "loc":
+                r = self.sar.getByLocation(id=id, module=module)
+            elif type == "group":
+                r = self.sar.getByGroup(id=id, module=module)
+            elif type == "exhibit":
+                r = self.sar.getByExhibit(id=id, module=module)
+            else:
+                raise TypeError ("UNKNOWN type")
+            self.xmlToFile(xml=r.text, path=fn)
+            return r.text
+
     def _mkdirs(self):
         date = datetime.datetime.today().strftime("%Y%m%d")
         dir = Path(self.job).joinpath(date)
@@ -417,6 +327,30 @@ class Mink:
             Path.mkdir(dir, parents=True)
         self.project_dir = dir
         self.pix_dir = dir.parent.joinpath("pix")
+        parts_dir = self.project_dir.joinpath("parts")
+        if not Path.is_dir(parts_dir):
+            Path.mkdir(parts_dir, parents=True)
+
+    def etreeFromFile(self, *, path):
+        return etree.parse(str(path), ETparser)
+
+    def etreeToFile(self, *, ET, path):
+        ET.write(
+            str(path), pretty_print=True, xml_declaration=True, encoding="UTF-8"
+        )  # encoding is important!
+
+    def etreePrint(self, *, ET):
+        print(etree.tostring(ET, pretty_print=True))
+
+    def info(self, msg):
+        logging.info(msg)
+        print(msg)
+
+    def validate(self, *, path):
+        m = Module(file=path)
+        print(" start validation ...")
+        m.validate()
+        print("OK")
 
     def xmlFromFile(self, *, path):
         # print (f"PATH {path}")
@@ -438,17 +372,6 @@ class Mink:
 
         # tree = self.xmlToEtree (xml=xml)
         # tree.write(str(path), pretty_print=True)  # only works on tree, not Element?
-
-    def etreeFromFile(self, *, path):
-        return etree.parse(str(path), ETparser)
-
-    def etreeToFile(self, *, ET, path):
-        ET.write(
-            str(path), pretty_print=True, xml_declaration=True, encoding="UTF-8"
-        )  # encoding is important!
-
-    def etreePrint(self, *, ET):
-        print(etree.tostring(ET, pretty_print=True))
 
 
 if __name__ == "__main__":
