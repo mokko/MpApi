@@ -116,15 +116,15 @@ class Sar:  # methods (mosly) in alphabetical order
         # Persons associated with objects that are in a certain exhibit
         # Registrar records of objects in a certain exhibit
         # Exhibit record (singular) with a certain id
+        if module == "Exhibition": # api.getItem should be faster than sar
+            return self.api.getItem(module=module, id=id) 
+
         fields = {
-            "Exhibition" : "__id", # we only need the key, value is ignored
             "Multimedia" : "MulObjectRef.ObjRegistrarRef.RegExhibitionRef.__id",
             "Object" : "ObjRegistrarRef.RegExhibitionRef.__id",
             "Person" : "PerObjectRef.ObjRegistrarRef.RegExhibitionRef.__id",
             "Registrar" : "RegExhibitionRef.__id"
         }
-        if module == "Exhibition": # api.getItem should be faster than sar
-            return self.api.getItem(module=module, id=id) 
         return self._getBy(module=module, id=id, field=fields[module])
 
     def getByGroup(self, *, id, module):

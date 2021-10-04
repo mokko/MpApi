@@ -120,7 +120,7 @@ class Mink:
         type = args[0]
         id = args[1]
         label = args[2]
-        join_fn = self.project_dir.joinpath(f"parts/{label}-join-{type}{id}.xml")
+        join_fn = self.parts_dir.joinpath(f"{label}-join-{type}{id}.xml")
         clean_fn = self.project_dir.joinpath(f"{label}-clean-{type}{id}.xml")
         if clean_fn.exists():
             print(f" clean from cache {clean_fn}")
@@ -144,12 +144,12 @@ class Mink:
         label = args[2]
 
         #pretty dirty: assumes that getMedia has been done before
-        mm_fn = self.project_dir.joinpath(f"parts/{label}-Multimedia-{type}{id}.xml")
+        mm_fn = self.parts_dir.joinpath(f"{label}-Multimedia-{type}{id}.xml")
         mmX = self.xmlFromFile(path=mm_fn)
 
-        pix_dir = f"{self.pix_dir}_{label}" # this is a new dir, cannot be made earlier
-        if not Path(pix_dir).exists():
-            os.mkdir(pix_dir)
+        pix_dir = Path(f"{self.pix_dir}_{label}") # this is a new dir, cannot be made earlier
+        if not pix_dir.exists():
+            pix_dir.mkdir()
         print(f" checking attachments; saving to {pix_dir}")
         try:
             expected = self.sar.saveAttachments(xml=mmX, adir=pix_dir)
@@ -235,11 +235,8 @@ class Mink:
         id = args[1]
         label = args[2]
         joinX = None
-        parts_dir = self.project_dir.joinpath("parts")
         #parts_dir now made during _mkdirs()
-        #if not Path.is_dir(parts_dir):
-        #    Path.mkdir(parts_dir, parents=True)
-        join_fn = parts_dir.joinpath(f"{label}-join-{type}{id}.xml")
+        join_fn = self.parts_dir.joinpath(f"{label}-join-{type}{id}.xml")
         if join_fn.exists():
             print(f" join from cache {join_fn}")
             joinX = self.xmlFromFile(path=join_fn)
@@ -303,7 +300,7 @@ class Mink:
 
     def _getPart(self, *, id, label, module, type):
         #type is either loc, exhibit or group
-        fn = self.project_dir.joinpath(f"parts/{label}-{module}-{type}{id}.xml")
+        fn = self.parts_dir.joinpath(f"{label}-{module}-{type}{id}.xml")
         if fn.exists():
             print(f" {module} from cache {fn}")
             return self.xmlFromFile(path=fn)
@@ -327,9 +324,9 @@ class Mink:
             Path.mkdir(dir, parents=True)
         self.project_dir = dir
         self.pix_dir = dir.parent.joinpath("pix")
-        parts_dir = self.project_dir.joinpath("parts")
-        if not Path.is_dir(parts_dir):
-            Path.mkdir(parts_dir, parents=True)
+        self.parts_dir = self.project_dir.joinpath("parts")
+        if not self.parts_dir.exists():
+            self.parts_dir.mkdir(parents=True)
 
     def etreeFromFile(self, *, path):
         return etree.parse(str(path), ETparser)
