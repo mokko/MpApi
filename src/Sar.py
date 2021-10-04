@@ -116,36 +116,36 @@ class Sar:  # methods (mosly) in alphabetical order
         # Persons associated with objects that are in a certain exhibit
         # Registrar records of objects in a certain exhibit
         # Exhibit record (singular) with a certain id
-        if module == "Exhibition": # api.getItem should be faster than sar
-            return self.api.getItem(module=module, id=id) 
+        if module == "Exhibition":  # api.getItem should be faster than sar
+            return self.api.getItem(module=module, id=id)
 
         fields = {
-            "Multimedia" : "MulObjectRef.ObjRegistrarRef.RegExhibitionRef.__id",
-            "Object" : "ObjRegistrarRef.RegExhibitionRef.__id",
-            "Person" : "PerObjectRef.ObjRegistrarRef.RegExhibitionRef.__id",
-            "Registrar" : "RegExhibitionRef.__id"
+            "Multimedia": "MulObjectRef.ObjRegistrarRef.RegExhibitionRef.__id",
+            "Object": "ObjRegistrarRef.RegExhibitionRef.__id",
+            "Person": "PerObjectRef.ObjRegistrarRef.RegExhibitionRef.__id",
+            "Registrar": "RegExhibitionRef.__id",
         }
         return self._getBy(module=module, id=id, field=fields[module])
 
     def getByGroup(self, *, id, module):
         fields = {
-            "Multimedia" : "MulObjectRef.ObjObjectGroupsRef.__id",
-            "Object" : "ObjObjectGroupsRef.__id",
-            "Person" :"PerObjectRef.ObjObjectGroupsRef.__id",
+            "Multimedia": "MulObjectRef.ObjObjectGroupsRef.__id",
+            "Object": "ObjObjectGroupsRef.__id",
+            "Person": "PerObjectRef.ObjObjectGroupsRef.__id",
         }
         return self._getBy(module=module, id=id, field=fields[module])
 
     def getByLocation(self, *, id, module):
         fields = {
-            "Multimedia" : "MulObjectRef.ObjCurrentLocationVoc",
-            "Object" : "ObjCurrentLocationVoc",
-            "Person" :"PerObjectRef.ObjCurrentLocationVoc",
+            "Multimedia": "MulObjectRef.ObjCurrentLocationVoc",
+            "Object": "ObjCurrentLocationVoc",
+            "Person": "PerObjectRef.ObjCurrentLocationVoc",
         }
         return self._getBy(module=module, id=id, field=fields[module])
 
     def join(self, *, inL):
         """
-        Expects a LIST of several documents as xml string and joins them to one 
+        Expects a LIST of several documents as xml string and joins them to one
         bigger document. Returns xml string.
 
         This method is lxml-based, so it works in memory.
@@ -278,7 +278,7 @@ class Sar:  # methods (mosly) in alphabetical order
 
     def search(self, *, xml):
         """
-        Send a request to the api and return the response. Expects an search as 
+        Send a request to the api and return the response. Expects an search as
         xml string in xml. (Same as in MpApi).
         """
         return self.api.search(xml=xml)

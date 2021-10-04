@@ -1,6 +1,6 @@
 """
 Test the Search module
-""" 
+"""
 import os
 import sys
 from lxml import etree
@@ -54,120 +54,127 @@ two = """
 </application>
 """
 
+
 def test_one():
-    #print(one)
+    # print(one)
     s = Search(fromString=one)
     assert s.validate(mode="search") is True
+
 
 def test_two():
     s = Search(fromString=two)
     assert s.validate(mode="search") is True
 
+
 def test_three():
     s = Search()
     s.addCriterion(
-        operator="equalsField", 
+        operator="equalsField",
         field="ObjCurrentLocationVoc",
-        value="4220560", # O1.189.01.K1 M13
+        value="4220560",  # O1.189.01.K1 M13
     )
     assert s.validate(mode="search") is True
+
 
 def test_four():
     s = Search()
     s.AND()
     s.addCriterion(
-        operator="equalsField", 
+        operator="equalsField",
         field="ObjCurrentLocationVoc",
-        value="4220560", # O1.189.01.K1 M13
+        value="4220560",  # O1.189.01.K1 M13
     )
     s.addCriterion(
-        operator="notEqualsField", # notEqualsTerm
+        operator="notEqualsField",  # notEqualsTerm
         field="ObjPublicationGrp.TypeVoc",
-        value="2600647", # use id? Daten freigegeben für SMB-digital
+        value="2600647",  # use id? Daten freigegeben für SMB-digital
     )
     s.addCriterion(
-        operator="notEqualsField", # notEqualsTerm
-        field="__orgUnit", #__orgUnit is not allowed in Zetcom's own search.xsd 
-        value="EMPrimarverpackungen", # 1632806EM-Primärverpackungen
+        operator="notEqualsField",  # notEqualsTerm
+        field="__orgUnit",  # __orgUnit is not allowed in Zetcom's own search.xsd
+        value="EMPrimarverpackungen",  # 1632806EM-Primärverpackungen
     )
 
     assert s.validate(mode="search") is True
 
+
 def test_five():
     s = Search()
     s.addCriterion(
-        operator="equalsField", 
+        operator="equalsField",
         field="ObjCurrentLocationVoc",
-        value="4220560", # O1.189.01.K1 M13
+        value="4220560",  # O1.189.01.K1 M13
     )
     s.AND()
     s.addCriterion(
-        operator="notEqualsField", # notEqualsTerm
+        operator="notEqualsField",  # notEqualsTerm
         field="ObjPublicationGrp.TypeVoc",
-        value="2600647", # use id? Daten freigegeben für SMB-digital
+        value="2600647",  # use id? Daten freigegeben für SMB-digital
     )
     s.addCriterion(
-        operator="notEqualsField", # notEqualsTerm
-        field="__orgUnit", #__orgUnit is not allowed in Zetcom's own search.xsd 
-        value="EMPrimarverpackungen", # 1632806EM-Primärverpackungen
+        operator="notEqualsField",  # notEqualsTerm
+        field="__orgUnit",  # __orgUnit is not allowed in Zetcom's own search.xsd
+        value="EMPrimarverpackungen",  # 1632806EM-Primärverpackungen
     )
 
     with pytest.raises(Exception) as e_info:
         s.validate(mode="search")
 
+
 def test_six():
     s = Search()
     s.AND()
     s.addCriterion(
-        operator="equalsField", 
+        operator="equalsField",
         field="ObjCurrentLocationVoc",
-        value="4220560", # O1.189.01.K1 M13
+        value="4220560",  # O1.189.01.K1 M13
     )
     s.addCriterion(
-        operator="notEqualsField", # notEqualsTerm
+        operator="notEqualsField",  # notEqualsTerm
         field="ObjPublicationGrp.TypeVoc",
-        value="2600647", # use id? Daten freigegeben für SMB-digital
+        value="2600647",  # use id? Daten freigegeben für SMB-digital
     )
     s.addCriterion(
-        operator="notEqualsField", # notEqualsTerm
-        field="__orgUnit", #__orgUnit is not allowed in Zetcom's own search.xsd 
-        value="EMPrimarverpackungen", # 1632806EM-Primärverpackungen
+        operator="notEqualsField",  # notEqualsTerm
+        field="__orgUnit",  # __orgUnit is not allowed in Zetcom's own search.xsd
+        value="EMPrimarverpackungen",  # 1632806EM-Primärverpackungen
     )
     s.NOT()
     s.addCriterion(
-        operator="contains", 
+        operator="contains",
         field="ObjTextOnlineGrp.TextHTMLClb",
-        value="SM8HF", 
+        value="SM8HF",
     )
-    #s.print()
+    # s.print()
     s.toFile(path="search.tmp.xml")
     assert s.validate(mode="search") is True
 
-def test_seven(): # addField
+
+def test_seven():  # addField
     s = Search()
     s.AND()
     s.addCriterion(
-        operator="equalsField", 
+        operator="equalsField",
         field="ObjCurrentLocationVoc",
-        value="4220560", # O1.189.01.K1 M13
+        value="4220560",  # O1.189.01.K1 M13
     )
     s.addCriterion(
-        operator="notEqualsField", # notEqualsTerm
+        operator="notEqualsField",  # notEqualsTerm
         field="ObjPublicationGrp.TypeVoc",
-        value="2600647", # use id? Daten freigegeben für SMB-digital
+        value="2600647",  # use id? Daten freigegeben für SMB-digital
     )
     s.addCriterion(
-        operator="notEqualsField", # notEqualsTerm
-        field="__orgUnit", #__orgUnit is not allowed in Zetcom's own search.xsd 
-        value="EMPrimarverpackungen", # 1632806EM-Primärverpackungen
+        operator="notEqualsField",  # notEqualsTerm
+        field="__orgUnit",  # __orgUnit is not allowed in Zetcom's own search.xsd
+        value="EMPrimarverpackungen",  # 1632806EM-Primärverpackungen
     )
     s.NOT()
     s.addCriterion(
-        operator="contains", 
+        operator="contains",
         field="ObjTextOnlineGrp.TextHTMLClb",
-        value="SM8HF", 
+        value="SM8HF",
     )
     s.addField(field="__id")
-    #s.print()
+    # s.print()
     s.toFile(path="search.tmp.xml")
     assert s.validate(mode="search") is True

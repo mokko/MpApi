@@ -7,16 +7,17 @@ from lxml import etree
 """
 
 NSMAP = {
-    "s" : "http://www.zetcom.com/ria/ws/module/search",
-    "m" : "http://www.zetcom.com/ria/ws/module",
+    "s": "http://www.zetcom.com/ria/ws/module/search",
+    "m": "http://www.zetcom.com/ria/ws/module",
 }
 
 marker = "SM8HF"
 
+
 class WestMarker:
-    def input (self):
+    def input(self):
         STO = {
-            #Westflügel, Westspange Eröffnung
+            # Westflügel, Westspange Eröffnung
             "O1.189.01.K1 M13": "4220560",
             "O2.017.B2 M37": "4220571",
             "O2.019.P3 M39": "4220580",
@@ -33,92 +34,96 @@ class WestMarker:
             "O3.126.P3 M62": "4221189",
             "O3.127.01.B3 M45": "4221214",
         }
-        #return STOs
-        r = {'M39locId': "4220580"} # for testing
+        # return STOs
+        r = {"M39locId": "4220580"}  # for testing
         return STO
 
-    def loop (self):
+    def loop(self):
         """
-            loop thru objects in the results
+        loop thru objects in the results
         """
-        return "/m:application/m:modules/m:module[@name = 'Object']/m:moduleItem" 
+        return "/m:application/m:modules/m:module[@name = 'Object']/m:moduleItem"
 
     def search(self, id, limit=-1):
         """
-            We're trying to find exactly the right records in one go.
-            - Objects at a certain locationId
-            - Objects that are not SMBfreigegeben yet 
-            whether they have marker or not is irrelevant
-            
-            Nicht freigegeben can be expressed in two ways SMBFreigabe = No or no SMBFreigabe
-            in any case we leave records alone that have SMBFreigabe already.
+        We're trying to find exactly the right records in one go.
+        - Objects at a certain locationId
+        - Objects that are not SMBfreigegeben yet
+        whether they have marker or not is irrelevant
+
+        Nicht freigegeben can be expressed in two ways SMBFreigabe = No or no SMBFreigabe
+        in any case we leave records alone that have SMBFreigabe already.
         """
-        query = Search(module="Object", limit=limit) 
+        query = Search(module="Object", limit=limit)
         query.AND()
         query.addCriterion(
-            operator="equalsField", 
+            operator="equalsField",
             field="ObjCurrentLocationVoc",
-            value=id, # using voc id
+            value=id,  # using voc id
         )
         query.addCriterion(
-            operator="notEqualsField", # notEqualsTerm
-            field="__orgUnit", #__orgUnit is not allowed in Zetcom's own search.xsd 
-            value="EMPrimarverpackungen", # 1632806EM-Primärverpackungen
+            operator="notEqualsField",  # notEqualsTerm
+            field="__orgUnit",  # __orgUnit is not allowed in Zetcom's own search.xsd
+            value="EMPrimarverpackungen",  # 1632806EM-Primärverpackungen
         )
         query.addCriterion(
-            operator="notEqualsField", # notEqualsTerm
-            field="__orgUnit", 
-            value="AKuPrimarverpackungen", # 1632806EM-Primärverpackungen
+            operator="notEqualsField",  # notEqualsTerm
+            field="__orgUnit",
+            value="AKuPrimarverpackungen",  # 1632806EM-Primärverpackungen
         )
-        #query.NOT() 
-        #query.addCriterion( # doesn't find records without ObjTextOnlineGrp, while "enthält nicht" in the Gui does find empty records
-        #    operator="contains", 
+        # query.NOT()
+        # query.addCriterion( # doesn't find records without ObjTextOnlineGrp, while "enthält nicht" in the Gui does find empty records
+        #    operator="contains",
         #    field="ObjTextOnlineGrp.TextHTMLClb",
-        #    value="SM8HF", 
-        #)
-        #query.OR() 
+        #    value="SM8HF",
+        # )
+        # query.OR()
         # then we have to download all records and test them manually
         query.addField(field="ObjTextOnlineGrp.repeatableGroupItem")
         query.addField(field="ObjTextOnlineGrp.TextHTMLClb")
         query.addField(field="ObjTextOnlineGrp.TextClb")
-        #query.print()
+        # query.print()
         return query
 
     def onItem(self):
         return self.checkMarker
-        
+
     def checkMarker(self, *, node, user):
         """
-            Check if onlineBeschreibung exists; if not add marker in first description.
-            If it exists, check if first description has marker. If not, add it.
+        Check if onlineBeschreibung exists; if not add marker in first description.
+        If it exists, check if first description has marker. If not, add it.
         """
         id = node.xpath("@id")[0]
 
-        rGrp = node.xpath("m:repeatableGroup[@name='ObjTextOnlineGrp']",
-            namespaces=NSMAP)
+        rGrp = node.xpath(
+            "m:repeatableGroup[@name='ObjTextOnlineGrp']", namespaces=NSMAP
+        )
 
         if len(rGrp) > 0:
-            #if multiple onlineBeschreibungen, we'll write ONLY in first
-            #if somebody else changes order, we're screwed
-            #so we look at all repeatableGroupItems
+            # if multiple onlineBeschreibungen, we'll write ONLY in first
+            # if somebody else changes order, we're screwed
+            # so we look at all repeatableGroupItems
             print("   online description exists already")
-            valueL = rGrp[0].xpath("m:repeatableGroupItem/m:dataField[@name='TextClb']/m:value", namespaces=NSMAP)
-            
-            #list comprehension?
+            valueL = rGrp[0].xpath(
+                "m:repeatableGroupItem/m:dataField[@name='TextClb']/m:value",
+                namespaces=NSMAP,
+            )
+
+            # list comprehension?
             found = 0
             for value in valueL:
-                if marker in value.text:    
+                if marker in value.text:
                     found += 1
-                    print ("\tfound marker, no change necessary")
-                    return {}# no payload
+                    print("\tfound marker, no change necessary")
+                    return {}  # no payload
 
             if found == 0:
-                print ("   marker not in online description")
+                print("   marker not in online description")
                 return self.updateOnlineDescription(node=rGrp[0], id=id)
         else:
             print("   no online description yet, ADDING MY MARK")
-            return self.createOnlineDescription(objId=id)                 
-    
+            return self.createOnlineDescription(objId=id)
+
     def createOnlineDescription(self, *, objId):
         """
         Caution: The id we might need here is objId, not the STOid
@@ -148,34 +153,34 @@ class WestMarker:
                     </module>
                 </modules>
             </application>"""
-        #print (xml)
+        # print (xml)
         m = Module(xml=xml)
         m.validate()
-        
+
         payload = {
             "type": "createRepeatableGroup",
             "module": module,
             "id": objId,
             "repeatableGroup": rGrpName,
             "xml": xml,
-            "success": f"{module} {objId}: new online description w/ marker"  
+            "success": f"{module} {objId}: new online description w/ marker",
         }
         return payload
 
     def updateOnlineDescription(self, *, node, id):
         """
-            The node we get passed here is __only__ a repeatableGroup fragment
+        The node we get passed here is __only__ a repeatableGroup fragment
         """
         refId = node.xpath("m:repeatableGroupItem/@id", namespaces=NSMAP)[0]
 
-        #todo: we haven't added marker yet
-        #we get the complete rGrp now, in order to reconstruct the complete rGrp
-        #we have already parsed it once and determined it has doesn't have marker
-        #now we need to add the marker to the first repeatableGroupItem
+        # todo: we haven't added marker yet
+        # we get the complete rGrp now, in order to reconstruct the complete rGrp
+        # we have already parsed it once and determined it has doesn't have marker
+        # now we need to add the marker to the first repeatableGroupItem
 
         module = "Object"
         rGrpName = "ObjTextOnlineGrp"
-        #creating a new document for upload
+        # creating a new document for upload
         outer = f"""
         <application xmlns="http://www.zetcom.com/ria/ws/module">
             <modules>
@@ -187,24 +192,32 @@ class WestMarker:
         </application>
         """
         ET = etree.fromstring(outer)
-        #add marker to first rGrp
-        htmlN = node.xpath("m:repeatableGroupItem/m:dataField[@name='TextHTMLClb']/m:value", namespaces=NSMAP)[0]
-        textN = node.xpath("m:repeatableGroupItem/m:dataField[@name='TextClb']/m:value", namespaces=NSMAP)[0]
-        #print (f"text {htmlN}")
+        # add marker to first rGrp
+        htmlN = node.xpath(
+            "m:repeatableGroupItem/m:dataField[@name='TextHTMLClb']/m:value",
+            namespaces=NSMAP,
+        )[0]
+        textN = node.xpath(
+            "m:repeatableGroupItem/m:dataField[@name='TextClb']/m:value",
+            namespaces=NSMAP,
+        )[0]
+        # print (f"text {htmlN}")
         htmlN.text = htmlN.text + " " + marker
         textN.text = textN.text + " " + marker
         itemN = ET.xpath("//m:moduleItem", namespaces=NSMAP)[0]
-        itemN.append(node) 
-        
-        doc = etree.ElementTree(ET)
-        doc.write("debug.xml", pretty_print=True, encoding="UTF-8")  
-        xml = etree.tostring(ET, pretty_print=True, encoding="unicode")  # dont return bytes
-        xml = xml.encode() # force UTF8
+        itemN.append(node)
 
-        #print(type(xml))
-        #print (xml)
-        print (f"\tUPDATING ONLINE DESC for {id}")
-        #print (f"refId {refId}")
+        doc = etree.ElementTree(ET)
+        doc.write("debug.xml", pretty_print=True, encoding="UTF-8")
+        xml = etree.tostring(
+            ET, pretty_print=True, encoding="unicode"
+        )  # dont return bytes
+        xml = xml.encode()  # force UTF8
+
+        # print(type(xml))
+        # print (xml)
+        print(f"\tUPDATING ONLINE DESC for {id}")
+        # print (f"refId {refId}")
 
         m = Module(tree=ET)
         m.validate()
@@ -217,6 +230,6 @@ class WestMarker:
                 "repeatableGroup": rGrpName,
                 "xml": xml,
                 "success": f"{module} {id}: update online description, adding marker",
-                "refId": refId
+                "refId": refId,
             }
             return payload

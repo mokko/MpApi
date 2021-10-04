@@ -214,12 +214,14 @@ class MpApi:
         PUT http://.../ria-ws/application/module/{module}/{__id}/{repeatableGroup|reference}/{__referenceId}
         """
         url = f"{self.appURL}/module/{module}/{id}/{repeatableGroup}/{referenceId}"
-        #xml = xml.encode()
+        # xml = xml.encode()
         r = requests.put(url, data=xml, headers=self.headers, auth=self.auth)
         r.raise_for_status()
         return r
 
-    def updateFieldInGroup(self, *, module, id, referenceId, datafield, repeatableGroup):
+    def updateFieldInGroup(
+        self, *, module, id, referenceId, datafield, repeatableGroup
+    ):
         """
         Update a single data field of a repeatable group / reference
         PUT http://.../ria-ws/application/module/{module}/{__id}/{repeatableGroup|reference}/{__referenceId}/{datafield}
@@ -239,7 +241,9 @@ class MpApi:
         r.raise_for_status()
         return r
 
-    def deleteReferenceInGroup(self, *, module, id, groupId, referenceId, repeatableGroup):
+    def deleteReferenceInGroup(
+        self, *, module, id, groupId, referenceId, repeatableGroup
+    ):
         """
         Delete a reference contained within a repeatable group
         DELETE http://.../ria-ws/application/module/{module}/{__id}/{repeatableGroup}/{__groupId}/{reference}/{__referenceId}

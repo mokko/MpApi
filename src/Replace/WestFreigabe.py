@@ -1,10 +1,11 @@
 from Search import Search
 import datetime
 
+
 class WestFreigabe:
-    def input (self):
+    def input(self):
         STO = {
-            #Westflügel, Westspange Eröffnung
+            # Westflügel, Westspange Eröffnung
             "O1.189.01.K1 M13": "4220560",
             "O2.017.B2 M37": "4220571",
             "O2.019.P3 M39": "4220580",
@@ -21,73 +22,73 @@ class WestFreigabe:
             "O3.126.P3 M62": "4221189",
             "O3.127.01.B3 M45": "4221214",
         }
-        #return STOs
-        #r = {'M39locId': "4220580"} # for testing
+        # return STOs
+        # r = {'M39locId': "4220580"} # for testing
         return STO
 
-    def loop (self):
+    def loop(self):
         """
-            loop thru objects in the results
+        loop thru objects in the results
         """
-        return "/m:application/m:modules/m:module[@name = 'Object']/m:moduleItem" 
+        return "/m:application/m:modules/m:module[@name = 'Object']/m:moduleItem"
 
     def search(self, id, limit=-1):
         """
-            We're trying to find exactly the right records in one go.
-            - Objects at a certain locationId
-            - Objects that are not SMBfreigegeben yet 
-            
-            Nicht freigegeben can be expressed in two ways SMBFreigabe = No or no SMBFreigabe
-            in any case we leave records alone that have SMBFreigabe already.
-            
-            Currently we also select VEs. One way to exclude it to use container
-            AKu-Alle Sammlungen OR EM-AlleSammlungen. I dont know how to do this
-            
+        We're trying to find exactly the right records in one go.
+        - Objects at a certain locationId
+        - Objects that are not SMBfreigegeben yet
+
+        Nicht freigegeben can be expressed in two ways SMBFreigabe = No or no SMBFreigabe
+        in any case we leave records alone that have SMBFreigabe already.
+
+        Currently we also select VEs. One way to exclude it to use container
+        AKu-Alle Sammlungen OR EM-AlleSammlungen. I dont know how to do this
+
         """
-        query = Search(module="Object", limit=limit) 
+        query = Search(module="Object", limit=limit)
         query.AND()
         query.addCriterion(
-            operator="equalsField", 
+            operator="equalsField",
             field="ObjCurrentLocationVoc",
-            value=id, # using voc id
+            value=id,  # using voc id
         )
         query.addCriterion(
-            operator="notEqualsField", # notEqualsTerm
+            operator="notEqualsField",  # notEqualsTerm
             field="ObjPublicationGrp.TypeVoc",
-            value="2600647", # use id? Daten freigegeben für SMB-digital
+            value="2600647",  # use id? Daten freigegeben für SMB-digital
         )
         query.addCriterion(
-            operator="notEqualsField", # notEqualsTerm
-            field="__orgUnit", #__orgUnit is not allowed in Zetcom's own search.xsd 
-            value="EMPrimarverpackungen", # 1632806EM-Primärverpackungen
+            operator="notEqualsField",  # notEqualsTerm
+            field="__orgUnit",  # __orgUnit is not allowed in Zetcom's own search.xsd
+            value="EMPrimarverpackungen",  # 1632806EM-Primärverpackungen
         )
         query.addCriterion(
-            operator="notEqualsField", # notEqualsTerm
-            field="__orgUnit", 
-            value="AKuPrimarverpackungen", # 1632806EM-Primärverpackungen
+            operator="notEqualsField",  # notEqualsTerm
+            field="__orgUnit",
+            value="AKuPrimarverpackungen",  # 1632806EM-Primärverpackungen
         )
         query.addField(field="ObjPublicationGrp")
         query.addField(field="ObjPublicationGrp.repeatableGroupItem")
         query.addField(field="ObjPublicationGrp.PublicationVoc")
         query.addField(field="ObjPublicationGrp.TypeVoc")
-        #query.print()
+        # query.print()
         return query
-        
+
     def onItem(self):
         """
-            I cant decide if I should run independent jobs for the marker and for 
-            SMB Freigabe or everything should be in one thing.
-            
-            for every identified record, set SMBFreigabe            
-        """    
-        return self.setObjectFreigabe # returns a callback
+        I cant decide if I should run independent jobs for the marker and for
+        SMB Freigabe or everything should be in one thing.
+
+        for every identified record, set SMBFreigabe
+        """
+        return self.setObjectFreigabe  # returns a callback
 
     def setObjectFreigabe(self, *, node, user):
         """
-            We're inside Objects's nodeItem here
-            We have already filtered out cases where SMBFreigabe exists already  
+        We're inside Objects's nodeItem here
+        We have already filtered out cases where SMBFreigabe exists already
         """
-        #print (node)
+        # print (node)
 
         id = node.xpath("@id")[0]
         today = datetime.date.today()
@@ -118,14 +119,14 @@ class WestFreigabe:
               </modules>
             </application>
         """
-        
+
         payload = {
             "type": "createRepeatableGroup",
             "module": module,
             "id": id,
             "repeatableGroup": "ObjPublicationGrp",
             "xml": xml,
-            "success": f"{module} {id}: set object smbfreigabe" 
+            "success": f"{module} {id}: set object smbfreigabe",
         }
 
         return payload

@@ -1,13 +1,15 @@
 import sys
 from pathlib import Path
-sys.path.append ("../src")
+
+sys.path.append("../src")
 from MpApi import MpApi
 from Module import Module
+
 with open("../sdata/vierteInstanz.py") as f:
     exec(f.read())
 
-#first test is if i can manually change Freigabe of obj id 744767
-#ok. 
+# first test is if i can manually change Freigabe of obj id 744767
+# ok.
 
 """
 <repeatableGroup name="ObjPublicationGrp" size="2">
@@ -71,6 +73,7 @@ Create repeatable group / reference
 </application>
 """
 
+
 def test_init():
     api = MpApi(baseURL=baseURL, user=user, pw=pw)
     assert api
@@ -78,7 +81,7 @@ def test_init():
     print(r.status_code)
     assert r
     api.toFile(xml=r.text, path="744767.xml")
-    xml=f"""
+    xml = f"""
     <application xmlns="http://www.zetcom.com/ria/ws/module">
       <modules>
         <module name="Object">
@@ -108,6 +111,8 @@ def test_init():
     </application>"""
     m = Module(xml=xml)
     m.validate()
-    r = api.createRepeatableGroup(module="Object", id="744767", repeatableGroup="ObjPublicationGrp", xml=xml)
+    r = api.createRepeatableGroup(
+        module="Object", id="744767", repeatableGroup="ObjPublicationGrp", xml=xml
+    )
     assert r
-    print (r.status_code)
+    print(r.status_code)

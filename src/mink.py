@@ -135,7 +135,7 @@ class Mink:
 
     def definition(self, args):
         dfX = self.sar.definition()
-        print ("Writing to definition.xml")
+        print("Writing to definition.xml")
         self.xmlToFile(xml=dfX, path="definition.xml")
 
     def getAttachments(self, args):
@@ -143,11 +143,13 @@ class Mink:
         id = args[1]
         label = args[2]
 
-        #pretty dirty: assumes that getMedia has been done before
+        # pretty dirty: assumes that getMedia has been done before
         mm_fn = self.parts_dir.joinpath(f"{label}-Multimedia-{type}{id}.xml")
         mmX = self.xmlFromFile(path=mm_fn)
 
-        pix_dir = Path(f"{self.pix_dir}_{label}") # this is a new dir, cannot be made earlier
+        pix_dir = Path(
+            f"{self.pix_dir}_{label}"
+        )  # this is a new dir, cannot be made earlier
         if not pix_dir.exists():
             pix_dir.mkdir()
         print(f" checking attachments; saving to {pix_dir}")
@@ -163,12 +165,13 @@ class Mink:
             if img not in expected:
                 print(f"image no longer attached, removing {img}")
                 os.remove(img)
-
-        # currently we dont get attachments that have changed, but keep the same mulId, 
-        # that case should be rare 
+        # currently we dont get attachments that have changed, but keep the same mulId,
+        # that case should be rare
 
     def getExhibit(self, args):
-        return self._getPart(id=args[1], label=args[2], module="Exhibition", type=args[0])
+        return self._getPart(
+            id=args[1], label=args[2], module="Exhibition", type=args[0]
+        )
 
     def getItem(self, args):
         """
@@ -194,9 +197,10 @@ class Mink:
         get media records for exhibit or group, saving it to disk
         get attachments for that set of media records saving them to disk
         return media records as mmX
-
         """
-        return self._getPart(id=args[1], label=args[2], module="Multimedia", type=args[0])
+        return self._getPart(
+            id=args[1], label=args[2], module="Multimedia", type=args[0]
+        )
 
     def getObjects(self, args):
         """
@@ -213,10 +217,6 @@ class Mink:
         """
         print(f"GET PACKAGE {args}")
 
-        #type = args[0]
-        #id = args[1]
-        #label = args[2]
-
         join_fn = self.join(args)
         self.getAttachments(args)
 
@@ -228,22 +228,26 @@ class Mink:
         return self._getPart(id=args[1], label=args[2], module="Person", type=args[0])
 
     def getRegistrar(self, args):
-        return self._getPart(id=args[1], label=args[2], module="Registrar", type=args[0])
-    
+        return self._getPart(
+            id=args[1], label=args[2], module="Registrar", type=args[0]
+        )
+
     def join(self, args):
         type = args[0]
         id = args[1]
         label = args[2]
         joinX = None
-        #parts_dir now made during _mkdirs()
-        join_fn = self.parts_dir.joinpath(f"{label}-join-{type}{id}.xml")
+        join_fn = self.parts_dir.joinpath(
+            f"{label}-join-{type}{id}.xml"
+        )  # parts_dir now made during _mkdirs()
+
         if join_fn.exists():
             print(f" join from cache {join_fn}")
             joinX = self.xmlFromFile(path=join_fn)
         else:
             print(f" making new join from {join_fn}")
 
-        #module for target and type refers to the type of selection 
+        # module for target and type refers to the type of selection
         pkX = self._getPart(module="Person", id=id, type=type, label=label)
         mmX = self._getPart(module="Multimedia", id=id, type=type, label=label)
         objX = self._getPart(module="Object", id=id, type=type, label=label)
@@ -299,7 +303,7 @@ class Mink:
         )
 
     def _getPart(self, *, id, label, module, type):
-        #type is either loc, exhibit or group
+        # type is either loc, exhibit or group
         fn = self.parts_dir.joinpath(f"{label}-{module}-{type}{id}.xml")
         if fn.exists():
             print(f" {module} from cache {fn}")
@@ -313,7 +317,7 @@ class Mink:
             elif type == "exhibit":
                 r = self.sar.getByExhibit(id=id, module=module)
             else:
-                raise TypeError ("UNKNOWN type")
+                raise TypeError("UNKNOWN type")
             self.xmlToFile(xml=r.text, path=fn)
             return r.text
 

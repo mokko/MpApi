@@ -83,9 +83,11 @@ allowedOperators = {
 
 
 class Search(Helper):
-    def __init__(self, *, module=None, limit=-1, offset=0, fromFile=None, fromString=None):
+    def __init__(
+        self, *, module=None, limit=-1, offset=0, fromFile=None, fromString=None
+    ):
         """
-            Currently, limit, offset and module are ignored if fromFile or fromString are used.
+        Currently, limit, offset and module are ignored if fromFile or fromString are used.
         """
 
         if fromString is not None:
@@ -140,9 +142,15 @@ class Search(Helper):
             expertN = self.etree.xpath(
                 "/s:application/s:modules/s:module/s:search/s:expert", namespaces=NSMAP
             )[0]
-            selectN = etree.Element("{http://www.zetcom.com/ria/ws/module/search}select")
+            selectN = etree.Element(
+                "{http://www.zetcom.com/ria/ws/module/search}select"
+            )
             expertN.addprevious(selectN)
-        etree.SubElement(selectN, "{http://www.zetcom.com/ria/ws/module/search}field", fieldPath=field)
+        etree.SubElement(
+            selectN,
+            "{http://www.zetcom.com/ria/ws/module/search}field",
+            fieldPath=field,
+        )
 
     #
     # conjunctions
@@ -168,10 +176,10 @@ class Search(Helper):
         """
         allowed_types = ["and", "or", "not"]
         if type not in allowed_types:
-            raise TypeError ("conjunction type NOT ALLOWED")
+            raise TypeError("conjunction type NOT ALLOWED")
 
         self.lastN = etree.SubElement(
-            self.lastN, "{http://www.zetcom.com/ria/ws/module/search}" + type 
+            self.lastN, "{http://www.zetcom.com/ria/ws/module/search}" + type
         )
 
 
