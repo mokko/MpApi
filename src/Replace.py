@@ -113,6 +113,7 @@ class Replace:
                         else:
                             raise TypeError("UNKNOWN PAYLOAD TYPE")
                         r.raise_for_status()
+                        print(payload["success"])
                         logging.info(payload["success"])
                     if limit != -1 and count >= limit:
                         print(f"Limit of {limit} reached, aborting")
