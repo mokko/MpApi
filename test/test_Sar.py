@@ -16,9 +16,9 @@ def test_init():
 
 def test_getItem():
     sr = Sar(baseURL=baseURL, user=user, pw=pw)
-    r = sr.getItem(module="Object", id="2609893")
+    r = sr.getItem(module="Object", id="2604474") # a random object collected by Wilhelm Grube
     assert r.status_code == 200
-    assert "ä" in r.text
+    #assert "ä" in r.text
 
 
 def test_getObjectSet():
@@ -57,3 +57,8 @@ def test_saveAttachments():
     sr = Sar(baseURL=baseURL, user=user, pw=pw)
     xml = sr.xmlFromFile(path="sdata/exhibit20222.xml")
     sr.saveAttachments(xml=xml, dir="sdata")
+
+def test_getByApprovalGrp():
+    sr = Sar(baseURL=baseURL, user=user, pw=pw)
+    r = sr.getByApprovalGrp(id="4460851", module="Object") #2600647 = SMB-Freigabe
+    sr.toFile(xml=r.text, path="sdata/getByApprovalGroup.xml")

@@ -310,12 +310,14 @@ class Mink:
             return self.xmlFromFile(path=fn)
         else:
             self.info(f" {module} from remote, saving to {fn}")
-            if type == "loc":
-                r = self.sar.getByLocation(id=id, module=module)
-            elif type == "group":
-                r = self.sar.getByGroup(id=id, module=module)
+            if type == "approval":
+                r = self.sar.getByApprovalGrp(id=id, module=module)
             elif type == "exhibit":
                 r = self.sar.getByExhibit(id=id, module=module)
+            elif type == "group":
+                r = self.sar.getByGroup(id=id, module=module)
+            elif type == "loc":
+                r = self.sar.getByLocation(id=id, module=module)
             else:
                 raise TypeError("UNKNOWN type")
             self.xmlToFile(xml=r.text, path=fn)

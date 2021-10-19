@@ -110,12 +110,66 @@ class Sar:  # methods (mosly) in alphabetical order
         s.validate(mode="search")
         return self.api.search(xml=s.toString())
 
+    def getByApprovalGrp(self, *, id, module):
+        """
+        ApprovalGrp is the term used in the multimedia module, it's a better label 
+        than PublicationGrp. So I use it here generically.
+        id is corresponding ID, module describes the requested type of target moduleItems.
+
+        We want to select only records that have Freigabe = Ja, i.e. we need two conditions
+
+        <repeatableGroupItem id="42657392">
+            <vocabularyReference name="PublicationVoc" id="62649" instanceName="ObjPublicationVgr">
+              <vocabularyReferenceItem id="1810139" name="Ja">
+                <formattedValue language="en">Ja</formattedValue>
+              </vocabularyReferenceItem>
+            </vocabularyReference>
+            <vocabularyReference name="TypeVoc" id="62650" instanceName="ObjPublicationTypeVgr">
+              <vocabularyReferenceItem id="2600647" name="Daten freigegeben für SMB-digital">
+                <formattedValue language="en">Daten freigegeben für SMB-digital</formattedValue>
+              </vocabularyReferenceItem>
+            </vocabularyReference>
+        </repeatableGroupItem>
+
+        Get Objects, Multimedia or Persons for one ApprovalGrp, i.e.
+        "freigegebene für SMB-Digital".
+        """
+        typeVoc = {
+            "Multimedia": "MulObjectRef.ObjPublicationGrp.TypeVoc",
+            "Object": "ObjPublicationGrp.TypeVoc", #  MulApprovalGrp.TypeVoc
+            "Person": "PerObjectRef.ObjPublicationGrp.TypeVoc",
+        }
+        
+        pubVoc = {
+            "Multimedia": "MulObjectRef.ObjPublicationGrp.PublicationVoc",
+            "Object": "ObjPublicationGrp.PublicationVoc", #  MulApprovalGrp.TypeVoc
+            "Person": "PerObjectRef.ObjPublicationGrp.PublicationVoc",
+        }
+
+        query = Search(module=module)
+        query.AND()
+        query.addCriterion(
+            field=str(typeVoc[module]),
+            operator="equalsField",
+            value=id,
+        )
+        query.addCriterion(
+            operator="equalsField",  # notEqualsTerm
+            field=str(pubVoc[module]),
+            value="1810139",  # use id? 1810139: yes 
+        )
+        query.validate(mode="search")
+        #query.print()
+        return self.api.search(xml=query.toString())
+
     def getByExhibit(self, *, id, module):
-        # Multimedia records from objects that are in a certain exhibit
-        # Object records that are in a certain exhibit
-        # Persons associated with objects that are in a certain exhibit
-        # Registrar records of objects in a certain exhibit
-        # Exhibit record (singular) with a certain id
+        """
+        Multimedia records from objects that are in a certain exhibit
+        Object records that are in a certain exhibit
+        Persons associated with objects that are in a certain exhibit
+        Registrar records of objects in a certain exhibit
+        Exhibit record (singular) with a certain id
+        """
         if module == "Exhibition":  # api.getItem should be faster than sar
             return self.api.getItem(module=module, id=id)
 
@@ -325,5 +379,4 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     s = Sar(baseURL=baseURL, pw=pw, user=user)
-    userList = s.visibleActiveUsers()
-    print(userList)
+    getattr(s, args.cmd)(args.args) # untested
