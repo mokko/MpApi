@@ -112,7 +112,7 @@ class Sar:  # methods (mosly) in alphabetical order
 
     def getByApprovalGrp(self, *, id, module):
         """
-        ApprovalGrp is the term used in the multimedia module, it's a better label 
+        ApprovalGrp is the term used in the multimedia module, it's a better label
         than PublicationGrp. So I use it here generically.
         id is corresponding ID, module describes the requested type of target moduleItems.
 
@@ -136,13 +136,13 @@ class Sar:  # methods (mosly) in alphabetical order
         """
         typeVoc = {
             "Multimedia": "MulObjectRef.ObjPublicationGrp.TypeVoc",
-            "Object": "ObjPublicationGrp.TypeVoc", #  MulApprovalGrp.TypeVoc
+            "Object": "ObjPublicationGrp.TypeVoc",  #  MulApprovalGrp.TypeVoc
             "Person": "PerObjectRef.ObjPublicationGrp.TypeVoc",
         }
-        
+
         pubVoc = {
             "Multimedia": "MulObjectRef.ObjPublicationGrp.PublicationVoc",
-            "Object": "ObjPublicationGrp.PublicationVoc", #  MulApprovalGrp.TypeVoc
+            "Object": "ObjPublicationGrp.PublicationVoc",  #  MulApprovalGrp.TypeVoc
             "Person": "PerObjectRef.ObjPublicationGrp.PublicationVoc",
         }
 
@@ -156,10 +156,10 @@ class Sar:  # methods (mosly) in alphabetical order
         query.addCriterion(
             operator="equalsField",  # notEqualsTerm
             field=str(pubVoc[module]),
-            value="1810139",  # use id? 1810139: yes 
+            value="1810139",  # use id? 1810139: yes
         )
         query.validate(mode="search")
-        #query.print()
+        # query.print()
         return self.api.search(xml=query.toString())
 
     def getByExhibit(self, *, id, module):
@@ -379,4 +379,4 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     s = Sar(baseURL=baseURL, pw=pw, user=user)
-    getattr(s, args.cmd)(args.args) # untested
+    getattr(s, args.cmd)(args.args)  # untested

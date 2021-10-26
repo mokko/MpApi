@@ -39,7 +39,7 @@ class BoxerAufstand:
         query.addField(field="ObjPublicationGrp.repeatableGroupItem")
         query.addField(field="ObjPublicationGrp.PublicationVoc")
         query.addField(field="ObjPublicationGrp.TypeVoc")
-        #query.print()
+        # query.print()
         return query
 
     def onItem(self):

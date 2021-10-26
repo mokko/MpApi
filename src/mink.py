@@ -142,7 +142,7 @@ class Mink:
         type = args[0]
         id = args[1]
         label = args[2]
-        try: 
+        try:
             args[3]
             if args[3].lower == "attachments":
                 # pretty dirty: assumes that getMedia has been done before
@@ -169,9 +169,8 @@ class Mink:
                         os.remove(img)
                 # currently we dont get attachments that have changed, but keep the same mulId,
                 # that case should be rare
-        except: 
-            print (" not downloading attachments")
-
+        except:
+            print(" not downloading attachments")
 
     def getExhibit(self, args):
         return self._getPart(
