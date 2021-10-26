@@ -26,7 +26,6 @@ class DigiP:
     def input (self):
         return {"locId": "4220557"}
 
-
     def loop (self):
         return "/m:application/m:modules/m:module[@name = 'Multimedia']/m:moduleItem" 
     

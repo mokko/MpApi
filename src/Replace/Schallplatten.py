@@ -23,35 +23,37 @@ class Schallplatten:
 
     def search(self, id, limit=-1):
         """
-        Objects 
-        - in EM-Medienarchiv that have 
+        Objects
+        - in EM-Medienarchiv that have
         - Sachbegriff Schallplatte ODER CD -> TechnicalTermEthnologicalVoc
-        - Freigabe Typ != SMB-Digital 
+        - Freigabe Typ != SMB-Digital
         - Freigabe Freigabe != Ja
         """
         query = Search(module="Object", limit=limit)
         query.AND()
         query.addCriterion(
-            operator="equalsField",  # 
+            operator="equalsField",  #
             field="__orgUnit",  # __orgUnit is not allowed in Zetcom's own search.xsd; we're using a modified version of the xsd file
-            value="EMMedienarchiv",  
+            value="EMMedienarchiv",
         )
         query.addCriterion(
             operator="notEqualsField",  # notEqualsTerm
             field="ObjPublicationGrp.TypeVoc",
             value="2600647",  # use id? Daten freigegeben für SMB-digital
+        )
         query.addCriterion(
             operator="notEqualsField",  # notEqualsTerm
             field="ObjPublicationVgr",
-            value="1810139",  # use id? 1810139: yes 
+            value="1810139",  # use id? 1810139: yes
+        )
         query.addCriterion(
-            operator="equalsField",  # 
+            operator="equalsField",  #
             field="TechnicalTermEthnologicalVoc",  # __orgUnit is not allowed in Zetcom's own search.xsd
             value="4289178",  # Schallplatte:4289178 CD: 4288787
         )
         query.OR()
         query.addCriterion(
-            operator="equalsField",  # 
+            operator="equalsField",  #
             field="TechnicalTermEthnologicalVoc",  # __orgUnit is not allowed in Zetcom's own search.xsd
             value="4288787",  # Schallplatte:4289178 CD: 4288787
         )
@@ -60,7 +62,7 @@ class Schallplatten:
         query.addField(field="ObjPublicationGrp.repeatableGroupItem")
         query.addField(field="ObjPublicationGrp.PublicationVoc")
         query.addField(field="ObjPublicationGrp.TypeVoc")
-        #query.print()
+        # query.print()
         return query
 
     def onItem(self):
@@ -82,7 +84,7 @@ class Schallplatten:
         id = node.xpath("@id")[0]
         today = datetime.date.today()
         module = "Object"
-        #4491690: Nein
+        # 4491690: Nein
         xml = f"""
             <application xmlns="http://www.zetcom.com/ria/ws/module">
               <modules>
