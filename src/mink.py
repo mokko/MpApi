@@ -142,31 +142,36 @@ class Mink:
         type = args[0]
         id = args[1]
         label = args[2]
+        try: 
+            args[3]
+            if args[3].lower == "attachments":
+                # pretty dirty: assumes that getMedia has been done before
+                mm_fn = self.parts_dir.joinpath(f"{label}-Multimedia-{type}{id}.xml")
+                mmX = self.xmlFromFile(path=mm_fn)
 
-        # pretty dirty: assumes that getMedia has been done before
-        mm_fn = self.parts_dir.joinpath(f"{label}-Multimedia-{type}{id}.xml")
-        mmX = self.xmlFromFile(path=mm_fn)
+                pix_dir = Path(
+                    f"{self.pix_dir}_{label}"
+                )  # this is a new dir, cannot be made earlier
+                if not pix_dir.exists():
+                    pix_dir.mkdir()
+                print(f" checking attachments; saving to {pix_dir}")
+                try:
+                    expected = self.sar.saveAttachments(xml=mmX, adir=pix_dir)
+                except Exception as e:
+                    self.info("Error during saveAttachments")
+                    raise e
 
-        pix_dir = Path(
-            f"{self.pix_dir}_{label}"
-        )  # this is a new dir, cannot be made earlier
-        if not pix_dir.exists():
-            pix_dir.mkdir()
-        print(f" checking attachments; saving to {pix_dir}")
-        try:
-            expected = self.sar.saveAttachments(xml=mmX, adir=pix_dir)
-        except Exception as e:
-            self.info("Error during saveAttachments")
-            raise e
+                # do we want to delete those files that are no longer attached?
+                for img in os.listdir(pix_dir):
+                    img = Path(pix_dir).joinpath(img)  # need resolve here
+                    if img not in expected:
+                        print(f"image no longer attached, removing {img}")
+                        os.remove(img)
+                # currently we dont get attachments that have changed, but keep the same mulId,
+                # that case should be rare
+        except: 
+            print (" not downloading attachments")
 
-        # do we want to delete those files that are no longer attached?
-        for img in os.listdir(pix_dir):
-            img = Path(pix_dir).joinpath(img)  # need resolve here
-            if img not in expected:
-                print(f"image no longer attached, removing {img}")
-                os.remove(img)
-        # currently we dont get attachments that have changed, but keep the same mulId,
-        # that case should be rare
 
     def getExhibit(self, args):
         return self._getPart(
