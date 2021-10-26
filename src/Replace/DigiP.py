@@ -22,49 +22,50 @@ import datetime
 
 from Search import Search
 
+
 class DigiP:
-    def input (self):
+    def input(self):
         return {"locId": "4220557"}
 
-    def loop (self):
-        return "/m:application/m:modules/m:module[@name = 'Multimedia']/m:moduleItem" 
-    
+    def loop(self):
+        return "/m:application/m:modules/m:module[@name = 'Multimedia']/m:moduleItem"
+
     def search(self, limit=-1, id):
-        query = Search(module="Multimedia", limit=limit) 
+        query = Search(module="Multimedia", limit=limit)
         query.AND()
         query.addCriterion(
-            operator="equalsField", 
-            field="MulObjectRef.ObjCurrentLocationVoc", #ObjCurrentLocationVoc
-            value=locId, # using voc id
+            operator="equalsField",
+            field="MulObjectRef.ObjCurrentLocationVoc",  # ObjCurrentLocationVoc
+            value=locId,  # using voc id
         )
         query.addCriterion(
-            operator="equalsField", #equalsTerm 
-            field="MulTypeVoc", #ObjCurrentLocationVoc
-            value="4457921", # using voc id Digitalisat p = 4457921
+            operator="equalsField",  # equalsTerm
+            field="MulTypeVoc",  # ObjCurrentLocationVoc
+            value="4457921",  # using voc id Digitalisat p = 4457921
         )
         query.addCriterion(
-            operator="notEqualsField", #equalsTerm 
-            field="MulApprovalGrp.TypeVoc", #ObjCurrentLocationVoc
-            value="1816002", # using vocId SMB-Digital = 1816002
+            operator="notEqualsField",  # equalsTerm
+            field="MulApprovalGrp.TypeVoc",  # ObjCurrentLocationVoc
+            value="1816002",  # using vocId SMB-Digital = 1816002
         )
-        return query 
+        return query
 
     def onItem(self):
-        return self.setAssetFreigabe # returns a callback
+        return self.setAssetFreigabe  # returns a callback
 
     def setAssetFreigabe(self, *, node, user):
         """
-            This is payload. Untested.
-            We're inside Multimedia's nodeItem here
-            We have already filtered to our hearts delight, so can change 
-            immediately.
+        This is payload. Untested.
+        We're inside Multimedia's nodeItem here
+        We have already filtered to our hearts delight, so can change
+        immediately.
         """
-        #print (node)
+        # print (node)
 
         id = node.xpath("@id")[0]
         today = datetime.date.today()
         module = "Multimedia"
-        sort = 1 # unsolved! I suspect it can be None or missing
+        sort = 1  # unsolved! I suspect it can be None or missing
         xml = f"""
         <application xmlns="http://www.zetcom.com/ria/ws/module">
           <modules>
@@ -90,14 +91,14 @@ class DigiP:
             </module>
           </modules>
         </application>"""
-        
+
         payload = {
             "type": "createRepeatableGroup",
             "module": module,
             "id": id,
             "repeatableGroup": "MulApprovalGrp",
             "xml": xml,
-            "success": f"{module} {id}: set asset smbfreigabe" 
+            "success": f"{module} {id}: set asset smbfreigabe",
         }
 
-        return payload 
+        return payload
