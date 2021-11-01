@@ -17,13 +17,16 @@ Each criterion can be combined with others using the usual conjunctions (and,
 or, not). 
 
 USAGE
+    s = mpSearch(fromFile="path/to/file")
+    s = mpSearch(fromString=xml)
     s = mpSearch(module="Object", limit=-1, offset=0)
+    s.setParam(key="offset", value=123) # offset or limit
     s.AND()
     s.addCriterion(operator="equalsValue", field="__id", value="1234")
     s.addCriterion(operator="equalsValue", field="__id", value="1234")
 
     #if you only want certain fields back, list them
-    s.addField()
+    s.addField("ObjExampleMissing")
 
 #helpers
     print(s.toString())
@@ -164,6 +167,16 @@ class Search(Helper):
 
     def NOT(self):
         self._addConjunction(type="not")
+
+    def setParam(self, *, key, value):
+        """
+        changes offset in the object; does not create a copy; does not return particularily much; 
+        """
+        searchN = self.etree.xpath(
+            "/s:application/s:modules/s:module/s:search", namespaces=NSMAP
+        )[0]
+        searchA = searchN.attrib
+        searchA[key] = value
 
     #
     # private helpers

@@ -178,3 +178,21 @@ def test_seven():  # addField
     # s.print()
     s.toFile(path="search.tmp.xml")
     assert s.validate(mode="search") is True
+
+def test_setParam():
+    q = Search()
+    q.AND()
+    q.addCriterion(
+        operator="equalsField",
+        field="ObjCurrentLocationVoc",
+        value="4220560",  # O1.189.01.K1 M13
+    )
+    q.addCriterion(
+        operator="notEqualsField",  # notEqualsTerm
+        field="ObjPublicationGrp.TypeVoc",
+        value="2600647",  # use id? Daten freigegeben für SMB-digital
+    )
+    q.setParam(key="offset", value="123")
+    q.setParam(key="limit", value="10")
+    q.getParam
+    #q.print()
