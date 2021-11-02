@@ -194,5 +194,5 @@ def test_setParam():
     )
     q.setParam(key="offset", value="123")
     q.setParam(key="limit", value="10")
-    q.getParam
+    #q.etree
     #q.print()
