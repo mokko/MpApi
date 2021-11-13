@@ -270,7 +270,7 @@ class Sar:  # methods (mosly) in alphabetical order
             raise TypeError("Join failed")
         return xml
 
-    def searchBlocks(self, *, xml, size=30)
+    def searchBlocks(self, *, xml, size=30):
         """
         Experimenting with a paginated search. Unfinished!
         
