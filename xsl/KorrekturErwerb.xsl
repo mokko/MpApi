@@ -267,40 +267,38 @@
 					<xsl:when test="normalize-space($PKVeräußerer) ne ''">
 						<xsl:value-of select="normalize-space($PKVeräußerer)"/>	
 					</xsl:when>
-					<xsl:when test="normalize-space($ErwerbNotizErwerbungVon) ne ''">
-						<xsl:value-of select="normalize-space($ErwerbNotizErwerbungVon)"/>	
-					</xsl:when>
 					<xsl:when test="normalize-space($PKVerbesitzer) ne ''">
 						<xsl:value-of select="normalize-space($PKVerbesitzer)"/>	
+					</xsl:when>
+					<xsl:when test="normalize-space($ErwerbNotizErwerbungVon) ne ''">
+						<xsl:value-of select="normalize-space($ErwerbNotizErwerbungVon)"/>	
 					</xsl:when>
 				</xsl:choose>
 			</xsl:variable>
 
-			<xsl:variable name="Satz">
-				<xsl:if test="$art ne '' or $von ne '' or $datum2 ne ''">
-					<xsl:choose>
-						<xsl:when test="$art eq 'Leihe' or $art eq 'Dauerleihgabe'">
-							<xsl:value-of select="$art"/>
-						</xsl:when>
-						<xsl:when test="$art ne ''">
-							<xsl:text>erworben durch </xsl:text>
-							<xsl:value-of select="$art"/>
-						</xsl:when>
-						<xsl:otherwise>
-							<xsl:text>erworben </xsl:text>
-						</xsl:otherwise>
-					</xsl:choose>
-					<xsl:if test="$von ne ''">
-						<xsl:text> von </xsl:text>
-						<xsl:value-of select="$von"/>
-					</xsl:if>
-					<xsl:if test="$datum2 ne ''">
-						<xsl:text> </xsl:text>
-						<xsl:value-of select="$datum2"/>
-					</xsl:if>
+			<!--Return Satz-->
+			<xsl:if test="$art ne '' or $von ne '' or $datum2 ne ''">
+				<xsl:choose>
+					<xsl:when test="$art eq 'Leihe' or $art eq 'Dauerleihgabe'">
+						<xsl:value-of select="$art"/>
+					</xsl:when>
+					<xsl:when test="$art ne ''">
+						<xsl:text>erworben durch </xsl:text>
+						<xsl:value-of select="$art"/>
+					</xsl:when>
+					<xsl:otherwise>
+						<xsl:text>erworben </xsl:text>
+					</xsl:otherwise>
+				</xsl:choose>
+				<xsl:if test="$von ne ''">
+					<xsl:text> von </xsl:text>
+					<xsl:value-of select="$von"/>
 				</xsl:if>
-			</xsl:variable>
-			<xsl:value-of select="$Satz"/>
+				<xsl:if test="$datum2 ne ''">
+					<xsl:text> </xsl:text>
+					<xsl:value-of select="$datum2"/>
+				</xsl:if>
+			</xsl:if>
 		</xsl:for-each>
 	</xsl:function>		
 </xsl:stylesheet>
