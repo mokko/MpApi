@@ -10,6 +10,7 @@
 	
 	<!-- 
 		Erstellt eine HTML Liste zum Korreturlesen des Erwerbszusammenhangs
+		15.11.2021 "erworben von" weglassen; jahr zum filtern isolieren
 	-->
 
 	<xsl:template match="/">
@@ -65,6 +66,8 @@
 		<xsl:apply-templates select="z:repeatableGroup[@name = 'ObjAcquisitionSourcePerRef']"/>
 		<xsl:apply-templates select="z:repeatableGroup[@name = 'ObjAcquisitionSourceGrp']"/>
 		<xsl:apply-templates select="z:repeatableGroup[@name = 'ObjAcquisitionNotesGrp']"/>
+		<!--Credits -->
+		<xsl:apply-templates select="z:vocabularyReference[@name = 'ObjCreditLineVoc']"/>
 	</xsl:template>
 	
 	<xsl:template name="Ergebnis">
@@ -126,7 +129,6 @@
 			<xsl:value-of select="z:dataField"/>
 			<br/>
 		</xsl:for-each>
-		<br/>
 	</xsl:template>
 
 	<xsl:template match="z:moduleReference[@name = 'ObjPerAssociationRef']/z:moduleReferenceItem[
@@ -167,7 +169,12 @@
 		<br/>
 	</xsl:template>
 
+	<xsl:template match="z:vocabularyReference[@name = 'ObjCreditLineVoc']">
+		<xsl:text>Credits: </xsl:text>
+		<xsl:value-of select="z:vocabularyReferenceItem/z:formattedValue"/>
+	</xsl:template>
 
+	<!-- FUNC -->
 	<xsl:function name="func:satz">
 		<xsl:param name="context"/>
 		<xsl:for-each select="$context">	
@@ -179,7 +186,10 @@
 			<xsl:variable name="art"> 
 				<xsl:choose>
 					<xsl:when test="$art2 eq 'Zugang ungeklärt (Expedition)'">
-						<xsl:text>unbekannten Zugang (Expedition)</xsl:text>
+						<xsl:text>unbekannter Zugang (Expedition)</xsl:text>
+					</xsl:when>
+					<xsl:when test="$art2 eq 'Zugang ungeklärt'">
+						<xsl:text>ungeklärte Zugangsart</xsl:text>
 					</xsl:when>
 					<xsl:when test="$art2 eq 'Unbekannt'">
 						<xsl:text>unbekannte Erwerbungsart</xsl:text>
@@ -283,12 +293,8 @@
 						<xsl:value-of select="$art"/>
 					</xsl:when>
 					<xsl:when test="$art ne ''">
-						<xsl:text>erworben durch </xsl:text>
 						<xsl:value-of select="$art"/>
 					</xsl:when>
-					<xsl:otherwise>
-						<xsl:text>erworben </xsl:text>
-					</xsl:otherwise>
 				</xsl:choose>
 				<xsl:if test="$von ne ''">
 					<xsl:text> von </xsl:text>
