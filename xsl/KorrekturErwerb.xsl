@@ -2,6 +2,7 @@
     xmlns:z="http://www.zetcom.com/ria/ws/module"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
 	xmlns:func="http://func"
 	exclude-result-prefixes="z">	
 
@@ -62,7 +63,7 @@
 		<xsl:apply-templates select="z:repeatableGroup[@name = 'ObjAcquisitionMethodGrp']"/>
 		<xsl:apply-templates select="z:repeatableGroup[@name = 'ObjOwnerMethodGrp']"/>
 		<xsl:apply-templates select="z:moduleReference[@name = 'ObjPerAssociationRef']/z:moduleReferenceItem[z:vocabularyReference/z:vocabularyReferenceItem/z:formattedValue = 'Veräußerer']"/>
-		<xsl:apply-templates select="z:moduleReference[@name = 'ObjPerAssociationRef']/z:moduleReferenceItem[z:vocabularyReference/z:vocabularyReferenceItem/z:formattedValue = 'Verbesitzer']"/>
+		<xsl:apply-templates select="z:moduleReference[@name = 'ObjPerAssociationRef']/z:moduleReferenceItem[z:vocabularyReference/z:vocabularyReferenceItem/z:formattedValue = 'Vorbesitzer']"/>
 		<xsl:apply-templates select="z:repeatableGroup[@name = 'ObjAcquisitionSourcePerRef']"/>
 		<xsl:apply-templates select="z:repeatableGroup[@name = 'ObjAcquisitionSourceGrp']"/>
 		<xsl:apply-templates select="z:repeatableGroup[@name = 'ObjAcquisitionNotesGrp']"/>
@@ -143,7 +144,7 @@
 
 	<xsl:template match="z:moduleReference[@name = 'ObjPerAssociationRef']/z:moduleReferenceItem[
 		z:vocabularyReference/z:vocabularyReferenceItem/z:formattedValue = 'Vorbesitzer']">
-		<xsl:text>PKVerbesitzer: </xsl:text>
+		<xsl:text>PKVorbesitzer: </xsl:text>
 		<xsl:value-of select="z:formattedValue"/>
 		<xsl:text> [kueId:</xsl:text>
 		<xsl:value-of select="@moduleItemId"/>
@@ -240,11 +241,36 @@
 					</xsl:otherwise>
 				</xsl:choose>
 			</xsl:variable>
-			<xsl:message>
+			<!--xsl:message>
 				<xsl:value-of select="$datum"/>
 				<xsl:text>::</xsl:text>
 				<xsl:value-of select="$datum2"/>
-			</xsl:message>
+			</xsl:message-->
+
+			<xsl:variable name="jahr" as="xs:integer">
+				<xsl:choose>
+					<xsl:when test="matches($datum, '\d\d\d\d$')">
+					<xsl:analyze-string select="$datum" regex="\d\d\d\d$">
+						<xsl:matching-substring>
+							<xsl:value-of select="." />
+						</xsl:matching-substring>
+					</xsl:analyze-string>
+					</xsl:when>
+					<xsl:otherwise>
+						<xsl:text>99999</xsl:text>
+					</xsl:otherwise>
+				</xsl:choose>
+			</xsl:variable>
+			<!--xsl:message>
+				<xsl:value-of select="$jahr"/>
+			</xsl:message-->
+
+			<xsl:variable name="deadOrPermission" select="
+				'Evaristo Muyinda (1983), Veräußerer', 
+				'Gerd Koch', 
+				'Internationales Institut für Traditionelle Musik',
+				'Koch, Gerd'
+			"/>
 
 			<!--VON-->
 
@@ -258,33 +284,38 @@
 					<xsl:value-of select="substring-before(., ' (')"/>
 				</xsl:for-each>
 			</xsl:variable>
-			<xsl:variable name="PKVerbesitzer">
+			<xsl:variable name="PKVorbesitzer">
 				<xsl:for-each select="z:moduleReference[
 					@name = 'ObjPerAssociationRef']/z:moduleReferenceItem[
 					z:vocabularyReference/z:vocabularyReferenceItem/z:formattedValue = 'Vorbesitzer']/z:formattedValue">
 					<xsl:value-of select="substring-before(., ' (')"/>
 				</xsl:for-each>
 			</xsl:variable> 
-			<!--xsl:if test="$PKVeräußerer ne ''">
-				<xsl:message>
-					<xsl:text>PKVeräußerer: </xsl:text>
-					<xsl:value-of select="$PKVeräußerer"/>
-				</xsl:message>
-			</xsl:if-->
 
+			<!-- 
+				"Vorbesitzer" is one a former owner from the Provenienzkette. Not necessarily the last owner 
+				before the institution acquired it; hence s/he/they should not be named
+			-->
 			<xsl:variable name="von">
 				<xsl:choose>
 					<xsl:when test="normalize-space($PKVeräußerer) ne ''">
 						<xsl:value-of select="normalize-space($PKVeräußerer)"/>	
 					</xsl:when>
-					<xsl:when test="normalize-space($PKVerbesitzer) ne ''">
-						<xsl:value-of select="normalize-space($PKVerbesitzer)"/>	
-					</xsl:when>
+					<!--xsl:when test="normalize-space($PKVorbesitzer) ne ''">
+						<xsl:value-of select="normalize-space($PKVorbesitzer)"/>	
+					</xsl:when-->
 					<xsl:when test="normalize-space($ErwerbNotizErwerbungVon) ne ''">
 						<xsl:value-of select="normalize-space($ErwerbNotizErwerbungVon)"/>	
 					</xsl:when>
 				</xsl:choose>
 			</xsl:variable>
+
+			<xsl:if test="$von ne ''">
+				<xsl:message>
+					<xsl:text>von: </xsl:text>
+					<xsl:value-of select="$von"/>
+				</xsl:message>
+			</xsl:if>
 
 			<!--Return Satz-->
 			<xsl:if test="$art ne '' or $von ne '' or $datum2 ne ''">
@@ -297,8 +328,10 @@
 					</xsl:when>
 				</xsl:choose>
 				<xsl:if test="$von ne ''">
-					<xsl:text> von </xsl:text>
-					<xsl:value-of select="$von"/>
+					<xsl:if test="$jahr lt 1951 or $von = $deadOrPermission">
+						<xsl:text> von </xsl:text>
+						<xsl:value-of select="$von"/>
+					</xsl:if>
 				</xsl:if>
 				<xsl:if test="$datum2 ne ''">
 					<xsl:text> </xsl:text>
