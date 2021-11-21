@@ -30,13 +30,13 @@ class DigiP:
     def loop(self):
         return "/m:application/m:modules/m:module[@name = 'Multimedia']/m:moduleItem"
 
-    def search(self, limit=-1, id):
+    def search(self, Id, limit=-1):
         query = Search(module="Multimedia", limit=limit)
         query.AND()
         query.addCriterion(
             operator="equalsField",
             field="MulObjectRef.ObjCurrentLocationVoc",  # ObjCurrentLocationVoc
-            value=locId,  # using voc id
+            value=Id,  # using voc id
         )
         query.addCriterion(
             operator="equalsField",  # equalsTerm
@@ -53,16 +53,16 @@ class DigiP:
     def onItem(self):
         return self.setAssetFreigabe  # returns a callback
 
-    def setAssetFreigabe(self, *, node, user):
+    def setAssetFreigabe(self, *, itemN, user):
         """
         This is payload. Untested.
         We're inside Multimedia's nodeItem here
         We have already filtered to our hearts delight, so can change
         immediately.
         """
-        # print (node)
+        # print (itemN)
 
-        id = node.xpath("@id")[0]
+        Id = itemN.xpath("@id")[0]
         today = datetime.date.today()
         module = "Multimedia"
         sort = 1  # unsolved! I suspect it can be None or missing
@@ -70,7 +70,7 @@ class DigiP:
         <application xmlns="http://www.zetcom.com/ria/ws/module">
           <modules>
             <module name="{module}">
-              <moduleItem id="{id}">
+              <moduleItem id="{Id}">
                 <repeatableGroup name="MulApprovalGrp">
                     <repeatableGroupItem>
                         <dataField dataType="Varchar" name="ModifiedByTxt">
@@ -95,10 +95,10 @@ class DigiP:
         payload = {
             "type": "createRepeatableGroup",
             "module": module,
-            "id": id,
+            "id": Id,
             "repeatableGroup": "MulApprovalGrp",
             "xml": xml,
-            "success": f"{module} {id}: set asset smbfreigabe",
+            "success": f"{module} {Id}: set asset smbfreigabe",
         }
 
         return payload

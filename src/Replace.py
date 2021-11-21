@@ -60,16 +60,18 @@ class Replace:
         Plugin = getattr(mod, plugin)
         return Plugin()  # new / constructor?
 
-    def loop(self, *, xpath, onItem):
+    def loop(self, *, xpath, onItem, type):
         """
         Generic loop
         """
         itemsL = self.ET.xpath(xpath, namespaces=NSMAP)
 
         for itemN in itemsL:
-            mulId = itemN.attrib["id"]
-            print(f"mulId {mulId}")  # not generic yet
-            yield onItem(node=itemN, user=self.user)  # how generic is that?
+            Id = itemN.attrib["id"]
+            print(f"{type} {Id}")  
+            count = itemN.xpath("count(//m:moduleItem)", namespaces=NSMAP)
+            #print (f"SYD: {count} inside replace; should be 1")
+            yield onItem(itemN=itemN, user=self.user)  
 
     def runPlugin(self, *, plugin, limit=-1):
         """
@@ -80,17 +82,18 @@ class Replace:
         count = int(0)
         for key in input:
             print(f"INPUT {key}")
-            query = plugin.search(id=input[key])
+            query = plugin.search(Id=input[key])
             query.validate(mode="search")
             # should validate the query inside replacer? Probably yes
             replacer.search(query=query, id=input[key])
             xpath = plugin.loop()
+            moduleType = xpath.split("'")[1] # not particularly generic
+            #print (f"T{moduleType}")
             onItem = plugin.onItem()
-            for payload in replacer.loop(xpath=xpath, onItem=onItem):
+            for payload in replacer.loop(xpath=xpath, onItem=onItem, type=moduleType):
                 # print (f"WOULD ACT {payload['xml']}")
-                if (
-                    "xml" in payload
-                ):  # it's possible that payload is empty, but it has to exist
+                # it's possible that payload is empty, but it has to exist
+                if "xml" in payload:  
                     m = Module(xml=payload["xml"])
                     m.validate()
                     count += 1
