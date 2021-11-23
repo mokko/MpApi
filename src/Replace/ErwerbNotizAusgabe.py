@@ -316,24 +316,24 @@ class ErwerbNotizAusgabe:
 
         # normalize-space(/m:repeatableGroup[
         # /z:repeatableGroupItem/z:vocabularyReference 
-        part["art2"] = self._xValue(node=itemN, select=
+        part["art2"] = self._xText(node=itemN, select=
             """m:repeatableGroup[@name='ObjAcquisitionMethodGrp']/m:repeatableGroupItem
             /m:vocabularyReference/m:vocabularyReferenceItem/m:formattedValue
             """)
 
-        part["dateFromTxt"] = self._xValue(node=itemN, select=
+        part["dateFromTxt"] = self._xText(node=itemN, select=
             """m:repeatableGroup[
                 @name = 'ObjAcquisitionDateGrp']/m:repeatableGroupItem/m:dataField[
                 @name = 'DateFromTxt']/m:value
             """)
 
-        part["dateTxt"] = self._xValue(node=itemN, select=
+        part["dateTxt"] = self._xText(node=itemN, select=
             """m:repeatableGroup[
                 @name = 'ObjAcquisitionDateGrp']/m:repeatableGroupItem/m:dataField[
                 @name = 'DateTxt']/m:value)
             """)
 
-        part["ErwerbNotizErwerbungVon"] = self._xValue(node=itemN, select=
+        part["ErwerbNotizErwerbungVon"] = self._xText(node=itemN, select=
             """m:repeatableGroup[
 				@name = 'ObjAcquisitionNotesGrp']/m:repeatableGroupItem[
 				m:vocabularyReference/m:vocabularyReferenceItem/m:formattedValue = 'Erwerbung von']/m:dataField/m:value
@@ -348,7 +348,7 @@ class ErwerbNotizAusgabe:
         if part["PKVeräußerer"] == "":
             part["PKVeräußerer"] = None
 
-        #part["PKVorbesitzer"] = self._xValue(node=itemN, select=
+        #part["PKVorbesitzer"] = self._xText(node=itemN, select=
         #    """ m:moduleReference[
 		#		@name = 'ObjPerAssociationRef']/m:moduleReferenceItem[
 		#		m:vocabularyReference[
@@ -409,9 +409,6 @@ class ErwerbNotizAusgabe:
         else:
             part["von"] = part["ErwerbNotizErwerbungVon"]
 
-        #DEBUG
-        #for key in sorted(part):
-        #    print (f":{key} :: {part[key]}")
 
         satz = ""
         if part["art"] is not None:
@@ -421,14 +418,16 @@ class ErwerbNotizAusgabe:
                 satz =  satz + f" von {part['von']}"
         if part["datum2"] is not None:
             satz = satz + f" {part['datum2']}"
-        print (satz)
+
+        part["satz"] = satz
+        for key in sorted(part): # DEBUG
+            print (f":{key} :: {part[key]}")
         return satz
     
-    def _xValue (self, *, node, select):
+    def _xText (self, *, node, select):
         try:
             r = node.xpath(select, namespaces=NSMAP)[0]
             #print (f"XXXX{r.text}")
             return r.text
         except:
-        
             return None # I dont know what python passes back implicitly 
