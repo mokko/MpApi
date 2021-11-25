@@ -239,6 +239,9 @@ class ErwerbNotizAusgabe:
         The node we get is the rGrp ObjAcquisitionNotesGrp.
         
         We keep the original repeatableItem or rItems and add a new one if note is not empty.
+
+        Now we try createRepeatableGroup
+        POST http://.../ria-ws/application/module/{module}/{__id}/{repeatableGroup|reference}
         
         """
         refId = node.xpath("m:repeatableGroupItem/@id", namespaces=NSMAP)[0]
@@ -249,6 +252,7 @@ class ErwerbNotizAusgabe:
             <modules>
                 <module name="{module}">
                     <moduleItem id="{Id}">
+                        <repeatableGroup name="ObjAcquisitionNotesGrp"/>
                     </moduleItem>
                 </module>
             </modules>
@@ -257,6 +261,7 @@ class ErwerbNotizAusgabe:
 
         ET = etree.fromstring(outer)
         """
+            OLD ATTEMPT. Let leave the notes here for the next time
             Do we have to modify original xml to write it back as part of the update?
             YES!
             - Do we have to remove the referenceID? Not according to examples in 
@@ -266,14 +271,14 @@ class ErwerbNotizAusgabe:
             - repeatableGrp/@size?
         """
         
-        for valueN in node.xpath("//m:formattedValue", namespaces=NSMAP):
-            valueN.getparent().remove(valueN)
+        #for valueN in node.xpath("//m:formattedValue", namespaces=NSMAP):
+        #    valueN.getparent().remove(valueN)
 
-        for itemN in node.xpath("//m:vocabularyReferenceItem", namespaces=NSMAP):
-            itemN.attrib.pop("name")
+        #for itemN in node.xpath("//m:vocabularyReferenceItem", namespaces=NSMAP):
+        #    itemN.attrib.pop("name")
  
-        itemN = ET.xpath("//m:moduleItem", namespaces=NSMAP)[0]
-        itemN.append(node)  # add original ErwerbNotiz rGrp
+        #itemN = ET.xpath("//m:moduleItem", namespaces=NSMAP)[0]
+        #itemN.append(node)  # add original ErwerbNotiz rGrp
 
         newItem = f"""
             <repeatableGroupItem xmlns="http://www.zetcom.com/ria/ws/module">
@@ -293,7 +298,7 @@ class ErwerbNotizAusgabe:
         newET = etree.fromstring(newItem)
         rpGrpN = ET.xpath("//m:moduleItem/m:repeatableGroup", namespaces=NSMAP)[0]
         rpGrpN.append(newET) # add new ErwerbNotiz (Ausgabe)
-        rpGrpN.attrib.pop("size") 
+        #rpGrpN.attrib.pop("size") 
         #rpGrpA["size"] = str(int(rpGrpA["size"]) + 1)
 
         doc = etree.ElementTree(ET)
@@ -307,17 +312,18 @@ class ErwerbNotizAusgabe:
         print ("*about to validate")
         m.validate()
 
-        if refId is not None:
-            payload = {
-                "type": "updateRepeatableGroup",
-                "module": module,
-                "id": Id,
-                "repeatableGroup": "ObjAcquisitionNotesGrp",
-                "xml": xml,
-                "success": f"{module} {Id}: update ErwerbNotizAusgabe {note}",
-                "refId": refId,
-            }
-            return payload
+        print (f"xml:{xml}")
+
+        payload = {
+            "type": "createRepeatableGroup", #is actual creating a repeatableGroupItem?
+            "module": module,
+            "id": Id,
+            "repeatableGroup": "ObjAcquisitionNotesGrp",
+            "xml": xml,
+            "success": f"{module} {Id}: update ErwerbNotizAusgabe {note}",
+            #"refId": refId,
+        }
+        return payload
 
     def writeNote(self, *, itemN):
         """
@@ -454,11 +460,13 @@ class ErwerbNotizAusgabe:
         if part["datum2"] is not None:
             if satz != "":
                 satz += " "
+            else: #wenn keine Zugangsart und keine Veräußerer
+                satz = "Zugang "
             satz += f"{part['datum2']}"
 
         part["satz"] = satz
         for key in sorted(part):  # DEBUG
-            print(f":{key}:{part[key]}|")
+            print(f":{key}:{part[key]}")
         return satz
 
     def _xText(self, *, node, select):

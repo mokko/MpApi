@@ -93,34 +93,35 @@ class Replace:
             for payload in replacer.loop(xpath=xpath, onItem=onItem, type=moduleType):
                 #print (f"XML {payload['xml']}") -> use file debug.xml instead
                 # it's possible that payload is empty, but it has to exist
-                if "xml" in payload:  
-                    m = Module(xml=payload["xml"])
-                    m.validate()
-                    count += 1
-                    if args.act is True:
-                        if payload["type"] == "createRepeatableGroup":
-                            r = self.api.createRepeatableGroup(
-                                module=payload["module"],
-                                id=payload["id"],
-                                repeatableGroup=payload["repeatableGroup"],
-                                xml=payload["xml"],
-                            )
-                        elif payload["type"] == "updateRepeatableGroup":
-                            r = self.api.updateRepeatableGroup(
-                                module=payload["module"],
-                                id=payload["id"],
-                                repeatableGroup=payload["repeatableGroup"],
-                                xml=payload["xml"],
-                                referenceId=payload["refId"], # do we need to pass refId or not?
-                            )
-                        else:
-                            raise TypeError("UNKNOWN PAYLOAD TYPE")
-                        r.raise_for_status()
-                        print(payload["success"])
-                        logging.info(payload["success"])
-                    if limit != -1 and count >= limit:
-                        print(f"Limit of {limit} reached, aborting")
-                        return  # break for loop
+                if payload is not None:
+                    if "xml" in payload:  
+                        m = Module(xml=payload["xml"])
+                        m.validate()
+                        count += 1
+                        if args.act is True:
+                            if payload["type"] == "createRepeatableGroup":
+                                r = self.api.createRepeatableGroup(
+                                    module=payload["module"],
+                                    id=payload["id"],
+                                    repeatableGroup=payload["repeatableGroup"],
+                                    xml=payload["xml"],
+                                )
+                            elif payload["type"] == "updateRepeatableGroup":
+                                r = self.api.updateRepeatableGroup(
+                                    module=payload["module"],
+                                    id=payload["id"],
+                                    repeatableGroup=payload["repeatableGroup"],
+                                    xml=payload["xml"],
+                                    referenceId=payload["refId"], # do we need to pass refId or not?
+                                )
+                            else:
+                                raise TypeError("UNKNOWN PAYLOAD TYPE")
+                            r.raise_for_status()
+                            print(payload["success"])
+                            logging.info(payload["success"])
+                        if limit != -1 and count >= limit:
+                            print(f"Limit of {limit} reached, aborting")
+                            return  # break for loop
         print(f"count: {count}")
 
     def search(self, *, query, id):
