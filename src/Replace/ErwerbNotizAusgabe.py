@@ -16,6 +16,7 @@ NSMAP = {
     "m": "http://www.zetcom.com/ria/ws/module",
 }
 
+
 class ErwerbNotizAusgabe:
     def input(self):
         STO = {
@@ -53,11 +54,11 @@ class ErwerbNotizAusgabe:
     def search(self, Id, limit=-1):
         """
         We want object records without ErwerbNotizAusgabe (i.e. empty)
-        
-        It seems impossible to select all records without ErwerbNotizAusgabe in RIA and 
-        exactly those. I can only get records with any ErwerbNotiz entry that don't have 
+
+        It seems impossible to select all records without ErwerbNotizAusgabe in RIA and
+        exactly those. I can only get records with any ErwerbNotiz entry that don't have
         any entries with the type Ausgabe, not records without any ErwerbNotiz entries.
-        
+
         Typ (Erwerb. Notiz)->ist nicht gleich: Ausgabe
         """
         query = Search(module="Object", limit=limit)
@@ -79,9 +80,9 @@ class ErwerbNotizAusgabe:
         )
         # doesn't find records without ObjAcquisitionNotesGrp, so we dont need it
         # query.addCriterion(
-            # operator="notEqualsField",  # notEqualsTerm id 1805533 für Ausgabe
-            # field="ObjAcquisitionNotesGrp.TypeVoc",
-            # value="Ausgabe",  # 
+        # operator="notEqualsField",  # notEqualsTerm id 1805533 für Ausgabe
+        # field="ObjAcquisitionNotesGrp.TypeVoc",
+        # value="Ausgabe",  #
         # )
         # We need full records
         # query.addField(field="ObjAcquisitionNotesGrp")
@@ -95,14 +96,14 @@ class ErwerbNotizAusgabe:
         # just return the callback
         return self.erwerbNotiz
 
-    #--------------------
+    # --------------------
     # STUFF             -
-    #--------------------
-        
-    def createErwerbNotiz (self, *, Id, note):
+    # --------------------
+
+    def createErwerbNotiz(self, *, Id, note):
         """
         There is no ErwerbNotiz, so we're making a completely new one
-        
+
         <repeatableGroupItem id="40926665">
             <dataField dataType="Clob" name="MemoClb">
               <value>Eingang 2004, Inventarisiert 2006</value>
@@ -115,7 +116,7 @@ class ErwerbNotizAusgabe:
               </vocabularyReferenceItem>
             </vocabularyReference>
         </repeatableGroupItem>
-        
+
         id 212110
 
         <repeatableGroup name="ObjAcquisitionNotesGrp" size="3">
@@ -153,8 +154,8 @@ class ErwerbNotizAusgabe:
         rGrpName = "ObjAcquisitionNotesGrp"
         module = "Object"
 
-        #the easiest will be to rewrite the text algorithm in python
-    
+        # the easiest will be to rewrite the text algorithm in python
+
         note = "test"
 
         xml = f"""
@@ -194,16 +195,16 @@ class ErwerbNotizAusgabe:
         }
         return payload
 
-    def erwerbNotiz (self, *, itemN, user):
+    def erwerbNotiz(self, *, itemN, user):
         """
         Just check conditions and transparently trigger correct method
         node should be a different moduleItem every time it gets called
         """
         moduleItemId = itemN.xpath("@id")[0]
-        #count = itemN.xpath("count(//m:moduleItem)", namespaces=NSMAP)
-        #print (f"RCOUNT: {count} inside erwerbNotiz; should be 1")
+        # count = itemN.xpath("count(//m:moduleItem)", namespaces=NSMAP)
+        # print (f"RCOUNT: {count} inside erwerbNotiz; should be 1")
 
-        #print(itemN)
+        # print(itemN)
         note = self.writeNote(itemN=itemN)
         # we need the existing ObjAcquisitionNotesGrp repeatableGroup to update it
         rGrpL = itemN.xpath(
@@ -217,20 +218,19 @@ class ErwerbNotizAusgabe:
                 namespaces=NSMAP,
             )
             if len(grpItemL) > 0:
-                print ("At least one ErwerbNotizAusgabe exists already -> do nothing")
+                print("At least one ErwerbNotizAusgabe exists already -> do nothing")
             else:
-                print ("ErwerbNotiz exists already, but no Ausgabe -> updateErwerbNotiz")
-                #there should always only be one ObjAcquisitionNotes Grp
+                print("ErwerbNotiz exists already, but no Ausgabe -> updateErwerbNotiz")
+                # there should always only be one ObjAcquisitionNotes Grp
                 return self.updateErwerbNotiz(Id=moduleItemId, node=rGrpL[0], note=note)
         else:
-            print ("No Erwerb.Notiz of any kind exists -> createErwerbNotiz")
+            print("No Erwerb.Notiz of any kind exists -> createErwerbNotiz")
             return self.createErwerbNotiz(Id=moduleItemId, note=note)
-        
 
     def updateErwerbNotiz(self, *, node, Id, note):
         """
-        The Id we get is moduleItemIt. 
-        The node we get is the rGrp ObjAcquisitionNotesGrp.  
+        The Id we get is moduleItemIt.
+        The node we get is the rGrp ObjAcquisitionNotesGrp.
         """
         refId = node.xpath("m:repeatableGroupItem/@id", namespaces=NSMAP)[0]
         module = "Object"
@@ -244,10 +244,10 @@ class ErwerbNotizAusgabe:
             </modules>
         </application>
         """
-        
+
         ET = etree.fromstring(outer)
         itemN = ET.xpath("//m:moduleItem", namespaces=NSMAP)[0]
-        itemN.append(node) # original ErwerbNotiz rGrp
+        itemN.append(node)  # original ErwerbNotiz rGrp
 
         newItem = f"""
             <repeatableGroupItem xmlns="http://www.zetcom.com/ria/ws/module">
@@ -263,16 +263,16 @@ class ErwerbNotizAusgabe:
                 </vocabularyReference>
             </repeatableGroupItem>
         """
-        
+
         frag = etree.fromstring(newItem)
         N = ET.xpath("//m:moduleItem/m:repeatableGroup", namespaces=NSMAP)[0]
         N.append(frag)
 
         # fragment = etree.tostring(
-            # node, pretty_print=True, encoding="unicode"
+        # node, pretty_print=True, encoding="unicode"
         # )
         # print (fragment)
-        
+
         doc = etree.ElementTree(ET)
         doc.write("debug.xml", pretty_print=True, encoding="UTF-8")
         xml = etree.tostring(
@@ -299,62 +299,72 @@ class ErwerbNotizAusgabe:
         """
         node carries the whole moduleItem as etree.
         returns the new text for ErwerbNotizAusgabe
-        
+
         Originally, I wanted to use xslt here. But now it's easier to re-implmenent the logarithm
         in Python using lxml than to use saxon from Python xslt2 even if that means extra debugging.
         """
 
-        #fragment = etree.tostring(
+        # fragment = etree.tostring(
         #    node, pretty_print=True, encoding="unicode"
-        #)
-        #print (fragment)
+        # )
+        # print (fragment)
 
         moduleItemId = itemN.xpath("@id")[0]
-        #count = itemN.xpath("count(//m:moduleItem)", namespaces=NSMAP)
-        #print (f"COUNT: {count} in writeNote; should be 1")
+        # count = itemN.xpath("count(//m:moduleItem)", namespaces=NSMAP)
+        # print (f"COUNT: {count} in writeNote; should be 1")
         part = {}
 
         # normalize-space(/m:repeatableGroup[
-        # /z:repeatableGroupItem/z:vocabularyReference 
-        part["art2"] = self._xText(node=itemN, select=
-            """m:repeatableGroup[@name='ObjAcquisitionMethodGrp']/m:repeatableGroupItem
+        # /z:repeatableGroupItem/z:vocabularyReference
+        part["art2"] = self._xText(
+            node=itemN,
+            select="""m:repeatableGroup[@name='ObjAcquisitionMethodGrp']/m:repeatableGroupItem
             /m:vocabularyReference/m:vocabularyReferenceItem/m:formattedValue
-            """)
+            """,
+        )
 
-        part["dateFromTxt"] = self._xText(node=itemN, select=
-            """m:repeatableGroup[
+        part["dateFromTxt"] = self._xText(
+            node=itemN,
+            select="""m:repeatableGroup[
                 @name = 'ObjAcquisitionDateGrp']/m:repeatableGroupItem/m:dataField[
                 @name = 'DateFromTxt']/m:value
-            """)
+            """,
+        )
 
-        part["dateTxt"] = self._xText(node=itemN, select=
-            """m:repeatableGroup[
+        part["dateTxt"] = self._xText(
+            node=itemN,
+            select="""m:repeatableGroup[
                 @name = 'ObjAcquisitionDateGrp']/m:repeatableGroupItem/m:dataField[
                 @name = 'DateTxt']/m:value)
-            """)
+            """,
+        )
 
-        part["ErwerbNotizErwerbungVon"] = self._xText(node=itemN, select=
-            """m:repeatableGroup[
+        part["ErwerbNotizErwerbungVon"] = self._xText(
+            node=itemN,
+            select="""m:repeatableGroup[
 				@name = 'ObjAcquisitionNotesGrp']/m:repeatableGroupItem[
 				m:vocabularyReference/m:vocabularyReferenceItem/m:formattedValue = 'Erwerbung von']/m:dataField/m:value
-            """)
+            """,
+        )
 
         part["PKVeräußerer"] = itemN.xpath(
             """substring-before(m:moduleReference[
                 @name = 'ObjPerAssociationRef']/m:moduleReferenceItem[
                     m:vocabularyReference/m:vocabularyReferenceItem/m:formattedValue = 'Veräußerer'
                 ]/m:formattedValue, ' (')
-            """, namespaces=NSMAP)
+            """,
+            namespaces=NSMAP,
+        )
         if part["PKVeräußerer"] == "":
             part["PKVeräußerer"] = None
 
-        #part["PKVorbesitzer"] = self._xText(node=itemN, select=
+        # part["PKVorbesitzer"] = self._xText(node=itemN, select=
         #    """ m:moduleReference[
-		#		@name = 'ObjPerAssociationRef']/m:moduleReferenceItem[
-		#		m:vocabularyReference[
+        # 		@name = 'ObjPerAssociationRef']/m:moduleReferenceItem[
+        # 		m:vocabularyReference[
         #       @name = 'RoleVoc']/m:vocabularyReferenceItem/m:formattedValue = 'Vorbesitzer']/m:formattedValue">
         #    """)
-            
+
         #
         # MAPPING, FRAGMENTS AND CONCLUSIONS
         #
@@ -366,8 +376,8 @@ class ErwerbNotizAusgabe:
         }
 
         deadOrPermission = [
-            "Evaristo Muyinda", 
-            "Gerd Koch", 
+            "Evaristo Muyinda",
+            "Gerd Koch",
             "Internationales Institut für Traditionelle Musik",
             "Koch, Gerd",
         ]
@@ -385,13 +395,13 @@ class ErwerbNotizAusgabe:
                 part["datum2"] = f"am {datum}"
                 part["jahr"] = int(m.group(1))
             elif re.search(r" \(um\)", datum):
-                before = datum.split('(')[0].strip
-                part["datum2"] = f" um {before}" 
-                part["jahr"] = int(before) # not safe
+                before = datum.split("(")[0].strip
+                part["datum2"] = f" um {before}"
+                part["jahr"] = int(before)  # not safe
             elif re.search(r"\(\?\)", datum):
-                before = datum.split('(')[0].strip
+                before = datum.split("(")[0].strip
                 part["datum2"] = before
-                part["jahr"] = int(before) # not safe
+                part["jahr"] = int(before)  # not safe
             else:
                 part["datum2"] = datum
                 part["jahr"] = int(datum)
@@ -411,24 +421,26 @@ class ErwerbNotizAusgabe:
 
         satz = ""
         if part["art"] is not None:
-            satz = part["art"] + " "
-        if part["von"] is not None:  
+            satz = part["art"] 
+        if part["von"] is not None:
+            if satz != "":
+                satz += " "
             if part["jahr"] <= 1950 or part["von"] in deadOrPermission:
-                satz +=  f"von {part['von']}"
+                satz += f"von {part['von']}"
         if part["datum2"] is not None:
             if satz != "":
                 satz += " "
             satz += f"{part['datum2']}"
 
         part["satz"] = satz
-        for key in sorted(part): # DEBUG
-            print (f":{key}:{part[key]}|")
+        for key in sorted(part):  # DEBUG
+            print(f":{key}:{part[key]}|")
         return satz
-    
-    def _xText (self, *, node, select):
+
+    def _xText(self, *, node, select):
         try:
             r = node.xpath(select, namespaces=NSMAP)[0]
-            #print (f"XXXX{r.text}")
+            # print (f"XXXX{r.text}")
             return r.text
         except:
-            return None # I dont know what python passes back implicitly 
+            return None  # I dont know what python passes back implicitly
