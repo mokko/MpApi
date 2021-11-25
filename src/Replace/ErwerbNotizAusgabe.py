@@ -39,7 +39,7 @@ class ErwerbNotizAusgabe:
 
         STO = {
             # Westflügel, Westspange Eröffnung
-            "O1.189.01.K1 M13": "4220560",
+            "O2.019.P3 M39": "4220580",
         }
         return STO
 
@@ -366,7 +366,7 @@ class ErwerbNotizAusgabe:
         }
 
         deadOrPermission = [
-            "Evaristo Muyinda (1983), Veräußerer", 
+            "Evaristo Muyinda", 
             "Gerd Koch", 
             "Internationales Institut für Traditionelle Musik",
             "Koch, Gerd",
@@ -380,10 +380,10 @@ class ErwerbNotizAusgabe:
         if part["datum"] is not None:
             datum = part["datum"]
             p = re.compile("\d+\.\d+\.(\d\d\d\d)")
-            m = p.match( datum)
+            m = p.match(datum)
             if m:
-                part["datum2"] = f" am {datum}"
-                part["jahr"] = int(m.group())
+                part["datum2"] = f"am {datum}"
+                part["jahr"] = int(m.group(1))
             elif re.search(r" \(um\)", datum):
                 before = datum.split('(')[0].strip
                 part["datum2"] = f" um {before}" 
@@ -409,19 +409,20 @@ class ErwerbNotizAusgabe:
         else:
             part["von"] = part["ErwerbNotizErwerbungVon"]
 
-
         satz = ""
         if part["art"] is not None:
-            satz = part["art"]
+            satz = part["art"] + " "
         if part["von"] is not None:  
-            if part["jahr"] <= 1950 or part["von"] in deadOrPermission :
-                satz =  satz + f" von {part['von']}"
+            if part["jahr"] <= 1950 or part["von"] in deadOrPermission:
+                satz +=  f"von {part['von']}"
         if part["datum2"] is not None:
-            satz = satz + f" {part['datum2']}"
+            if satz != "":
+                satz += " "
+            satz += f"{part['datum2']}"
 
         part["satz"] = satz
         for key in sorted(part): # DEBUG
-            print (f":{key} :: {part[key]}")
+            print (f":{key}:{part[key]}|")
         return satz
     
     def _xText (self, *, node, select):
