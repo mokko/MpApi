@@ -7,8 +7,11 @@ import re
 """
 Für die HFObjekte wollen wir ErwerbNotizAusgabe befüllen.
 Wir ändern ErwerbNotizAusgabe nur wenn das Feld leer ist.
-Wir schreiben Inhalte aus anderen Feldern darein. Dafür habe ich ein
-XSLT 2.0 gebaut, das hier eingebunden werden soll.
+Wir schreiben Inhalte aus anderen Feldern rein. XSLT jetzt in Python reimplementiert.
+
+Typische Fehlermeldungen des Clients
+400 Client Error: Bad Request for url
+
 """
 
 NSMAP = {
@@ -156,8 +159,6 @@ class ErwerbNotizAusgabe:
 
         # the easiest will be to rewrite the text algorithm in python
 
-        note = "test"
-
         xml = f"""
         <application xmlns="http://www.zetcom.com/ria/ws/module">
             <modules>
@@ -183,6 +184,7 @@ class ErwerbNotizAusgabe:
         </application>"""
         # print (xml)
         m = Module(xml=xml)
+        print ("...validate")
         m.validate()
 
         payload = {
@@ -220,9 +222,13 @@ class ErwerbNotizAusgabe:
             if len(grpItemL) > 0:
                 print("At least one ErwerbNotizAusgabe exists already -> do nothing")
             else:
-                print("ErwerbNotiz exists already, but no Ausgabe -> updateErwerbNotiz")
                 # there should always only be one ObjAcquisitionNotes Grp
-                return self.updateErwerbNotiz(Id=moduleItemId, node=rGrpL[0], note=note)
+                print("ErwerbNotiz exists already, but no Ausgabe -> updateErwerbNotiz")
+                if note is None or note == "":
+                    print (" ErwerbNotiz is empty -> not adding anything")
+                else:
+                    print (f"*ErwerbNotiz {note}")
+                    return self.updateErwerbNotiz(Id=moduleItemId, node=rGrpL[0], note=note)
         else:
             print("No Erwerb.Notiz of any kind exists -> createErwerbNotiz")
             return self.createErwerbNotiz(Id=moduleItemId, note=note)
@@ -231,8 +237,12 @@ class ErwerbNotizAusgabe:
         """
         The Id we get is moduleItemIt.
         The node we get is the rGrp ObjAcquisitionNotesGrp.
+        
+        We keep the original repeatableItem or rItems and add a new one if note is not empty.
+        
         """
         refId = node.xpath("m:repeatableGroupItem/@id", namespaces=NSMAP)[0]
+        print (f"*updateErwerbNotiz refId {refId}")
         module = "Object"
         outer = f"""
         <application xmlns="http://www.zetcom.com/ria/ws/module">
@@ -246,8 +256,24 @@ class ErwerbNotizAusgabe:
         """
 
         ET = etree.fromstring(outer)
+        """
+            Do we have to modify original xml to write it back as part of the update?
+            YES!
+            - Do we have to remove the referenceID? Not according to examples in 
+            http://docs.zetcom.com/ws/#Update_all_fields_of_repeatable_groups_.2F_references
+            - From vocabularyReferenceItem we might have to remove name attribute
+            - formattedValue elements and content
+            - repeatableGrp/@size?
+        """
+        
+        for valueN in node.xpath("//m:formattedValue", namespaces=NSMAP):
+            valueN.getparent().remove(valueN)
+
+        for itemN in node.xpath("//m:vocabularyReferenceItem", namespaces=NSMAP):
+            itemN.attrib.pop("name")
+ 
         itemN = ET.xpath("//m:moduleItem", namespaces=NSMAP)[0]
-        itemN.append(node)  # original ErwerbNotiz rGrp
+        itemN.append(node)  # add original ErwerbNotiz rGrp
 
         newItem = f"""
             <repeatableGroupItem xmlns="http://www.zetcom.com/ria/ws/module">
@@ -258,20 +284,17 @@ class ErwerbNotizAusgabe:
                   <value>1</value>
                 </dataField>
                 <vocabularyReference name="TypeVoc" id="62641" instanceName="ObjAcquisitionNotesTypeVgr">
-                  <vocabularyReferenceItem id="1805533" name="Ausgabe">
-                  </vocabularyReferenceItem>
+                  <vocabularyReferenceItem id="1805533"/>
                 </vocabularyReference>
             </repeatableGroupItem>
         """
 
-        frag = etree.fromstring(newItem)
-        N = ET.xpath("//m:moduleItem/m:repeatableGroup", namespaces=NSMAP)[0]
-        N.append(frag)
 
-        # fragment = etree.tostring(
-        # node, pretty_print=True, encoding="unicode"
-        # )
-        # print (fragment)
+        newET = etree.fromstring(newItem)
+        rpGrpN = ET.xpath("//m:moduleItem/m:repeatableGroup", namespaces=NSMAP)[0]
+        rpGrpN.append(newET) # add new ErwerbNotiz (Ausgabe)
+        rpGrpN.attrib.pop("size") 
+        #rpGrpA["size"] = str(int(rpGrpA["size"]) + 1)
 
         doc = etree.ElementTree(ET)
         doc.write("debug.xml", pretty_print=True, encoding="UTF-8")
@@ -281,6 +304,7 @@ class ErwerbNotizAusgabe:
         xml = xml.encode()  # force UTF8
 
         m = Module(tree=ET)
+        print ("*about to validate")
         m.validate()
 
         if refId is not None:
@@ -290,7 +314,7 @@ class ErwerbNotizAusgabe:
                 "id": Id,
                 "repeatableGroup": "ObjAcquisitionNotesGrp",
                 "xml": xml,
-                "success": f"{module} {Id}: update online description, adding marker",
+                "success": f"{module} {Id}: update ErwerbNotizAusgabe {note}",
                 "refId": refId,
             }
             return payload

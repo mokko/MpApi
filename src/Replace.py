@@ -91,7 +91,7 @@ class Replace:
             #print (f"T{moduleType}")
             onItem = plugin.onItem()
             for payload in replacer.loop(xpath=xpath, onItem=onItem, type=moduleType):
-                # print (f"WOULD ACT {payload['xml']}")
+                #print (f"XML {payload['xml']}") -> use file debug.xml instead
                 # it's possible that payload is empty, but it has to exist
                 if "xml" in payload:  
                     m = Module(xml=payload["xml"])
@@ -111,7 +111,7 @@ class Replace:
                                 id=payload["id"],
                                 repeatableGroup=payload["repeatableGroup"],
                                 xml=payload["xml"],
-                                referenceId=refId,
+                                referenceId=payload["refId"], # do we need to pass refId or not?
                             )
                         else:
                             raise TypeError("UNKNOWN PAYLOAD TYPE")
