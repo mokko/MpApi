@@ -7,15 +7,15 @@ if "PYTHONPATH" in os.environ:
 from Search import Search
 from Module import Module
 
-#with open("../sdata/credentials.py") as f:
+# with open("../sdata/credentials.py") as f:
 #    exec(f.read())
 
 
 def test_load_file():
     m = Module(file="sdata/exhibit20222.xml")
-    #totalSize = m.attribute(name="totalSize")
-    #print(totalSize)  # if no parent, assume self.etree
-    #assert totalSize is not None
+    # totalSize = m.attribute(name="totalSize")
+    # print(totalSize)  # if no parent, assume self.etree
+    # assert totalSize is not None
     for mi in m.iter():
         m.attribute(parent=mi, name="uuid", action="remove")
         m._dropUUID()
@@ -46,4 +46,4 @@ def test_from_scratch():
 
 def test_totalSitze():
     m = Module(file="sdata/exhibit20222.xml")
-    assert m.totalSize (module="Multimedia") == "619"
+    assert m.totalSize(module="Multimedia") == "619"

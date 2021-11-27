@@ -179,6 +179,7 @@ def test_seven():  # addField
     s.toFile(path="search.tmp.xml")
     assert s.validate(mode="search") is True
 
+
 def test_setParam():
     q = Search()
     q.AND()
@@ -194,5 +195,5 @@ def test_setParam():
     )
     q.setParam(key="offset", value="123")
     q.setParam(key="limit", value="10")
-    #q.etree
-    #q.print()
+    # q.etree
+    # q.print()

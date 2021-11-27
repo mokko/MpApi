@@ -112,8 +112,8 @@ def test_init():
     m = Module(xml=xml)
     m.validate()
     # Might be stupid to create a Freigabe every time we run a test suite
-    #r = api.createRepeatableGroup(
+    # r = api.createRepeatableGroup(
     #    module="Object", id="744767", repeatableGroup="ObjPublicationGrp", xml=xml
-    #)
-    #assert r
+    # )
+    # assert r
     print(r.status_code)
