@@ -186,7 +186,7 @@ class ErwerbNotizAusgabe:
 
         note = self.writeNote(itemN=itemN)
         if note is None or note == "":
-            print(" ErwerbNotiz is empty -> not adding anything")
+            print(" Satz is empty -> not adding anything")
             return
 
         module = "Object"
@@ -413,3 +413,4 @@ class ErwerbNotizAusgabe:
             return r.text
         except:
             return None  # python returns implict None, but let's be explicit here
+    
