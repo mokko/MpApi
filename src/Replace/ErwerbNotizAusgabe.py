@@ -41,10 +41,6 @@ class ErwerbNotizAusgabe:
             "O3.127.01.B3 M45": "4221214",
         }
 
-        STO = {
-            # Westflügel, Westspange Eröffnung
-            "O2.019.P3 M39": "4220580",
-        }
         return STO
 
     def loop(self):
@@ -81,18 +77,14 @@ class ErwerbNotizAusgabe:
             field="__orgUnit",
             value="AKuPrimarverpackungen",  # 1632806EM-Primärverpackungen
         )
-        # doesn't find records without ObjAcquisitionNotesGrp, so we dont need it
+        # doesn't reliably find all records without ObjAcquisitionNotesGrp
         # query.addCriterion(
         # operator="notEqualsField",  # notEqualsTerm id 1805533 für Ausgabe
         # field="ObjAcquisitionNotesGrp.TypeVoc",
         # value="Ausgabe",  #
         # )
-        # We need full records
-        # query.addField(field="ObjAcquisitionNotesGrp")
-        # query.addField(field="ObjAcquisitionNotesGrp.repeatableGroupItem")
-        # query.addField(field="ObjAcquisitionNotesGrp.MemoClb")
-        # query.addField(field="ObjAcquisitionNotesGrp.TypeVoc")
-        query.print()
+        # We need full records, so no fields here
+        #query.print()
         return query
 
     def onItem(self):
@@ -103,9 +95,47 @@ class ErwerbNotizAusgabe:
     # STUFF             -
     # --------------------
 
-    def createErwerbNotiz(self, *, Id, note):
+    def erwerbNotiz(self, *, itemN, user):
         """
-        There is no ErwerbNotiz, so we're making a completely new one
+        Just check conditions and transparently trigger correct method
+        itemN should be a different moduleItem every time it gets called
+        """
+        moduleItemId = itemN.xpath("@id")[0]
+        # count = itemN.xpath("count(//m:moduleItem)", namespaces=NSMAP)
+        # print (f"RCOUNT: {count} inside erwerbNotiz; should be 1")
+
+        rGrpL = itemN.xpath(
+            "m:repeatableGroup[@name='ObjAcquisitionNotesGrp']", namespaces=NSMAP
+        )
+
+        if len(rGrpL) > 0:
+            # Some kind of Erwerb.Notiz exists
+            grpItemL = rGrpL[0].xpath(
+                "m:repeatableGroupItem[m:vocabularyReference/@name = 'TypeVoc' and ./m:vocabularyReference/m:vocabularyReferenceItem/m:formattedValue = 'Ausgabe']",
+                namespaces=NSMAP,
+            )
+            note = self.writeNote(itemN=itemN)
+            if len(grpItemL) > 0:
+                print(" ErwerbNotizAusgabe exists already -> do nothing")
+            else:
+                # there should always only be one ObjAcquisitionNotes Grp
+                print("ErwerbNotiz exists already, but no Ausgabe -> createErwerbNotizAusgabe")
+                return self.createErwerbNotizAusgabe(Id=moduleItemId, itemN=itemN)
+        else:
+            print(" ErwerbNotiz doesn't exist yet -> createErwerbNotizAusgabe")
+            return self.createErwerbNotizAusgabe(Id=moduleItemId, itemN=itemN)
+
+    def createErwerbNotizAusgabe(self, *, Id, itemN):
+        """
+        The Id we get is from moduleItem.
+        itemN is the whole moduleItem node
+        
+        We keep existing repeatableGroupItems in ObjAcquisitionNotesGrp and add a new 
+        repeatableGroupItem for erwerbNotizAusgabe.
+        
+        If there is no ErwerbNotiz, so we're making a completely new one.
+        If there is no ErwerbNotizAusgabe, we're making one.
+        If there is an ErwerbNotizAusgabe, we dont get here.
 
         <repeatableGroupItem id="40926665">
             <dataField dataType="Clob" name="MemoClb">
@@ -154,98 +184,11 @@ class ErwerbNotizAusgabe:
         </repeatableGroup>
         """
 
-        rGrpName = "ObjAcquisitionNotesGrp"
-        module = "Object"
-
-        # the easiest will be to rewrite the text algorithm in python
-
-        xml = f"""
-        <application xmlns="http://www.zetcom.com/ria/ws/module">
-            <modules>
-                <module name="{module}">
-                    <moduleItem id="{Id}">
-                        <repeatableGroup name="{rGrpName}">
-                          <repeatableGroupItem>
-                            <dataField dataType="Clob" name="MemoClb">
-                              <value>{note}</value>
-                            </dataField>
-                            <dataField dataType="Long" name="SortLnu">
-                              <value>1</value>
-                            </dataField>
-                            <vocabularyReference name="TypeVoc" id="62641" instanceName="ObjAcquisitionNotesTypeVgr">
-                              <vocabularyReferenceItem id="1805533" name="Ausgabe">
-                              </vocabularyReferenceItem>
-                            </vocabularyReference>
-                          </repeatableGroupItem>
-                        </repeatableGroup>
-                    </moduleItem>
-                </module>
-            </modules>
-        </application>"""
-        # print (xml)
-        m = Module(xml=xml)
-        print ("...validate")
-        m.validate()
-
-        payload = {
-            "type": "createRepeatableGroup",
-            "module": module,
-            "id": Id,
-            "repeatableGroup": rGrpName,
-            "xml": xml,
-            "success": f"{module} {Id}: create new ErwerbNotiz@Ausgabe",
-        }
-        return payload
-
-    def erwerbNotiz(self, *, itemN, user):
-        """
-        Just check conditions and transparently trigger correct method
-        node should be a different moduleItem every time it gets called
-        """
-        moduleItemId = itemN.xpath("@id")[0]
-        # count = itemN.xpath("count(//m:moduleItem)", namespaces=NSMAP)
-        # print (f"RCOUNT: {count} inside erwerbNotiz; should be 1")
-
-        # print(itemN)
         note = self.writeNote(itemN=itemN)
-        # we need the existing ObjAcquisitionNotesGrp repeatableGroup to update it
-        rGrpL = itemN.xpath(
-            "m:repeatableGroup[@name='ObjAcquisitionNotesGrp']", namespaces=NSMAP
-        )
-
-        if len(rGrpL) > 0:
-            # Some kind of Erwerb.Notiz exists
-            grpItemL = rGrpL[0].xpath(
-                "m:repeatableGroupItem[m:vocabularyReference/@name = 'TypeVoc' and ./m:vocabularyReference/m:vocabularyReferenceItem/m:formattedValue = 'Ausgabe']",
-                namespaces=NSMAP,
-            )
-            if len(grpItemL) > 0:
-                print("At least one ErwerbNotizAusgabe exists already -> do nothing")
-            else:
-                # there should always only be one ObjAcquisitionNotes Grp
-                print("ErwerbNotiz exists already, but no Ausgabe -> updateErwerbNotiz")
-                if note is None or note == "":
-                    print (" ErwerbNotiz is empty -> not adding anything")
-                else:
-                    print (f"*ErwerbNotiz {note}")
-                    return self.updateErwerbNotiz(Id=moduleItemId, node=rGrpL[0], note=note)
-        else:
-            print("No Erwerb.Notiz of any kind exists -> createErwerbNotiz")
-            return self.createErwerbNotiz(Id=moduleItemId, note=note)
-
-    def updateErwerbNotiz(self, *, node, Id, note):
-        """
-        The Id we get is moduleItemIt.
-        The node we get is the rGrp ObjAcquisitionNotesGrp.
+        if note is None or note == "":
+            print (" ErwerbNotiz is empty -> not adding anything")
+            return
         
-        We keep the original repeatableItem or rItems and add a new one if note is not empty.
-
-        Now we try createRepeatableGroup
-        POST http://.../ria-ws/application/module/{module}/{__id}/{repeatableGroup|reference}
-        
-        """
-        refId = node.xpath("m:repeatableGroupItem/@id", namespaces=NSMAP)[0]
-        print (f"*updateErwerbNotiz refId {refId}")
         module = "Object"
         outer = f"""
         <application xmlns="http://www.zetcom.com/ria/ws/module">
@@ -260,26 +203,7 @@ class ErwerbNotizAusgabe:
         """
 
         ET = etree.fromstring(outer)
-        """
-            OLD ATTEMPT. Let leave the notes here for the next time
-            Do we have to modify original xml to write it back as part of the update?
-            YES!
-            - Do we have to remove the referenceID? Not according to examples in 
-            http://docs.zetcom.com/ws/#Update_all_fields_of_repeatable_groups_.2F_references
-            - From vocabularyReferenceItem we might have to remove name attribute
-            - formattedValue elements and content
-            - repeatableGrp/@size?
-        """
         
-        #for valueN in node.xpath("//m:formattedValue", namespaces=NSMAP):
-        #    valueN.getparent().remove(valueN)
-
-        #for itemN in node.xpath("//m:vocabularyReferenceItem", namespaces=NSMAP):
-        #    itemN.attrib.pop("name")
- 
-        #itemN = ET.xpath("//m:moduleItem", namespaces=NSMAP)[0]
-        #itemN.append(node)  # add original ErwerbNotiz rGrp
-
         newItem = f"""
             <repeatableGroupItem xmlns="http://www.zetcom.com/ria/ws/module">
                 <dataField dataType="Clob" name="MemoClb">
@@ -294,12 +218,9 @@ class ErwerbNotizAusgabe:
             </repeatableGroupItem>
         """
 
-
         newET = etree.fromstring(newItem)
         rpGrpN = ET.xpath("//m:moduleItem/m:repeatableGroup", namespaces=NSMAP)[0]
         rpGrpN.append(newET) # add new ErwerbNotiz (Ausgabe)
-        #rpGrpN.attrib.pop("size") 
-        #rpGrpA["size"] = str(int(rpGrpA["size"]) + 1)
 
         doc = etree.ElementTree(ET)
         doc.write("debug.xml", pretty_print=True, encoding="UTF-8")
@@ -309,19 +230,18 @@ class ErwerbNotizAusgabe:
         xml = xml.encode()  # force UTF8
 
         m = Module(tree=ET)
-        print ("*about to validate")
+        #print (" about to validate")
         m.validate()
 
-        print (f"xml:{xml}")
+        #print (f"xml:{xml}")
 
         payload = {
-            "type": "createRepeatableGroup", #is actual creating a repeatableGroupItem?
+            "type": "createRepeatableGroup", #is actual creating a repeatableGroupItem
             "module": module,
             "id": Id,
             "repeatableGroup": "ObjAcquisitionNotesGrp",
             "xml": xml,
             "success": f"{module} {Id}: update ErwerbNotizAusgabe {note}",
-            #"refId": refId,
         }
         return payload
 
@@ -334,18 +254,11 @@ class ErwerbNotizAusgabe:
         in Python using lxml than to use saxon from Python xslt2 even if that means extra debugging.
         """
 
-        # fragment = etree.tostring(
-        #    node, pretty_print=True, encoding="unicode"
-        # )
-        # print (fragment)
-
         moduleItemId = itemN.xpath("@id")[0]
         # count = itemN.xpath("count(//m:moduleItem)", namespaces=NSMAP)
         # print (f"COUNT: {count} in writeNote; should be 1")
         part = {}
 
-        # normalize-space(/m:repeatableGroup[
-        # /z:repeatableGroupItem/z:vocabularyReference
         part["art2"] = self._xText(
             node=itemN,
             select="""m:repeatableGroup[@name='ObjAcquisitionMethodGrp']/m:repeatableGroupItem
@@ -388,12 +301,7 @@ class ErwerbNotizAusgabe:
         if part["PKVeräußerer"] == "":
             part["PKVeräußerer"] = None
 
-        # part["PKVorbesitzer"] = self._xText(node=itemN, select=
-        #    """ m:moduleReference[
-        # 		@name = 'ObjPerAssociationRef']/m:moduleReferenceItem[
-        # 		m:vocabularyReference[
-        #       @name = 'RoleVoc']/m:vocabularyReferenceItem/m:formattedValue = 'Vorbesitzer']/m:formattedValue">
-        #    """)
+        # Vorbesitzer is irrelevant as it is uncertain if this relates to Erwerbszusammenhang
 
         #
         # MAPPING, FRAGMENTS AND CONCLUSIONS
@@ -416,6 +324,9 @@ class ErwerbNotizAusgabe:
             part["datum"] = part["dateTxt"]
         else:
             part["datum"] = part["dateFromTxt"]
+
+        if part["datum"] is not None:
+            part["datum"] = part["datum"].strip()
 
         if part["datum"] is not None:
             datum = part["datum"]
@@ -444,18 +355,24 @@ class ErwerbNotizAusgabe:
         except:
             part["art"] = part["art2"]
 
+        if part["art"] is not None:
+            part["art"] = part["art"].strip()
+
         if "PKVeräußerer" in part:
             part["von"] = part["PKVeräußerer"]
         else:
             part["von"] = part["ErwerbNotizErwerbungVon"]
 
+        if part["von"] is not None:
+            part["von"] = part["von"].strip()
+
         satz = ""
         if part["art"] is not None:
             satz = part["art"] 
         if part["von"] is not None:
-            if satz != "":
-                satz += " "
             if part["jahr"] <= 1950 or part["von"] in deadOrPermission:
+                if satz != "":
+                    satz += " "
                 satz += f"von {part['von']}"
         if part["datum2"] is not None:
             if satz != "":
@@ -464,10 +381,11 @@ class ErwerbNotizAusgabe:
                 satz = "Zugang "
             satz += f"{part['datum2']}"
 
-        part["satz"] = satz
-        for key in sorted(part):  # DEBUG
-            print(f":{key}:{part[key]}")
-        return satz
+        part["satz"] = satz.strip()
+        print (f" satz {part['satz']}")
+        #for key in sorted(part):  # DEBUG
+        #    print(f":{key}:{part[key]}")
+        return part["satz"]
 
     def _xText(self, *, node, select):
         try:
