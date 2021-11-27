@@ -113,7 +113,6 @@ class ErwerbNotizAusgabe:
                 "m:repeatableGroupItem[m:vocabularyReference/@name = 'TypeVoc' and ./m:vocabularyReference/m:vocabularyReferenceItem/m:formattedValue = 'Ausgabe']",
                 namespaces=NSMAP,
             )
-            note = self.writeNote(itemN=itemN)
             if len(grpItemL) > 0:
                 print(" ErwerbNotizAusgabe exists already -> do nothing")
             else:
