@@ -331,22 +331,27 @@ class ErwerbNotizAusgabe:
 
         if part["datum"] is not None:
             datum = part["datum"]
-            p = re.compile("\d+\.\d+\.(\d\d\d\d)")
-            m = p.match(datum)
+            p = re.compile("(\d\d\d\d)$")
+            m = p.search(datum)
+            if m:
+                part["jahr"] = int(m.group(1))
+            else:
+                part["jahr"] = 99999
+
+            p = re.compile("\d+\.\d+\.\d\d\d\d")
+            m = p.search(datum)
             if m:
                 part["datum2"] = f"am {datum}"
-                part["jahr"] = int(m.group(1))
             elif re.search(r" \(um\)", datum):
                 before = datum.split("(")[0].strip
                 part["datum2"] = f" um {before}"
                 part["jahr"] = int(before)  # not safe
             elif re.search(r"\(\?\)", datum):
                 before = datum.split("(")[0].strip
-                part["datum2"] = before
+                part["datum2"] = before + " Datum fraglich"
                 part["jahr"] = int(before)  # not safe
             else:
                 part["datum2"] = datum
-                part["jahr"] = int(datum)
         else:
             part["datum2"] = None
             part["jahr"] = 99999
@@ -408,4 +413,4 @@ class ErwerbNotizAusgabe:
             # print (f"XXXX{r.text}")
             return r.text
         except:
-            return None  # I dont know what python passes back implicitly
+            return None  # python returns implict None, but let's be explicit here
