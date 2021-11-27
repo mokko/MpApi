@@ -413,4 +413,3 @@ class ErwerbNotizAusgabe:
             return r.text
         except:
             return None  # python returns implict None, but let's be explicit here
-    
