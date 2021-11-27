@@ -186,7 +186,7 @@ class ErwerbNotizAusgabe:
 
         note = self.writeNote(itemN=itemN)
         if note is None or note == "":
-            print(" Satz is empty -> not adding anything")
+            print(" Satz is empty -> nothing to add")
             return
 
         module = "Object"
