@@ -40,7 +40,6 @@ class ErwerbNotizAusgabe:
             "O3.126.P3 M62": "4221189",
             "O3.127.01.B3 M45": "4221214",
         }
-
         return STO
 
     def loop(self):
@@ -360,7 +359,7 @@ class ErwerbNotizAusgabe:
         if part["art"] is not None:
             part["art"] = part["art"].strip()
 
-        if "PKVeräußerer" in part:
+        if part["PKVeräußerer"] is not None:
             part["von"] = part["PKVeräußerer"]
         else:
             part["von"] = part["ErwerbNotizErwerbungVon"]
@@ -384,9 +383,23 @@ class ErwerbNotizAusgabe:
             satz += f"{part['datum2']}"
 
         part["satz"] = satz.strip()
-        print(f" satz {part['satz']}")
-        # for key in sorted(part):  # DEBUG
-        #    print(f":{key}:{part[key]}")
+
+        # https://stackoverflow.com/questions/1546717
+        table = str.maketrans(
+            {
+                "<": "&lt;",
+                ">": "&gt;",
+                "&": "&amp;",
+                "'": "&apos;",
+                '"': "&quot;",
+            }
+        )
+
+        part["satz"] = part["satz"].translate(table)
+
+        # print(f" satz {part['satz']}")
+        for key in sorted(part):  # DEBUG
+            print(f":{key}:{part[key]}")
         return part["satz"]
 
     def _xText(self, *, node, select):
