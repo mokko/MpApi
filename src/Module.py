@@ -85,7 +85,7 @@ class Module(Helper):
             if uuid in a:
                 print("delete @uuid")
                 del a['uuid']
-                
+
         Todo: This method has to go. Currently, it doesn't work like a getter
         """
         if parent is None:
@@ -217,10 +217,10 @@ class Module(Helper):
             )
             valueN.text = value
 
-    def totalSize (self, *, module):
+    def totalSize(self, *, module):
         """
         Report the size; only getter
-        
+
         EXAMPLE
         <application xmlns="http://www.zetcom.com/ria/ws/module">
            <modules>
@@ -229,9 +229,9 @@ class Module(Helper):
         """
         totalSize = self.etree.xpath(
             f"/m:application/m:modules/m:module[@name ='{module}']/@totalSize",
-            namespaces=NSMAP)[0]
+            namespaces=NSMAP,
+        )[0]
         return totalSize
-
 
     def vocabularyReference(self, *, parent, name, id, instanceName):
         """

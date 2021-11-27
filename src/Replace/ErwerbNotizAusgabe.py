@@ -84,7 +84,7 @@ class ErwerbNotizAusgabe:
         # value="Ausgabe",  #
         # )
         # We need full records, so no fields here
-        #query.print()
+        # query.print()
         return query
 
     def onItem(self):
@@ -119,7 +119,9 @@ class ErwerbNotizAusgabe:
                 print(" ErwerbNotizAusgabe exists already -> do nothing")
             else:
                 # there should always only be one ObjAcquisitionNotes Grp
-                print("ErwerbNotiz exists already, but no Ausgabe -> createErwerbNotizAusgabe")
+                print(
+                    "ErwerbNotiz exists already, but no Ausgabe -> createErwerbNotizAusgabe"
+                )
                 return self.createErwerbNotizAusgabe(Id=moduleItemId, itemN=itemN)
         else:
             print(" ErwerbNotiz doesn't exist yet -> createErwerbNotizAusgabe")
@@ -129,10 +131,10 @@ class ErwerbNotizAusgabe:
         """
         The Id we get is from moduleItem.
         itemN is the whole moduleItem node
-        
-        We keep existing repeatableGroupItems in ObjAcquisitionNotesGrp and add a new 
+
+        We keep existing repeatableGroupItems in ObjAcquisitionNotesGrp and add a new
         repeatableGroupItem for erwerbNotizAusgabe.
-        
+
         If there is no ErwerbNotiz, so we're making a completely new one.
         If there is no ErwerbNotizAusgabe, we're making one.
         If there is an ErwerbNotizAusgabe, we dont get here.
@@ -186,9 +188,9 @@ class ErwerbNotizAusgabe:
 
         note = self.writeNote(itemN=itemN)
         if note is None or note == "":
-            print (" ErwerbNotiz is empty -> not adding anything")
+            print(" ErwerbNotiz is empty -> not adding anything")
             return
-        
+
         module = "Object"
         outer = f"""
         <application xmlns="http://www.zetcom.com/ria/ws/module">
@@ -203,7 +205,7 @@ class ErwerbNotizAusgabe:
         """
 
         ET = etree.fromstring(outer)
-        
+
         newItem = f"""
             <repeatableGroupItem xmlns="http://www.zetcom.com/ria/ws/module">
                 <dataField dataType="Clob" name="MemoClb">
@@ -220,7 +222,7 @@ class ErwerbNotizAusgabe:
 
         newET = etree.fromstring(newItem)
         rpGrpN = ET.xpath("//m:moduleItem/m:repeatableGroup", namespaces=NSMAP)[0]
-        rpGrpN.append(newET) # add new ErwerbNotiz (Ausgabe)
+        rpGrpN.append(newET)  # add new ErwerbNotiz (Ausgabe)
 
         doc = etree.ElementTree(ET)
         doc.write("debug.xml", pretty_print=True, encoding="UTF-8")
@@ -230,13 +232,13 @@ class ErwerbNotizAusgabe:
         xml = xml.encode()  # force UTF8
 
         m = Module(tree=ET)
-        #print (" about to validate")
+        # print (" about to validate")
         m.validate()
 
-        #print (f"xml:{xml}")
+        # print (f"xml:{xml}")
 
         payload = {
-            "type": "createRepeatableGroup", #is actual creating a repeatableGroupItem
+            "type": "createRepeatableGroup",  # is actual creating a repeatableGroupItem
             "module": module,
             "id": Id,
             "repeatableGroup": "ObjAcquisitionNotesGrp",
@@ -368,7 +370,7 @@ class ErwerbNotizAusgabe:
 
         satz = ""
         if part["art"] is not None:
-            satz = part["art"] 
+            satz = part["art"]
         if part["von"] is not None:
             if part["jahr"] <= 1950 or part["von"] in deadOrPermission:
                 if satz != "":
@@ -377,13 +379,13 @@ class ErwerbNotizAusgabe:
         if part["datum2"] is not None:
             if satz != "":
                 satz += " "
-            else: #wenn keine Zugangsart und keine Veräußerer
+            else:  # wenn keine Zugangsart und keine Veräußerer
                 satz = "Zugang "
             satz += f"{part['datum2']}"
 
         part["satz"] = satz.strip()
-        print (f" satz {part['satz']}")
-        #for key in sorted(part):  # DEBUG
+        print(f" satz {part['satz']}")
+        # for key in sorted(part):  # DEBUG
         #    print(f":{key}:{part[key]}")
         return part["satz"]
 

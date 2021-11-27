@@ -68,10 +68,10 @@ class Replace:
 
         for itemN in itemsL:
             Id = itemN.attrib["id"]
-            print(f"{type} {Id}")  
+            print(f"{type} {Id}")
             count = itemN.xpath("count(//m:moduleItem)", namespaces=NSMAP)
-            #print (f"SYD: {count} inside replace; should be 1")
-            yield onItem(itemN=itemN, user=self.user)  
+            # print (f"SYD: {count} inside replace; should be 1")
+            yield onItem(itemN=itemN, user=self.user)
 
     def runPlugin(self, *, plugin, limit=-1):
         """
@@ -87,14 +87,14 @@ class Replace:
             # should validate the query inside replacer? Probably yes
             replacer.search(query=query, id=input[key])
             xpath = plugin.loop()
-            moduleType = xpath.split("'")[1] # not particularly generic
-            #print (f"T{moduleType}")
+            moduleType = xpath.split("'")[1]  # not particularly generic
+            # print (f"T{moduleType}")
             onItem = plugin.onItem()
             for payload in replacer.loop(xpath=xpath, onItem=onItem, type=moduleType):
-                #print (f"XML {payload['xml']}") -> use file debug.xml instead
+                # print (f"XML {payload['xml']}") -> use file debug.xml instead
                 # it's possible that payload is empty, but it has to exist
                 if payload is not None:
-                    if "xml" in payload:  
+                    if "xml" in payload:
                         m = Module(xml=payload["xml"])
                         m.validate()
                         count += 1
@@ -112,7 +112,9 @@ class Replace:
                                     id=payload["id"],
                                     repeatableGroup=payload["repeatableGroup"],
                                     xml=payload["xml"],
-                                    referenceId=payload["refId"], # do we need to pass refId or not?
+                                    referenceId=payload[
+                                        "refId"
+                                    ],  # do we need to pass refId or not?
                                 )
                             else:
                                 raise TypeError("UNKNOWN PAYLOAD TYPE")

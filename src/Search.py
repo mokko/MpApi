@@ -170,7 +170,7 @@ class Search(Helper):
 
     def setParam(self, *, key, value):
         """
-        changes offset in the object; does not create a copy; does not return particularily much; 
+        changes offset in the object; does not create a copy; does not return particularily much;
         """
         searchN = self.etree.xpath(
             "/s:application/s:modules/s:module/s:search", namespaces=NSMAP
