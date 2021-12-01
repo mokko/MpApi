@@ -13,6 +13,7 @@ def test_init():
     sr = Sar(baseURL=baseURL, user=user, pw=pw)
     assert sr
 
+
 def test_getItem():
     sr = Sar(baseURL=baseURL, user=user, pw=pw)
     r = sr.getItem(

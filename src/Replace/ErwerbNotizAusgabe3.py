@@ -16,7 +16,8 @@ NSMAP = {
     "m": "http://www.zetcom.com/ria/ws/module",
 }
 
-class ErwerbNotizAusgabe3 (ErwerbNotizAusgabe): # inheritance!
+
+class ErwerbNotizAusgabe3(ErwerbNotizAusgabe):  # inheritance!
     def input(self):
         STO = {
             "BoxerGroup": "117396",
@@ -38,7 +39,7 @@ class ErwerbNotizAusgabe3 (ErwerbNotizAusgabe): # inheritance!
             operator="equalsField",
             field="ObjObjectGroupsRef.__id",
             value=Id,  # using voc id
-        )        
+        )
         # We need full records, so no fields here
         # query.print()
         return query

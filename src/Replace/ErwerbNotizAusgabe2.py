@@ -16,7 +16,8 @@ NSMAP = {
     "m": "http://www.zetcom.com/ria/ws/module",
 }
 
-class ErwerbNotizAusgabe2 (ErwerbNotizAusgabe): # inheritance!
+
+class ErwerbNotizAusgabe2(ErwerbNotizAusgabe):  # inheritance!
     def input(self):
         STO = {
             "Musikethnologie": "EMMusikethnologie",
@@ -43,7 +44,7 @@ class ErwerbNotizAusgabe2 (ErwerbNotizAusgabe): # inheritance!
         query.addCriterion(
             operator="equalsField",  # notEqualsTerm
             field="ObjPublicationGrp.PublicationVoc",
-            value="1810139",  # 1810139 = Ja 
+            value="1810139",  # 1810139 = Ja
         )
         query.addCriterion(
             operator="equalsField",  # notEqualsTerm
