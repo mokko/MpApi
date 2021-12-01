@@ -7,7 +7,7 @@ import re
 from Replace.ErwerbNotizAusgabe import ErwerbNotizAusgabe
 
 """
-Loop thru the SMB-freigegebenen objects of one Bereich and write erwerbNotizAusgabe
+ Loop thru the SMB-freigegebenen objects of one Bereich and write erwerbNotizAusgabe
  if there is none already, using the data from various fields
 """
 
@@ -16,7 +16,7 @@ NSMAP = {
     "m": "http://www.zetcom.com/ria/ws/module",
 }
 
-class ErwerbNotizAusgabe2 (ErwerbNotizAusgabe):
+class ErwerbNotizAusgabe2 (ErwerbNotizAusgabe): # inheritance!
     def input(self):
         STO = {
             "Musikethnologie": "EMMusikethnologie",
@@ -51,5 +51,5 @@ class ErwerbNotizAusgabe2 (ErwerbNotizAusgabe):
             value="EMMusikethnologie",  # 1632806EM-Primärverpackungen
         )
         # We need full records, so no fields here
-        query.print()
+        # query.print()
         return query
