@@ -231,7 +231,7 @@ class Module(Helper):
             f"/m:application/m:modules/m:module[@name ='{module}']/@totalSize",
             namespaces=NSMAP,
         )[0]
-        return totalSize
+        return int(totalSize)
 
     def vocabularyReference(self, *, parent, name, id, instanceName):
         """

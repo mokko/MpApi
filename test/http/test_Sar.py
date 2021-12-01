@@ -1,7 +1,7 @@
 # -*- coding: UTF-8
 import sys
 
-sys.path.append("../src")
+sys.path.append("../../src")
 from Search import Search
 from Sar import Sar
 
@@ -12,7 +12,6 @@ with open("sdata/credentials.py") as f:
 def test_init():
     sr = Sar(baseURL=baseURL, user=user, pw=pw)
     assert sr
-
 
 def test_getItem():
     sr = Sar(baseURL=baseURL, user=user, pw=pw)

@@ -203,6 +203,9 @@ class Sar:  # methods (mosly) in alphabetical order
         bigger document. Returns xml string.
 
         This method is lxml-based, so it works in memory.
+        
+        Old version would add identical moduleItems creating duplicates; new version
+        is supposed to not admit duplicates.
         """
         # print (inL)
         known_types = set()
@@ -245,7 +248,15 @@ class Sar:  # methods (mosly) in alphabetical order
                             )
                         # print(f"len:{len(lastModuleN)} {lastModuleN}")
                         for newItemN in newItemsL:
-                            lastModuleN.append(newItemN)
+                            # test if item exists already
+                            newId = int(newItemN.attrib["id"])
+                            try: firstET.xpath(
+                                f"/m:application/m:modules/m:module[@name = '{type}']/m:moduleItem[@id = '{newId}']",
+                                namespaces=NSMAP)[0]
+                                # moduleItem exists already, do nothing
+                            except:
+                                #print ("moduleItem unique, appending")
+                                lastModuleN.append(newItemN)
                     # else:
                     #    print ("None found!")
 
