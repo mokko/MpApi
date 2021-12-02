@@ -51,11 +51,11 @@ USAGE:
 """
 
 import os  # b/c Pathlib has troubles with windows network paths
-from Search import Search
-from MpApi import MpApi
 from lxml import etree
 from pathlib import Path
-from Module import Module
+from MpApi.Search import Search
+from MpApi.Client import MpApi
+from MpApi.Module import Module
 
 NSMAP = {
     "s": "http://www.zetcom.com/ria/ws/module/search",

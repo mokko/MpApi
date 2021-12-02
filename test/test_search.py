@@ -9,7 +9,7 @@ import pytest
 if "PYTHONPATH" in os.environ:
     sys.path.append(os.environ["PYTHONPATH"])
 
-from Search import Search
+from MpApi.Search import Search
 
 one = """
 <application xmlns="http://www.zetcom.com/ria/ws/module/search" 

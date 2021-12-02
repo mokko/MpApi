@@ -29,8 +29,11 @@ CLASS USAGE
 """
 import datetime
 import logging
-import sys
+from lxml import etree  # necessary?
 import os
+from pathlib import Path
+import requests
+import sys
 
 # what the heck?
 if "PYTHONPATH" in os.environ:
@@ -38,12 +41,9 @@ if "PYTHONPATH" in os.environ:
 credentials = "credentials.py"  # expect credentials in pwd
 
 
-from Module import Module
-from Sar import Sar
-from pathlib import Path
-import requests
-from Search import Search
-from lxml import etree  # necessary?
+from MpApi.Module import Module
+from MpApi.Sar import Sar
+from MpApi.Search import Search
 
 ETparser = etree.XMLParser(remove_blank_text=True)
 NSMAP = {

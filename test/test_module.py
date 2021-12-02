@@ -4,8 +4,8 @@ import os
 
 if "PYTHONPATH" in os.environ:
     sys.path.append(os.environ["PYTHONPATH"])
-from Search import Search
-from Module import Module
+from MpApi.Search import Search
+from MpApi.Module import Module
 
 # with open("../sdata/credentials.py") as f:
 #    exec(f.read())
@@ -44,6 +44,6 @@ def test_from_scratch():
     m.toFile(path="sdata/fromScratch.xml")
 
 
-def test_totalSitze():
+def test_totalSize():
     m = Module(file="sdata/exhibit20222.xml")
-    assert m.totalSize(module="Multimedia") == "619"
+    assert m.totalSize(module="Multimedia") == 619

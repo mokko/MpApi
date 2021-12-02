@@ -15,10 +15,10 @@ import importlib
 if "PYTHONPATH" in os.environ:
     sys.path.append(os.environ["PYTHONPATH"])
 
-from Sar import Sar
-from MpApi import MpApi
-from Module import Module
-from Search import Search
+from MpApi.Sar import Sar
+from MpApi.Client import MpApi
+from MpApi.Module import Module
+from MpApi.Search import Search
 
 credentials = "credentials.py"  # in pwd
 # credentials = "vierteInstanz.py"

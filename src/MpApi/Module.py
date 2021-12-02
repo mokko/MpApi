@@ -53,7 +53,7 @@ NSMAP = {"m": "http://www.zetcom.com/ria/ws/module"}
 dataTypes = {"Clb": "Clob", "Dat": "Date", "Lnu": "Long", "Txt": "Varchar"}
 
 from lxml import etree
-from Helper import Helper
+from MpApi.Helper import Helper
 
 
 class Module(Helper):

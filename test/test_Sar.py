@@ -2,9 +2,9 @@ import sys
 
 sys.path.append("../src")
 
-from Search import Search
-from Module import Module
-from Sar import Sar
+from MpApi.Search import Search
+from MpApi.Module import Module
+from MpApi.Sar import Sar
 
 with open("sdata/credentials.py") as f:
     exec(f.read())
