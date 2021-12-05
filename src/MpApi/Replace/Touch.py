@@ -40,6 +40,7 @@ Why touch?
 	source: https://en.wikipedia.org/wiki/Touch_(command)
 """
 
+
 class WestMarker:
     def input(self):
         STO = {

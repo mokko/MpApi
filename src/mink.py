@@ -139,7 +139,7 @@ class Mink:
         self.xmlToFile(xml=dfX, path="definition.xml")
 
     def getAttachments(self, args):
-        print (f"***{args}")
+        print(f"***{args}")
         Type = args[0]
         Id = args[1]
         label = args[2]
@@ -147,7 +147,7 @@ class Mink:
             args[3]
         except:
             print(" not downloading attachments")
-        else: # executed if no exceptions were raised in the try block.
+        else:  # executed if no exceptions were raised in the try block.
             att = str(args[3]).lower().strip()
             # print (f"GET HERE!{att}")
             if att == "attachments":

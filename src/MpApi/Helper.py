@@ -16,10 +16,7 @@ class Helper:
         doc.write(str(path), pretty_print=True, method="c14n2")
 
     def _write(self, *, path, doc):
-        doc.write(
-            str(path), pretty_print=True, encoding="UTF-8"
-        )  
-            
+        doc.write(str(path), pretty_print=True, encoding="UTF-8")
 
     def toString(self, *, et=None):
         if et is None:

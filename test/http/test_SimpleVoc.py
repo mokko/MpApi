@@ -16,8 +16,8 @@ with open("../sdata/credentials.py") as f:
     exec(f.read())
 
 
-voc = "GenLocationVgr" # ObjIconographyKeywordProjectVgr"
-voc = "ObjIconographyKeywordProjectVgr" # 
+voc = "GenLocationVgr"  # ObjIconographyKeywordProjectVgr"
+voc = "ObjIconographyKeywordProjectVgr"  #
 
 
 def test_init():
@@ -66,7 +66,7 @@ def test_vNodeByIdentifier():
 def write_file(*, path, xml):
     api = MpApi(baseURL=baseURL, user=user, pw=pw)
     # can't pretty print xml right now b/c of encoding declaration
-    #if not Path(path).exists():
-    #ET = etree.fromstring(xml)
-    #xml_pp = etree.tostring(xml, pretty_print=True, encoding="unicode")
+    # if not Path(path).exists():
+    # ET = etree.fromstring(xml)
+    # xml_pp = etree.tostring(xml, pretty_print=True, encoding="unicode")
     api.toFile(xml=xml, path=path)

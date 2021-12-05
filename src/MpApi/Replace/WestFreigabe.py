@@ -89,7 +89,7 @@ class WestFreigabe:
         We've already filtered out cases where SMBFreigabe exists already
         """
         Id = itemN.xpath("@id")[0]
-        print ("   setting freigabe")
+        print("   setting freigabe")
         today = datetime.date.today()
         module = "Object"
         xml = f"""
