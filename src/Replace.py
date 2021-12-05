@@ -85,7 +85,7 @@ class Replace:
             query = plugin.search(Id=input[key])
             query.validate(mode="search")
             # should validate the query inside replacer? Probably yes
-            replacer.search(query=query, id=input[key])
+            replacer.search(query=query, Id=input[key])
             xpath = plugin.loop()
             moduleType = xpath.split("'")[1]  # not particularly generic
             # print (f"T{moduleType}")
@@ -126,8 +126,8 @@ class Replace:
                             return  # break for loop
         print(f"count: {count}")
 
-    def search(self, *, query, id):
-        out_fn = f"temp{id}.zml.xml"
+    def search(self, *, query, Id):
+        out_fn = f"temp{Id}.zml.xml"
         if self.lazy is True and Path(out_fn).exists():
             print(f"Loading response for temp file {out_fn}")
             self.ET = self.sar.ETfromFile(path=out_fn)

@@ -2,8 +2,8 @@ import sys
 from pathlib import Path
 
 sys.path.append("../src")
-from MpApi import MpApi
-from Module import Module
+from MpApi.Client import MpApi
+from MpApi.Module import Module
 
 with open("sdata/vierteInstanz.py") as f:
     exec(f.read())

@@ -4,19 +4,22 @@ from pathlib import Path
 
 class Helper:
     def toFile(self, *, path):
-
-        # print (":"+str(type(self.etree))+" _Element works")
         doc = self.etree
-        # etree.indent(doc)
         try:
-            doc.write(
-                str(path), pretty_print=True, encoding="UTF-8"
-            )  # appears to write Element
+            self._write(path=path, doc=doc)
         except:
             doc = etree.ElementTree(self.etree)
-            doc.write(
-                str(path), pretty_print=True, encoding="UTF-8"
-            )  # appears to write Element
+            self._write(path=path, doc=doc)
+
+    def toFile2(self, *, path):
+        doc = self.etree
+        doc.write(str(path), pretty_print=True, method="c14n2")
+
+    def _write(self, *, path, doc):
+        doc.write(
+            str(path), pretty_print=True, encoding="UTF-8"
+        )  
+            
 
     def toString(self, *, et=None):
         if et is None:
