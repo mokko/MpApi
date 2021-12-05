@@ -1,5 +1,5 @@
-from Search import Search
 import datetime
+from MpApi.Search import Search
 
 
 class WestFreigabe:
@@ -32,7 +32,7 @@ class WestFreigabe:
         """
         return "/m:application/m:modules/m:module[@name = 'Object']/m:moduleItem"
 
-    def search(self, id, limit=-1):
+    def search(self, Id, limit=-1):
         """
         We're trying to find exactly the right records in one go.
         - Objects at a certain locationId
@@ -50,7 +50,7 @@ class WestFreigabe:
         query.addCriterion(
             operator="equalsField",
             field="ObjCurrentLocationVoc",
-            value=id,  # using voc id
+            value=Id,  # using voc id
         )
         query.addCriterion(
             operator="notEqualsField",  # notEqualsTerm
@@ -83,21 +83,20 @@ class WestFreigabe:
         """
         return self.setObjectFreigabe  # returns a callback
 
-    def setObjectFreigabe(self, *, node, user):
+    def setObjectFreigabe(self, *, itemN, user):
         """
-        We're inside Objects's nodeItem here
-        We have already filtered out cases where SMBFreigabe exists already
+        We're inside Object's nodeItem here
+        We've already filtered out cases where SMBFreigabe exists already
         """
-        # print (node)
-
-        id = node.xpath("@id")[0]
+        Id = itemN.xpath("@id")[0]
+        print ("   setting freigabe")
         today = datetime.date.today()
         module = "Object"
         xml = f"""
             <application xmlns="http://www.zetcom.com/ria/ws/module">
               <modules>
                 <module name="{module}">
-                  <moduleItem id="{id}">
+                  <moduleItem id="{Id}">
                     <repeatableGroup name="ObjPublicationGrp">
                         <repeatableGroupItem>
                             <dataField dataType="Date" name="ModifiedDateDat">
@@ -123,10 +122,10 @@ class WestFreigabe:
         payload = {
             "type": "createRepeatableGroup",
             "module": module,
-            "id": id,
+            "id": Id,
             "repeatableGroup": "ObjPublicationGrp",
             "xml": xml,
-            "success": f"{module} {id}: set object smbfreigabe",
+            "success": f"{module} {Id}: set object smbfreigabe",
         }
 
         return payload

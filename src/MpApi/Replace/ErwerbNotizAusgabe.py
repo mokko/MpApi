@@ -1,8 +1,8 @@
 import datetime
 from lxml import etree
-from Search import Search
-from Module import Module
 import re
+from MpApi.Search import Search
+from MpApi.Module import Module
 
 """
 Für die HFObjekte wollen wir ErwerbNotizAusgabe befüllen.

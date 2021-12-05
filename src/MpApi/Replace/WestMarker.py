@@ -1,6 +1,6 @@
-from Search import Search
-from Module import Module
 from lxml import etree
+from MpApi.Module import Module
+from MpApi.Search import Search
 
 """
     set marker SM8HF in onlineBeschreibung if it doesn't exist yet
@@ -18,21 +18,21 @@ class WestMarker:
     def input(self):
         STO = {
             # Westflügel, Westspange Eröffnung
-            "O1.189.01.K1 M13": "4220560",
-            "O2.017.B2 M37": "4220571",
-            "O2.019.P3 M39": "4220580",
-            "O2.029.B3 M15": "4220589",
-            "O2.037.B3 M16": "4220679",
-            "O2.124.K1 M14": "4220743",
-            "O2.133.K2 M12": "4220744",
-            "O2.160.02.B2 SM Afrika": "4220747",
-            "O3.014.B2 M61": "4220964",
-            "O3.021.B3 M44": "4220994",
-            "O3.090.K1 M43StuSamZ-Asien": "4221084",
-            "O3.097.K2 M42": "4221123",
-            "O3.125.02.B2 M60": "4221168",
-            "O3.126.P3 M62": "4221189",
-            "O3.127.01.B3 M45": "4221214",
+            "O1.189.01.K1-M13": "4220560",
+            "O2.017.B2-M37": "4220571",
+            "O2.019.P3-M39": "4220580",
+            "O2.029.B3-M15": "4220589",
+            "O2.037.B3-M16": "4220679",
+            "O2.124.K1-M14": "4220743",
+            "O2.133.K2-M12": "4220744",
+            "O2.160.02.B2-SMAfrika": "4220747",
+            "O3.014.B2-M61": "4220964",
+            "O3.021.B3-M44": "4220994",
+            "O3.090.K1-M43StuSamZ-Asien": "4221084",
+            "O3.097.K2-M42": "4221123",
+            "O3.125.02.B2-M60": "4221168",
+            "O3.126.P3-M62": "4221189",
+            "O3.127.01.B3-M45": "4221214",
         }
         # return STOs
         r = {"M39locId": "4220580"}  # for testing
@@ -44,7 +44,7 @@ class WestMarker:
         """
         return "/m:application/m:modules/m:module[@name = 'Object']/m:moduleItem"
 
-    def search(self, id, limit=-1):
+    def search(self, Id, limit=-1):
         """
         We're trying to find exactly the right records in one go.
         - Objects at a certain locationId
@@ -59,7 +59,7 @@ class WestMarker:
         query.addCriterion(
             operator="equalsField",
             field="ObjCurrentLocationVoc",
-            value=id,  # using voc id
+            value=Id,  # using voc id
         )
         query.addCriterion(
             operator="notEqualsField",  # notEqualsTerm
@@ -88,14 +88,14 @@ class WestMarker:
     def onItem(self):
         return self.checkMarker
 
-    def checkMarker(self, *, node, user):
+    def checkMarker(self, *, itemN, user):
         """
         Check if onlineBeschreibung exists; if not add marker in first description.
         If it exists, check if first description has marker. If not, add it.
         """
-        id = node.xpath("@id")[0]
+        Id = itemN.xpath("@id")[0]
 
-        rGrp = node.xpath(
+        rGrp = itemN.xpath(
             "m:repeatableGroup[@name='ObjTextOnlineGrp']", namespaces=NSMAP
         )
 
@@ -119,10 +119,10 @@ class WestMarker:
 
             if found == 0:
                 print("   marker not in online description")
-                return self.updateOnlineDescription(node=rGrp[0], id=id)
+                return self.updateOnlineDescription(node=rGrp[0], Id=Id)
         else:
             print("   no online description yet, ADDING MY MARK")
-            return self.createOnlineDescription(objId=id)
+            return self.createOnlineDescription(objId=Id)
 
     def createOnlineDescription(self, *, objId):
         """
@@ -167,7 +167,7 @@ class WestMarker:
         }
         return payload
 
-    def updateOnlineDescription(self, *, node, id):
+    def updateOnlineDescription(self, *, node, Id):
         """
         The node we get passed here is __only__ a repeatableGroup fragment
         """
@@ -185,7 +185,7 @@ class WestMarker:
         <application xmlns="http://www.zetcom.com/ria/ws/module">
             <modules>
                 <module name="{module}">
-                    <moduleItem id="{id}">
+                    <moduleItem id="{Id}">
                     </moduleItem>
                 </module>
             </modules>
@@ -216,7 +216,7 @@ class WestMarker:
 
         # print(type(xml))
         # print (xml)
-        print(f"\tUPDATING ONLINE DESC for {id}")
+        print(f"\tUPDATING ONLINE DESC for {Id}")
         # print (f"refId {refId}")
 
         m = Module(tree=ET)
@@ -226,10 +226,10 @@ class WestMarker:
             payload = {
                 "type": "updateRepeatableGroup",
                 "module": module,
-                "id": id,
+                "id": Id,
                 "repeatableGroup": rGrpName,
                 "xml": xml,
-                "success": f"{module} {id}: update online description, adding marker",
+                "success": f"{module} {Id}: update online description, adding marker",
                 "refId": refId,
             }
             return payload
