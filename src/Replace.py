@@ -55,7 +55,7 @@ class Replace:
         Load a job/plugin by name. Returns the plugin object
         """
         print(f"Loading plugin {plugin}")
-        name = "Replace." + plugin
+        name = "MpApi.Replace." + plugin
         mod = importlib.import_module(name)
         Plugin = getattr(mod, plugin)
         return Plugin()  # new / constructor?
