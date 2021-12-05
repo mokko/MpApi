@@ -139,14 +139,20 @@ class Mink:
         self.xmlToFile(xml=dfX, path="definition.xml")
 
     def getAttachments(self, args):
-        type = args[0]
-        id = args[1]
+        print (f"***{args}")
+        Type = args[0]
+        Id = args[1]
         label = args[2]
         try:
             args[3]
-            if args[3].lower == "attachments":
+        except:
+            print(" not downloading attachments")
+        else: # executed if no exceptions were raised in the try block.
+            att = str(args[3]).lower().strip()
+            # print (f"GET HERE!{att}")
+            if att == "attachments":
                 # pretty dirty: assumes that getMedia has been done before
-                mm_fn = self.parts_dir.joinpath(f"{label}-Multimedia-{type}{id}.xml")
+                mm_fn = self.parts_dir.joinpath(f"{label}-Multimedia-{Type}{Id}.xml")
                 mmX = self.xmlFromFile(path=mm_fn)
 
                 pix_dir = Path(
@@ -167,10 +173,8 @@ class Mink:
                     if img not in expected:
                         print(f"image no longer attached, removing {img}")
                         os.remove(img)
-                # currently we dont get attachments that have changed, but keep the same mulId,
-                # that case should be rare
-        except:
-            print(" not downloading attachments")
+        # currently we dont get attachments that have changed, but keep the same mulId,
+        # that case should be rare
 
     def getExhibit(self, args):
         return self._getPart(
@@ -251,20 +255,20 @@ class Mink:
         else:
             print(f" making new join from {join_fn}")
 
-        # module for target and type refers to the type of selection
-        pkX = self._getPart(module="Person", id=id, type=type, label=label)
-        mmX = self._getPart(module="Multimedia", id=id, type=type, label=label)
-        objX = self._getPart(module="Object", id=id, type=type, label=label)
+            # module for target and type refers to the type of selection
+            pkX = self._getPart(module="Person", id=id, type=type, label=label)
+            mmX = self._getPart(module="Multimedia", id=id, type=type, label=label)
+            objX = self._getPart(module="Object", id=id, type=type, label=label)
 
-        self.info(f" joining modules, saving to {join_fn}")
-        inL = [objX, mmX, pkX]
-        if type == "exhibit":
-            exhX = self._getPart(module="Exhibition", id=id, type=type, label=label)
-            regX = self._getPart(module="Registrar", id=id, type=type, label=label)
-            inL.append(exhX)
-            inL.append(regX)
-        joinX = self.sar.join(inL=inL)
-        self.xmlToFile(xml=joinX, path=join_fn)
+            self.info(f" joining modules, saving to {join_fn}")
+            inL = [objX, mmX, pkX]
+            if type == "exhibit":
+                exhX = self._getPart(module="Exhibition", id=id, type=type, label=label)
+                regX = self._getPart(module="Registrar", id=id, type=type, label=label)
+                inL.append(exhX)
+                inL.append(regX)
+            joinX = self.sar.join(inL=inL)
+            self.xmlToFile(xml=joinX, path=join_fn)
         return join_fn
 
     def pack(self, args):
