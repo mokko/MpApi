@@ -139,10 +139,14 @@ class Mink:
         self.xmlToFile(xml=dfX, path="definition.xml")
 
     def getAttachments(self, args):
-        print(f"***{args}")
+        # print(f"***{args}")
         Type = args[0]
         Id = args[1]
         label = args[2]
+        try:
+            since = args[4]
+        except:
+            since = None
         try:
             args[3]
         except:
@@ -158,6 +162,8 @@ class Mink:
                 pix_dir = Path(
                     f"{self.pix_dir}_{label}"
                 )  # this is a new dir, cannot be made earlier
+                if since is not None:
+                    pix_dir = Path(f"{self.pix_dir}_update")
                 if not pix_dir.exists():
                     pix_dir.mkdir()
                 print(f" checking attachments; saving to {pix_dir}")
@@ -228,8 +234,19 @@ class Mink:
         * arg[2]: label
         * arg[3]: attachments
         * arg[4]: since date, optional
+
+        Returns
+        * xml as string with a clean, joined zml document
         """
         print(f"GET PACK {args}")
+        try:
+            args[4]
+        except:
+            pass
+        else:
+            print(
+                f" UPDATE Mode. Only getting records that have changed since {args[4]}"
+            )
 
         join_fn = self.join(args)
         self.getAttachments(args)

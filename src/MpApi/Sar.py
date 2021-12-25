@@ -117,7 +117,6 @@ class Sar:  # methods (mosly) in alphabetical order
             value=id,
         )
         if since is not None:
-            print(f"**UPDATE Mode. Only get data new since {since}")
             s.addCriterion(
                 operator="greater",
                 field="__lastModified",
