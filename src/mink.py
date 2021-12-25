@@ -139,6 +139,23 @@ class Mink:
         self.xmlToFile(xml=dfX, path="definition.xml")
 
     def getAttachments(self, args):
+        """
+        Gets (=downloads) attachments for module of ceratin types. Usually writes 
+        attachments to path as follows:
+            pix_{label}/{mulId}.{ext}
+        
+        Currently, getAttachments relies on the file "{label}-Multimedia-{Type}{Id}.xml"
+        for multimedia items. So make sure that this file exists (that 
+        
+        Expects:
+        * arg: list with parameters
+        * arg[0]: type (exhibit, group, approval or loc)
+        * arg[1]: id of the respective type
+        * arg[2]: label (used for filenames)
+        * arg[3]: only if string "attachments", will d/l them (optional)
+        * arg[4]: timestamp (optional); if specified, d/l attachents to subdir pix_update
+        """
+        
         # print(f"***{args}")
         Type = args[0]
         Id = args[1]
@@ -151,34 +168,37 @@ class Mink:
             args[3]
         except:
             print(" not downloading attachments")
+            att = None
         else:  # executed if no exceptions were raised in the try block.
             att = str(args[3]).lower().strip()
-            # print (f"GET HERE!{att}")
-            if att == "attachments":
-                # pretty dirty: assumes that getMedia has been done before
-                mm_fn = self.parts_dir.joinpath(f"{label}-Multimedia-{Type}{Id}.xml")
-                mmX = self.xmlFromFile(path=mm_fn)
 
-                pix_dir = Path(
-                    f"{self.pix_dir}_{label}"
-                )  # this is a new dir, cannot be made earlier
-                if since is not None:
-                    pix_dir = Path(f"{self.pix_dir}_update")
-                if not pix_dir.exists():
-                    pix_dir.mkdir()
-                print(f" checking attachments; saving to {pix_dir}")
-                try:
-                    expected = self.sar.saveAttachments(xml=mmX, adir=pix_dir)
-                except Exception as e:
-                    self.info("Error during saveAttachments")
-                    raise e
+        if att == "attachments":
+            # pretty dirty: assumes that getMedia has been done before
+            mm_fn = self.parts_dir.joinpath(f"{label}-Multimedia-{Type}{Id}.xml")
+            print (f" looking for multimedia info at {mm_fn}")
+            mmX = self.xmlFromFile(path=mm_fn)
 
-                # do we want to delete those files that are no longer attached?
-                for img in os.listdir(pix_dir):
-                    img = Path(pix_dir).joinpath(img)  # need resolve here
-                    if img not in expected:
-                        print(f"image no longer attached, removing {img}")
-                        os.remove(img)
+            # determine target dir
+            if since is None:
+                pix_dir = Path(f"{self.pix_dir}_{label}")  
+            else:
+                pix_dir = Path(f"{self.pix_dir}_update")
+            if not pix_dir.exists():
+                pix_dir.mkdir()
+            print(f" about to check attachments; saving to {pix_dir}")
+
+            try:
+                expected = self.sar.saveAttachments(xml=mmX, adir=pix_dir)
+            except Exception as e:
+                self.info("Error during saveAttachments")
+                raise e
+
+            # do we want to delete those files that are no longer attached?
+            for img in os.listdir(pix_dir):
+                img = Path(pix_dir).joinpath(img)  # need resolve here
+                if img not in expected:
+                    print(f"image no longer attached, removing {img}")
+                    os.remove(img)
         # currently we dont get attachments that have changed, but keep the same mulId,
         # that case should be rare
 
@@ -208,9 +228,18 @@ class Mink:
 
     def getMedia(self, args):
         """
-        get media records for exhibit or group, saving it to disk
-        get attachments for that set of media records saving them to disk
-        return media records as mmX
+        Get Multimedia records for exhibit, group or location.
+
+        Excepts:
+        * args: List of arguments
+        * args[0]: type
+        * args[1]: id
+        * args[2]: label
+        * what about arg[4] since (update date)? Not yet implemented, should 
+          probably be here as well.
+
+        Returns
+        * xml as string containing zml document with found multimedia items
         """
         return self._getPart(
             id=args[1], label=args[2], module="Multimedia", type=args[0]
@@ -236,17 +265,18 @@ class Mink:
         * arg[4]: since date, optional
 
         Returns
-        * xml as string with a clean, joined zml document
+        * xml as string with a clean, zml document containing at least objects, persons 
+          and multimedia
         """
         print(f"GET PACK {args}")
         try:
             args[4]
         except:
             pass
-        else:
-            print(
-                f" UPDATE Mode. Only getting records that have changed since {args[4]}"
-            )
+        # else:
+        #    print(
+        #        f" UPDATE Mode. Only getting records that have changed since {args[4]}"
+        #    )
 
         join_fn = self.join(args)
         self.getAttachments(args)
@@ -348,6 +378,20 @@ class Mink:
         )
 
     def _getPart(self, *, id, label, module, type, since):
+        """
+        Gets a set of moduleItems depending on requested type. Caches
+        results in a file and returns from file cache if that exists already.
+        
+        Expects:
+        * type: approval, exhibit, group or loc
+        * id: id of that type
+        * module: requested target module
+        * label: a label to be used as part of a filename (for cache)
+        * since: dateTime (optional); if provided only get items newer than that date
+
+        Returns:
+        * xml as string; a document with the result moduleItems
+        """
         # type is either loc, exhibit or group
         fn = self.parts_dir.joinpath(f"{label}-{module}-{type}{id}.xml")
         if fn.exists():

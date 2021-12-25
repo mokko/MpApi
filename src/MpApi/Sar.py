@@ -379,32 +379,34 @@ class Sar:  # methods (mosly) in alphabetical order
 
     def saveAttachments(self, *, xml, adir):
         """
-        For a set of multimedia moduleItems, download their attachments.
+        For a set of multimedia moduleItems (provided in xml), download their attachments.
+        Attachments are saved to disk with the filename {mulId}.{ext}.
 
         Typcially will process moduleItems of type multimeida (aka media). But
         could theoretically also work on different types.
 
-        Expects a xml string and a directory to save the attachments to.
-        Attachments are saved to disk with the filename {mulId}.{ext}.
+        Expects 
+        * xml: a zml string  
+        * adir: directory to save the attachments to.
 
-        New: Now uses streaming to save memory.
-        New: Download only attachments with Freigabe[Typ = "SMB-Freigabe"] = "Ja"
+        New: 
+        * uses streaming to save memory.
+        * downloads only attachments with approval (Typ = "SMB-Freigabe" and Freigabe = "Ja")
+        
         """
         E = etree.fromstring(bytes(xml, "UTF-8"))
 
-        itemsL = E.xpath(
-            """
-            /m:application/m:modules/m:module[@name='Multimedia']
-            /m:moduleItem[@hasAttachments = 'true']
-            /m:repeatableGroup[@name = 'MulApprovalGrp']
-            /m:repeatableGroupItem
-            /m:vocabularyReference[@name = 'TypeVoc']
-            /m:vocabularyReferenceItem[@name = 'SMB-digital'] 
-            /../../..
-            /m:repeatableGroupItem
-            /m:vocabularyReference[@name = 'ApprovalVoc']
-            /m:vocabularyReferenceItem[@name = 'Ja'] 
-            /../../../..            
+        itemsL = E.xpath("""
+            /m:application/m:modules/m:module[
+                @name='Multimedia'
+                ]/m:moduleItem[
+                    @hasAttachments = 'true'
+                    and ./m:repeatableGroup[@name = 'MulApprovalGrp']/m:repeatableGroupItem[
+                        ./m:vocabularyReference[@name = 'TypeVoc']/m:vocabularyReferenceItem[@name = 'SMB-digital']
+                        and ./m:vocabularyReference[@name = 'ApprovalVoc']/m:vocabularyReferenceItem[@name = 'Ja']
+                    ]
+
+                ]            
             """,
             namespaces=NSMAP,
         )
