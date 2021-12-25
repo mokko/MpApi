@@ -99,7 +99,9 @@ class Search(Helper):
             self.etree = etree.parse(str(fromFile))
         else:
             if module is None:
-                raise TypeError ("Module is not allowed to be none when making search from string")
+                raise TypeError(
+                    "Module is not allowed to be none when making search from string"
+                )
             xml = f"""<application 
             xmlns="http://www.zetcom.com/ria/ws/module/search" 
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 

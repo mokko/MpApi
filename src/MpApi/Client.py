@@ -723,7 +723,7 @@ class MpApi:
         with open(path, "w", encoding="UTF-8") as f:
             f.write(xml)
 
-    def completeXML (self, *, fragment):
+    def completeXML(self, *, fragment):
         """
         Expects a moduleItem as xml string, returns a whole
         document as xml string.
@@ -739,6 +739,7 @@ class MpApi:
         </application>
         """
         return whole
+
 
 if __name__ == "__main__":
     from pathlib import Path

@@ -218,10 +218,10 @@ class Mink:
 
     def getPack(self, args):
         """
-        Download object and related information (attachment, media, people), join data 
+        Download object and related information (attachment, media, people), join data
         together and clean it.
 
-        Expects 
+        Expects
         * args: a list with arguments that it passes along;
         * arg[0]: type (approval, exhibit or group)
         * arg[1]: id
@@ -266,15 +266,25 @@ class Mink:
             print(f" making new join from {join_fn}")
 
             # module for target and type refers to the type of selection
-            pkX = self._getPart(module="Person", id=id, type=type, label=label, since=since)
-            mmX = self._getPart(module="Multimedia", id=id, type=type, label=label, since=since)
-            objX = self._getPart(module="Object", id=id, type=type, label=label, since=since)
+            pkX = self._getPart(
+                module="Person", id=id, type=type, label=label, since=since
+            )
+            mmX = self._getPart(
+                module="Multimedia", id=id, type=type, label=label, since=since
+            )
+            objX = self._getPart(
+                module="Object", id=id, type=type, label=label, since=since
+            )
 
             self.info(f" joining modules, saving to {join_fn}")
             inL = [objX, mmX, pkX]
             if type == "exhibit":
-                exhX = self._getPart(module="Exhibition", id=id, type=type, label=label, since=since)
-                regX = self._getPart(module="Registrar", id=id, type=type, label=label, since=since)
+                exhX = self._getPart(
+                    module="Exhibition", id=id, type=type, label=label, since=since
+                )
+                regX = self._getPart(
+                    module="Registrar", id=id, type=type, label=label, since=since
+                )
                 inL.append(exhX)
                 inL.append(regX)
             joinX = self.sar.join(inL=inL)

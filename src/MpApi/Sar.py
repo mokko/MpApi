@@ -105,7 +105,7 @@ class Sar:  # methods (mosly) in alphabetical order
         Expects module (e.g. Object), id (for that object), fields is a dictionary with a
         set of fields that relevant for the search, since is None or a date; if since is
         not None, search will only list items that are newer than the provided date.
-        
+
         Sould only get called from getByExhibit, getByGroup, getByLocation
         """
         s = Search(module=module)
@@ -117,18 +117,18 @@ class Sar:  # methods (mosly) in alphabetical order
             value=id,
         )
         if since is not None:
-            print (f"**UPDATE Mode. Only get data new since {since}")
+            print(f"**UPDATE Mode. Only get data new since {since}")
             s.addCriterion(
-                operator="greater", 
+                operator="greater",
                 field="__lastModified",
-                value=since, # "2021-12-23T12:00:00.0"   
+                value=since,  # "2021-12-23T12:00:00.0"
             )
         s.validate(mode="search")
         return self.api.search(xml=s.toString())
 
     def getByApprovalGrp(self, *, id, module, since=None):
         """
-        ApprovalGrp is the term used in the multimedia module, it's a better label than 
+        ApprovalGrp is the term used in the multimedia module, it's a better label than
         PublicationGrp. So I use it here generically for Freigabe in RIA.
 
         Gets a set of items depending on the requested module; modules that can be requested
@@ -137,10 +137,10 @@ class Sar:  # methods (mosly) in alphabetical order
         * id is the ID of the approvalGrp
         * module: requested module (Object, Multimedia, Person)
         * since is either None or a date.
-        
+
         For Objects
             gets object records in that approval group
-        For Multimedia 
+        For Multimedia
             gets multimedia records linked to objects in the approval group
         For Person
             gets persons associated with objects in that approval group
@@ -192,17 +192,17 @@ class Sar:  # methods (mosly) in alphabetical order
     def getByExhibit(self, *, id, module, since=None):
         """
         Gets a set of items related to a certain exhibit depending on the requested module
-        
-        * id is the exhibitId, 
+
+        * id is the exhibitId,
         * module is the requested module
         * since is None or a date; if a date is provided, gets only items newer than date
 
-        if module is Multimedia    
+        if module is Multimedia
             gets multimedia (records) in exhibit with that id
         if module is Object
-            gets objects in exhibit with that $id 
+            gets objects in exhibit with that $id
         if module is Person
-            gets Persons associated with objects that are in exhibit with $id 
+            gets Persons associated with objects that are in exhibit with $id
         if module is Registrar
             gets registrar records of objects in exhibit with $id
         if module is Exhibit
@@ -230,7 +230,7 @@ class Sar:  # methods (mosly) in alphabetical order
     def getByLocation(self, *, id, module, since=None):
         """
         Gets items of the requested module type by location id.
-        
+
         * module: reuquested module, possible values are Multimedia, Object or Person
         * id: location id
         * since: None or date; only return items newer than date
@@ -245,16 +245,16 @@ class Sar:  # methods (mosly) in alphabetical order
     def join(self, *, inL):
         """
         Joins the documents in inL to a single document
-        
-        Expects a 
-        * list of zml documents as xml string 
-        
+
+        Expects a
+        * list of zml documents as xml string
+
         Returns one xml string.
 
         This method is lxml-based, so it works in memory.
 
-        Old version would add identical moduleItems creating duplicates; new version is 
-        returning only distinct items. 
+        Old version would add identical moduleItems creating duplicates; new version is
+        returning only distinct items.
         """
         # print (inL)
         known_types = set()
