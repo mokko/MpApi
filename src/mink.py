@@ -218,12 +218,18 @@ class Mink:
 
     def getPack(self, args):
         """
-        Download object and related information (attachment, media, people),
-        join data together and clean it.
+        Download object and related information (attachment, media, people), join data 
+        together and clean it.
 
-        Expects a type (exhibit or group) and a corresponding id
+        Expects 
+        * args: a list with arguments that it passes along;
+        * arg[0]: type (approval, exhibit or group)
+        * arg[1]: id
+        * arg[2]: label
+        * arg[3]: attachments
+        * arg[4]: since date, optional
         """
-        print(f"GET PACKAGE {args}")
+        print(f"GET PACK {args}")
 
         join_fn = self.join(args)
         self.getAttachments(args)
@@ -244,6 +250,10 @@ class Mink:
         type = args[0]
         id = args[1]
         label = args[2]
+        try:
+            since = args[4]
+        except:
+            since = None
         joinX = None
         join_fn = self.parts_dir.joinpath(
             f"{label}-join-{type}{id}.xml"
@@ -256,15 +266,15 @@ class Mink:
             print(f" making new join from {join_fn}")
 
             # module for target and type refers to the type of selection
-            pkX = self._getPart(module="Person", id=id, type=type, label=label)
-            mmX = self._getPart(module="Multimedia", id=id, type=type, label=label)
-            objX = self._getPart(module="Object", id=id, type=type, label=label)
+            pkX = self._getPart(module="Person", id=id, type=type, label=label, since=since)
+            mmX = self._getPart(module="Multimedia", id=id, type=type, label=label, since=since)
+            objX = self._getPart(module="Object", id=id, type=type, label=label, since=since)
 
             self.info(f" joining modules, saving to {join_fn}")
             inL = [objX, mmX, pkX]
             if type == "exhibit":
-                exhX = self._getPart(module="Exhibition", id=id, type=type, label=label)
-                regX = self._getPart(module="Registrar", id=id, type=type, label=label)
+                exhX = self._getPart(module="Exhibition", id=id, type=type, label=label, since=since)
+                regX = self._getPart(module="Registrar", id=id, type=type, label=label, since=since)
                 inL.append(exhX)
                 inL.append(regX)
             joinX = self.sar.join(inL=inL)
@@ -310,7 +320,7 @@ class Mink:
             format="%(asctime)s: %(message)s",
         )
 
-    def _getPart(self, *, id, label, module, type):
+    def _getPart(self, *, id, label, module, type, since):
         # type is either loc, exhibit or group
         fn = self.parts_dir.joinpath(f"{label}-{module}-{type}{id}.xml")
         if fn.exists():
@@ -319,13 +329,13 @@ class Mink:
         else:
             self.info(f" {module} from remote, saving to {fn}")
             if type == "approval":
-                r = self.sar.getByApprovalGrp(id=id, module=module)
+                r = self.sar.getByApprovalGrp(id=id, module=module, since=since)
             elif type == "exhibit":
-                r = self.sar.getByExhibit(id=id, module=module)
+                r = self.sar.getByExhibit(id=id, module=module, since=since)
             elif type == "group":
-                r = self.sar.getByGroup(id=id, module=module)
+                r = self.sar.getByGroup(id=id, module=module, since=since)
             elif type == "loc":
-                r = self.sar.getByLocation(id=id, module=module)
+                r = self.sar.getByLocation(id=id, module=module, since=since)
             else:
                 raise TypeError("UNKNOWN type")
             self.xmlToFile(xml=r.text, path=fn)

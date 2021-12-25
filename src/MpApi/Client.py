@@ -169,14 +169,14 @@ class MpApi:
     #
     # B.4 FIELDs
     #
-    def updateField(self, *, module, id, datafield):
+    def updateField(self, *, module, id, datafield, xml):
         """
         Update a single field of a module item
         PUT http://.../ria-ws/application/module/{module}/{__id}/{datafield}
 
-        NB: We dont need a createField method since simple dataFields are always created.
+        NB: We dont need a createField method since simple datafields are always created.
         """
-        url = f"{self.appURL}/module/{module}/{id}/{datafield}"
+        url = f"{self.appURL}/module/{module}/{id}/{dataField}"
         r = requests.put(url, data=xml, headers=self.headers, auth=self.auth)
         r.raise_for_status()
         return r
@@ -723,6 +723,22 @@ class MpApi:
         with open(path, "w", encoding="UTF-8") as f:
             f.write(xml)
 
+    def completeXML (self, *, fragment):
+        """
+        Expects a moduleItem as xml string, returns a whole
+        document as xml string.
+        """
+
+        whole = f"""
+        <application xmlns="http://www.zetcom.com/ria/ws/module">
+            <modules name="Object">
+                <moduleItem>
+                    {fragment}
+                </moduleItem>
+            </modules>
+        </application>
+        """
+        return whole
 
 if __name__ == "__main__":
     from pathlib import Path

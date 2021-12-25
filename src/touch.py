@@ -6,7 +6,7 @@ import sys
 if "PYTHONPATH" in os.environ:
     sys.path.append(os.environ["PYTHONPATH"])
 
-credentials = "credentials.py"  # in pwd    
+credentials = "emem1.py"  # in pwd    
 with open(credentials) as f:
     exec(f.read())
         
@@ -65,7 +65,7 @@ class Touch:
     def __init__(self, *, Input, act=False):
         self.api = MpApi(baseURL=baseURL, user=user, pw=pw)
         self.act = act
-
+        print (f"act = {act}")
         logging.basicConfig(
             datefmt="%Y%m%d %I:%M:%S %p",
             format="[%(asctime)s %(message)s]",
@@ -79,8 +79,9 @@ class Touch:
             "ObjRecordsNeedingUpdate": 0
         } # one-based numbers
 
-        print (f"About to parse input {Input}")
+        print (f"about to parse input {Input}")
         ET = etree.parse(str(Input), ETparser)
+        self.ET = ET
 
         objItems = ET.xpath("/m:application/m:modules/m:module[@name = 'Object']/m:moduleItem", 
             namespaces=NSMAP)
@@ -94,7 +95,7 @@ class Touch:
         for itemN in objItems:
             objId = itemN.xpath("@id")[0]
             objLastModified = itemN.xpath("m:systemField[@name = '__lastModified']/m:value/text()", namespaces=NSMAP)[0]            
-            print (f"objId {objId} {objLastModified}")
+            print (f"objId {objId}") #{objLastModified}
             mulRefs = itemN.xpath("m:moduleReference[@name = 'ObjMultimediaRef']/m:moduleReferenceItem/@moduleItemId", 
                 namespaces=NSMAP)
             
@@ -114,51 +115,43 @@ class Touch:
                     mmLastModified = mmItem.xpath("m:systemField[@name = '__lastModified']/m:value/text()", namespaces=NSMAP)[0]            
                     #print (f"\tincluded and approved: {mmItem} {mmLastModified}")
                     if mmLastModified > objLastModified:
-                        report["ObjRecordsNeedingUpdate"] = report["ObjRecordsNeedingUpdate"] + 1 
-                        print ("obj record older than asset: objId {objId}")
+                        report["ObjRecordsNeedingUpdate"] = report["ObjRecordsNeedingUpdate"] + 1
+                        print ("   Object older than asset") # : objId {objId}
+                        if act is True:
+                            self.touch(objId=objId)
+                            break # only one touch per object
         print (report)
 
-    def search(self, Id, limit=-1):
+    def touch(self, *, objId):
+        # dont rely on a cache file as it might be too old 
+        r = self.api.getItem(module="Object", id=objId)
+        xml = r.text.encode()
+        # print (r.content)
+        itemN = etree.fromstring(xml)
+        objekttypN = itemN.xpath("""/m:application/m:modules/m:module[
+            @name='Object']/m:moduleItem/m:vocabularyReference[@name = 'ObjCategoryVoc']""", 
+            namespaces=NSMAP)[0]
+        fragment = etree.tostring(objekttypN)
+        print (fragment)
+        """    
+        <vocabularyReference name="ObjCategoryVoc" id="30349" instanceName="ObjCategoryVgr">
+          <vocabularyReferenceItem id="3206608" name="Allgemein">
+            <formattedValue language="en">Allgemein</formattedValue>
+          </vocabularyReferenceItem>
+        </vocabularyReference>  
         """
-        We're trying to find exactly the right records in one go.
-        - Objects at a certain locationId
-        - Objects that are not SMBfreigegeben yet
-        whether they have marker or not is irrelevant
-
-        Nicht freigegeben can be expressed in two ways SMBFreigabe = No or no SMBFreigabe
-        in any case we leave records alone that have SMBFreigabe already.
+        whole = f"""
+        <application xmlns="http://www.zetcom.com/ria/ws/module">
+            <modules name="Object">
+                <moduleItem>
+                    {fragment}
+                </moduleItem>
+            </modules>
+        </application>
         """
-        query = Search(module="Object", limit=limit)
-        query.AND()
-        query.addCriterion(
-            operator="equalsField",
-            field="ObjCurrentLocationVoc",
-            value=Id,  # using voc id
-        )
-        query.addCriterion(
-            operator="notEqualsField",  # notEqualsTerm
-            field="__orgUnit",  # __orgUnit is not allowed in Zetcom's own search.xsd
-            value="EMPrimarverpackungen",  # 1632806EM-Primärverpackungen
-        )
-        query.addCriterion(
-            operator="notEqualsField",  # notEqualsTerm
-            field="__orgUnit",
-            value="AKuPrimarverpackungen",  # 1632806EM-Primärverpackungen
-        )
-        # query.NOT()
-        # query.addCriterion( # doesn't find records without ObjTextOnlineGrp, while "enthält nicht" in the Gui does find empty records
-        #    operator="contains",
-        #    field="ObjTextOnlineGrp.TextHTMLClb",
-        #    value="SM8HF",
-        # )
-        # query.OR()
-        # then we have to download all records and test them manually
-        query.addField(field="ObjTextOnlineGrp.repeatableGroupItem")
-        query.addField(field="ObjTextOnlineGrp.TextHTMLClb")
-        query.addField(field="ObjTextOnlineGrp.TextClb")
-        # query.print()
-        return query
-
+        
+        self.api.updateItem(module="Object", id=objId, xml=itemX) # works but updates too many fields
+        raise TypeError("TE")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Update lastModified date of object records if the multimedia's lastModified is newer")
