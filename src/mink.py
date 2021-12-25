@@ -140,13 +140,13 @@ class Mink:
 
     def getAttachments(self, args):
         """
-        Gets (=downloads) attachments for module of ceratin types. Usually writes 
+        Gets (=downloads) attachments for module of ceratin types. Usually writes
         attachments to path as follows:
             pix_{label}/{mulId}.{ext}
-        
+
         Currently, getAttachments relies on the file "{label}-Multimedia-{Type}{Id}.xml"
-        for multimedia items. So make sure that this file exists (that 
-        
+        for multimedia items. So make sure that this file exists (that
+
         Expects:
         * arg: list with parameters
         * arg[0]: type (exhibit, group, approval or loc)
@@ -155,7 +155,7 @@ class Mink:
         * arg[3]: only if string "attachments", will d/l them (optional)
         * arg[4]: timestamp (optional); if specified, d/l attachents to subdir pix_update
         """
-        
+
         # print(f"***{args}")
         Type = args[0]
         Id = args[1]
@@ -175,12 +175,12 @@ class Mink:
         if att == "attachments":
             # pretty dirty: assumes that getMedia has been done before
             mm_fn = self.parts_dir.joinpath(f"{label}-Multimedia-{Type}{Id}.xml")
-            print (f" looking for multimedia info at {mm_fn}")
+            print(f" looking for multimedia info at {mm_fn}")
             mmX = self.xmlFromFile(path=mm_fn)
 
             # determine target dir
             if since is None:
-                pix_dir = Path(f"{self.pix_dir}_{label}")  
+                pix_dir = Path(f"{self.pix_dir}_{label}")
             else:
                 pix_dir = Path(f"{self.pix_dir}_update")
             if not pix_dir.exists():
@@ -235,7 +235,7 @@ class Mink:
         * args[0]: type
         * args[1]: id
         * args[2]: label
-        * what about arg[4] since (update date)? Not yet implemented, should 
+        * what about arg[4] since (update date)? Not yet implemented, should
           probably be here as well.
 
         Returns
@@ -265,7 +265,7 @@ class Mink:
         * arg[4]: since date, optional
 
         Returns
-        * xml as string with a clean, zml document containing at least objects, persons 
+        * xml as string with a clean, zml document containing at least objects, persons
           and multimedia
         """
         print(f"GET PACK {args}")
@@ -381,7 +381,7 @@ class Mink:
         """
         Gets a set of moduleItems depending on requested type. Caches
         results in a file and returns from file cache if that exists already.
-        
+
         Expects:
         * type: approval, exhibit, group or loc
         * id: id of that type

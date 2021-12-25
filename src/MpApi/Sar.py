@@ -385,18 +385,19 @@ class Sar:  # methods (mosly) in alphabetical order
         Typcially will process moduleItems of type multimeida (aka media). But
         could theoretically also work on different types.
 
-        Expects 
-        * xml: a zml string  
+        Expects
+        * xml: a zml string
         * adir: directory to save the attachments to.
 
-        New: 
+        New:
         * uses streaming to save memory.
         * downloads only attachments with approval (Typ = "SMB-Freigabe" and Freigabe = "Ja")
-        
+
         """
         E = etree.fromstring(bytes(xml, "UTF-8"))
 
-        itemsL = E.xpath("""
+        itemsL = E.xpath(
+            """
             /m:application/m:modules/m:module[
                 @name='Multimedia'
                 ]/m:moduleItem[
