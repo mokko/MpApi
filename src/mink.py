@@ -140,12 +140,13 @@ class Mink:
 
     def getAttachments(self, args):
         """
-        Gets (=downloads) attachments for module of ceratin types. Usually writes
+        Gets (downloads) attachments for module of certain types. Usually writes
         attachments to path as follows:
             pix_{label}/{mulId}.{ext}
 
         Currently, getAttachments relies on the file "{label}-Multimedia-{Type}{Id}.xml"
-        for multimedia items. So make sure that this file exists (that
+        for multimedia items. So make sure that this file exists (that getMedia has been
+        called before).
 
         Expects:
         * arg: list with parameters
@@ -209,10 +210,17 @@ class Mink:
 
     def getItem(self, args):
         """
-        Expects list of two arguments: module and id;
-        returns response.text as xml.
+        gets a single items. Caches item on disk at
+            {project_dir}/{id}.xml
+        and makes new http request only if cache doesn't exist.
 
-        Makes a new response only if no cached requests already on disk.
+        Expects
+        * args: list with two arguments
+        * args[0] module type
+        * args[1] id
+
+        returns
+        * zml moduleItem as xml string.
         """
         module = args[0]
         id = args[1]

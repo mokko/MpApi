@@ -184,6 +184,12 @@ class Sar:  # methods (mosly) in alphabetical order
             field=str(pubVoc[module]),
             value="1810139",  # use id? 1810139: yes
         )
+        if since is not None:
+            s.addCriterion(
+                operator="greater",
+                field="__lastModified",
+                value=since,  # "2021-12-23T12:00:00.0"
+            )
         query.validate(mode="search")
         # query.print()
         return self.api.search(xml=query.toString())
@@ -248,12 +254,14 @@ class Sar:  # methods (mosly) in alphabetical order
         Expects a
         * list of zml documents as xml string
 
-        Returns one xml string.
+        Returns
+        * one xml string
 
         This method is lxml-based, so it works in memory.
 
-        Old version would add identical moduleItems creating duplicates; new version is
-        returning only distinct items.
+        New
+        * Old version would add identical moduleItems creating duplicates; new version is
+          returning only distinct items. TODO: only keep newer version
         """
         # print (inL)
         known_types = set()
