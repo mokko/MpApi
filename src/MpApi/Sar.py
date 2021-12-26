@@ -411,40 +411,38 @@ class Sar:  # methods (mosly) in alphabetical order
         E = etree.fromstring(bytes(xml, "UTF-8"))
 
         if since is None:
-            itemsL = E.xpath(
-                """
+            xpath = """
                 /m:application/m:modules/m:module[
                     @name='Multimedia'
-                    ]/m:moduleItem[
-                        @hasAttachments = 'true'
-                        and ./m:repeatableGroup[@name = 'MulApprovalGrp']/m:repeatableGroupItem[
-                            ./m:vocabularyReference[@name = 'TypeVoc']/m:vocabularyReferenceItem[@name = 'SMB-digital']
-                            and ./m:vocabularyReference[@name = 'ApprovalVoc']/m:vocabularyReferenceItem[@name = 'Ja']
-                        ]
-                    ]            
-                """,
-                namespaces=NSMAP,
-            )
+                ]/m:moduleItem[
+                    @hasAttachments = 'true'
+                    and ./m:repeatableGroup[@name = 'MulApprovalGrp']/m:repeatableGroupItem[
+                        ./m:vocabularyReference[@name = 'TypeVoc']/m:vocabularyReferenceItem[@name = 'SMB-digital']
+                        and ./m:vocabularyReference[@name = 'ApprovalVoc']/m:vocabularyReferenceItem[@name = 'Ja']
+                    ]
+                ]            
+            """
         else:
             print(f" filtering out multimedia records that have changed since {since}")
-            itemsL = E.xpath(
-                f"""
+            # dateTime comparison might not work as expected if number of digits is not equal, e.g. when user
+            # provides since with date format (2020-12-12). Perhaps I can check
+            xpath = f"""
                 /m:application/m:modules/m:module[
                     @name='Multimedia'
-                    ]/m:moduleItem[
-                        @hasAttachments = 'true'
-                        and ./m:repeatableGroup[@name = 'MulApprovalGrp']/m:repeatableGroupItem[
-                            ./m:vocabularyReference[@name = 'TypeVoc']/m:vocabularyReferenceItem[@name = 'SMB-digital']
-                            and ./m:vocabularyReference[@name = 'ApprovalVoc']/m:vocabularyReferenceItem[@name = 'Ja']
-                        ]
-                        and ./m:systemField[
-                            @name = '__lastModified'
-                            and translate(m:value,'-:T. ','') > translate('{since}','-:T. ','')
-                        ]
+                ]/m:moduleItem[
+                    @hasAttachments = 'true'
+                    and ./m:repeatableGroup[@name = 'MulApprovalGrp']/m:repeatableGroupItem[
+                        ./m:vocabularyReference[@name = 'TypeVoc']/m:vocabularyReferenceItem[@name = 'SMB-digital']
+                        and ./m:vocabularyReference[@name = 'ApprovalVoc']/m:vocabularyReferenceItem[@name = 'Ja']
                     ]
-                """,
-                namespaces=NSMAP,
-            )
+                    and ./m:systemField[
+                        @name = '__lastModified'
+                        and translate(m:value,'-:T. ','') > translate('{since}','-:T. ','')
+                    ]
+                ]
+            """
+        itemsL = E.xpath( xpath, namespaces=NSMAP)
+        print (xpath)
 
         print(
             f" xml has {len(itemsL)} records with attachment=True and Freigabe[@typ='SMB-Digital'] = Ja"
@@ -474,8 +472,8 @@ class Sar:  # methods (mosly) in alphabetical order
 
     def search(self, *, xml):
         """
-        Send a request to the api and return the response. Expects an search as
-        xml string in xml. (Same as in MpApi).
+        Send a request to the api and return the response. Expects an search as xml 
+        string in xml. (Same as in MpApi).
         """
         return self.api.search(xml=xml)
 

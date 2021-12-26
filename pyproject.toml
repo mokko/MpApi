@@ -1,6 +1,6 @@
 [tool.poetry]
-name = "mpapi"
-version = "0.1.0"
+name = "MpApi"
+version = "0.0.1"
 description = "Client for MuseumPlus API"
 authors = ["Maurice Mengel <mauricemengel@gmail.com>"]
 license = "GNU GPLv3"
