@@ -389,19 +389,24 @@ class Sar:  # methods (mosly) in alphabetical order
         For a set of multimedia moduleItems (provided in xml), download their attachments.
         Attachments are saved to disk with the filename {mulId}.{ext}.
 
-        Typcially will process moduleItems of type multimeida (aka media). But
-        could theoretically also work on different types.
+        Typcially will process moduleItems of type multimeida (aka media). Might also work
+        on different types.
 
         Expects
         * xml: a zml string
-        * adir: directory to save the attachments to.
+        * adir: directory to save the attachments to
+        * since (optional): xs:date or xs:dateTime; if provided will only get attachments
+          of media that are newer than this date
 
-        New:
+        Returns
+        * a set with the paths of the identified attachments; can be counted
+
+        New
         * uses streaming to save memory.
-        * downloads only attachments with approval (Typ = "SMB-Freigabe" and Freigabe = "Ja")
-        * xpath corrected
-        * optional arg since, to get only items that have changed since that date
-
+        * downloads only attachments with approval (Typ = "SMB-Freigabe" and Freigabe =
+          "Ja")
+        * xpath corrected 20211225
+        * optional arg since 20211226
         """
         E = etree.fromstring(bytes(xml, "UTF-8"))
 
@@ -445,27 +450,24 @@ class Sar:  # methods (mosly) in alphabetical order
             f" xml has {len(itemsL)} records with attachment=True and Freigabe[@typ='SMB-Digital'] = Ja"
         )
 
-        positives = set()
+        positives = set()  # future return value
 
         for itemN in itemsL:
             itemA = itemN.attrib  # A for attribute
             mmId = itemA["id"]
-
             # Why do i get suffix from old filename? Is that really the best source?
             # Seems that it is. I see no other field in RIA
+            # assuming that there can be only one
             fn_old = itemN.xpath(
                 "m:dataField[@name = 'MulOriginalFileTxt']/m:value/text()",
                 namespaces=NSMAP,
-            )[
-                0
-            ]  # assuming that there can be only one
+            )[0]
             fn = mmId + Path(fn_old).suffix
-            mmPath = Path(adir).joinpath(fn)  # need resolve here!
+            mmPath = Path(adir).joinpath(fn)
             # print(f"POSITIVE {mmPath}")
             positives.add(mmPath)
-            if (
-                not mmPath.exists()
-            ):  # only d/l if doesn't exist yet, not sure if we want that
+            # only d/l if doesn't exist yet
+            if not mmPath.exists():
                 print(f" getting {mmPath}")
                 self.api.saveAttachment(module="Multimedia", id=mmId, path=mmPath)
         return positives
