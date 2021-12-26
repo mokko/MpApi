@@ -189,7 +189,7 @@ class Mink:
             print(f" about to check attachments; saving to {pix_dir}")
 
             try:
-                expected = self.sar.saveAttachments(xml=mmX, adir=pix_dir)
+                expected = self.sar.saveAttachments(xml=mmX, adir=pix_dir, since=since)
             except Exception as e:
                 self.info("Error during saveAttachments")
                 raise e
@@ -281,16 +281,10 @@ class Mink:
             args[4]
         except:
             pass
-        # else:
-        #    print(
-        #        f" UPDATE Mode. Only getting records that have changed since {args[4]}"
-        #    )
 
         join_fn = self.join(args)
         self.getAttachments(args)
-
-        cleanX = self.clean(args)  # takes too long
-        # self.validate(path=join_fn) # doesn't validate b/c of bad uuid
+        cleanX = self.clean(args)  # validation is part of clean
         return cleanX
 
     def getPersons(self, args):

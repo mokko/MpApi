@@ -293,7 +293,7 @@ class Sar:  # methods (mosly) in alphabetical order
                                 namespaces=NSMAP,
                             )[-1]
                         except:
-                            # make a node with the write type
+                            # make a node with the right type
                             modulesN = firstET.xpath(
                                 f"/m:application/m:modules", namespaces=NSMAP
                             )[-1]
@@ -312,11 +312,10 @@ class Sar:  # methods (mosly) in alphabetical order
                                     namespaces=NSMAP,
                                 )[0]
                             # moduleItem exists already, do nothing
+                            # todo: make sure only the newer node survives
                             except:
                                 # print ("moduleItem unique, appending")
                                 lastModuleN.append(newItemN)
-                    # else:
-                    #    print ("None found!")
 
         for type in known_types:  # update totalSize for every type
             itemsL = firstET.xpath(
@@ -331,7 +330,7 @@ class Sar:  # methods (mosly) in alphabetical order
                 attributes = moduleN.attrib
                 attributes["totalSize"] = str(len(itemsL))
             except:
-                pass  # it is not an error if a file is has no items that can be counted
+                pass  # it is not an error if a file has no items that can be counted
 
         # print(known_types)
         xml = etree.tostring(firstET, pretty_print=True, encoding="unicode")
@@ -385,7 +384,7 @@ class Sar:  # methods (mosly) in alphabetical order
         Search module should allow updating offset value?
         """
 
-    def saveAttachments(self, *, xml, adir):
+    def saveAttachments(self, *, xml, adir, since=None):
         """
         For a set of multimedia moduleItems (provided in xml), download their attachments.
         Attachments are saved to disk with the filename {mulId}.{ext}.
@@ -400,25 +399,48 @@ class Sar:  # methods (mosly) in alphabetical order
         New:
         * uses streaming to save memory.
         * downloads only attachments with approval (Typ = "SMB-Freigabe" and Freigabe = "Ja")
+        * xpath corrected
+        * optional arg since, to get only items that have changed since that date
 
         """
         E = etree.fromstring(bytes(xml, "UTF-8"))
 
-        itemsL = E.xpath(
-            """
-            /m:application/m:modules/m:module[
-                @name='Multimedia'
-                ]/m:moduleItem[
-                    @hasAttachments = 'true'
-                    and ./m:repeatableGroup[@name = 'MulApprovalGrp']/m:repeatableGroupItem[
-                        ./m:vocabularyReference[@name = 'TypeVoc']/m:vocabularyReferenceItem[@name = 'SMB-digital']
-                        and ./m:vocabularyReference[@name = 'ApprovalVoc']/m:vocabularyReferenceItem[@name = 'Ja']
+        if since is None:
+            itemsL = E.xpath(
+                """
+                /m:application/m:modules/m:module[
+                    @name='Multimedia'
+                    ]/m:moduleItem[
+                        @hasAttachments = 'true'
+                        and ./m:repeatableGroup[@name = 'MulApprovalGrp']/m:repeatableGroupItem[
+                            ./m:vocabularyReference[@name = 'TypeVoc']/m:vocabularyReferenceItem[@name = 'SMB-digital']
+                            and ./m:vocabularyReference[@name = 'ApprovalVoc']/m:vocabularyReferenceItem[@name = 'Ja']
+                        ]
+                    ]            
+                """,
+                namespaces=NSMAP,
+            )
+        else:
+            print(f" filtering out multimedia records that have changed since {since}")
+            itemsL = E.xpath(
+                f"""
+                /m:application/m:modules/m:module[
+                    @name='Multimedia'
+                    ]/m:moduleItem[
+                        @hasAttachments = 'true'
+                        and ./m:repeatableGroup[@name = 'MulApprovalGrp']/m:repeatableGroupItem[
+                            ./m:vocabularyReference[@name = 'TypeVoc']/m:vocabularyReferenceItem[@name = 'SMB-digital']
+                            and ./m:vocabularyReference[@name = 'ApprovalVoc']/m:vocabularyReferenceItem[@name = 'Ja']
+                        ]
+                        and ./m:systemField[
+                            @name = '__lastModified'
+                            and translate(m:value,'-:T. ','') > translate('{since}','-:T. ','')
+                        ]
                     ]
+                """,
+                namespaces=NSMAP,
+            )
 
-                ]            
-            """,
-            namespaces=NSMAP,
-        )
         print(
             f" xml has {len(itemsL)} records with attachment=True and Freigabe[@typ='SMB-Digital'] = Ja"
         )
