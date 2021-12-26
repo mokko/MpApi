@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://www.zetcom.com/ria/ws/session"
+           xmlns="http://www.zetcom.com/ria/ws/session"
+           elementFormDefault="qualified"
+           version="1.0">
+
+    <xs:element name="application" type="Application" />
+
+    <xs:complexType name="Application">
+        <xs:sequence>
+            <xs:element name="session" type="Session" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="Session">
+        <xs:all>
+            <xs:element name="key" type="xs:string" />
+        </xs:all>
+        <xs:attribute name="pending" type="xs:boolean" default="false" />
+    </xs:complexType>
+
+</xs:schema>

@@ -36,9 +36,9 @@ class Helper:
         """
 
         if mode == "module":
-            xsdLoc = Path(__file__).joinpath("../../../sdata/module_1_6.xsd").resolve()
+            xsdLoc = Path(__file__).joinpath("../../../xsd/module_1_6.xsd").resolve()
         elif mode == "search":
-            xsdLoc = Path(__file__).joinpath("../../../sdata/search_1_6.xsd").resolve()
+            xsdLoc = Path(__file__).joinpath("../../../xsd/search_1_6.xsd").resolve()
         else:
             raise TypeError("Unknown validation mode")
         # more options for http access?

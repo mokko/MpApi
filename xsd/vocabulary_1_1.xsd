@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.zetcom.com/ria/ws/vocabulary" xmlns="http://www.zetcom.com/ria/ws/vocabulary" elementFormDefault="qualified" version="1.1">
+
+    <xs:element name="collection" type="Collection"/>
+
+    <xs:element name="node" type="Node"/>
+
+    <xs:element name="instance" type="Instance"/>
+
+    <xs:element name="term" type="Term"/>
+
+    <xs:element name="relation" type="NodeRelation"/>
+
+    <xs:element name="relations" type="NodeRelations"/>
+
+    <xs:element name="parents" type="ParentNodeReference"/>
+
+    <xs:element name="parent" type="ParentNodeReferenceItem"/>
+
+    <xs:element name="nodeClasses" type="NodeClasses"/>
+
+    <xs:element name="nodeClass" type="NodeClass"/>
+
+    <xs:element name="termClasses" type="TermClasses"/>
+
+    <xs:element name="termClass" type="TermClass"/>
+
+    <xs:element name="labels" type="Labels"/>
+
+    <xs:element name="label" type="Label"/>
+
+    <xs:complexType name="Collection">
+        <xs:choice>
+            <xs:element ref="instance" maxOccurs="unbounded"/>
+            <xs:element ref="node" maxOccurs="unbounded"/>
+        </xs:choice>
+        <xs:attribute name="size" type="xs:long"/>
+    </xs:complexType>
+
+    <xs:complexType name="VocabularyBaseType">
+        <xs:sequence>
+            <xs:element name="uuid" type="xs:string" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="version" type="xs:dateTime" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="lastModified" type="xs:dateTime" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="lastModifiedUser" type="xs:string" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>
+        <xs:attribute name="id" type="xs:long" use="optional"/>
+    </xs:complexType>
+
+    <xs:complexType name="Instance">
+        <xs:complexContent>
+            <xs:extension base="VocabularyBaseType">
+                <xs:sequence>
+                    <xs:element name="orgUnit" type="OrgUnit" minOccurs="0" maxOccurs="1"/>
+                    <xs:element name="type" type="InstanceType" minOccurs="0" maxOccurs="1"/>
+                    <xs:element name="versionInfo" type="xs:string" minOccurs="0" maxOccurs="1"/>
+                    <xs:element name="comment" type="xs:string" minOccurs="0" maxOccurs="1"/>
+                    <xs:element name="instanceSource" type="InstanceSource" minOccurs="0" maxOccurs="1"/>
+                    <xs:element name="nodeClasses" type="NodeClasses" minOccurs="0" maxOccurs="1"/>
+                    <xs:element name="termClasses" type="TermClasses" minOccurs="0" maxOccurs="1"/>
+                    <xs:element name="labels" type="Labels" minOccurs="0" maxOccurs="1"/>
+                </xs:sequence>
+                <xs:attribute name="logicalName" type="xs:string" use="optional"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="NodeClasses">
+        <xs:sequence>
+            <xs:element name="nodeClass" type="NodeClass" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="NodeClass">
+        <xs:sequence>
+            <xs:element name="label" type="Label" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="logicalName" type="xs:string" use="required"/>
+    </xs:complexType>
+
+    <xs:complexType name="TermClasses">
+        <xs:sequence>
+            <xs:element name="termClass" type="TermClass" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="TermClass">
+        <xs:sequence>
+            <xs:element name="label" type="Label" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="logicalName" type="xs:string" use="required"/>
+    </xs:complexType>
+
+    <xs:complexType name="Labels">
+        <xs:sequence>
+            <xs:element name="label" type="Label" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="Label">
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute name="language" type="Language"/>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+
+    <xs:simpleType name="Language">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="[a-zA-Z]{2}"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:complexType name="Node">
+        <xs:complexContent>
+            <xs:extension base="VocabularyBaseType">
+                <xs:sequence>
+                    <!-- JH, 2018-11-27: not used anymore, left for backwards compatibility -->
+                    <xs:element name="lastHierarchyChange" type="xs:dateTime" minOccurs="0" maxOccurs="1"/>
+                    <xs:element name="sortCriteria" type="xs:string" minOccurs="0" maxOccurs="1"/>
+                    <xs:element name="orgUnit" type="OrgUnit" minOccurs="0" maxOccurs="1"/>
+                    <xs:element name="status" type="Status" minOccurs="0" maxOccurs="1"/>
+                    <xs:element name="type" type="NodeType" minOccurs="0" maxOccurs="1"/>
+                    <xs:element name="parents" type="ParentNodeReference" minOccurs="0" maxOccurs="1"/>
+                    <xs:element ref="instance" minOccurs="0" maxOccurs="1"/>
+                    <xs:element name="terms" type="Terms" minOccurs="0" maxOccurs="1"/>
+                    <xs:element name="comment" type="xs:string" minOccurs="0" maxOccurs="1"/>
+                    <xs:element name="relations" type="NodeRelations" minOccurs="0" maxOccurs="1"/>
+                    <xs:element name="nodeClass" type="NodeClass" minOccurs="0" maxOccurs="1"/>
+                </xs:sequence>
+                <xs:attribute name="logicalName" type="xs:string" use="optional"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="Terms">
+        <xs:sequence>
+            <xs:element name="term" type="Term" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="Term">
+        <xs:complexContent>
+            <xs:extension base="VocabularyBaseType">
+                <xs:sequence>
+                    <xs:element name="isoLanguageCode" type="xs:string" minOccurs="0" maxOccurs="1"/>
+                    <xs:element name="content" type="xs:string" minOccurs="0" maxOccurs="1"/>
+                    <xs:element name="order" type="xs:long" minOccurs="0" maxOccurs="1"/>
+                    <xs:element name="note" type="xs:string" minOccurs="0" maxOccurs="1"/>
+                    <xs:element name="status" type="Status" minOccurs="0" maxOccurs="1"/>
+                    <xs:element name="category" type="TermCategory" minOccurs="0" maxOccurs="1"/>
+                    <xs:element name="termClass" type="TermClass" minOccurs="0" maxOccurs="1"/>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="OrgUnit">
+        <xs:attribute name="logicalName" type="xs:string" use="optional"/>
+    </xs:complexType>
+
+    <xs:complexType name="Status">
+        <xs:attribute name="logicalName" type="xs:string" use="optional"/>
+    </xs:complexType>
+
+    <xs:complexType name="NodeType">
+        <xs:attribute name="logicalName" type="xs:string" use="optional"/>
+    </xs:complexType>
+
+    <xs:complexType name="InstanceType">
+        <xs:attribute name="logicalName" type="xs:string" use="optional"/>
+    </xs:complexType>
+
+    <xs:complexType name="InstanceSource">
+        <xs:complexContent>
+            <xs:extension base="VocabularyBaseType">
+                <xs:sequence>
+                    <xs:element name="sourceReference" type="xs:string" minOccurs="0" maxOccurs="1"/>
+                    <xs:element name="imported" type="xs:boolean" minOccurs="0" maxOccurs="1"/>
+                    <xs:element name="sourceId" type="xs:string" minOccurs="0" maxOccurs="1"/>
+                    <xs:element name="sourceUrl" type="xs:string" minOccurs="0" maxOccurs="1"/>
+                    <xs:element name="sourceLastUpdate" type="xs:dateTime" minOccurs="0" maxOccurs="1"/>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="TermCategory">
+        <xs:complexContent>
+            <xs:extension base="VocabularyBaseType">
+                <xs:attribute name="logicalName" type="xs:string" use="optional"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="ParentNodeReference">
+        <xs:sequence>
+            <xs:element name="parent" type="ParentNodeReferenceItem" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="ParentNodeReferenceItem">
+        <xs:attribute name="nodeId" type="xs:long"/>
+    </xs:complexType>
+
+    <xs:complexType name="NodeRelations">
+        <xs:sequence>
+            <xs:element name="relation" type="NodeRelation" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="NodeRelation">
+        <xs:complexContent>
+            <xs:extension base="VocabularyBaseType">
+                <xs:sequence>
+                    <xs:element name="type" type="xs:string" minOccurs="1" maxOccurs="1"/>
+                    <xs:element name="direction" type="xs:string" minOccurs="1" maxOccurs="1"/>
+                </xs:sequence>
+                <xs:attribute name="nodeId" type="xs:long" use="required"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+</xs:schema>

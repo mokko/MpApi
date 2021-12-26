@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+        targetNamespace="http://www.zetcom.com/ria/ws/module"
+        xmlns="http://www.zetcom.com/ria/ws/module"
+        elementFormDefault="qualified"
+        version="1.6">
+
+    <xs:element name="application" type="Application" />
+
+    <xs:complexType name="Application">
+        <xs:sequence>
+            <xs:element name="modules" type="Modules" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="Modules">
+        <xs:sequence>
+            <xs:element name="module" type="Module" minOccurs="0" maxOccurs="unbounded" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="Module">
+        <xs:sequence>
+            <xs:element name="select" type="Select" minOccurs="0" />
+            <xs:element name="moduleItem" type="ModuleItem" minOccurs="0" maxOccurs="unbounded" />
+        </xs:sequence>
+        <xs:attribute name="name" type="Name" use="required" />
+        <xs:attribute name="totalSize" type="xs:long" use="optional" />
+    </xs:complexType>
+
+    <xs:simpleType name="Language">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="[a-zA-Z]{2}" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:complexType name="ModuleItem">
+        <xs:sequence>
+            <xs:element name="validationResult" type="ValidationResult" minOccurs="0" />
+            <xs:element name="formattedValue" type="FormattedValue" minOccurs="0" maxOccurs="1" />
+            <xs:element name="systemField" type="SystemField" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="dataField" type="DataField" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="vocabularyReference" type="VocabularyReference" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="virtualField" type="VirtualField" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="repeatableGroup" type="RepeatableGroup" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="repeatableGroupReference" type="RepeatableGroupReference" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="moduleReference" type="ModuleReference" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="composite" type="Composite" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="attachment" type="Attachment" minOccurs="0" maxOccurs="1" />
+            <xs:element name="thumbnails" type="Thumbnails" minOccurs="0" maxOccurs="1" />
+        </xs:sequence>
+        <xs:attribute name="id" type="xs:long" use="optional" />
+        <xs:attribute name="uuid" type="Uuid" use="optional" />
+        <xs:attribute name="hasAttachments" type="xs:boolean" default="false" />
+    </xs:complexType>
+
+    <xs:complexType name="Field" abstract="true">
+        <xs:sequence>
+            <xs:element name="value" type="xs:string" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>
+        <xs:attribute name="name" type="Name" use="required" />
+    </xs:complexType>
+
+    <xs:complexType name="DataField">
+        <xs:complexContent>
+            <xs:extension base="Field">
+                <xs:sequence>
+                    <xs:element name="formattedValue" type="FormattedValue" minOccurs="0" maxOccurs="1"/>
+                </xs:sequence>
+                <xs:attribute name="dataType" type="DataType" use="optional" />
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="SystemField">
+        <xs:complexContent>
+            <xs:extension base="DataField"/>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="VocabularyReference">
+        <xs:sequence>
+            <xs:element name="vocabularyReferenceItem" type="VocabularyReferenceItem" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="name" type="Name" use="required" />
+        <xs:attribute name="id" type="xs:long" use="optional" />
+        <xs:attribute name="instanceName" type="xs:string" use="optional" />
+    </xs:complexType>
+
+    <xs:complexType name="VocabularyReferenceItem">
+        <xs:sequence>
+            <xs:element name="formattedValue" type="FormattedValue" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>
+        <!-- oldTODO change type to long -->
+        <xs:attribute name="id" type="xs:string" />
+        <xs:attribute name="name" type="xs:string" use="optional" />
+    </xs:complexType>
+
+    <xs:complexType name="VirtualField">
+        <xs:complexContent>
+            <xs:extension base="Field" />
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="ModuleReference">
+        <xs:sequence>
+            <xs:element name="moduleReferenceItem" type="ModuleReferenceItem" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="name" type="Name" use="required" />
+        <xs:attribute name="targetModule" type="Name" use="optional" />
+        <xs:attribute name="multiplicity" type="ReferenceMultiplicity" use="optional" />
+        <xs:attribute name="size" type="xs:long" use="optional" />
+    </xs:complexType>
+
+    <xs:complexType name="ModuleReferenceItem">
+        <xs:sequence>
+            <xs:element name="formattedValue" type="FormattedValue" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="dataField" type="DataField" minOccurs="0" maxOccurs="unbounded" />
+            <!-- oldTODO remove virtual field. virtual fields are not available in module reference items -->
+            <xs:element name="virtualField" type="VirtualField" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="vocabularyReference" type="VocabularyReference" minOccurs="0" maxOccurs="unbounded" />
+        </xs:sequence>
+        <xs:attribute name="moduleItemId" type="xs:long" use="optional" />
+        <xs:attribute name="uuid" type="Uuid" use="optional" />
+        <xs:attribute name="seqNo" type="xs:long" use="optional" />
+    </xs:complexType>
+
+    <xs:complexType name="RepeatableGroupReference">
+        <xs:sequence>
+            <xs:element name="referenceItem" type="RepeatableGroupReferenceItem" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="name" type="Name" use="required" />
+        <xs:attribute name="targetModule" type="Name" use="optional" />
+        <xs:attribute name="targetGroup" type="Name" use="optional" />
+        <xs:attribute name="size" type="xs:long" use="optional" />
+    </xs:complexType>
+
+    <xs:complexType name="RepeatableGroupReferenceItem">
+        <xs:sequence>
+            <xs:element name="formattedValue" type="FormattedValue" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="dataField" type="DataField" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="virtualField" type="VirtualField" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="vocabularyReference" type="VocabularyReference" minOccurs="0" maxOccurs="unbounded" />
+        </xs:sequence>
+        <xs:attribute name="moduleItemId" type="xs:long" use="optional" />
+        <xs:attribute name="repeatableGroupItemId" type="xs:long" use="optional" />
+        <xs:attribute name="uuid" type="Uuid" use="optional" />
+        <xs:attribute name="seqNo" type="xs:long" use="optional" />
+    </xs:complexType>
+
+    <xs:complexType name="Composite">
+        <xs:sequence>
+            <xs:element name="compositeItem" type="CompositeItem" minOccurs="0" maxOccurs="unbounded" />
+        </xs:sequence>
+        <xs:attribute name="name" type="Name" use="required" />
+    </xs:complexType>
+
+    <xs:complexType name="CompositeItem">
+        <xs:choice>
+            <xs:element name="repeatableGroup" type="RepeatableGroup" />
+            <!-- oldTODO remove repeatable group reference. not available in composite item -->
+            <xs:element name="repeatableGroupReference" type="RepeatableGroupReference" />
+            <xs:element name="moduleReference" type="ModuleReference" />
+        </xs:choice>
+        <xs:attribute name="seqNo" type="xs:long" use="optional" />
+    </xs:complexType>
+
+    <xs:complexType name="RepeatableGroup">
+        <xs:sequence>
+            <xs:element name="repeatableGroupItem" type="RepeatableGroupItem" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="name" type="Name" use="required" />
+        <xs:attribute name="size" type="xs:long" use="optional" />
+    </xs:complexType>
+
+    <xs:complexType name="RepeatableGroupItem">
+        <xs:sequence>
+            <xs:element name="formattedValue" type="FormattedValue" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="dataField" type="DataField" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="virtualField" type="VirtualField" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="vocabularyReference" type="VocabularyReference" minOccurs="0" maxOccurs="unbounded" />
+            <!-- oldTODO remove repeatable group reference. not available in repeatable group -->
+            <xs:element name="repeatableGroupReference" type="RepeatableGroupReference" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="moduleReference" type="ModuleReference" minOccurs="0" maxOccurs="unbounded" />
+        </xs:sequence>
+        <xs:attribute name="id" type="xs:long" use="optional" />
+        <xs:attribute name="uuid" type="Uuid" use="optional" />
+        <xs:attribute name="seqNo" type="xs:long" use="optional" />
+    </xs:complexType>
+
+    <xs:complexType name="Thumbnails">
+        <xs:sequence>
+            <xs:element name="thumbnail" type="Thumbnail" minOccurs="1" maxOccurs="unbounded" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="Thumbnail">
+        <xs:complexContent>
+            <xs:extension base="Attachment">
+                <xs:attribute name="size" type="ThumbnailSize" />
+            </xs:extension>
+        </xs:complexContent>
+
+    </xs:complexType>
+
+    <xs:simpleType name="ThumbnailSize">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="extraSmall" />
+            <xs:enumeration value="small" />
+            <xs:enumeration value="medium" />
+            <xs:enumeration value="large" />
+            <xs:enumeration value="extraLarge" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:complexType name="Attachment">
+        <xs:all>
+            <xs:element name="value" type="xs:base64Binary" />
+        </xs:all>
+        <xs:attribute name="name" type="xs:string" />
+    </xs:complexType>
+
+    <xs:complexType name="FormattedValue">
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute name="language" type="Language" />
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+
+    <!--
+        All introduced data types map to an xml data type.
+        See comments below for actual mapping.
+    -->
+    <xs:simpleType name="DataType">
+        <xs:restriction base="xs:string">
+            <!-- Varchar = xs:string -->
+            <xs:enumeration value="Varchar" />
+            <!-- Clob = xs:string -->
+            <xs:enumeration value="Clob" />
+            <!-- Date = xs:date -->
+            <xs:enumeration value="Date" />
+            <!-- Time = xs:time -->
+            <xs:enumeration value="Time" />
+            <!-- Timestamp = xs:dateTime -->
+            <xs:enumeration value="Timestamp" />
+            <!-- Long = xs:long -->
+            <xs:enumeration value="Long" />
+            <!-- Numeric = xs:decimal -->
+            <xs:enumeration value="Numeric" />
+            <!-- Boolean = xs:boolean -->
+            <xs:enumeration value="Boolean" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="Name">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="[a-zA-Z_][a-zA-Z0-9_$]*" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="Uuid">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="[a-zA-Z0-9]{8}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{12}" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="ReferenceMultiplicity">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="1:1" />
+            <xs:enumeration value="1:N" />
+            <xs:enumeration value="N:1" />
+            <xs:enumeration value="M:N" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:complexType name="ValidationResult">
+        <xs:sequence>
+            <xs:element name="message" type="ValidationMessage" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="ValidationMessage">
+        <xs:all>
+            <xs:element name="value" type="xs:string"/>
+        </xs:all>
+        <xs:attribute name="fieldPath" type="xs:string" />
+        <xs:attribute name="key" type="xs:string" />
+        <xs:attribute name="moduleItemId" type="xs:long" />
+        <xs:attribute name="repeatableGroupItemId" type="xs:long" />
+        <xs:attribute name="moduleReferenceItemId" type="xs:long" />
+        <xs:attribute name="vocabularyReferenceItemId" type="xs:long" />
+    </xs:complexType>
+
+    <xs:complexType name="Select">
+        <xs:sequence>
+            <xs:element name="field" type="SelectField" minOccurs="1" maxOccurs="unbounded" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="SelectField">
+        <xs:attribute name="fieldPath" type="Path" />
+    </xs:complexType>
+
+    <!--
+        A path is a dot separated list of segments. A segment represent
+        a field, a repeatable group, a reference and so on. A path
+        starts at module level. The path makes it easier do identifiy
+        a field in the whole module structure. Lets assume we have a module
+        'Artist' with a repeatable group 'Education' that has to fields
+        'Organisation' and 'Years'. And the 'Artist' has a field 'Surname'.
+
+        If you are looking for artists without a special 'Education' 'Organisation'
+        you would use the NotEqualsField element with the
+        fieldPath: "Education.Organisation".
+
+        If you are looking for artists with a special 'Surname' you would use
+        the EqualsField element with fieldPath: "Surname".
+    -->
+    <xs:simpleType name="Path">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="__id|__lastModified|__lastModifiedUser|__created|__createdUser|[a-zA-Z][a-zA-Z0-9_$]*(\.[a-zA-Z][a-zA-Z0-9_$]*)*(\[[a-zA-Z][a-zA-Z0-9_$]*\]|\.(__attributes\.[a-zA-Z][a-zA-Z0-9_$]*|__id|__lastModified|__lastModifiedUser|__created|__createdUser|__parent(((\.[a-zA-Z][a-zA-Z0-9_$]*)+((\[[a-zA-Z][a-zA-Z0-9_$]*\]|(\.__attributes\.[a-zA-Z][a-zA-Z0-9_$]*))|\.__id|\.__lastModified|\.__lastModifiedUser|\.__created|\.__createdUser)?)|(\.(__id|__lastModified|__lastModifiedUser|__created|__createdUser)))?))?" />
+        </xs:restriction>
+    </xs:simpleType>
+
+</xs:schema>

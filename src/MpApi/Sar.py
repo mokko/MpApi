@@ -17,14 +17,13 @@ A set is an xml containing a set of items, typically moduleItems.
 USAGE:
     import Sar from Sar
     import Search from Search
-    #import Module from Module
     sr = Sar(baseURL=baseURL, user=user, pw=pw)
 
     #get stuff from single ids; returns request object
-    #NEW INTERFACE
     r = sr.getByGroup(module=module, id=groupId)
     r = sr.getByExhibit(module=module, id=exhibitId)
     r = sr.getByLocation(module=module, id=locId)
+
     #search
     s = Search()
     r = sr.search (xml=s.toString())
