@@ -441,8 +441,8 @@ class Sar:  # methods (mosly) in alphabetical order
                     ]
                 ]
             """
-        itemsL = E.xpath( xpath, namespaces=NSMAP)
-        print (xpath)
+        itemsL = E.xpath(xpath, namespaces=NSMAP)
+        print(xpath)
 
         print(
             f" xml has {len(itemsL)} records with attachment=True and Freigabe[@typ='SMB-Digital'] = Ja"
@@ -472,7 +472,7 @@ class Sar:  # methods (mosly) in alphabetical order
 
     def search(self, *, xml):
         """
-        Send a request to the api and return the response. Expects an search as xml 
+        Send a request to the api and return the response. Expects an search as xml
         string in xml. (Same as in MpApi).
         """
         return self.api.search(xml=xml)
