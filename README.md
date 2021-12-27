@@ -1,4 +1,4 @@
-# MpApi - API client for Zetcom's MuseumPlus
+# MpApi - Unofficial API client for Zetcom's MuseumPlus
 
 API Specification: http://docs.zetcom.com/ws
 
