@@ -9,9 +9,6 @@ Python object representing moduleItems
 
 module is really a set of moduleItems.
 
-I guess there could be multiple moduleLists for different kinds of modules
-(object, person etc.). At the moment, I assume there is only one.
-
 What Zetcom calls item I also call a record or Datensatz.
 
 USAGE:
@@ -101,12 +98,14 @@ class Module(Helper):
 
     def dataField(self, *, parent, name, dataType=None, value=None):
         """
+        Create a dataField with name, dataType and value.
+        
+        If no dataType is given, dataType will be determined based on last
+        three characters of name.
+
         <dataField dataType="Clob" name="ObjTechnicalTermClb">
             <value>Zupftrommel</value>
         </dataField>
-
-        If no dataType is given, dataType will be determined based on last
-        three characters of name.
         """
         if dataType is None:
             typeHint = name[-3:]
@@ -179,6 +178,16 @@ class Module(Helper):
 
     def repeatableGroup(self, *, parent, name, size):
         """
+        Creates a new rGrp and returns it.
+        
+        Expects
+        * parent: lxml node
+        * name
+        * size
+
+        Returns
+        * lxml node
+
         <repeatableGroup name="ObjObjectNumberGrp" size="1">
           <repeatableGroupItem id="20414895">
             <dataField dataType="Varchar" name="InventarNrSTxt">
@@ -192,19 +201,52 @@ class Module(Helper):
         )
 
     def repeatableGroupItem(self, *, parent, id):
+        """
+        Creates a new rGrpItem and returns it.
+        
+        Expects
+        * parent: lxml node
+        * id
+        
+        Do we really want tocreate an element with an id? Seems like MuseumPlus should
+        create that id.
+        
+        Returns
+        * lxml node
+        <repeatableGroup name="ObjObjectNumberGrp" size="1">
+          <repeatableGroupItem id="20414895">
+            <dataField dataType="Varchar" name="InventarNrSTxt">
+              <value>I C 7723</value>
+        """
+
         return etree.SubElement(
             parent, "{http://www.zetcom.com/ria/ws/module}repeatableGroupItem", id=id
         )
 
     def systemField(self, *, parent, dataType, name, value=None):
         """
-        setter if value is not None; else getter.
+        Gets a systemField[@name = {name}] if value is None; else sets it with value.
 
-        In most cases you will want to let MuseumPlus create the systemFields."""
+        Expects
+        * parent: lxml node
+        * dataType: attribute value
+        * name: attribute value
+
+        Returns
+        * nothing (but changes parent as per side effect)
+
+        New: 
+        * Deprecated, should probably go
+        * In most cases you will want to let MuseumPlus create the systemFields.
+
+        <systemField dataType="Timestamp" name="__lastModified">
+          <value>2021-02-10 11:54:09.993</value>
+          <formattedValue language="en">10/02/2021 11:54</formattedValue>
+        </systemField>
+        """
 
         if value is None:
-            pass
-        # this is a getter, not sure atm how to do tis
+            return parent.xpath(f"{http://www.zetcom.com/ria/ws/module}systemField[@name = {name}]")
         else:  # this is a setter
             systemFieldN = etree.SubElement(
                 parent,
@@ -219,22 +261,39 @@ class Module(Helper):
 
     def totalSize(self, *, module):
         """
-        Report the size; only getter
+        Report the size; only getter. If requested module doesn't exist, return None
+        
+        Expects
+        * module: type, e.g. Object
+
+        Returns
+        * integer or None
 
         EXAMPLE
         <application xmlns="http://www.zetcom.com/ria/ws/module">
            <modules>
               <module name="Object" totalSize="173">
-
         """
-        totalSize = self.etree.xpath(
-            f"/m:application/m:modules/m:module[@name ='{module}']/@totalSize",
-            namespaces=NSMAP,
-        )[0]
-        return int(totalSize)
+        try:
+            return int(self.etree.xpath(
+                f"/m:application/m:modules/m:module[@name ='{module}']/@totalSize",
+                namespaces=NSMAP,
+            )[0])
+        except:
+            return None # I like eplicit returns
 
     def vocabularyReference(self, *, parent, name, id, instanceName):
         """
+        Makes a new vocabularyReference with name and id and adds it to parent.
+        
+        Expects:
+        * parent: ltree node
+        * name: str
+        * id: int
+
+        Do we really want to create nodes with ids? Seems that is not what the API wants
+        from us.
+
         EXAMPLE
         <vocabularyReference name="GeopolVoc" id="61663" instanceName="ObjGeopolVgr">
             <vocabularyReferenceItem id="4399117" name="Land">
@@ -252,6 +311,16 @@ class Module(Helper):
 
     def vocabularyReferenceItem(self, *, parent, name, id):
         """
+        Makes a new vocabularyReferenceItem with name and id and adds it to parent.
+
+        Expects:
+        * parent: ltree node
+        * name: str
+        * id: int
+
+        Do we really want to create nodes with ids? Seems that is not what the API wants
+        from us.
+
         EXAMPLE
         <vocabularyReferenceItem id="4399117" name="Land">
             <formattedValue language="en">Land</formattedValue>
@@ -271,7 +340,9 @@ class Module(Helper):
     def describe(self):
         """
         Reports module types and number of moduleItems per type. Works on self.etree.
-        Returns a dictionary like this: {'Object': 173, 'Person': 58, 'Multimedia': 608}
+        
+        Returns 
+        * a dictionary like this: {'Object': 173, 'Person': 58, 'Multimedia': 608}
         """
         # report[type] = number_of_items
         known_types = set()

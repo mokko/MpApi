@@ -67,7 +67,7 @@ def test_two():
 
 
 def test_three():
-    s = Search()
+    s = Search(module="Object")
     s.addCriterion(
         operator="equalsField",
         field="ObjCurrentLocationVoc",
@@ -77,7 +77,7 @@ def test_three():
 
 
 def test_four():
-    s = Search()
+    s = Search(module="Object")
     s.AND()
     s.addCriterion(
         operator="equalsField",
@@ -99,7 +99,7 @@ def test_four():
 
 
 def test_five():
-    s = Search()
+    s = Search(module="Object")
     s.addCriterion(
         operator="equalsField",
         field="ObjCurrentLocationVoc",
@@ -122,7 +122,7 @@ def test_five():
 
 
 def test_six():
-    s = Search()
+    s = Search(module="Object")
     s.AND()
     s.addCriterion(
         operator="equalsField",
@@ -151,7 +151,7 @@ def test_six():
 
 
 def test_seven():  # addField
-    s = Search()
+    s = Search(module="Object")
     s.AND()
     s.addCriterion(
         operator="equalsField",
@@ -181,7 +181,7 @@ def test_seven():  # addField
 
 
 def test_setParam():
-    q = Search()
+    q = Search(module="Object")
     q.AND()
     q.addCriterion(
         operator="equalsField",

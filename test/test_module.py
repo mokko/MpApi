@@ -1,28 +1,19 @@
-# -*- coding: UTF-8
-import sys
-import os
-
-if "PYTHONPATH" in os.environ:
-    sys.path.append(os.environ["PYTHONPATH"])
 from MpApi.Search import Search
 from MpApi.Module import Module
-
-# with open("../sdata/credentials.py") as f:
-#    exec(f.read())
 
 
 def test_load_file():
     m = Module(file="sdata/exhibit20222.xml")
-    # totalSize = m.attribute(name="totalSize")
-    # print(totalSize)  # if no parent, assume self.etree
-    # assert totalSize is not None
+    totalSize = m.totalSize(module="Multimedia")
+    #print(totalSize)  
+    assert totalSize is not None
     for mi in m.iter():
         m.attribute(parent=mi, name="uuid", action="remove")
         m._dropUUID()
-        m._dropFields(parent=mi, type="virtualField")  # if no parent, assume self.etree
-        m._dropFields(parent=mi, type="systemField")  # if no parent, assume self.etree
+        #m._dropFields(parent=mi, type="virtualField")  # if no parent, assume self.etree
+        #m._dropFields(parent=mi, type="systemField")  # if no parent, assume self.etree
     m.toFile(path="sdata/response-simplified.xml")
-    m.validate()
+    assert m.validate() is True
 
 
 def test_from_scratch():
@@ -39,11 +30,13 @@ def test_from_scratch():
 
     for miN in m.iter():
         m.print(miN)
-    m.print()
-    m.validate()
+    #m.print()
+    assert m.validate() is True
     m.toFile(path="sdata/fromScratch.xml")
 
 
 def test_totalSize():
+    
     m = Module(file="sdata/exhibit20222.xml")
+    assert m.totalSize(module="Object") is None
     assert m.totalSize(module="Multimedia") == 619

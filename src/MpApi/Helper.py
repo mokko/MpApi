@@ -1,5 +1,6 @@
 from lxml import etree
 from pathlib import Path
+import pkgutil
 
 
 class Helper:
@@ -36,16 +37,16 @@ class Helper:
         """
 
         if mode == "module":
-            xsdLoc = Path(__file__).joinpath("../../../xsd/module_1_6.xsd").resolve()
+            xsd = pkgutil.get_data(__name__, "data/xsd/module_1_6.xsd")
         elif mode == "search":
-            xsdLoc = Path(__file__).joinpath("../../../xsd/search_1_6.xsd").resolve()
+            xsd = pkgutil.get_data(__name__, "data/xsd/search_1_6.xsd") 
         else:
             raise TypeError("Unknown validation mode")
         # more options for http access?
 
-        if not hasattr(self, "xsd"):
-            self.xsd = etree.parse(str(xsdLoc))
-        xmlschema = etree.XMLSchema(self.xsd)
+        if not hasattr(self, mode):
+            self.mode = etree.fromstring(xsd)
+        xmlschema = etree.XMLSchema(self.mode)
         xmlschema.assertValid(self.etree)  # dies if doesn't validate
         return True
 

@@ -31,7 +31,7 @@ def test_double_join():
     moduleItems.
     """
     sr = Sar(baseURL=baseURL, user=user, pw=pw)
-    path = "sdata/739673.xml"
+    path = "data/739673.xml" # use public folder now
     inL = list()
     xml = sr.xmlFromFile(path=path)
     inL.append(xml)
@@ -41,7 +41,7 @@ def test_double_join():
     xml_new = sr.join(inL=inL)
     m = Module(xml=xml_new)
     m._dropUUID()
-    m.toFile(path="sdata/debug.xml")
+    m.toFile(path="data/debug.xml")
     # print (xml_new)
     assert m.validate()
     assert m.totalSize(module="Object") == 1
