@@ -25,7 +25,6 @@ USAGE:
 
     miN = m.moduleItem(hasAttachments="false", id="254808")
     m.dataField(parent=miN, dataType="Clob", name="ObjTechnicalTermClb", value="Zupfinstrument")
-    m.systemField(parent=miN, dataType="Long", name="__id", value="254808")
 
     rgN = m.repeatableGroup(parent=miN, name=name, size=size)
     rgiN = m.repeatableGroupItem(parent=rgN, id=id)
@@ -223,42 +222,6 @@ class Module(Helper):
             parent, "{http://www.zetcom.com/ria/ws/module}repeatableGroupItem", id=id
         )
 
-    def systemField(self, *, parent, dataType, name, value=None):
-        """
-        Gets a systemField[@name = {name}] if value is None; else sets it with value.
-
-        Expects
-        * parent: lxml node
-        * dataType: attribute value
-        * name: attribute value
-
-        Returns
-        * nothing (but changes parent as per side effect)
-
-        New: 
-        * Deprecated, should probably go
-        * In most cases you will want to let MuseumPlus create the systemFields.
-
-        <systemField dataType="Timestamp" name="__lastModified">
-          <value>2021-02-10 11:54:09.993</value>
-          <formattedValue language="en">10/02/2021 11:54</formattedValue>
-        </systemField>
-        """
-
-        if value is None:
-            return parent.xpath(f"{http://www.zetcom.com/ria/ws/module}systemField[@name = {name}]")
-        else:  # this is a setter
-            systemFieldN = etree.SubElement(
-                parent,
-                "{http://www.zetcom.com/ria/ws/module}systemField",
-                dataType=dataType,
-                name=name,
-            )
-            valueN = etree.SubElement(
-                systemFieldN, "{http://www.zetcom.com/ria/ws/module}value"
-            )
-            valueN.text = value
-
     def totalSize(self, *, module):
         """
         Report the size; only getter. If requested module doesn't exist, return None
@@ -282,7 +245,7 @@ class Module(Helper):
         except:
             return None # I like eplicit returns
 
-    def vocabularyReference(self, *, parent, name, id, instanceName):
+    def vocabularyReference(self, *, parent, name, instanceName, id=None):
         """
         Makes a new vocabularyReference with name and id and adds it to parent.
         
@@ -301,22 +264,30 @@ class Module(Helper):
             </vocabularyReferenceItem>
         </vocabularyReference>
         """
-        return etree.SubElement(
-            parent,
-            "{http://www.zetcom.com/ria/ws/module}vocabularyReference",
-            id=id,
-            name=name,
-            instanceName=instanceName,
-        )
+        if id is None:
+            return etree.SubElement(
+                parent,
+                "{http://www.zetcom.com/ria/ws/module}vocabularyReference",
+                name=name,
+                instanceName=instanceName,
+            )
+        else:
+            return etree.SubElement(
+                parent,
+                "{http://www.zetcom.com/ria/ws/module}vocabularyReference",
+                id=id,
+                name=name,
+                instanceName=instanceName,
+            )
 
-    def vocabularyReferenceItem(self, *, parent, name, id):
+    def vocabularyReferenceItem(self, *, parent, name, id=None):
         """
-        Makes a new vocabularyReferenceItem with name and id and adds it to parent.
+        Makes a new vocabularyReferenceItem with name and id, adds it to parent and returns it.
 
         Expects:
         * parent: ltree node
         * name: str
-        * id: int
+        * id (optional): int
 
         Do we really want to create nodes with ids? Seems that is not what the API wants
         from us.
@@ -327,12 +298,19 @@ class Module(Helper):
         </vocabularyReferenceItem>
         Todo: getter for formattedValue
         """
-        return etree.SubElement(
-            parent,
-            "{http://www.zetcom.com/ria/ws/module}vocabularyReferenceItem",
-            id=id,
-            name=name,
-        )
+        if id is None:
+            return etree.SubElement(
+                parent,
+                "{http://www.zetcom.com/ria/ws/module}vocabularyReferenceItem",
+                name=name,
+            )
+        else:
+            return etree.SubElement(
+                parent,
+                "{http://www.zetcom.com/ria/ws/module}vocabularyReferenceItem",
+                id=id,
+                name=name,
+            )
 
     #
     # getter and setter
