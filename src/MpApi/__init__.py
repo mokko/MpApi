@@ -19,6 +19,8 @@ def mink():
 
 
 def replace():
+    credentials = "emem1.py"  # in pwd
+
     with open(credentials) as f:
         exec(f.read())
 

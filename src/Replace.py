@@ -12,17 +12,11 @@ from lxml import etree
 import sys
 import importlib
 
-if "PYTHONPATH" in os.environ:
-    sys.path.append(os.environ["PYTHONPATH"])
 
 from MpApi.Sar import Sar
 from MpApi.Client import MpApi
 from MpApi.Module import Module
 from MpApi.Search import Search
-
-credentials = "credentials.py"  # in pwd
-# credentials = "vierteInstanz.py"
-credentials = "emem1.py"  # in pwd
 
 NSMAP = {
     "s": "http://www.zetcom.com/ria/ws/module/search",
@@ -142,36 +136,3 @@ class Replace:
             print(f" writing response to temp file: {out_fn}")
             self.sar.toFile(xml=response.text, path=out_fn)  # replace with self.api?
             self.ET = etree.fromstring(bytes(response.text, "UTF-8"))
-
-
-if __name__ == "__main__":
-    import argparse
-
-    with open(credentials) as f:
-        exec(f.read())
-
-    parser = argparse.ArgumentParser(description="Command line frontend for Replace.py")
-    parser.add_argument(
-        "-l",
-        "--lazy",
-        help="lazy modes reads search results from a file cache, for debugging",
-        action="store_true",
-    )
-    parser.add_argument(
-        "-a",
-        "--act",
-        help="include action, without it only show what would be changed",
-        action="store_true",
-    )
-    parser.add_argument(
-        "-j", "--job", help="load a plugin and use that code", required=True
-    )
-    parser.add_argument(
-        "-L", "--Limit", help="set limit for initial search", default="-1"
-    )
-
-    args = parser.parse_args()
-
-    replacer = Replace(baseURL=baseURL, pw=pw, user=user, lazy=args.lazy, act=args.act)
-    plugin = replacer.job(plugin=args.job)
-    replacer.runPlugin(plugin=plugin, limit=args.Limit)  # set to -1 for production
