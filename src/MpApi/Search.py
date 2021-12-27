@@ -100,7 +100,7 @@ class Search(Helper):
         else:
             if module is None:
                 raise TypeError(
-                    "Module is not allowed to be none when making search from string"
+                    "Module is not allowed to be None when making search from string"
                 )
             xml = f"""<application 
             xmlns="http://www.zetcom.com/ria/ws/module/search" 
