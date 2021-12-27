@@ -9,3 +9,12 @@ readme = "README.md"
 license = {file = "LICENSE"}
 classifiers = ["License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)"]
 dynamic = ["version", "description"]
+keywords = ["museum", "museumPlus", "api client"]
+dependencies = [
+    "requests >=2.6",
+    "lxml",
+]
+[project.optional-dependencies]
+test = [
+    "pytest >=2.7.3",
+]

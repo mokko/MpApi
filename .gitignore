@@ -5,7 +5,6 @@ credentials.py
 .settings/*
 __pycache__
 bak/*
-dist/*
 build/*
 sdata/*
 sdata2/*

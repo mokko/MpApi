@@ -422,7 +422,7 @@ class Sar:  # methods (mosly) in alphabetical order
                 ]            
             """
         else:
-            print(f" filtering out multimedia records that have changed since {since}")
+            print(f" filtering multimedia records that have changed since {since}")
             # dateTime comparison might not work as expected if number of digits is not equal, e.g. when user
             # provides since with date format (2020-12-12). Perhaps I can check
             xpath = f"""
