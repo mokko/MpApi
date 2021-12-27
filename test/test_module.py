@@ -5,13 +5,13 @@ from MpApi.Module import Module
 def test_load_file():
     m = Module(file="sdata/exhibit20222.xml")
     totalSize = m.totalSize(module="Multimedia")
-    #print(totalSize)  
+    # print(totalSize)
     assert totalSize is not None
     for mi in m.iter():
         m.attribute(parent=mi, name="uuid", action="remove")
         m._dropUUID()
-        #m._dropFields(parent=mi, type="virtualField")  # if no parent, assume self.etree
-        #m._dropFields(parent=mi, type="systemField")  # if no parent, assume self.etree
+        # m._dropFields(parent=mi, type="virtualField")  # if no parent, assume self.etree
+        # m._dropFields(parent=mi, type="systemField")  # if no parent, assume self.etree
     m.toFile(path="sdata/response-simplified.xml")
     assert m.validate() is True
 
@@ -30,13 +30,13 @@ def test_from_scratch():
 
     for miN in m.iter():
         m.print(miN)
-    #m.print()
+    # m.print()
     assert m.validate() is True
     m.toFile(path="sdata/fromScratch.xml")
 
 
 def test_totalSize():
-    
+
     m = Module(file="sdata/exhibit20222.xml")
     assert m.totalSize(module="Object") is None
     assert m.totalSize(module="Multimedia") == 619

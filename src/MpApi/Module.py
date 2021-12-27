@@ -7,9 +7,23 @@ Python object representing moduleItems
       <moduleItem hasAttachments="false" id="254808" uuid="254808">
         ...
 
-module is really a set of moduleItems.
+Thesis: 
+* a module is really a set of moduleItems.
+* What Zetcom calls "item" I also call a "record" or a "Datensatz".
 
-What Zetcom calls item I also call a record or Datensatz.
+Definition:
+* zml: the xml language we are dealing with here
+* a multi-type document is one which has multiple moduleItem nodes in different modules 
+  (Object, Multimedia).
+
+Writing ZML from scratch
+This module is in quite a raw state. I wonder in which direction I should take it.
+I started to write xml with it, but I haven't used this feature much in the replacer, so
+perhaps I dont need it.
+
+* Writing more ZML?
+* should I use it to join modules items etc.?
+* the attribute method has to go
 
 USAGE:
     # CONSTRUCTION: 4 ways to make a moduleList
@@ -19,30 +33,31 @@ USAGE:
     m = Module(name="Object", totalSize=1) # new Object item from scratch
 
     # WRITING XML FROM SCRATCH
-    #m is a Module object; others are lxml.etree objects
+    # NEW: Let's write the kind of xml here that the API wants for put requests
+    # m is a Module object; others are lxml.etree objects
     # N is a node, L is a list, T is a etree, E is an element 
-    m = Module(name="Object", totalSize=1) # new Object item from scratch
-
+    m = Module(name="Object") # new Object item from scratch
     miN = m.moduleItem(hasAttachments="false", id="254808")
     m.dataField(parent=miN, dataType="Clob", name="ObjTechnicalTermClb", value="Zupfinstrument")
-
     rgN = m.repeatableGroup(parent=miN, name=name, size=size)
     rgiN = m.repeatableGroupItem(parent=rgN, id=id)
     m.dataField(parent=rgiN, dataType="Clob", name="ObjTechnicalTermClb", value="Zupfinstrument")
 
     for eachN in m.iter(parent=rg):
         m.print(eachN)
-    
+
+    #delete stuff
+    m._dropRG(parent=miN, name="ObjValuationGrp")
+    m._dropFields(parent=miN, type="systemField")
+    m._rmUuidsInReferenceItems(parent=miN)    
+
+    #statistics    
     m.describe()
        
     # HELPERS
     m.toFile()
     m.toString()
     m.validate()
-
-    m._dropRG(parent=miN, name="ObjValuationGrp")
-    m._dropFields(parent=miN, type="systemField")
-    m._rmUuidsInReferenceItems(parent=miN)    
 """
 # xpath 1.0 and lxml don't allow empty string or None for default ns
 NSMAP = {"m": "http://www.zetcom.com/ria/ws/module"}
@@ -82,7 +97,7 @@ class Module(Helper):
                 print("delete @uuid")
                 del a['uuid']
 
-        Todo: This method has to go. Currently, it doesn't work like a getter
+        Todo: This method has to go. Currently, it doesn't work as a getter
         """
         if parent is None:
             parent = self.etree
@@ -98,7 +113,7 @@ class Module(Helper):
     def dataField(self, *, parent, name, dataType=None, value=None):
         """
         Create a dataField with name, dataType and value.
-        
+
         If no dataType is given, dataType will be determined based on last
         three characters of name.
 
@@ -125,8 +140,62 @@ class Module(Helper):
             )
             valueN.text = value
 
+    def describe(self):
+        """
+        Reports module types and number of moduleItems per type. Works on self.etree.
+
+        Returns
+        * a dictionary like this: {'Object': 173, 'Person': 58, 'Multimedia': 608}
+        """
+        # report[type] = number_of_items
+        known_types = set()
+        report = dict()
+        moduleL = self.etree.xpath(
+            f"/m:application/m:modules/m:module",
+            namespaces=NSMAP,
+        )
+        for moduleN in moduleL:
+            moduleA = moduleN.attrib
+            known_types.add(moduleA["name"])
+
+        for type in known_types:
+            itemL = self.etree.xpath(
+                f"/m:application/m:modules/m:module[@name = '{type}']/m:moduleItem",
+                namespaces=NSMAP,
+            )
+            report[type] = len(itemL)
+        return report
+
+    def iter(self, *, parent=None):
+        """
+        Currently, iterates through moduleItems assuming that there is only one.
+
+        Expects
+        * parent (optional): lxml node
+
+        TODO: abstract so we can use it for multi-type documents
+
+        Do we really need to iterate through a document using this module or should we
+        simply use lxml for that?
+        """
+        if parent is None:
+            apath = "/m:application/m:modules/m:module/m:moduleItem"
+        else:
+            apath = tree.getpath(parent)
+            print(apath)
+        itemsN = self.etree.xpath(apath, namespaces=NSMAP)
+        for itemN in itemsN:
+            yield itemN
+
     def moduleItem(self, *, hasAttachments=None, id=None):
         """
+        Creates a new moduleItem at the end of the document.
+
+        TODO:
+        This works for now. But this is not what we want in the long term. We
+        want to decide transparently what kind(=type) of module we want to add
+        a moduleItem for (e.g. Object, Multimedia).
+
         <moduleItem hasAttachments="false" id="254808">
             <systemField dataType="Long" name="__id">
                 <value>254808</value>
@@ -147,18 +216,6 @@ class Module(Helper):
         moduleItemN.append(mi)
         return mi
 
-    def iter(self, *, parent=None):
-        # we could extract the xpath from parent and feed in the next step
-        # that would be an consistent interface
-        if parent is None:
-            axpath = "/m:application/m:modules/m:module/m:moduleItem"
-        else:
-            axpath = tree.getpath(parent)
-            print(axpath)
-        itemsN = self.etree.xpath(axpath, namespaces=NSMAP)
-        for itemN in itemsN:
-            yield itemN
-
     def moduleReference(self, *, parent, name, targetModule, multiplicity, size):
         """
         <moduleReference name="InvNumberSchemeRef" targetModule="InventoryNumber" multiplicity="N:1" size="1">
@@ -178,7 +235,7 @@ class Module(Helper):
     def repeatableGroup(self, *, parent, name, size):
         """
         Creates a new rGrp and returns it.
-        
+
         Expects
         * parent: lxml node
         * name
@@ -202,14 +259,14 @@ class Module(Helper):
     def repeatableGroupItem(self, *, parent, id):
         """
         Creates a new rGrpItem and returns it.
-        
+
         Expects
         * parent: lxml node
         * id
-        
+
         Do we really want tocreate an element with an id? Seems like MuseumPlus should
         create that id.
-        
+
         Returns
         * lxml node
         <repeatableGroup name="ObjObjectNumberGrp" size="1">
@@ -225,7 +282,7 @@ class Module(Helper):
     def totalSize(self, *, module):
         """
         Report the size; only getter. If requested module doesn't exist, return None
-        
+
         Expects
         * module: type, e.g. Object
 
@@ -238,17 +295,19 @@ class Module(Helper):
               <module name="Object" totalSize="173">
         """
         try:
-            return int(self.etree.xpath(
-                f"/m:application/m:modules/m:module[@name ='{module}']/@totalSize",
-                namespaces=NSMAP,
-            )[0])
+            return int(
+                self.etree.xpath(
+                    f"/m:application/m:modules/m:module[@name ='{module}']/@totalSize",
+                    namespaces=NSMAP,
+                )[0]
+            )
         except:
-            return None # I like eplicit returns
+            return None  # I like eplicit returns
 
     def vocabularyReference(self, *, parent, name, instanceName, id=None):
         """
         Makes a new vocabularyReference with name and id and adds it to parent.
-        
+
         Expects:
         * parent: ltree node
         * name: str
@@ -311,35 +370,6 @@ class Module(Helper):
                 id=id,
                 name=name,
             )
-
-    #
-    # getter and setter
-    #
-    def describe(self):
-        """
-        Reports module types and number of moduleItems per type. Works on self.etree.
-        
-        Returns 
-        * a dictionary like this: {'Object': 173, 'Person': 58, 'Multimedia': 608}
-        """
-        # report[type] = number_of_items
-        known_types = set()
-        report = dict()
-        moduleL = self.etree.xpath(
-            f"/m:application/m:modules/m:module",
-            namespaces=NSMAP,
-        )
-        for moduleN in moduleL:
-            moduleA = moduleN.attrib
-            known_types.add(moduleA["name"])
-
-        for type in known_types:
-            itemL = self.etree.xpath(
-                f"/m:application/m:modules/m:module[@name = '{type}']/m:moduleItem",
-                namespaces=NSMAP,
-            )
-            report[type] = len(itemL)
-        return report
 
     #
     # HELPER

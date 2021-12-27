@@ -31,7 +31,7 @@ def test_double_join():
     moduleItems.
     """
     sr = Sar(baseURL=baseURL, user=user, pw=pw)
-    path = "data/739673.xml" # use public folder now
+    path = "data/739673.xml"  # use public folder now
     inL = list()
     xml = sr.xmlFromFile(path=path)
     inL.append(xml)
