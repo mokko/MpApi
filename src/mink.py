@@ -35,12 +35,6 @@ from pathlib import Path
 import requests
 import sys
 
-# what the heck?
-if "PYTHONPATH" in os.environ:
-    sys.path.append(os.environ["PYTHONPATH"])
-credentials = "credentials.py"  # expect credentials in pwd
-
-
 from MpApi.Module import Module
 from MpApi.Sar import Sar
 from MpApi.Search import Search
@@ -466,17 +460,3 @@ class Mink:
 
         # tree = self.xmlToEtree (xml=xml)
         # tree.write(str(path), pretty_print=True)  # only works on tree, not Element?
-
-
-if __name__ == "__main__":
-    import argparse
-
-    with open(credentials) as f:
-        exec(f.read())
-
-    parser = argparse.ArgumentParser(description="Commandline frontend for MpApi.py")
-    parser.add_argument("-j", "--job", help="job to run", required=True)
-    parser.add_argument("-c", "--conf", help="config file", default="jobs.dsl")
-    args = parser.parse_args()
-
-    m = Mink(job=args.job, conf=args.conf, baseURL=baseURL, pw=pw, user=user)
