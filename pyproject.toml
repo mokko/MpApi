@@ -21,4 +21,4 @@ test = [
 
 [project.scripts]
 mink = 'MpApi:mink'
-replace = 'MpApi:replace'
+mpReplace = 'MpApi:replace'
