@@ -65,7 +65,7 @@ ETparser = etree.XMLParser(remove_blank_text=True)
 
 
 class Sar:  # methods (mosly) in alphabetical order
-    def __init__(self, *, baseURL, user, pw):
+    def __init__(self, *, baseURL: str, user: str, pw: str) -> None: 
         """
         Earlier version stored last search in searchRequest. Eliminated b/c too
         bothersome and I didn't need it.
@@ -73,7 +73,7 @@ class Sar:  # methods (mosly) in alphabetical order
         self.api = MpApi(baseURL=baseURL, user=user, pw=pw)
         self.user = user
 
-    def clean(self, *, inX):
+    def clean(self, *, inX: str) -> str:
         """
         Drop uuid fields b/c they sometimes don't validate (Zetcom bug)
         Drop Werte und Versicherung to not spill our guts
@@ -87,19 +87,19 @@ class Sar:  # methods (mosly) in alphabetical order
         m.validate()
         return m.toString()
 
-    def definition(self, *, module=None):
+    def definition(self, *, module: str = None) -> str:
         """
         Gets definition from server and returns it as xml string.
         """
         return self.api.getDefinition(module=module).text
 
-    def getItem(self, *, module, id):
+    def getItem(self, *, module: str, id: int): # returns response object
         """
         Get a single item of specified module by id. Returns a request object.
         """
         return self.api.getItem(module=module, id=id)
 
-    def _getBy(self, *, module, id, field, since=None):
+    def _getBy(self, *, module: str, id: int, field: dict, since: str = None):
         """
         Expects module (e.g. Object), id (for that object), fields is a dictionary with a
         set of fields that relevant for the search, since is None or a date; if since is
@@ -336,52 +336,6 @@ class Sar:  # methods (mosly) in alphabetical order
         if not xml:
             raise TypeError("Join failed")
         return xml
-
-    def searchBlocks(self, *, xml, size=30):
-        """
-        Experimenting with a paginated search. Unfinished!
-
-        For a given search query, return the results. If the number of results exceeds
-        the block (page) size, return the results in multiple blocks (chunks, pages).
-
-        The paginated or block search is expected to be considerably slower than a
-        normal search nice it necessessarily involves more http requests.
-
-        - expects a search request as xml string as well as the block size;
-          in production block size should default to 3000 or so. For developing we use
-          a lower number.
-
-        - returns a dictionary that is structured as follows
-            block = {
-                blockNo: 1,  # number of this block (1-based)
-                blockSize: 3000, # nominal block size
-                last: False,  # not the last block
-                offset: 0  # (1-based)
-                response: requestObject # payload
-                resultsRunning: 3000  # number of results returned so far in this
-                                      # and prev. blocks
-            }
-
-        We're trying not to use a deterministic algorithm to save some time:
-            first request with least amount of fields just to determine the number of results
-            further requests for each block with appropriate offset and size values
-
-        Can we dispose of the first request and make the second request the first?
-        Yes perhaps but then we only know number of total results when request is done.
-        So we would need different return dict structure.
-
-        Sort of a definition:
-        A block is the last if the number of returns in a given block is smaller than
-        the blockSize or if the query for the next block does not return any results.
-        So we may cache one block and look at the next one before we return the first.
-
-        Note to self:
-        In order to save cpu time, we might change the interface of MpAPI and SAR and
-        pass around xml as etree instead of as string.
-
-        We need a method to see the itemSize of a response
-        Search module should allow updating offset value?
-        """
 
     def saveAttachments(self, *, xml, adir, since=None):
         """
