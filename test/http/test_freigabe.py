@@ -1,7 +1,4 @@
-import sys
 from pathlib import Path
-
-sys.path.append("../src")
 from MpApi.Client import MpApi
 from MpApi.Module import Module
 

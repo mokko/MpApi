@@ -1,13 +1,11 @@
 # -*- coding: UTF-8
 # content of test_sample.py
 import chardet
-import sys
 import requests
 from pathlib import Path
 from lxml import etree
 from pathlib import Path
 
-sys.path.append("../../src")
 from MpApi.Client import MpApi
 from MpApi.Search import Search
 from MpApi.Module import Module

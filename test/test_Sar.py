@@ -1,7 +1,3 @@
-import sys
-
-sys.path.append("../src")
-
 from MpApi.Search import Search
 from MpApi.Module import Module
 from MpApi.Sar import Sar

@@ -1,15 +1,10 @@
 """
 Test the Search module
 """
-import os
-import sys
 from lxml import etree
+from MpApi.Search import Search
 import pytest
 
-if "PYTHONPATH" in os.environ:
-    sys.path.append(os.environ["PYTHONPATH"])
-
-from MpApi.Search import Search
 
 one = """
 <application xmlns="http://www.zetcom.com/ria/ws/module/search" 

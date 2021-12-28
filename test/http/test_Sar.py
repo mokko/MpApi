@@ -1,7 +1,4 @@
 # -*- coding: UTF-8
-import sys
-
-sys.path.append("../../src")
 from Search import Search
 from Sar import Sar
 

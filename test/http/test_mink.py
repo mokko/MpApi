@@ -1,9 +1,4 @@
-# -*- coding: UTF-8
-
-import sys
 from pathlib import Path
-
-sys.path.append("../src")
 from mink import Mink
 from pathlib import Path
 
