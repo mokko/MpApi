@@ -50,8 +50,9 @@ USAGE:
 """
 
 import os  # b/c Pathlib has troubles with windows network paths
-from lxml import etree
+from lxml import etree  # type: ignore
 from pathlib import Path
+
 from MpApi.Search import Search
 from MpApi.Client import MpApi
 from MpApi.Module import Module
@@ -64,8 +65,8 @@ NSMAP = {
 ETparser = etree.XMLParser(remove_blank_text=True)
 
 
-class Sar:  # methods (mosly) in alphabetical order
-    def __init__(self, *, baseURL: str, user: str, pw: str) -> None: 
+class Sar:  # methods (mostly) in alphabetical order
+    def __init__(self, *, baseURL: str, user: str, pw: str) -> None:
         """
         Earlier version stored last search in searchRequest. Eliminated b/c too
         bothersome and I didn't need it.
@@ -93,13 +94,13 @@ class Sar:  # methods (mosly) in alphabetical order
         """
         return self.api.getDefinition(module=module).text
 
-    def getItem(self, *, module: str, id: int): # returns response object
+    def getItem(self, *, module: str, id: int) -> Requests:  # type: ignore
         """
         Get a single item of specified module by id. Returns a request object.
         """
         return self.api.getItem(module=module, id=id)
 
-    def _getBy(self, *, module: str, id: int, field: dict, since: str = None):
+    def _getBy(self, *, module, id, field, since=None):
         """
         Expects module (e.g. Object), id (for that object), fields is a dictionary with a
         set of fields that relevant for the search, since is None or a date; if since is
@@ -159,13 +160,13 @@ class Sar:  # methods (mosly) in alphabetical order
         </repeatableGroupItem>
         """
 
-        typeVoc = {
+        typeVoc: dict = {
             "Multimedia": "MulObjectRef.ObjPublicationGrp.TypeVoc",
             "Object": "ObjPublicationGrp.TypeVoc",  #  MulApprovalGrp.TypeVoc
             "Person": "PerObjectRef.ObjPublicationGrp.TypeVoc",
         }
 
-        pubVoc = {
+        pubVoc: dict = {
             "Multimedia": "MulObjectRef.ObjPublicationGrp.PublicationVoc",
             "Object": "ObjPublicationGrp.PublicationVoc",  #  MulApprovalGrp.TypeVoc
             "Person": "PerObjectRef.ObjPublicationGrp.PublicationVoc",
@@ -184,7 +185,7 @@ class Sar:  # methods (mosly) in alphabetical order
             value="1810139",  # use id? 1810139: yes
         )
         if since is not None:
-            s.addCriterion(
+            s.addCriterion(  # type: ignore
                 operator="greater",
                 field="__lastModified",
                 value=since,  # "2021-12-23T12:00:00.0"
@@ -193,7 +194,7 @@ class Sar:  # methods (mosly) in alphabetical order
         # query.print()
         return self.api.search(xml=query.toString())
 
-    def getByExhibit(self, *, id, module, since=None):
+    def getByExhibit(self, *, id: int, module: str, since: str = None) -> Requests:  # type: ignore
         """
         Gets a set of items related to a certain exhibit depending on the requested module
 
@@ -223,7 +224,10 @@ class Sar:  # methods (mosly) in alphabetical order
         }
         return self._getBy(module=module, id=id, field=fields[module], since=since)
 
-    def getByGroup(self, *, id, module, since=None):
+    def getByGroup(
+        self, *, id: int, module: str, since: str = None
+    ) -> Requests:  # type: ignore
+
         fields = {
             "Multimedia": "MulObjectRef.ObjObjectGroupsRef.__id",
             "Object": "ObjObjectGroupsRef.__id",
@@ -231,7 +235,9 @@ class Sar:  # methods (mosly) in alphabetical order
         }
         return self._getBy(module=module, id=id, field=fields[module], since=since)
 
-    def getByLocation(self, *, id, module, since=None):
+    def getByLocation(
+        self, *, id: int, module: str, since: str = None
+    ) -> Requests:  # type: ignore
         """
         Gets items of the requested module type by location id.
 
@@ -246,7 +252,7 @@ class Sar:  # methods (mosly) in alphabetical order
         }
         return self._getBy(module=module, id=id, field=fields[module], since=since)
 
-    def join(self, *, inL):
+    def join(self, *, inL: List[str]) -> str:
         """
         Joins the documents in inL to a single document
 
@@ -266,11 +272,12 @@ class Sar:  # methods (mosly) in alphabetical order
         known_types = set()
         firstET = None
         for xml in inL:
-            tree = etree.fromstring(bytes(xml, "UTF-8"))
+            tree: etree._Element = etree.fromstring(bytes(xml, "UTF-8"))
             moduleL = tree.xpath(
                 f"/m:application/m:modules/m:module",
                 namespaces=NSMAP,
             )
+
             for moduleN in moduleL:
                 moduleA = moduleN.attrib
                 known_types.add(moduleA["name"])
@@ -332,12 +339,14 @@ class Sar:  # methods (mosly) in alphabetical order
                 pass  # it is not an error if a file has no items that can be counted
 
         # print(known_types)
-        xml = etree.tostring(firstET, pretty_print=True, encoding="unicode")
+        xml: Union[_Element, _ElementTree] = etree.tostring(
+            firstET, pretty_print=True, encoding="unicode"
+        )
         if not xml:
             raise TypeError("Join failed")
         return xml
 
-    def saveAttachments(self, *, xml, adir, since=None):
+    def saveAttachments(self, *, xml: str, adir: str, since=None) -> Set:
         """
         For a set of multimedia moduleItems (provided in xml), download their attachments.
         Attachments are saved to disk with the filename {mulId}.{ext}.
@@ -361,7 +370,7 @@ class Sar:  # methods (mosly) in alphabetical order
         * xpath corrected 20211225
         * optional arg since 20211226
         """
-        E = etree.fromstring(bytes(xml, "UTF-8"))
+        E: etree._Element = etree.fromstring(bytes(xml, "UTF-8"))
 
         if since is None:
             xpath = """
@@ -405,7 +414,7 @@ class Sar:  # methods (mosly) in alphabetical order
 
         for itemN in itemsL:
             itemA = itemN.attrib  # A for attribute
-            mmId = itemA["id"]
+            mmId: str = itemA["id"]
             # Why do i get suffix from old filename? Is that really the best source?
             # Seems that it is. I see no other field in RIA
             # assuming that there can be only one
@@ -423,9 +432,9 @@ class Sar:  # methods (mosly) in alphabetical order
                 self.api.saveAttachment(module="Multimedia", id=mmId, path=mmPath)
         return positives
 
-    def search(self, *, xml):
+    def search(self, *, xml: str) -> Requests:  # type: ignore
         """
-        Send a request to the api and return the response. Expects an search as xml
+        Send a request to the api and return the request response. Expects an search as xml
         string in xml. (Same as in MpApi).
         """
         return self.api.search(xml=xml)
@@ -433,24 +442,24 @@ class Sar:  # methods (mosly) in alphabetical order
     #
     # Helper
     #
-    def xmlFromFile(self, *, path):
+    def xmlFromFile(self, *, path: str) -> str:
         with open(path, "r", encoding="UTF-8") as f:
             xml = f.read()
         return xml
 
-    def toFile(self, *, xml, path):
-        E = etree.fromstring(bytes(xml, "UTF-8"))
-        tree = etree.ElementTree(E)
+    def toFile(self, *, xml: str, path: Path) -> None:
+        E: etree._Element = etree.fromstring(bytes(xml, "UTF-8"))
+        tree: etree._ElementTree = etree.ElementTree(E)
         tree.write(
             str(path), pretty_print=True, encoding="UTF-8"
         )  # appears to write Element
 
-    def EToString(self, *, tree):
+    def EToString(self, *, tree: etree._Element) -> None:
         etree.tostring(
             tree, pretty_print=True, encoding="unicode"
         )  # so as not to return bytes
 
-    def ETfromFile(self, *, path):
+    def ETfromFile(self, *, path: str) -> lxml:  # type: ignore
         return etree.parse(str(path), ETparser)
 
 
