@@ -50,7 +50,7 @@ USAGE:
 """
 
 import os  # b/c Pathlib has troubles with windows network paths
-from lxml import etree  # type: ignore
+from lxml import etree
 from pathlib import Path
 
 from MpApi.Search import Search
@@ -66,7 +66,7 @@ ETparser = etree.XMLParser(remove_blank_text=True)
 
 
 class Sar:  # methods (mostly) in alphabetical order
-    def __init__(self, *, baseURL: str, user: str, pw: str) -> None:
+    def __init__(self, *, baseURL, user, pw):
         """
         Earlier version stored last search in searchRequest. Eliminated b/c too
         bothersome and I didn't need it.
@@ -74,7 +74,7 @@ class Sar:  # methods (mostly) in alphabetical order
         self.api = MpApi(baseURL=baseURL, user=user, pw=pw)
         self.user = user
 
-    def clean(self, *, inX: str) -> str:
+    def clean(self, *, inX):
         """
         Drop uuid fields b/c they sometimes don't validate (Zetcom bug)
         Drop Werte und Versicherung to not spill our guts
@@ -88,13 +88,13 @@ class Sar:  # methods (mostly) in alphabetical order
         m.validate()
         return m.toString()
 
-    def definition(self, *, module: str = None) -> str:
+    def definition(self, *, module=None):
         """
         Gets definition from server and returns it as xml string.
         """
         return self.api.getDefinition(module=module).text
 
-    def getItem(self, *, module: str, id: int) -> Requests:  # type: ignore
+    def getItem(self, *, module, id):
         """
         Get a single item of specified module by id. Returns a request object.
         """
@@ -185,7 +185,7 @@ class Sar:  # methods (mostly) in alphabetical order
             value="1810139",  # use id? 1810139: yes
         )
         if since is not None:
-            s.addCriterion(  # type: ignore
+            s.addCriterion(
                 operator="greater",
                 field="__lastModified",
                 value=since,  # "2021-12-23T12:00:00.0"
@@ -194,7 +194,7 @@ class Sar:  # methods (mostly) in alphabetical order
         # query.print()
         return self.api.search(xml=query.toString())
 
-    def getByExhibit(self, *, id: int, module: str, since: str = None) -> Requests:  # type: ignore
+    def getByExhibit(self, *, id, module, since=None):
         """
         Gets a set of items related to a certain exhibit depending on the requested module
 
@@ -216,7 +216,7 @@ class Sar:  # methods (mostly) in alphabetical order
         if module == "Exhibition":  # api.getItem should be faster than sar
             return self.api.getItem(module=module, id=id)
 
-        fields = {
+        fields: dict = {
             "Multimedia": "MulObjectRef.ObjRegistrarRef.RegExhibitionRef.__id",
             "Object": "ObjRegistrarRef.RegExhibitionRef.__id",
             "Person": "PerObjectRef.ObjRegistrarRef.RegExhibitionRef.__id",
@@ -224,20 +224,16 @@ class Sar:  # methods (mostly) in alphabetical order
         }
         return self._getBy(module=module, id=id, field=fields[module], since=since)
 
-    def getByGroup(
-        self, *, id: int, module: str, since: str = None
-    ) -> Requests:  # type: ignore
+    def getByGroup(self, *, id, module, since=None):
 
-        fields = {
+        fields: dict = {
             "Multimedia": "MulObjectRef.ObjObjectGroupsRef.__id",
             "Object": "ObjObjectGroupsRef.__id",
             "Person": "PerObjectRef.ObjObjectGroupsRef.__id",
         }
         return self._getBy(module=module, id=id, field=fields[module], since=since)
 
-    def getByLocation(
-        self, *, id: int, module: str, since: str = None
-    ) -> Requests:  # type: ignore
+    def getByLocation(self, *, id, module, since=None):
         """
         Gets items of the requested module type by location id.
 
@@ -245,14 +241,14 @@ class Sar:  # methods (mostly) in alphabetical order
         * id: location id
         * since: None or date; only return items newer than date
         """
-        fields = {
+        fields: dict = {
             "Multimedia": "MulObjectRef.ObjCurrentLocationVoc",
             "Object": "ObjCurrentLocationVoc",
             "Person": "PerObjectRef.ObjCurrentLocationVoc",
         }
         return self._getBy(module=module, id=id, field=fields[module], since=since)
 
-    def join(self, *, inL: List[str]) -> str:
+    def join(self, *, inL) -> str:
         """
         Joins the documents in inL to a single document
 
@@ -339,14 +335,12 @@ class Sar:  # methods (mostly) in alphabetical order
                 pass  # it is not an error if a file has no items that can be counted
 
         # print(known_types)
-        xml: Union[_Element, _ElementTree] = etree.tostring(
-            firstET, pretty_print=True, encoding="unicode"
-        )
+        xml = etree.tostring(firstET, pretty_print=True, encoding="unicode")
         if not xml:
             raise TypeError("Join failed")
         return xml
 
-    def saveAttachments(self, *, xml: str, adir: str, since=None) -> Set:
+    def saveAttachments(self, *, xml, adir, since=None):
         """
         For a set of multimedia moduleItems (provided in xml), download their attachments.
         Attachments are saved to disk with the filename {mulId}.{ext}.
@@ -370,7 +364,7 @@ class Sar:  # methods (mostly) in alphabetical order
         * xpath corrected 20211225
         * optional arg since 20211226
         """
-        E: etree._Element = etree.fromstring(bytes(xml, "UTF-8"))
+        E = etree.fromstring(bytes(xml, "UTF-8"))
 
         if since is None:
             xpath = """
@@ -414,7 +408,7 @@ class Sar:  # methods (mostly) in alphabetical order
 
         for itemN in itemsL:
             itemA = itemN.attrib  # A for attribute
-            mmId: str = itemA["id"]
+            mmId = itemA["id"]
             # Why do i get suffix from old filename? Is that really the best source?
             # Seems that it is. I see no other field in RIA
             # assuming that there can be only one
@@ -432,7 +426,7 @@ class Sar:  # methods (mostly) in alphabetical order
                 self.api.saveAttachment(module="Multimedia", id=mmId, path=mmPath)
         return positives
 
-    def search(self, *, xml: str) -> Requests:  # type: ignore
+    def search(self, *, xml):
         """
         Send a request to the api and return the request response. Expects an search as xml
         string in xml. (Same as in MpApi).
@@ -442,24 +436,24 @@ class Sar:  # methods (mostly) in alphabetical order
     #
     # Helper
     #
-    def xmlFromFile(self, *, path: str) -> str:
+    def xmlFromFile(self, *, path):
         with open(path, "r", encoding="UTF-8") as f:
             xml = f.read()
         return xml
 
-    def toFile(self, *, xml: str, path: Path) -> None:
-        E: etree._Element = etree.fromstring(bytes(xml, "UTF-8"))
-        tree: etree._ElementTree = etree.ElementTree(E)
+    def toFile(self, *, xml, path):
+        E = etree.fromstring(bytes(xml, "UTF-8"))
+        tree = etree.ElementTree(E)
         tree.write(
             str(path), pretty_print=True, encoding="UTF-8"
         )  # appears to write Element
 
-    def EToString(self, *, tree: etree._Element) -> None:
+    def EToString(self, *, tree):
         etree.tostring(
             tree, pretty_print=True, encoding="unicode"
         )  # so as not to return bytes
 
-    def ETfromFile(self, *, path: str) -> lxml:  # type: ignore
+    def ETfromFile(self, *, path):
         return etree.parse(str(path), ETparser)
 
 

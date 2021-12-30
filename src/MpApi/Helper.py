@@ -16,6 +16,9 @@ class Helper:
         doc = self.etree
         doc.write(str(path), pretty_print=True, method="c14n2")
 
+    def toET(self):
+        return self.etree
+
     def _write(self, *, path, doc):
         doc.write(str(path), pretty_print=True, encoding="UTF-8")
 
@@ -44,8 +47,8 @@ class Helper:
             raise TypeError("Unknown validation mode")
         # more options for http access?
 
-        if not hasattr(self, mode):
-            self.mode = etree.fromstring(xsd)
+        # if not hasattr(self, mode):
+        self.mode = etree.fromstring(xsd)
         xmlschema = etree.XMLSchema(self.mode)
         xmlschema.assertValid(self.etree)  # dies if doesn't validate
         return True

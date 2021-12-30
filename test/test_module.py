@@ -1,42 +1,77 @@
-from MpApi.Search import Search
-from MpApi.Module import Module
+from MpApi.Search import Search  # type: ignore
+from MpApi.Module import Module  # type: ignore
+from lxml import etree
+
+NSMAP = {"m": "http://www.zetcom.com/ria/ws/module"}
 
 
-def test_load_file():
+def test_constructors_only():
+    # four different constructors, sort of
     m = Module(file="sdata/exhibit20222.xml")
-    totalSize = m.totalSize(module="Multimedia")
-    # print(totalSize)
-    assert totalSize is not None
-    for mi in m.iter():
-        m.attribute(parent=mi, name="uuid", action="remove")
-        m._dropUUID()
-        # m._dropFields(parent=mi, type="virtualField")  # if no parent, assume self.etree
-        # m._dropFields(parent=mi, type="systemField")  # if no parent, assume self.etree
-    m.toFile(path="sdata/response-simplified.xml")
-    assert m.validate() is True
+    assert m
+    xml = """
+    <application xmlns="http://www.zetcom.com/ria/ws/module">
+        <modules>
+        </modules>
+    </application>
+    """
+    m = Module(xml=xml)
+    assert m
+    ET = etree.fromstring(xml)
+    m = Module(tree=ET)
+    assert m
+    m = Module()  # from scratch
+    assert m
 
 
-def test_from_scratch():
-    m = Module(name="Object")
-    miN = m.moduleItem(hasAttachments="false")
-    m.dataField(parent=miN, name="ObjTechnicalTermClb", value="Zupftrommel")
-    vrN = m.vocabularyReference(
-        parent=miN, name="ObjCategoryVoc", id="30349", instanceName="ObjCategoryVgr"
-    )
-    m.vocabularyReferenceItem(parent=vrN, id="3206642", name="Musikinstrument")
-    rgN = m.repeatableGroup(parent=miN, name="ObjObjectNumberGrp", size="1")
-    rgiN = m.repeatableGroupItem(parent=rgN, id="20414895")
-    m.dataField(parent=rgiN, name="InventarNrSTxt", value="I C 7723")
-
-    for miN in m.iter():
-        m.print(miN)
-    # m.print()
-    assert m.validate() is True
-    m.toFile(path="sdata/fromScratch.xml")
+def test_output():
+    m = Module(file="sdata/exhibit20222.xml")
+    m.toFile(path="sdata/output.xml")  # not sure how to test
+    xml = m.toString()
+    assert xml  # not sure how to test
 
 
-def test_totalSize():
-
+def test_inspection():
     m = Module(file="sdata/exhibit20222.xml")
     assert m.totalSize(module="Object") is None
     assert m.totalSize(module="Multimedia") == 619
+    desc = m.describe
+    print(desc)  # todo write a good test
+    m.dropUUID()
+    assert m.validate()
+
+
+def test_iter():
+    m = Module(file="sdata/exhibit20222.xml")
+    for itemN in m:
+        pass  # not sure how to test
+
+    for itemN in m.iter(module="Multimedia"):
+        pass  # itemN m.print(miN)
+
+
+def test_from_scratch_interface():
+    m = Module()
+    moduleN = m.module(name="Object")  # setter, how to test the getter?
+    moduleN = m.module(name="Object")  # setter, how to test the getter?
+    moduleN = m.module(name="Multimedia")  # setter, how to test the getter?
+    ET = m.toET()
+    result = int(ET.xpath("count(/m:application/m:modules/m:module)", namespaces=NSMAP))
+    assert result == 2
+    itemN = m.moduleItem(parent=moduleN, ID=1234, hasAttachments="false")
+    m.dataField(parent=itemN, name="ObjTechnicalTermClb", value="Zupftrommel")
+    vrN = m.vocabularyReference(
+        parent=itemN, name="ObjCategoryVoc", ID=30349, instanceName="ObjCategoryVgr"
+    )
+    m.vocabularyReferenceItem(parent=vrN, ID=3206642, name="Musikinstrument")
+    rGrpN = m.repeatableGroup(parent=itemN, name="ObjObjectNumberGrp", size="1")
+    rGrpItemsL = m.repeatableGroupItems(parent=rGrpN)
+    rGrpItemN = m.repeatableGroupItemAdd(parent=rGrpN, ID=99999998)
+    m.dataField(parent=rGrpItemN, name="InventarNrSTxt", value="I C 7723")
+    assert m.validate()
+
+
+def test_drops_other_changes():
+    m = Module(file="sdata/exhibit20222.xml")
+    m.dropUUID()
+    assert m.validate()
