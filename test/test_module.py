@@ -1,13 +1,13 @@
-from MpApi.Search import Search  
-from MpApi.Module import Module  
-from lxml import etree #type: ignore
+from MpApi.Search import Search
+from MpApi.Module import Module
+from lxml import etree  # type: ignore
 
-NSMAP:dict = {"m": "http://www.zetcom.com/ria/ws/module"}
+NSMAP: dict = {"m": "http://www.zetcom.com/ria/ws/module"}
 
 
 def test_constructors_only():
     # four different constructors, sort of
-    m:MpApi.Module = Module(file="sdata/exhibit20222.xml")
+    m: MpApi.Module = Module(file="sdata/exhibit20222.xml")
     assert m
     xml = """
     <application xmlns="http://www.zetcom.com/ria/ws/module">

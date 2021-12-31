@@ -166,7 +166,7 @@ class Module(Helper):
                 return None
 
             for mtype in mtypeL:
-                #print(f"newdoc mtype: {mtype}")
+                # print(f"newdoc mtype: {mtype}")
                 try:
                     # Does this module type exist already in old doc?
                     mod = self.etree.xpath(
