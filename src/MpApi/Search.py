@@ -56,7 +56,7 @@ EXAMPLE
 """
 
 from pathlib import Path
-from lxml import etree
+from lxml import etree # type: ignore
 from MpApi.Helper import Helper
 
 # xpath 1.0 and lxml don't empty string or None for default ns

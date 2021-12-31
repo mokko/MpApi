@@ -53,7 +53,7 @@ USAGE:
 
     # change xml
     m.totalSizeUpdate() # update for all module types
-    m.join(doc=Module(xml=xml))
+    m.add(doc=ET)
 
     # NEW: Let's write the kind of xml here that the API wants for put requests
 
@@ -77,7 +77,7 @@ USAGE:
     m.validate()
 """
 
-from typing_extensions import TypeAlias  # only in python 3.9
+from typing_extensions import TypeAlias  # only in python 3.9?
 from typing import Union, Iterator, List, Set
 from lxml import etree  # type: ignore
 from MpApi.Helper import Helper
@@ -126,7 +126,7 @@ class Module(Helper):
             </application>"""
             self.etree = etree.fromstring(xml, parser)
 
-    def addDocument(self, *, doc: ET) -> None:
+    def add(self, *, doc: ET) -> None:
         """
         add a new doc[ument] to the Module, i.e. join two documents.
 
@@ -162,7 +162,7 @@ class Module(Helper):
                 )
             except:
                 # newdoc appears to be empty
-                print("newdoc appears to be empty")
+                # print("newdoc appears to be empty")
                 return None
 
             for mtype in mtypeL:
@@ -488,18 +488,25 @@ class Module(Helper):
             rGrpItem.set("id", str(ID))
         return rGrpItem
 
-    def totalSize(self, *, module: str) -> intNone:
+    def totalSize(self, *, module: str) -> int:
         """
-        Report the totalSize of module (i.e. only getter). If the requested
-        module type doesn't exist, returns None.
+        Report the totalSize of a requested module (as provided by the xml 
+        attribute of the same name not by counter moduleItems). It's getter 
+        only , use totalSizeUpdate for writing attributes after counting 
+        moduleItems. 
+        
+        If the requested module type or the attribute doesn't exist, 
+        raises TypeError.
 
-        Use totalSizeUpdate() if you want to write/update totalSize attribute.
-
-        Expects
+        EXPECTS
         * module: type, e.g. Object
 
-        Returns
-        * integer or None
+        RETURNS
+        * integer
+
+        NEW
+        * Used to return None when requested object didn't exist, now raises
+          TypeError.
 
         EXAMPLE
         <application xmlns="http://www.zetcom.com/ria/ws/module">
@@ -514,7 +521,7 @@ class Module(Helper):
                 )[0]
             )
         except:
-            return None  # I like eplicit returns
+            raise TypeError (f"Requested module '{module}' or attribute totalSize doesn't exist")
 
     def totalSizeUpdate(self) -> None:
         """

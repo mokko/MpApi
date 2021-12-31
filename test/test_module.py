@@ -83,7 +83,7 @@ def test_join():
     before = m.totalSize(module="Multimedia")
     assert isinstance(before, int)
     ET = etree.parse("sdata/exhibit20222.xml")
-    m.addDocument(doc=ET)
+    m.add(doc=ET)
     after = m.totalSize(module="Multimedia")
     assert before == after
     assert m.totalSize(module="Object") is None

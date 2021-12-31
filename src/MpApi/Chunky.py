@@ -1,77 +1,90 @@
 """
-    For a given search query, return the results. If the number of results exceeds
-    the chunkSize, return multiple chunks.
+    For a given search query, return the results. If the number of results 
+    exceeds the chunkSize, return multiple chunks. For now, we only allow very
+    limited set of search queries.
 
     Experimenting with a paginated search. Unfinished!
 
-    The problem: A search returns more items (=results) than I can digest
+    The problem 
+    * A search returns more items (=results) than I can digest
 
-    The solution: to split up the response in chunks (aka blocks or pages)
+    The solution
+    * to split up the response in chunks (aka blocks or pages)
     and to deal with them individually.
     
-    A deterministic solution
-    1. First query: how many results are there?
-    2. Further queries for every chunk
+    TOWARDS AN ALGORITHM
+    A "deterministic" solution would first
+    1. query how many results there are and then
+    2. do further queries for every chunk 
+    until done.
     
     Example: 100 results, but chunk size is 10, so we make 10 chunks
     (in production we expect that chunk size should be between 1000 or 3000, in 
     development we're using a much smaller number to reduce the wait)
     
-    What about an undeterministic solution, e.g. a solution where we don't know the total
-    number of results until we have gotten all results?
+    What about an "undeterministic" solution, e.g. a solution where we don't 
+    know the total number of results until we have gotten all results?
 
-    The chunky (=paginated) search is expected not to be faster than an unchunked search 
-    nice it may involve more http requests for the same thing.
-
-    Let's look for the simplest solution: A block is the last block if the number of results
-    is smaller than chunkSize.
+    Let's look for the simplest solution: A block is the last block if the 
+    number of results is smaller than chunkSize.
+    
     Let's say there a 30 results and the chunkSize is 10. Then we get
     10 limit is 10; offset is 0 -> first chunk
     10 limit is 10; offset is 10 -> 2nd chunk
     10 limit is 10; offset is 20 -> 3rd chunk
-    0 limit is 10; offset is 30; -> 4th chunk; 0 is smaller than chunkSize so it's the last chunk  
-
-    Should we count chunks one-based?
-
-    We start with simple searches, but perhaps we generalize later, e.g. requesting the objects 
-    from one group. More general would be to have a chunking mechanism for all searches.
-
-    INTERFACE
-    def byGroup (ID:int = ID) -> ETdocument # ID is groupID
-    # mtype: List[str] = ['Object', 'Multimedia', 'Person'] considered, but discarded
-    
-    for chunk in byGroup (ID=ID):
-        do_something_with (chunk)
-
-    The chunk is supposed to be multi-type, i.e. have objects, multimedia, and persons, perhaps 
-    others. I could hide that fact, or I can make it explicit. Compromise would be a default 
-    value. On the others hand, this is not our problem atm. Let's just bake Object, Multimedia 
-    and Person in and find a proper solution later.
+    0 limit is 10; offset is 30; -> 4th chunk; 0 is smaller than chunkSize so 
+    it's the last chunk
 
     So internally we have to do something like this:
-    get moduleItems of type "Object" for a certain groupID for first chunk
-    get corresponding Multimedia items
-    get corresponding Person items
-    join them all together
-    yield them
-    continue with the next chunk 
-    until we encounter a chunk that has less items than chunkSize
-        
-    This time I want to return document as etree, because in the long term I expect I that
-    this solution will be quicker than always converting between etree and xml string.
-    
-    Should we write chunks to disk? In Sar I left all disk operations to mink level. Should we
-    still do that or should Chunky.py this time be able to write to disk directly. Perhaps useful
-    for testing.
+    * get moduleItems of type "Object" for a certain groupID for first chunk
+    * get corresponding Multimedia items
+    * get corresponding Person items
+    * join them all together
+    * yield them
+    * continue with the next chunk 
+    * until we encounter a chunk that has less items than chunkSize
+
+    NOTES / QUESTIONS
+    * The chunky (=paginated) search is expected not to be faster than an 
+      unchunked search nice it may involve more http requests for the same
+      thing.
+    * Should we count chunks one-based?
+    * We start with simple searches, but perhaps we generalize later, e.g. 
+      requesting the objects from one group. More general would be to have 
+      a chunking mechanism for all searches.
+    * We want a multi-type chunk, i.e. have objects, multimedia, and persons, 
+      perhaps others in one chunk. I could hide that fact, or I can make it 
+      explicit. Compromise would be a default value. On the others hand, this 
+      is not our problem atm. Let's just bake Object, Multimedia and Person in
+      and find a proper solution later.
+    * In other words: We considered to provide another argument to specify the 
+      requested target modules, e.g.:
+        mtype: List[str] = ['Object', 'Multimedia', 'Person']
+      But we decided against it; this could be done later, if really of use.
+    * This time I want to return document as etree, because in the long term I 
+      expect I that this solution will be quicker than always converting 
+      between etree and xml string.
+    * Should we write chunks to disk? In Sar I left all disk operations to mink
+      level. Should we still do that or should Chunky.py this time be able to 
+      write to disk directly. Perhaps useful for testing.
+    * Let's experiment with type hints again; we're using Python 3.9 type hints
+
+    INTERFACE PROPOSAL
+    def byGroup (ID:int = ID) -> ETdocument # ID is groupID
+
+    for chunk in byGroup (ID=ID): # it's a generator
+        do_something_with (chunk)
+  
 """
 
-from lxml import etree
+from lxml import etree # type: ignore
 from pathlib import Path
-from typing import Iterator, Union
-from MpApi.Search import Search
+from typing import Iterator, NewType, Union
+from MpApi.Search import Search 
 from MpApi.Client import MpApi
 from MpApi.Module import Module
 from MpApi.Sar import Sar
+from MpApi.Helper import Helper
 
 NSMAP = {
     "s": "http://www.zetcom.com/ria/ws/module/search",
@@ -80,57 +93,51 @@ NSMAP = {
 
 ETparser = etree.XMLParser(remove_blank_text=True)
 
-# TYPES
-Since = Union[str, None]
+# types
+since = Union[str, None] # NewType ('since', Union[str, None]) gives mypy error
 ET = etree._Element
 
+# typed variables
 baseURL: str
 pw: str
 user: str
 
 
-class Chunky:
-    def __init__(
-        self, *, chunkSize: int, baseURL: str, pw: str
-    ):  # dont know how to write return value -> Chunky
+class Chunky (Helper):
+    def __init__(self, *, chunkSize: int, baseURL: str, pw: str) -> None:  
         self.chunkSize = chunkSize
-        # self.baseURL = baseURL
-        # self.user = user
-        self.appURL = baseURL + "/ria-ws/application"
         self.api = MpApi(baseURL=baseURL, user=user, pw=pw)
-        self.sar = Sar(baseURL=baseURL, user=user, pw=pw)
-        # self.auth = HTTPBasicAuth(user, pw)
+        # self.baseURL = baseURL # dont need it yet
+        # self.user = user # dont need it yet
+        # self.sar = Sar(baseURL=baseURL, user=user, pw=pw)
 
-    def byGroup(
-        self, *, ID, since: Since = None
-    ):  # , since:Since = None -> Iterator[ET]
-
-        print("enter byGroup")
+    def byGroup(self, *, ID, since: since = None) -> Iterator:  
 
         lastChunk: bool = False
         offset: int = 0
 
         while not lastChunk:
-            chunk: Module = (
-                Module()
-            )  # make a new zml document; should this class be called differently?
+            chunk = Module()  # make a new zml document; should this class be called differently?
+            # let's deal with exotic multi-type later
             for mtype in [
-                "Object",
                 "Multimedia",
+                "Object",
                 "Person",
-            ]:  # lets deal with multi-type later
+            ]:  
                 print(f"module: {mtype}")
-                part = self._getPart(module=mtype, offset=offset, since=since)
-                chunk.join(doc=part)  # part is a Module object
+                # partM is a Module object
+                partM = self._getPart(module=mtype, ID=ID, offset=offset, since=since)
+                chunk.add(doc=partM.toET())  
 
             offset = offset + self.chunkSize
+            actualNo = chunk.totalSize(module="Object")
             if chunk.totalSize(module="Object") <= self.chunkSize:
                 print("seems to be last chunk; setting lastChunk to True")
                 lastChunk = True
             print("getting to yield")
-            yield chunk.toET()  # not sure why
+            yield chunk  # not sure why .toET() 
 
-    def _getPart(self, *, module: str, offset: int, since: Since) -> Module:
+    def _getPart(self, *, module: str, ID: int, offset: int, since: since) -> Module:
         """
         A part is the result from a single request, e.g. for one module type.
 
@@ -147,14 +154,18 @@ class Chunky:
             "Person": "PerObjectRef.ObjObjectGroupsRef.__id",
         }
 
-        s = Search(module=module, limit=self.chunkSize, offset=offset)
+        limit = self.chunkSize
+        if module == "Multimedia" or module == "Person":
+            limit = -1
+    
+        s = Search(module=module, limit=limit, offset=offset)
 
         if since is not None:
             s.AND()
         s.addCriterion(
             field=fields[module],
             operator="equalsField",
-            value=id,
+            value=str(ID),
         )
         if since is not None:
             s.addCriterion(
@@ -163,58 +174,19 @@ class Chunky:
                 value=since,  # "2021-12-23T12:00:00.0"
             )
         s.validate(mode="search")
+        print (f"Query validates: {s.toString()}")
+        r = self.api.search(xml=s.toString())
+        print (f"status {r.status_code}")
+        return Module(xml=r.content)
 
-        req = self.api.search(xml=s.toString())
-        xml = req.content()  # or .text?
-        # partET = etree.fromstring(bytes(xml, "UTF-8"))
-        partM = Module(xml=req.content())
-        return partM
-
-
-"""
-    ----
-    old notes
-    ----
-    - expects a search request as xml string as well as the block size;
-      in production block size should default to 3000 or so. For developing we use
-      a lower number.
-
-    - returns a dictionary that is structured as follows
-        block = {
-            blockNo: 1,  # number of this block (1-based)
-            blockSize: 3000, # nominal block size
-            last: False,  # not the last block
-            offset: 0  # (1-based)
-            response: requestObject # payload
-            resultsRunning: 3000  # number of results returned so far in this
-                                  # and prev. blocks
-        }
-
-    We're trying not to use a deterministic algorithm to save some time:
-        first request with least amount of fields just to determine the number of results
-        further requests for each block with appropriate offset and size values
-
-    Can we dispose of the first request and make the second request the first?
-    Yes perhaps but then we only know number of total results when request is done.
-    So we would need different return dict structure.
-
-    Sort of a definition:
-    A block is the last if the number of returns in a given block is smaller than
-    the blockSize (or if the query for the next block does not return any results.
-    So we may cache one block and look at the next one before we return the first.
-
-    Note to self:
-    In order to save cpu time, we might change the interface of MpAPI and SAR and
-    pass around xml as etree instead of as string.
-
-    We need a method to see the itemSize of a response
-    Search module should allow updating offset value?
-"""
 
 if __name__ == "__main__":
     with open("credentials.py") as f:
         exec(f.read())
 
-    c = Chunky(chunkSize=10, baseURL=baseURL, pw=pw)
-    for chunk in c.byGroup(ID=20222):
-        print(chunk)
+    c = Chunky(chunkSize=1, baseURL=baseURL, pw=pw)
+    cnt = 1 # 1-based counter
+    for chunk in c.byGroup(ID=162397): # chunk is ET
+        chunk.toFile(path=f"o{cnt}.xml")
+        print (f"Working on chunk no {cnt}")
+        cnt +=1
