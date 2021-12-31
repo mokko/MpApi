@@ -76,27 +76,25 @@ USAGE:
     m.toString()
     m.validate()
 """
-# xpath 1.0 and lxml don't allow empty string or None for default ns
-NSMAP = {"m": "http://www.zetcom.com/ria/ws/module"}
-dataTypes = {"Clb": "Clob", "Dat": "Date", "Lnu": "Long", "Txt": "Varchar"}
 
 from typing_extensions import TypeAlias  # only in python 3.9
 from typing import Union, Iterator, List, Set
 from lxml import etree  # type: ignore
 from MpApi.Helper import Helper
 
+# xpath 1.0 and lxml don't allow empty string or None for default ns
+dataTypes = {"Clb": "Clob", "Dat": "Date", "Lnu": "Long", "Txt": "Varchar"}
+NSMAP = {"m": "http://www.zetcom.com/ria/ws/module"}
 parser = etree.XMLParser(remove_blank_text=True)
 
 # types
-strNone = Union[str, None]
-intNone = Union[int, None]
 ET: TypeAlias = etree._Element
+intNone = Union[int, None]
+strNone = Union[str, None]
 
 
 class Module(Helper):
-    def __init__(
-        self, *, file: str = None, tree: ET = None, xml: str = None
-    ):  # still dont know how to specify return value
+    def __init__(self, *, file: str = None, tree: ET = None, xml: str = None) -> None:
         """
         There are FOUR ways to make a new Module object. Pick one:
             m = Module(file="path.xml") # from a file
@@ -160,7 +158,7 @@ class Module(Helper):
         for moduleN in moduleL:
             try:
                 mtypeL: List[ET] = moduleN.xpath(
-                    "/m:application/m:modules/m:module/@name"
+                    "/m:application/m:modules/m:module/@name", namespaces=NSMAP
                 )
             except:
                 # newdoc appears to be empty
@@ -168,7 +166,7 @@ class Module(Helper):
                 return None
 
             for mtype in mtypeL:
-                print("newdoc mtype: {mtype}")
+                #print(f"newdoc mtype: {mtype}")
                 try:
                     # Does this module type exist already in old doc?
                     mod = self.etree.xpath(
@@ -176,9 +174,10 @@ class Module(Helper):
                     )
                 except:
                     # module of mtype doesn't exist yet in old doc, so we add the
-                    # whole module fragment
-                    # there can be only one
-                    modules = self.etree.xpath("/m:application/m:modules")[0]
+                    # whole module fragment, there can be only one
+                    modules = self.etree.xpath(
+                        "/m:application/m:modules", namespaces=NSMAP
+                    )[0]
                     modules.append(moduleN)
                 else:
                     # new doc's mtype exists already in old doc
@@ -450,7 +449,7 @@ class Module(Helper):
                 rGrp.set("size", size)
         return rGrp
 
-    def repeatableGroupItems(self, *, parent):
+    def repeatableGroupItems(self, *, parent: ET):
         """
         Returns existing rGrpItem (only getter).
 

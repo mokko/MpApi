@@ -1,13 +1,13 @@
-from MpApi.Search import Search  # type: ignore
-from MpApi.Module import Module  # type: ignore
-from lxml import etree
+from MpApi.Search import Search  
+from MpApi.Module import Module  
+from lxml import etree #type: ignore
 
-NSMAP = {"m": "http://www.zetcom.com/ria/ws/module"}
+NSMAP:dict = {"m": "http://www.zetcom.com/ria/ws/module"}
 
 
 def test_constructors_only():
     # four different constructors, sort of
-    m = Module(file="sdata/exhibit20222.xml")
+    m:MpApi.Module = Module(file="sdata/exhibit20222.xml")
     assert m
     xml = """
     <application xmlns="http://www.zetcom.com/ria/ws/module">
@@ -74,4 +74,19 @@ def test_from_scratch_interface():
 def test_drops_other_changes():
     m = Module(file="sdata/exhibit20222.xml")
     m.dropUUID()
+    # ... TODO: some methods are missing
     assert m.validate()
+
+
+def test_join():
+    m = Module(file="sdata/exhibit20222.xml")
+    before = m.totalSize(module="Multimedia")
+    assert isinstance(before, int)
+    ET = etree.parse("sdata/exhibit20222.xml")
+    m.addDocument(doc=ET)
+    after = m.totalSize(module="Multimedia")
+    assert before == after
+    assert m.totalSize(module="Object") is None
+    ET = etree.parse("data/739673.xml")
+    m.addDocument(doc=ET)
+    assert m.totalSize(module="Object") == 1
