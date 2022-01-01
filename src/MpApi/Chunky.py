@@ -185,11 +185,11 @@ class Chunky(Helper):
           the name of the method suggests.
         * Let's not return a Module object, b/c that simplifies the code
         """
-        fields: dict = {  # TODO
-            "approval": "wrong.__id",
+        fields: dict = {  # TODO: untested
+            "approval": "ObjPublicationGrp.TypeVoc",
             "group": "ObjObjectGroupsRef.__id",
-            "loc": "loc",
-            "exhibit": "exhibit",
+            "loc": "ObjCurrentLocationVoc",
+            "exhibit": "ObjRegistrarRef.RegExhibitionRef.__id",
         }
 
         s = Search(module="Object", limit=self.chunkSize, offset=offset)
