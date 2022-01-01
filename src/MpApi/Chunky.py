@@ -241,14 +241,12 @@ class Chunky(Helper):
             print(f"***No related {target} IDs found {IDs}")
             return
 
-        # IDs are not unique, but we want unique; set has no order
-        relIDs = set(IDs)  #
-
         # use limit=0 for a deterministic search as response provides the
         # number of search results limit -1 not documented at
         # http://docs.zetcom.com/ws/ seems to return all results
         s = Search(module=target, limit=-1, offset=0)
         count = 1  # one-based out of tradition
+        relIDs = set(IDs)  # IDs are not unique, but we want unique
         for ID in sorted(relIDs):
             # print(f"{target} {ID}")
             if count == 1 and len(IDs) > 1:
