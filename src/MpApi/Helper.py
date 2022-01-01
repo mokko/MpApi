@@ -12,7 +12,7 @@ class Helper:
             doc = etree.ElementTree(self.etree)
             self._write(path=path, doc=doc)
 
-    def toFile2(self, *, path): # should not be necessary
+    def toFile2(self, *, path):  # should not be necessary
         doc = self.etree
         doc.write(str(path), pretty_print=True, method="c14n2")
 
@@ -20,7 +20,7 @@ class Helper:
         return self.etree
 
     def _write(self, *, path, doc):
-        #,pretty_print=True, method="c14n2"
+        # ,pretty_print=True, method="c14n2"
         doc.write(str(path), pretty_print=True, encoding="UTF-8")
 
     def toString(self, *, et=None):

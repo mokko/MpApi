@@ -56,7 +56,7 @@ EXAMPLE
 """
 
 from pathlib import Path
-from lxml import etree # type: ignore
+from lxml import etree  # type: ignore
 from MpApi.Helper import Helper
 
 # xpath 1.0 and lxml don't empty string or None for default ns
@@ -164,13 +164,13 @@ class Search(Helper):
     #
 
     def AND(self):
-        self._addConjunction(type="and")
+        self._addConjunction(Type="and")
 
     def OR(self):
-        self._addConjunction(type="or")
+        self._addConjunction(Type="or")
 
     def NOT(self):
-        self._addConjunction(type="not")
+        self._addConjunction(Type="not")
 
     def setParam(self, *, key, value):
         """
@@ -186,17 +186,17 @@ class Search(Helper):
     # private helpers
     #
 
-    def _addConjunction(self, *, type):
+    def _addConjunction(self, *, Type):
         """
         kind is "and", "or" or "not"
         either places conjunction under expert or under last conjunction that has been added.
         """
         allowed_types = ["and", "or", "not"]
-        if type not in allowed_types:
+        if Type not in allowed_types:
             raise TypeError("conjunction type NOT ALLOWED")
 
         self.lastN = etree.SubElement(
-            self.lastN, "{http://www.zetcom.com/ria/ws/module/search}" + type
+            self.lastN, "{http://www.zetcom.com/ria/ws/module/search}" + Type
         )
 
 

@@ -490,13 +490,17 @@ class Module(Helper):
 
     def totalSize(self, *, module: str) -> int:
         """
-        Report the totalSize of a requested module (as provided by the xml 
-        attribute of the same name not by counter moduleItems). It's getter 
-        only , use totalSizeUpdate for writing attributes after counting 
-        moduleItems. 
-        
-        If the requested module type or the attribute doesn't exist, 
+        Report the totalSize of a requested module (as provided by the xml
+        attribute of the same name not by counter moduleItems). It's getter
+        only , use totalSizeUpdate for writing attributes after counting
+        moduleItems.
+
+        If the requested module type or the attribute doesn't exist,
         raises TypeError.
+
+        Note that RIA returns the number of hits in the totalSize attribute,
+        which does not have equal the number of actually returned items in case
+        offset or limit are used. See totalSize2.
 
         EXPECTS
         * module: type, e.g. Object
@@ -521,7 +525,44 @@ class Module(Helper):
                 )[0]
             )
         except:
-            raise TypeError (f"Requested module '{module}' or attribute totalSize doesn't exist")
+            raise TypeError(
+                f"Requested module '{module}' or attribute totalSize doesn't exist"
+            )
+
+    def totalSize2(self, *, module: str) -> int:
+        """
+        Report the totalSize of a requested module using the actual number of 
+        moduleItems. It's getter only
+
+        If the requested module type or the attribute doesn't exist,
+        raises TypeError.
+
+        EXPECTS
+        * module: type, e.g. Object
+
+        RETURNS
+        * integer
+
+        NEW
+        * Used to return None when requested object didn't exist, now raises
+          TypeError.
+
+        EXAMPLE
+        <application xmlns="http://www.zetcom.com/ria/ws/module">
+           <modules>
+              <module name="Object" totalSize="173">
+        """
+        try:
+            return int(
+                self.etree.xpath(
+                    f"count(/m:application/m:modules/m:module[@name ='{module}']/m:moduleItem)",
+                    namespaces=NSMAP,
+                )
+            )
+        except:
+            raise TypeError(
+                f"Requested module '{module}' doesn't exist or has no moduleItems"
+            )
 
     def totalSizeUpdate(self) -> None:
         """
