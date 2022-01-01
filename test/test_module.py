@@ -82,18 +82,22 @@ def test_drops_other_changes():
 
 def test_join():
     m = Module(file="sdata/exhibit20222.xml")
-    before = m.totalSize(module="Multimedia")
-    assert isinstance(before, int)
+    MM_before = m.totalSize(module="Multimedia")
+    assert isinstance(MM_before, int)
+
     ET = etree.parse("sdata/exhibit20222.xml")
     m.add(doc=ET)
-    after = m.totalSize(module="Multimedia")
-    assert before == after
+    MM_after = m.totalSize(module="Multimedia")
+    assert MM_before == MM_after
+
     ET2 = etree.parse("data/739673.xml")
-    xml = len(etree.tostring(ET2, pretty_print=True, encoding="unicode"))
+    Obj_before = Module(tree=ET2).actualSize(module="Object")
     m.add(doc=ET2)
     assert m.totalSize(module="Object") == 1
+
     # there was a version where add(doc=ET) deleted most of the document, so now we
     # test that doc remains the same
-    xml2 = len(etree.tostring(ET, pretty_print=True, encoding="unicode"))
-    # assert xml == xml2 # len()?
-    print(ET2)
+    Obj_after = Module(tree=ET2).actualSize(
+        module="Object"
+    )  # ET2 has to remain the same
+    assert Obj_before == Obj_after
