@@ -81,6 +81,7 @@ from typing_extensions import TypeAlias  # only in python 3.9?
 from typing import Union, Iterator, List, Set
 from lxml import etree  # type: ignore
 from MpApi.Helper import Helper
+from copy import deepcopy  # for lxml
 
 # xpath 1.0 and lxml don't allow empty string or None for default ns
 dataTypes = {"Clb": "Clob", "Dat": "Date", "Lnu": "Long", "Txt": "Varchar"}
@@ -126,6 +127,41 @@ class Module(Helper):
             </application>"""
             self.etree = etree.fromstring(xml, parser)
 
+    def actualSize(self, *, module: str) -> int:
+        """
+        Report the actual size of a requested module type (using number of
+        moduleItems, not the number of the attribute value. It's getter only.
+
+        If the requested module type or the attribute doesn't exist,
+        raises TypeError.
+
+        EXPECTS
+        * module: type, e.g. Object
+
+        RETURNS
+        * integer
+
+        NEW
+        * Used to return None when requested object didn't exist, now raises
+          TypeError.
+
+        EXAMPLE
+        <application xmlns="http://www.zetcom.com/ria/ws/module">
+           <modules>
+              <module name="Object" totalSize="173">
+        """
+        try:
+            return int(
+                self.etree.xpath(
+                    f"count(/m:application/m:modules/m:module[@name ='{module}']/m:moduleItem)",
+                    namespaces=NSMAP,
+                )
+            )
+        except:
+            raise TypeError(
+                f"Requested module '{module}' doesn't exist or has no moduleItems"
+            )
+
     def add(self, *, doc: ET) -> None:
         """
         add a new doc[ument] to the Module, i.e. join two documents.
@@ -148,9 +184,14 @@ class Module(Helper):
         m.join(doc=Module())
 
         Should doc be an lxml object or another Module?
+        NEW
+        * At some point, the method add would change doc so that after
+          completion, the document would no longer be there.
+
         """
         # List[Union[_Element, Union[_ElementUnicodeResult, _PyElementUnicodeResult, _ElementStringResult]]]
-        moduleL = doc.xpath(  # newdoc
+        doc2 = deepcopy(doc)  # leave doc alone, so we don't change it
+        moduleL = doc2.xpath(  # newdoc
             "/m:application/m:modules/m:module",
             namespaces=NSMAP,
         )
@@ -496,11 +537,11 @@ class Module(Helper):
         moduleItems.
 
         If the requested module type or the attribute doesn't exist,
-        raises TypeError.
+        raises TypeError (IndexError?).
 
-        Note that RIA returns the number of hits in the totalSize attribute,
-        which does not have equal the number of actually returned items in case
-        offset or limit are used. See totalSize2.
+        Note that RIA returns the number of "hits" to the query in the
+        totalSize attribute. This may differ from the number of actually
+        returned items (e.g. if offset or limit) are used. See actualSize.
 
         EXPECTS
         * module: type, e.g. Object
@@ -511,6 +552,7 @@ class Module(Helper):
         NEW
         * Used to return None when requested object didn't exist, now raises
           TypeError.
+        * Todo write tests for the erros this method can throw!
 
         EXAMPLE
         <application xmlns="http://www.zetcom.com/ria/ws/module">
@@ -527,41 +569,6 @@ class Module(Helper):
         except:
             raise TypeError(
                 f"Requested module '{module}' or attribute totalSize doesn't exist"
-            )
-
-    def totalSize2(self, *, module: str) -> int:
-        """
-        Report the totalSize of a requested module using the actual number of 
-        moduleItems. It's getter only
-
-        If the requested module type or the attribute doesn't exist,
-        raises TypeError.
-
-        EXPECTS
-        * module: type, e.g. Object
-
-        RETURNS
-        * integer
-
-        NEW
-        * Used to return None when requested object didn't exist, now raises
-          TypeError.
-
-        EXAMPLE
-        <application xmlns="http://www.zetcom.com/ria/ws/module">
-           <modules>
-              <module name="Object" totalSize="173">
-        """
-        try:
-            return int(
-                self.etree.xpath(
-                    f"count(/m:application/m:modules/m:module[@name ='{module}']/m:moduleItem)",
-                    namespaces=NSMAP,
-                )
-            )
-        except:
-            raise TypeError(
-                f"Requested module '{module}' doesn't exist or has no moduleItems"
             )
 
     def totalSizeUpdate(self) -> None:

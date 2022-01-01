@@ -105,50 +105,74 @@ class Chunky(Helper):
         # self.user = user # dont need it yet
         # self.sar = Sar(baseURL=baseURL, user=user, pw=pw)
 
-    def byGroup(self, *, ID, since: since = None) -> Iterator[Module]:
+    def getByType(self, *, ID, Type, since: since = None) -> Iterator[Module]:
+        """
+        Get a pack based on approval [group], location, group or exhibit.
+        Yields independent chunks.
+
+        EXPECTS
+        * ID:
+        * Type: type of the ID (approval, location, group, exhibit) TODO
+        * since: TODO
+
+        RETURNS
+        *
+        """
 
         lastChunk: bool = False
         offset: int = 0
 
         while not lastChunk:
             chunk = Module()  # make a new zml module document
-
+            print(f"Getting {self.chunkSize} objects")
             # let's deal with exotic multi-type later
-            partET = self._getPart(module="Object", ID=ID, offset=offset, since=since)
-            chunk.add(doc=partET)
 
-            # all related items, no chunking
-            try:
-                relMulET = self._relatedItems(
-                    part=partET, target="Multimedia", since=since
-                )
-            except:
-                pass  # not really an error if there are no related items
-            else:  # only if try succeeds
-                chunk.add(doc=relMulET)
+            print(f"ID:{ID} offset:{offset} since:{since}")
+            partET = self._getObjects(Type="group", ID=ID, offset=offset, since=since)
 
-            try:
-                relPerET = self._relatedItems(part=partET, target="Person", since=since)
-            except:
-                pass  # not really an error if there are no related items
-            else:
-                chunk.add(doc=relPerET)
+            # print(
+            #    etree.tostring(partET, pretty_print=True, encoding="unicode")
+            # )
+
+            chunk.add(doc=partET)  # chunk.add empties out partET
+
+            # print(
+            #    etree.tostring(partET, pretty_print=True, encoding="unicode")
+            # )
+
+            # all related Multimedia and Persons items, no chunking
+            relMul = self._relatedItems(part=partET, target="Multimedia", since=since)
+            # print(f"***relMul: {relMul}")
+            if relMul is not None:
+                chunk.add(doc=relMul)
+
+            relPer = self._relatedItems(part=partET, target="Person", since=since)
+            # print(f"***relPer: {relPer}")
+            if relPer is not None:
+                chunk.add(doc=relPer)
+
+            # TODO: is it possible that Persons and Multimedia reference other Persons and Multimedia?
+            # then these might be missing so far -> Let's ponder that first
 
             offset = offset + self.chunkSize
-            actualNo = chunk.totalSize2(module="Object") # of object moduleItems
-
-            print (f"*** actual VS chunkSize: {actualNo} VS {self.chunkSize}")
+            actualNo = chunk.actualSize(module="Object")  # of object moduleItems
+            # print(f"*** actual VS chunkSize: {actualNo} VS {self.chunkSize}")
 
             if actualNo < self.chunkSize:
-                print ("****************************************")
                 lastChunk = True
             yield chunk
 
-    def _getPart(self, *, module: str, ID: int, offset: int, since: since) -> ET:
+    #
+    # private methods
+    #
+
+    def _getObjects(
+        self, *, Type: str, ID: int, offset: int, since: since = None
+    ) -> ET:
         """
         A part is the result from a single request, e.g. for one module type.
         EXPECTS
-        * module: requested target module type
+        * type: requested target module type
         * ID: of requested group
         * offset: offset for search query
         * since: dateTime string; TODO
@@ -161,19 +185,20 @@ class Chunky(Helper):
           the name of the method suggests.
         * Let's not return a Module object, b/c that simplifies the code
         """
-        fields: dict = {
-            "Multimedia": "MulObjectRef.ObjObjectGroupsRef.__id",
-            "Object": "ObjObjectGroupsRef.__id",
-            "Person": "PerObjectRef.ObjObjectGroupsRef.__id",
+        fields: dict = {  # TODO
+            "approval": "wrong.__id",
+            "group": "ObjObjectGroupsRef.__id",
+            "loc": "loc",
+            "exhibit": "exhibit",
         }
 
-        s = Search(module=module, limit=self.chunkSize, offset=offset)
+        s = Search(module="Object", limit=self.chunkSize, offset=offset)
 
         if since is not None:
             s.AND()
 
         s.addCriterion(
-            field=fields[module],
+            field=fields[Type],
             operator="equalsField",
             value=str(ID),
         )
@@ -184,15 +209,16 @@ class Chunky(Helper):
                 field="__lastModified",
                 value=since,  # "2021-12-23T12:00:00.0"
             )
-        s.print()
+        # s.print()
         s.validate(mode="search")
 
-        #print(f"Query validates: {s.toString()}")
         r = self.api.search(xml=s.toString())
-        print(f"status {r.status_code}")
+        # print(f"status {r.status_code}")
         return etree.fromstring(r.content, ETparser)
 
-    def _relatedItems(self, *, part: ET, target: str, since: since = None) -> ET:
+    def _relatedItems(
+        self, *, part: ET, target: str, since: since = None
+    ) -> Union[ET, None]:
         """
         For a zml document, return all related items of the target type.
 
@@ -210,19 +236,29 @@ class Chunky(Helper):
             namespaces=NSMAP,
         )
 
-        # use limit=0 for a deterministic search as response provides the 
-        # number of search results limit -1 not documented at 
-        # http://docs.zetcom.com/ws/ seems to return all results
-        print (f"IDS {IDs}")
+        if len(IDs) == 0:
+            # raise IndexError("No related IDs found!")
+            print(f"***No related {target} IDs found {IDs}")
+            return
+
+        # IDs are not unique, but we want unique
+        relIDs = set(IDs)  # set has no order
+
+        # do we really need this? If yes, why?
         if isinstance(IDs, bool):
             # it's NOT an error if there are no related items, but what do I
             # return in that case? I guess an error so I don't have to return
             # ET or None
-            raise IndexError("No related {target} items")
+            print(f"{IDs} is bool")
+            return
+
+        # use limit=0 for a deterministic search as response provides the
+        # number of search results limit -1 not documented at
+        # http://docs.zetcom.com/ws/ seems to return all results
         s = Search(module=target, limit=-1, offset=0)
         count = 1  # one-based out of tradition
-        for ID in IDs:
-            print(f"{target} {ID}")
+        for ID in relIDs:
+            # print(f"{target} {ID}")
             if count == 1 and len(IDs) > 1:
                 s.OR()
             s.addCriterion(

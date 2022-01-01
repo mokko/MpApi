@@ -1,6 +1,7 @@
 from MpApi.Search import Search
 from MpApi.Module import Module
 from lxml import etree  # type: ignore
+import pytest
 
 NSMAP: dict = {"m": "http://www.zetcom.com/ria/ws/module"}
 
@@ -33,7 +34,8 @@ def test_output():
 
 def test_inspection():
     m = Module(file="sdata/exhibit20222.xml")
-    assert m.totalSize(module="Object") is None
+    with pytest.raises(TypeError) as exc_info:
+        m.totalSize(module="Object")  # none
     assert m.totalSize(module="Multimedia") == 619
     desc = m.describe
     print(desc)  # todo write a good test
@@ -86,7 +88,12 @@ def test_join():
     m.add(doc=ET)
     after = m.totalSize(module="Multimedia")
     assert before == after
-    assert m.totalSize(module="Object") is None
-    ET = etree.parse("data/739673.xml")
-    m.addDocument(doc=ET)
+    ET2 = etree.parse("data/739673.xml")
+    xml = len(etree.tostring(ET2, pretty_print=True, encoding="unicode"))
+    m.add(doc=ET2)
     assert m.totalSize(module="Object") == 1
+    # there was a version where add(doc=ET) deleted most of the document, so now we
+    # test that doc remains the same
+    xml2 = len(etree.tostring(ET, pretty_print=True, encoding="unicode"))
+    # assert xml == xml2 # len()?
+    print(ET2)

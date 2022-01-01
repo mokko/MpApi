@@ -41,12 +41,51 @@ def test_relatedItems():
     assert int(r) == 1
 
 
-def test_chunk():
-    c = Chunky(chunkSize=99, baseURL=baseURL, pw=pw, user=user)
+def test_getObjects():
+    c = Chunky(chunkSize=1, baseURL=baseURL, pw=pw, user=user)
+    partET = c._getObjects(Type="group", ID=162397, offset=0)
+
+    itemCnt = partET.xpath(
+        "count(//m:moduleItem)",
+        namespaces=NSMAP,
+    )
+    assert int(itemCnt) == 1
+
+    partET = c._getObjects(Type="group", ID=162397, offset=0, since=None)
+
+    itemCnt = int(
+        partET.xpath(
+            "count(//m:moduleItem)",
+            namespaces=NSMAP,
+        )
+    )
+    assert itemCnt == 1
+
+    partET = c._getObjects(Type="group", ID=162397, offset=1, since=None)
+
+    itemCnt = int(
+        partET.xpath(
+            "count(//m:moduleItem)",
+            namespaces=NSMAP,
+        )
+    )
+    assert itemCnt == 1
+
+    # print(
+    # etree.tostring(partET, pretty_print=True, encoding="unicode")
+    # )
+
+
+def test_full():
+    c = Chunky(chunkSize=1, baseURL=baseURL, pw=pw, user=user)
     no = 1
-    for chunk in c.byGroup(ID=162397):
-        chunk.toFile(path=f"sdata/chunk{no}.xml")
+    for chunk in c.getByType(ID=162397, Type="group"):
+        print("before saving to file in test_chunky")
+        chunk.toFile(path=f"sdata/group162397-chunk{no}.xml")
+        if no == 3:
+            break
         no += 1
+    print("Stopping after 3")
 
 
 def toFile(ET, path):
