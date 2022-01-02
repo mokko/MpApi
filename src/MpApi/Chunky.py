@@ -111,7 +111,9 @@ class Chunky(Helper):
         self.chunkSize = chunkSize
         self.api = MpApi(baseURL=baseURL, user=user, pw=pw)
 
-    def getByType(self, *, ID, Type, since: since = None) -> Iterator[Module]:
+    def getByType(
+        self, *, ID, Type, since: since = None, offset: int = 0
+    ) -> Iterator[Module]:
         """
         Get a pack based on approval [group], location, group or exhibit.
         Yields independent chunks.
@@ -119,38 +121,28 @@ class Chunky(Helper):
         EXPECTS
         * ID:
         * Type: type of the ID (approval, location, group, exhibit) TODO
-        * since: TODO
+        * since: xs:DateTime
+        * offset: initial offset to igore object hits
 
         RETURNS
-        *
+        * iterator [chunk: Module]: an indepedent chunk with persons, multimedia and objects
         """
-
         lastChunk: bool = False
-        offset: int = 0
-
         while not lastChunk:
             chunk = Module()  # make a new zml module document
-            # print(f"Getting {self.chunkSize} objects")
-            # let's deal with exotic multi-type later
-
-            # print(f"ID:{ID} offset:{offset} since:{since}")
             partET = self._getObjects(Type="group", ID=ID, offset=offset, since=since)
-
-            chunk.add(doc=partET)  # chunk.add empties out partET
+            chunk.add(doc=partET)
 
             # all related Multimedia and Persons items, no chunking
-            relMul = self._relatedItems(part=partET, target="Multimedia", since=since)
-            # print(f"***relMul: {relMul}")
-            if relMul is not None:
-                chunk.add(doc=relMul)
-
-            relPer = self._relatedItems(part=partET, target="Person", since=since)
-            # print(f"***relPer: {relPer}")
-            if relPer is not None:
-                chunk.add(doc=relPer)
+            for targetType in ["Multimedia", "Person"]:
+                relatedET = self._relatedItems(
+                    part=partET, target=targetType, since=since
+                )
+                if relatedET is not None:
+                    chunk.add(doc=relatedET)
 
             offset = offset + self.chunkSize
-            actualNo = chunk.actualSize(module="Object")  # of object moduleItems
+            actualNo = chunk.actualSize(module="Object")
             # print(f"*** actual VS chunkSize: {actualNo} VS {self.chunkSize}")
 
             if actualNo < self.chunkSize:
@@ -259,7 +251,7 @@ class Chunky(Helper):
                     field="__lastModified",
                     value=str(since),  # "2021-12-23T12:00:00.0"
                 )
-        # s.print()
+        s.print()
         s.validate(mode="search")
         r = self.api.search(xml=s.toString())
         return etree.fromstring(r.content, ETparser)

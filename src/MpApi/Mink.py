@@ -124,6 +124,13 @@ class Mink:
 
         * args[]: label (used for filename) -> not used ATM
         * args[]: attachments -> not implemented, not needed ATM
+
+        NEW
+        * I would like the ability to start where the last run stopped. To do
+          so, we need to establish the last chunk on disk and its number and
+          then calculate the offset.
+          So three chunks got written, the fourth aborted, so offset
+          would 3 x 1000
         """
         Type = args[0]
         ID = args[1]
@@ -136,7 +143,21 @@ class Mink:
             f" CHUNKER: {Type}-{ID} since:{since} chunkSize: {self.chunker.chunkSize}"
         )
         no = 1
-        for chunk in self.chunker.getByType(ID=ID, Type=Type, since=since):
+
+        path2 = self.project_dir.joinpath(f"{Type}{ID}-chunk{no}.xml")
+        while path2.exists():
+            path2 = self.project_dir.joinpath(f"{Type}{ID}-chunk{no}.xml")
+            no += 1
+        else:
+            if no > 1:
+                no -= 1
+
+        offset = (no - 1) * self.chunker.chunkSize
+        print(f" next chunk {no}; offset:{offset}")
+
+        for chunk in self.chunker.getByType(
+            ID=ID, Type=Type, since=since, offset=offset
+        ):
             path = self.project_dir.joinpath(f"{Type}{ID}-chunk{no}.xml")
             print(f"saving to {path}")
             chunk.toFile(path=path)
