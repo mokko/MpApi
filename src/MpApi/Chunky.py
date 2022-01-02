@@ -3,12 +3,15 @@
     exceeds the chunkSize, return multiple chunks. For now, we only allow very
     limited set of search queries.
 
-    Experimenting with a paginated search. Unfinished!
+    USAGE
+    import Chunky from Chunky
+    for chunk in getByType (ID=ID, Type="group"): 
+        do_something_with (chunk) # chunk is ET
 
-    The problem 
+    THE PROBLEM 
     * A search returns more items (=results) than I can digest
 
-    The solution
+    THE SOLUTION
     * to split up the response in chunks (aka blocks or pages) and to deal with
       them individually
     * in good old MPX tradition, we want independent chunks, i.e. the objects
@@ -46,8 +49,8 @@
     * The chunky (=paginated) search is expected not to be faster than an 
       unchunked search nice it will involve more http requests for the same
       thing.
-    * We'll call the one-type response/document a part in contrast to chunk, 
-      which we'll reserve for multi-type documents.
+    * We'll call the one-type response/document "a part" in contrast to 
+      "chunk", which we'll reserve for multi-type documents.
     * Should we count chunks one-based? Yes, b/c we like one-based counters in 
       xslt.
     * We start with simple searches, but perhaps we generalize later, e.g. 
@@ -72,10 +75,6 @@
       have any of the relevant directory information inside Chunky.
     * Let's experiment with type hints again; we're using Python 3.9 type hints
 
-    USAGE
-
-    for chunk in getByType (ID=ID, Type="group"): 
-        do_something_with (chunk) # chunk is ET
   
 """
 
@@ -148,6 +147,15 @@ class Chunky(Helper):
             if actualNo < self.chunkSize:
                 lastChunk = True
             yield chunk
+
+    def search(self, query: str, since: since = None, offset: int = 0):
+        """
+        We could attempt a general chunky search. Just hand over a search query
+        (presumably one which finds object items). We split the results into
+        chunks and add the related items to every chunk.
+
+        TODO
+        """
 
     #
     # private methods
@@ -228,15 +236,15 @@ class Chunky(Helper):
             print(f"***No related {target} IDs found {IDs}")
             return None
 
-        # use limit=0 for a deterministic search as response provides the
+        # use limit=0 for a deterministic search as RIA's response provides the
         # number of search results limit -1 not documented at
         # http://docs.zetcom.com/ws/ seems to return all results
         s = Search(module=target, limit=-1, offset=0)
-        count = 1  # one-based out of tradition
+        count = 1  # one-based out of tradition; counting unique IDs
         relIDs = set(IDs)  # IDs are not unique, but we want unique
         for ID in sorted(relIDs):
             # print(f"{target} {ID}")
-            if count == 1 and len(IDs) > 1:
+            if count == 1 and len(relIDs) > 1:
                 s.OR()
             s.addCriterion(
                 operator="equalsField",
@@ -251,12 +259,12 @@ class Chunky(Helper):
                     field="__lastModified",
                     value=str(since),  # "2021-12-23T12:00:00.0"
                 )
-        s.print()
+        # s.toFile(path="debug.search.xml")
+        # s.print()
         s.validate(mode="search")
         r = self.api.search(xml=s.toString())
         return etree.fromstring(r.content, ETparser)
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # use test_chunky.py instead
     pass
-# use test_chunky.py instead
