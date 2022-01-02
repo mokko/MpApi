@@ -13,11 +13,17 @@
       them individually
     * in good old MPX tradition, we want independent chunks, i.e. the objects
       should be accompanied not by random Person and Multimedia records, but
-      exactly by those that are referenced in the object records.
+      exactly by those that are referenced in the object records. So related
+      items are those referenced from the object item. However, if the person 
+      or multimedia items reference other persons and multimedia, we don't 
+      include them, i.e. we're including only immediate relatives, no distant
+      cousins.
     
     TOWARDS AN ALGORITHM
     A "deterministic" solution would first (1) query how many results there are
-    and then (2) do further queries for every chunk until done.
+    and then (2) do further queries for every chunk until done. It turns out 
+    that a deterministic algorithm would be very easy, b/c RIA reports the 
+    total hits in the totalSize attribute.
     
     Example: 100 results, but chunk size is 10, so we make 10 chunks
     (in production we expect that chunk size should be between 1000 or 3000, in 
@@ -40,16 +46,20 @@
     * The chunky (=paginated) search is expected not to be faster than an 
       unchunked search nice it will involve more http requests for the same
       thing.
-    * Should we count chunks one-based?
+    * We'll call the one-type response/document a part in contrast to chunk, 
+      which we'll reserve for multi-type documents.
+    * Should we count chunks one-based? Yes, b/c we like one-based counters in 
+      xslt.
     * We start with simple searches, but perhaps we generalize later, e.g. 
       requesting the objects from one group. More general would be a chunking
       mechanism for all searches.
     * We want a multi-type chunk, i.e. have objects, multimedia, and persons, 
-      perhaps others in one chunk. I could hide that fact, or I can make it 
-      explicit. Compromise would be a default value. On the others hand, this 
-      is not our problem atm. Let's just bake Object, Multimedia and Person in
-      and find a proper solution later. In other words: We considered to 
-      provide another argument to specify the requested target modules, e.g.:
+      perhaps others in one chunk. I could hide which modules are included, or 
+      I can make it explicit. Compromise would be a default value. On the other
+      hand, this is not our problem atm. Let's just bake Object, Multimedia and
+      Person in and find a proper solution later. In other words: We considered 
+      to provide another argument to specify the requested target modules, 
+      e.g.:
         mtype: List[str] = ['Object', 'Multimedia', 'Person']
       But we decided against it; this can be done later, if really of use.
     * This time I want to return document as etree, b/c in the long term I 
@@ -58,27 +68,25 @@
     * Should we write chunks to disk? In Sar I left all disk operations to mink
       level. Should we still do that or should Chunky.py this time be able to 
       write to disk directly. Perhaps useful for testing. In general let's try
-      stuff here differently from SAR.
+      stuff here differently from SAR. -> Still makes no sense since we don't 
+      have any of the relevant directory information inside Chunky.
     * Let's experiment with type hints again; we're using Python 3.9 type hints
-    * We'll call the one-type response/document a part in contrast to chunk, 
-      which we'll reserve for multi-type documents.
 
-    INTERFACE PROPOSAL
-    def byGroup (ID:int = ID) -> iterator[ET] # ID is groupID
+    USAGE
 
-    for chunk in byGroup (ID=ID): 
+    for chunk in getByType (ID=ID, Type="group"): 
         do_something_with (chunk) # chunk is ET
   
 """
 
-from lxml import etree  # type: ignore
+from lxml import etree
 from pathlib import Path
-from typing import Iterator, NewType, Union
+from typing import Any, Iterator, List, NewType, Union  # NewType not used ATM
 from MpApi.Search import Search
 from MpApi.Client import MpApi
+from MpApi.Helper import Helper
 from MpApi.Module import Module
 from MpApi.Sar import Sar
-from MpApi.Helper import Helper
 
 NSMAP = {
     "s": "http://www.zetcom.com/ria/ws/module/search",
@@ -87,9 +95,10 @@ NSMAP = {
 
 ETparser = etree.XMLParser(remove_blank_text=True)
 
-# types
-since = Union[str, None]  # NewType ('since', Union[str, None]) gives mypy error
+# types aliasses
 ET = etree._Element
+ETNone = Union[etree._Element, None]
+since = Union[str, None]
 
 # typed variables
 baseURL: str
@@ -101,9 +110,6 @@ class Chunky(Helper):
     def __init__(self, *, chunkSize: int, baseURL: str, pw: str, user: str) -> None:
         self.chunkSize = chunkSize
         self.api = MpApi(baseURL=baseURL, user=user, pw=pw)
-        # self.baseURL = baseURL # dont need it yet
-        # self.user = user # dont need it yet
-        # self.sar = Sar(baseURL=baseURL, user=user, pw=pw)
 
     def getByType(self, *, ID, Type, since: since = None) -> Iterator[Module]:
         """
@@ -124,21 +130,13 @@ class Chunky(Helper):
 
         while not lastChunk:
             chunk = Module()  # make a new zml module document
-            print(f"Getting {self.chunkSize} objects")
+            # print(f"Getting {self.chunkSize} objects")
             # let's deal with exotic multi-type later
 
-            print(f"ID:{ID} offset:{offset} since:{since}")
+            # print(f"ID:{ID} offset:{offset} since:{since}")
             partET = self._getObjects(Type="group", ID=ID, offset=offset, since=since)
 
-            # print(
-            #    etree.tostring(partET, pretty_print=True, encoding="unicode")
-            # )
-
             chunk.add(doc=partET)  # chunk.add empties out partET
-
-            # print(
-            #    etree.tostring(partET, pretty_print=True, encoding="unicode")
-            # )
 
             # all related Multimedia and Persons items, no chunking
             relMul = self._relatedItems(part=partET, target="Multimedia", since=since)
@@ -150,9 +148,6 @@ class Chunky(Helper):
             # print(f"***relPer: {relPer}")
             if relPer is not None:
                 chunk.add(doc=relPer)
-
-            # TODO: is it possible that Persons and Multimedia reference other Persons and Multimedia?
-            # then these might be missing so far -> Let's ponder that first
 
             offset = offset + self.chunkSize
             actualNo = chunk.actualSize(module="Object")  # of object moduleItems
@@ -231,7 +226,7 @@ class Chunky(Helper):
         * etree document with related items of the target type
         """
 
-        IDs = part.xpath(
+        IDs: Any = part.xpath(
             f"//m:moduleReference[@targetModule = '{target}']/m:moduleReferenceItem/@moduleItemId",
             namespaces=NSMAP,
         )
@@ -239,7 +234,7 @@ class Chunky(Helper):
         if len(IDs) == 0:
             # raise IndexError("No related IDs found!")?
             print(f"***No related {target} IDs found {IDs}")
-            return
+            return None
 
         # use limit=0 for a deterministic search as response provides the
         # number of search results limit -1 not documented at
@@ -264,21 +259,12 @@ class Chunky(Helper):
                     field="__lastModified",
                     value=str(since),  # "2021-12-23T12:00:00.0"
                 )
-        s.print()
+        # s.print()
         s.validate(mode="search")
         r = self.api.search(xml=s.toString())
-        # print (f"status {r.status_code}")
-        # print (r.content)
         return etree.fromstring(r.content, ETparser)
 
 
 if __name__ == "__main__":
-    with open("credentials.py") as f:
-        exec(f.read())
-
-    c = Chunky(chunkSize=1, baseURL=baseURL, pw=pw)
-    cnt = 1  # 1-based counter
-    for chunk in c.byGroup(ID=162397):  # chunk is ET
-        chunk.toFile(path=f"o{cnt}.xml")
-        print(f"Working on chunk no {cnt}")
-        cnt += 1
+    pass
+# use test_chunky.py instead

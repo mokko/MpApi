@@ -12,6 +12,11 @@ baseURL: str
 pw: str
 user: str
 
+#
+# has plenty of http tests...
+# pytest -sx -vv test_chunky.py
+
+
 with open("sdata/credentials.py") as f:
     exec(f.read())
 
@@ -21,7 +26,6 @@ def test_relatedItems():
     partET = etree.parse("sdata/testobjects.xml")
 
     relMul = c._relatedItems(part=partET, target="Multimedia")
-    # toFile(relMul, "sdata/relMul.xml")
     rL = relMul.xpath(
         "//m:module[@name = 'Multimedia']/m:moduleItem[@id = '468698']",
         namespaces=NSMAP,
@@ -76,19 +80,33 @@ def test_getObjects():
     # )
 
 
-def test_full():
+def test_getByGroup():
     c = Chunky(chunkSize=1, baseURL=baseURL, pw=pw, user=user)
     no = 1
     for chunk in c.getByType(ID=162397, Type="group"):
-        print("before saving to file in test_chunky")
+        # print("before saving to file in test_chunky")
         chunk.toFile(path=f"sdata/group162397-chunk{no}.xml")
         if no == 3:
             break
         no += 1
-    print("Stopping after 3")
+    print(" stopping after 3")
 
 
-def toFile(ET, path):
-    doc = etree.ElementTree(ET)
-    doc.write(path, pretty_print=True)
-    print(f"Results written to {path}")
+def test_getByOtherTypes():
+    c = Chunky(chunkSize=1, baseURL=baseURL, pw=pw, user=user)
+
+    todo: dict[str, int] = {
+        "exhibit": 20222,  # M39
+        "approval": 4460851,  # Benin
+        "loc": 4220580,  # M39
+    }
+
+    for task in list(todo):
+        no = 1
+        for chunk in c.getByType(ID=162397, Type="group"):
+            print("before saving to file in test_chunky")
+            chunk.toFile(path=f"sdata/{task}{todo[task]}-chunk{no}.xml")
+            if no == 3:
+                break
+            no += 1
+        print("Stopping after 3")
