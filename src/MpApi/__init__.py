@@ -1,14 +1,15 @@
 """An unofficial client for MuseumPlus's API"""
 
-__version__ = "0.1"
+__version__ = "0.1.1"
 credentials = "credentials.py"  # expect credentials in pwd
 import argparse
+from MpApi.Mink import Mink
+
+with open(credentials) as f:
+    exec(f.read())
 
 
 def mink():
-
-    with open(credentials) as f:
-        exec(f.read())
 
     parser = argparse.ArgumentParser(description="Commandline frontend for MpApi.py")
     parser.add_argument("-j", "--job", help="job to run", required=True)
@@ -20,9 +21,6 @@ def mink():
 
 def replace():
     credentials = "emem1.py"  # in pwd
-
-    with open(credentials) as f:
-        exec(f.read())
 
     parser = argparse.ArgumentParser(description="Command line frontend for Replace.py")
     parser.add_argument(

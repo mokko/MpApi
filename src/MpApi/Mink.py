@@ -35,6 +35,7 @@ from pathlib import Path
 import requests
 import sys
 
+from MpApi.Chunky import Chunky
 from MpApi.Module import Module
 from MpApi.Sar import Sar
 from MpApi.Search import Search
@@ -49,6 +50,7 @@ NSMAP = {
 class Mink:
     def __init__(self, *, conf, job, baseURL, user, pw):
         self.sar = Sar(baseURL=baseURL, user=user, pw=pw)
+        self.chunker = Chunky(chunkSize=1000, baseURL=baseURL, pw=pw, user=user)
         self.conf = conf
         self._parse_conf(job=job)
 
@@ -109,6 +111,36 @@ class Mink:
 
     def all(self, args):
         self._parse_conf(job=args[0])
+
+    def chunk(self, args):
+        """
+        New chunky version of getPack
+
+        Expects
+        * args: a list with arguments that it passes along;
+        * args[0]: type of the ID (approval, loc, exhibit or group)
+        * args[1]: ID
+        * args[2] (optional): since date
+
+        * args[]: label (used for filename) -> not used ATM
+        * args[]: attachments -> not implemented, not needed ATM
+        """
+        Type = args[0]
+        ID = args[1]
+        try:
+            since = args[2]
+        except:
+            since = None
+
+        print(
+            f" CHUNKER: {Type}-{ID} since:{since} chunkSize: {self.chunker.chunkSize}"
+        )
+        no = 1
+        for chunk in self.chunker.getByType(ID=ID, Type=Type, since=since):
+            path = self.project_dir.joinpath(f"{Type}{ID}-chunk{no}.xml")
+            print(f"saving to {path}")
+            chunk.toFile(path=path)
+            no += 1
 
     def clean(self, args):
         type = args[0]
@@ -271,10 +303,10 @@ class Mink:
           and multimedia
         """
         print(f"GET PACK {args}")
-        try:
-            args[4]
-        except:
-            pass
+        # try:
+        # args[4]
+        # except:
+        # pass
 
         join_fn = self.join(args)
         self.getAttachments(args)
