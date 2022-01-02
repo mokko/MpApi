@@ -20,7 +20,7 @@ USAGE
     s = mpSearch(fromFile="path/to/file")
     s = mpSearch(fromString=xml)
     s = mpSearch(module="Object", limit=-1, offset=0)
-    s.setParam(key="offset", value=123) # offset or limit
+    s.offset(value=123) # offset or limit
     s.AND()
     s.addCriterion(operator="equalsValue", field="__id", value="1234")
     s.addCriterion(operator="equalsValue", field="__id", value="1234")
@@ -169,18 +169,24 @@ class Search(Helper):
     def OR(self):
         self._addConjunction(Type="or")
 
+    def limit(self, *, value=None) -> int:
+        """
+        Get or set limit:
+            limit = s.limit()
+            s.limit(value=12)
+        """
+        return self._attribute(value=value, key="limit")
+
     def NOT(self):
         self._addConjunction(Type="not")
 
-    def setParam(self, *, key, value):
+    def offset(self, *, value=None) -> int:
         """
-        changes offset in the object; does not create a copy; does not return particularily much;
+        Get or set offset:
+            offset = s.offset()
+            s.offset(value=12)
         """
-        searchN = self.etree.xpath(
-            "/s:application/s:modules/s:module/s:search", namespaces=NSMAP
-        )[0]
-        searchA = searchN.attrib
-        searchA[key] = value
+        return self._attribute(value=value, key="offset")
 
     #
     # private helpers
@@ -198,6 +204,17 @@ class Search(Helper):
         self.lastN = etree.SubElement(
             self.lastN, "{http://www.zetcom.com/ria/ws/module/search}" + Type
         )
+
+    def _attribute(self, *, value, key) -> int:
+        searchN = self.etree.xpath(
+            "/s:application/s:modules/s:module/s:search", namespaces=NSMAP
+        )[0]
+        searchA = searchN.attrib
+        if value is None:  # getter
+            return int(searchA[key])
+        else:  # setter
+            searchA[key] = str(value)
+            return int(value)
 
 
 if __name__ == "__main__":

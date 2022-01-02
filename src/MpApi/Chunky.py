@@ -206,7 +206,6 @@ class Chunky(Helper):
             )
         # s.print()
         s.validate(mode="search")
-
         r = self.api.search(xml=s.toString())
         # print(f"status {r.status_code}")
         return etree.fromstring(r.content, ETparser)

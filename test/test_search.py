@@ -175,7 +175,7 @@ def test_seven():  # addField
     assert s.validate(mode="search") is True
 
 
-def test_setParam():
+def test_attributes():
     q = Search(module="Object")
     q.AND()
     q.addCriterion(
@@ -188,7 +188,9 @@ def test_setParam():
         field="ObjPublicationGrp.TypeVoc",
         value="2600647",  # use id? Daten freigegeben für SMB-digital
     )
-    q.setParam(key="offset", value="123")
-    q.setParam(key="limit", value="10")
-    # q.etree
-    # q.print()
+    assert q.offset() == 0
+    q.offset(value="123")
+    assert q.offset(value="123")
+    assert q.limit() == -1
+    q.limit(value=10)
+    assert q.limit() == 10

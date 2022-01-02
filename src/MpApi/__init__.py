@@ -4,9 +4,11 @@ __version__ = "0.1.1"
 credentials = "credentials.py"  # expect credentials in pwd
 import argparse
 from MpApi.Mink import Mink
+from pathlib import Path
 
-with open(credentials) as f:
-    exec(f.read())
+if Path(credentials).exists():
+    with open(credentials) as f:
+        exec(f.read())
 
 
 def mink():
