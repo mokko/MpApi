@@ -22,7 +22,9 @@ MpApi expects two configuration files
 Credentials.py has three lines in pure Python:
 
 >		user = "EM_XY"
+>
 >		pw = "pass"
+>
 >		baseURL = "https://museumplus-produktiv.spk-berlin.de:8181/MpWeb-mpBerlinStaatlicheMuseen" # this instance is behind a firewall
 
 Here is a section my jobs.dsl
@@ -40,4 +42,5 @@ Tip: Execute mink from the dir in which you placed credentials.py; this will be 
 
 Try mink to see if everything is installed correctly:
 >	usage: mink.py [-h] -j JOB [-c CONF]
+>
 >	C:\>mink -j HF-EM-Module
