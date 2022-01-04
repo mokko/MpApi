@@ -111,7 +111,7 @@ class Chunky(Helper):
         * offset: initial offset to ignore object hits
 
         RETURNS
-        * iterator [chunk: Module]: an indepedent chunk with persons, 
+        * iterator [chunk: Module]: an indepedent chunk with persons,
           multimedia and objects
         """
         lastChunk: bool = False
@@ -147,7 +147,7 @@ class Chunky(Helper):
         lastChunk: bool = False
         while not lastChunk:
             chunk = Module()  # make a new zml module document
-            query.offset=offset # todo in search
+            query.offset = offset  # todo in search
             r = self.api.search(xml=query.toString())
             partET = etree.fromstring(r.content, ETparser)
             chunk.add(doc=partET)
@@ -272,8 +272,8 @@ class Chunky(Helper):
         # s.print()
         s.validate(mode="search")
         r = self.api.search(xml=s.toString())
-        #DEBUG
+        # DEBUG
         with open("DEBUGresponse.xml", "wb") as binary_file:
             # Write bytes to file
-            binary_file.write(r.content)        
+            binary_file.write(r.content)
         return etree.fromstring(r.content, ETparser)
