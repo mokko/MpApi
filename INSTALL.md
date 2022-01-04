@@ -42,6 +42,5 @@ Tip: Execute mink from the dir in which you placed credentials.py; this will be 
 
 Try mink to see if everything is installed correctly:
 
->		usage: mink.py [-h] -j JOB [-c CONF]
-
->		C:\>mink -j HF-EM-Module
+>	mink -h 	
+>	mink -j HF-EM-Module
