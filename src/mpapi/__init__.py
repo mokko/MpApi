@@ -1,9 +1,9 @@
 """An unofficial client for MuseumPlus's API"""
 
-__version__ = "0.1.1"
+__version__ = "0.1.2"
 credentials = "credentials.py"  # expect credentials in pwd
 import argparse
-from MpApi.Mink import Mink
+from mpapi.mink import Mink
 from pathlib import Path
 
 if Path(credentials).exists():

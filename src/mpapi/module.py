@@ -80,7 +80,7 @@ USAGE:
 from typing_extensions import TypeAlias  # only in python 3.9?
 from typing import Union, Iterator, List, Set
 from lxml import etree  # type: ignore
-from MpApi.Helper import Helper
+from mpapi.helper import Helper
 from copy import deepcopy  # for lxml
 
 # xpath 1.0 and lxml don't allow empty string or None for default ns

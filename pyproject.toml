@@ -20,5 +20,5 @@ test = [
 ]
 
 [project.scripts]
-mink = 'MpApi:mink'
-mpReplace = 'MpApi:replace'
+mink = 'mpapi:mink'
+mpReplace = 'mpapi:replace'

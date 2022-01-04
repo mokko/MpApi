@@ -53,9 +53,9 @@ import os  # b/c Pathlib has troubles with windows network paths
 from lxml import etree
 from pathlib import Path
 
-from mpapi.Search import Search
-from mpapi.Client import MpApi
-from mpapi.Module import Module
+from mpapi.search import Search
+from mpapi.client import MpApi
+from mpapi.module import Module
 
 NSMAP = {
     "s": "http://www.zetcom.com/ria/ws/module/search",
