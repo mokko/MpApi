@@ -4,8 +4,8 @@ import requests
 from requests.auth import HTTPBasicAuth
 from requests.structures import CaseInsensitiveDict
 from lxml import etree  # currently only necessary for getSession
-from MpApi.Search import Search
-from MpApi.Module import Module
+from mpapi.search import Search
+from mpapi.module import Module
 
 """
 MpApi - MuseumPlus API Client  

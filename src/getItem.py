@@ -1,21 +1,14 @@
 """
 I want Multimedia 271188 on disk
 """
-import os
-import sys
 import requests
-from Search import Search
+from search import Search
 from lxml import etree  # necessary?
-
-# what the heck?
-if "PYTHONPATH" in os.environ:
-    sys.path.append(os.environ["PYTHONPATH"])
+from mpapi.module import Module
+from mpapi.client import MpApi
+from pathlib import Path
 
 credentials = "credentials.py"  # expect credentials in pwd
-
-from MpApi.Module import Module
-from MpApi.Client import MpApi
-from pathlib import Path
 
 if __name__ == "__main__":
     import argparse

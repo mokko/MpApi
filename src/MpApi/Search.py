@@ -6,7 +6,7 @@ Specification: http://docs.zetcom.com/ws/module/search/search.xml
 Currently, we're making only expert searches.
 
 We're using a different lingo here than Zetcom. For us an expert search can
-contain different criteria. Criteria have three components
+contain different search criteria. Criteria have three components
 - a field (e.g. __id)
 - an operator (e.g. isNull)
 - and a value (e.g. 123)
@@ -23,17 +23,24 @@ USAGE
     s.offset(value=123) # offset or limit
     s.AND()
     s.addCriterion(operator="equalsValue", field="__id", value="1234")
-    s.addCriterion(operator="equalsValue", field="__id", value="1234")
+    s.addCriterion(operator="equalsValue", field="__id", value="1235")
 
     #if you only want certain fields back, list them
     s.addField("ObjExampleMissing")
 
 #helpers
-    print(s.toString())
+    s.print()  # print to STDOUT
     s.toFile(path="out.xml")
     s.validate(mode="search")
+
+NEW
+    s.limit(value=10)  # setter, returns int
+    value = s.limit()  # getter, returns int
+    s.offset(value=10) # setter, returns int
+    value = s.offset() # getter, returns int
     
-self.etree stores the lxml object containing the xml document.
+INTERNAL
+    self.etree stores the lxml object containing the xml document.
 
 EXAMPLE
 <application 
@@ -57,7 +64,7 @@ EXAMPLE
 
 from pathlib import Path
 from lxml import etree  # type: ignore
-from MpApi.Helper import Helper
+from mpapi.helper import Helper
 
 # xpath 1.0 and lxml don't empty string or None for default ns
 NSMAP = {"s": "http://www.zetcom.com/ria/ws/module/search"}
@@ -100,7 +107,7 @@ class Search(Helper):
         else:
             if module is None:
                 raise TypeError(
-                    "Module is not allowed to be None when making search from string"
+                    "Module is not allowed to be None when making search from scratch"
                 )
             xml = f"""<application 
             xmlns="http://www.zetcom.com/ria/ws/module/search" 

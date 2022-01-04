@@ -10,10 +10,10 @@ from pathlib import Path
 from lxml import etree
 import importlib
 
-from MpApi.Sar import Sar
-from MpApi.Client import MpApi
-from MpApi.Module import Module
-from MpApi.Search import Search
+from mpapi.sar import Sar
+from mpapi.client import MpApi
+from mpapi.module import Module
+from mpapi.search import Search
 
 NSMAP = {
     "s": "http://www.zetcom.com/ria/ws/module/search",

@@ -35,10 +35,10 @@ from pathlib import Path
 import requests
 import sys
 
-from MpApi.Chunky import Chunky
-from MpApi.Module import Module
-from MpApi.Sar import Sar
-from MpApi.Search import Search
+from mpapi.chunky import Chunky
+from mpapi.module import Module
+from mpapi.sar import Sar
+from mpapi.search import Search
 
 ETparser = etree.XMLParser(remove_blank_text=True)
 NSMAP = {

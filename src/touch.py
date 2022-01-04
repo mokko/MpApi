@@ -3,20 +3,13 @@ import logging
 import os
 import sys
 
-if "PYTHONPATH" in os.environ:
-    sys.path.append(os.environ["PYTHONPATH"])
 
 credentials = "emem1.py"  # in pwd
 with open(credentials) as f:
     exec(f.read())
 
 from lxml import etree
-
-# from MpApi.Module import Module
-# from MpApi.Search import Search
-from MpApi.Client import MpApi
-
-# from MpApi.Sar import Sar
+from mpapi.client import MpApi
 
 """
 Touch Replace Plugin
