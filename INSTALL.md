@@ -39,5 +39,5 @@ Use mink.py as commandline frontend for MpApi.
 Tip: Execute mink from the dir in which you placed credentials.py; this will be your data dir.
 
 Try mink to see if everything is installed correctly:
-	usage: mink.py [-h] -j JOB [-c CONF]
-	C:\>mink -j HF-EM-Module
+>	usage: mink.py [-h] -j JOB [-c CONF]
+>	C:\>mink -j HF-EM-Module
