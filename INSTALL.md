@@ -25,13 +25,13 @@ Credentials.py has three lines in pure Python
 	baseURL = "https://museumplus-produktiv.spk-berlin.de:8181/MpWeb-mpBerlinStaatlicheMuseen" # this instance is behind a firewall
 
 Here is a section my jobs.dsl
-	HF-EM-Module: # job label
-		getPack exhibit 20222 M39                  
-		getPack exhibit 21822 Amerika-Ausstellung  
-		getPack exhibit 20215 Südsee-Ausstellung   
-		getPack exhibit 20226 Afrika-Ausstellung   
-		getPack exhibit 20218 Asien-Ausstellung	   
-		pack 
+>	HF-EM-Module: # job label
+>		getPack exhibit 20222 M39                  
+>		getPack exhibit 21822 Amerika-Ausstellung  
+>		getPack exhibit 20215 Südsee-Ausstellung   
+>		getPack exhibit 20226 Afrika-Ausstellung   
+>		getPack exhibit 20218 Asien-Ausstellung	   
+>		pack 
 
 ## Mink.py as frontend
 Use mink.py as commandline frontend for MpApi. 
