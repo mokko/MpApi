@@ -19,10 +19,10 @@ MpApi expects two configuration files
 - credentials: e.g. in credentials.py
 - a description of the jobs you planning to run: jobs.dsl
 
-Credentials.py has three lines in pure Python
-	user = "EM_XY"
-	pw = "pass"
-	baseURL = "https://museumplus-produktiv.spk-berlin.de:8181/MpWeb-mpBerlinStaatlicheMuseen" # this instance is behind a firewall
+Credentials.py has three lines in pure Python:
+>	user = "EM_XY"
+>	pw = "pass"
+>	baseURL = "https://museumplus-produktiv.spk-berlin.de:8181/MpWeb-mpBerlinStaatlicheMuseen" # this instance is behind a firewall
 
 Here is a section my jobs.dsl
 >	HF-EM-Module: # job label
