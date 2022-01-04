@@ -3,12 +3,13 @@
 pip install git+https://github.com/mokko/MpApi#egg=MpApi
 
 Or try this for editable install 
-pip install -e .
+> pip install -e .
 
 ## Prerequisites
-* a modern Python 3.x, https://www.python.org/downloads/
+* Python >=3.9, https://www.python.org/downloads/
 * pip, a package installer that normales comes as part of Python
-* lxml, requests
+* lxml
+* requests
 
 ## Configuration
 I put my configuration and all the data in a directory sdata that 
