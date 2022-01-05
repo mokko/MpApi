@@ -1,5 +1,5 @@
-from MpApi.Search import Search
-from MpApi.Module import Module
+from mpapi.search import Search
+from mpapi.module import Module
 from lxml import etree  # type: ignore
 import pytest
 

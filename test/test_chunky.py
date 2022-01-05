@@ -1,5 +1,5 @@
-from MpApi.Chunky import Chunky
-from MpApi.Module import Module
+from mpapi.chunky import Chunky
+from mpapi.module import Module
 from lxml import etree  # type: ignore
 from typing import Union
 

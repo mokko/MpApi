@@ -1,6 +1,6 @@
 # from MpApi.Search import Search
 # from MpApi.Module import Module
-from MpApi.Client import MpApi
+from mpapi.client import MpApi
 
 with open("sdata/credentials.py") as f:
     exec(f.read())

@@ -1,6 +1,6 @@
-from MpApi.Search import Search
-from MpApi.Module import Module
-from MpApi.Sar import Sar
+from mpapi.search import Search
+from mpapi.module import Module
+from mpapi.sar import Sar
 
 with open("sdata/credentials.py") as f:
     exec(f.read())
@@ -36,7 +36,7 @@ def test_double_join():
     inL.append(xml)
     xml_new = sr.join(inL=inL)
     m = Module(xml=xml_new)
-    m._dropUUID()
+    m.dropUUID()
     m.toFile(path="data/debug.xml")
     # print (xml_new)
     assert m.validate()

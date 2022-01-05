@@ -2,7 +2,7 @@
 Test the Search module
 """
 from lxml import etree
-from MpApi.Search import Search
+from mpapi.search import Search
 import pytest
 
 
