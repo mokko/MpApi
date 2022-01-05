@@ -756,7 +756,7 @@ class Module(Helper):
         if len(str(new)) > 13: # zero-based Python
             new = int(str(new)[:13]) 
         elif len(str(new)) < 13:
-            raise TypeError (f"The 'since' argument is in an expected format ({new} is too short)!") 
+            raise TypeError (f"The 'since' argument is in an unexpected format ({new} is too short)!") 
         return new
 
     def _types(self) -> Set:
