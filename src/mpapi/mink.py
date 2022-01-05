@@ -428,7 +428,7 @@ class Mink:
             format="%(asctime)s: %(message)s",
         )
 
-    def _getPart(self, *, id, label, module, type, since = None):
+    def _getPart(self, *, id, label, module, type, since=None):
         """
         Gets a set of moduleItems depending on requested type. Caches
         results in a file and returns from file cache if that exists already.
