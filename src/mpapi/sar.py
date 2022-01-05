@@ -14,7 +14,7 @@ everywhere, even if that has a performance penality.
 
 A set is an xml containing a set of items, typically moduleItems.
 
-USAGE:
+USAGE
     import Sar from Sar
     import Search from Search
     sr = Sar(baseURL=baseURL, user=user, pw=pw)
@@ -47,6 +47,12 @@ USAGE:
     sr.toFile(xml=xml, path=path)
     xml = sr.EToString (tree=tree)
     ET = sr.ETfromFile (path=path)
+
+NEW
+2021-12
+* some methods removed since they didn't add anything to basic mpapi.client (definition, search, getItem)
+* some methods renamed, b/c they are useful and dont need to stay private (dropUUID, dropRepeatableGroup
+* avoid capital letters in package names to be more conformist/pythonic
 
 THE SINCE PARAMETER
 The since parameter expects typical xs:dateTime format,e.g. 
@@ -98,18 +104,6 @@ class Sar:  # methods (mostly) in alphabetical order
         m.dropRepeatableGroup(name="ObjValuationGrp")
         m.validate()
         return m.toString()
-
-    def definition(self, *, module=None):
-        """
-        Gets definition from server and returns it as xml string.
-        """
-        return self.api.getDefinition(module=module).text
-
-    def getItem(self, *, module, id):
-        """
-        Get a single item of specified module by id. Returns a request object.
-        """
-        return self.api.getItem(module=module, id=id)
 
     def _getBy(self, *, module, id, field, since=None):
         """
@@ -449,13 +443,6 @@ class Sar:  # methods (mostly) in alphabetical order
                 print(f" getting {mmPath}")
                 self.api.saveAttachment(module="Multimedia", id=mmId, path=mmPath)
         return positives
-
-    def search(self, *, xml):
-        """
-        Send a request to the api and return the request response. Expects an search as xml
-        string in xml. (Same as in MpApi).
-        """
-        return self.api.search(xml=xml)
 
     #
     # Helper
