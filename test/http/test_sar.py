@@ -1,8 +1,8 @@
 # -*- coding: UTF-8
-from Search import Search
-from Sar import Sar
+from mpapi.search import Search
+from mpapi.sar import Sar
 
-with open("sdata/credentials.py") as f:
+with open("../sdata/credentials.py") as f:
     exec(f.read())
 
 

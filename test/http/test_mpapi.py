@@ -5,10 +5,10 @@ import requests
 from lxml import etree
 from pathlib import Path
 
-from MpApi import MpApi
-from Search import Search
+from mpapi.client import MpApi
+from mpapi.search import Search
 
-with open("sdata/credentials.py") as f:
+with open("../sdata/credentials.py") as f:
     exec(f.read())
 
 

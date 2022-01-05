@@ -1,13 +1,13 @@
 from pathlib import Path
-from mink import Mink
+from mpapi.mink import Mink
 from pathlib import Path
 
-with open("sdata/credentials.py") as f:
+with open("../sdata/credentials.py") as f:
     exec(f.read())
 
 
 def test_init():
-    m = Mink(conf="sdata/jobs.dsl", job=None, baseURL=baseURL, pw=pw, user=user)
+    m = Mink(conf="../sdata/jobs.dsl", job=None, baseURL=baseURL, pw=pw, user=user)
     assert m
 
 
@@ -26,7 +26,7 @@ def test_getItem():
 
 
 def test_getObjects():
-    m = Mink(conf="../sdata/jobs.dsl", job=None, baseURL=baseURL, pw=pw, user=user)
+    m = Mink(conf="../sdata/jobs.dsl", job="HFWest", baseURL=baseURL, pw=pw, user=user)
     type = "exhibit"
     id = "20222"
     out = "ex20222"  # not a full filename

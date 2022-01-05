@@ -1,8 +1,8 @@
 from pathlib import Path
-from MpApi.Client import MpApi
-from MpApi.Module import Module
+from mpapi.client import MpApi
+from mpapi.module import Module
 
-with open("sdata/vierteInstanz.py") as f:
+with open("../sdata/vierteInstanz.py") as f:
     exec(f.read())
 
 # first test is if i can manually change Freigabe of obj id 744767
@@ -77,7 +77,7 @@ def test_init():
     r = api.getItem(module="Object", id="744767")
     print(r.status_code)
     assert r
-    api.toFile(xml=r.text, path="sdata/744767.xml")
+    api.toFile(xml=r.text, path="../sdata/744767.xml")
     xml = f"""
     <application xmlns="http://www.zetcom.com/ria/ws/module">
       <modules>

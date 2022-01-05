@@ -38,6 +38,7 @@ import sys
 from mpapi.chunky import Chunky
 from mpapi.module import Module
 from mpapi.sar import Sar
+from mpapi.client import MpApi
 from mpapi.search import Search
 
 ETparser = etree.XMLParser(remove_blank_text=True)
@@ -50,6 +51,7 @@ NSMAP = {
 class Mink:
     def __init__(self, *, conf, job, baseURL, user, pw):
         self.sar = Sar(baseURL=baseURL, user=user, pw=pw)
+        self.api = MpApi(baseURL=baseURL, user=user, pw=pw)
         self.chunker = Chunky(chunkSize=1000, baseURL=baseURL, pw=pw, user=user)
         self.conf = conf
         self._parse_conf(job=job)
@@ -277,7 +279,7 @@ class Mink:
             return str(self.xmlFromFile(path=out_fn))
         else:
             self.info(f"getItem module={module} id={id} out_fn={out_fn}")
-            r = self.sar.getItem(module=module, id=id)
+            r = self.api.getItem(module=module, id=id)
             self.xmlToFile(xml=r.text, path=out_fn)
             return r.text
 
@@ -426,7 +428,7 @@ class Mink:
             format="%(asctime)s: %(message)s",
         )
 
-    def _getPart(self, *, id, label, module, type, since):
+    def _getPart(self, *, id, label, module, type, since = None):
         """
         Gets a set of moduleItems depending on requested type. Caches
         results in a file and returns from file cache if that exists already.

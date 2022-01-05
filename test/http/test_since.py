@@ -6,9 +6,9 @@ from pathlib import Path
 from lxml import etree
 from pathlib import Path
 
-from MpApi.Client import MpApi
-from MpApi.Search import Search
-from MpApi.Module import Module
+from mpapi.client import MpApi
+from mpapi.search import Search
+from mpapi.module import Module
 
 with open("../sdata/credentials.py") as f:
     exec(f.read())
