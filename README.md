@@ -3,8 +3,8 @@
 API Specification: http://docs.zetcom.com/ws
 
 Libraries
-* mpapi.py   - low level client; all endpoints 
-* sar.py     - search and response; slightly higher level client
+* mpapi.py   - low level client; all endpoints; agnostic of metadata format  
+* sar.py     - search and response; slightly higher level client; specific to Berlin instance
 * chunky.py  - search responses in chunks
 
 Frontends and CLI utils
