@@ -47,6 +47,17 @@ USAGE:
     sr.toFile(xml=xml, path=path)
     xml = sr.EToString (tree=tree)
     ET = sr.ETfromFile (path=path)
+
+THE SINCE PARAMETER
+The since parameter expects typical xs:dateTime format,e.g. 
+    2021-10-14T07:40:29Z
+but internally it's transformed to a number to compare it in xpath 1.0
+    20211014074029 
+then it's reduced to a 14 digit number (resolution seconds) but cutting off 
+additional numbers (referencing fractions of seconds)
+
+So you can use this interal 14 digit format for the since parameter to if you
+like.
 """
 
 import os  # b/c Pathlib has troubles with windows network paths
@@ -83,8 +94,8 @@ class Sar:  # methods (mostly) in alphabetical order
         Expects xml as string and returns xml as string.
         """
         m = Module(xml=inX)
-        m._dropUUID()
-        m._dropRG(name="ObjValuationGrp")
+        m.dropUUID()
+        m.dropRepeatableGroup(name="ObjValuationGrp")
         m.validate()
         return m.toString()
 
@@ -380,8 +391,20 @@ class Sar:  # methods (mostly) in alphabetical order
             """
         else:
             print(f" filtering multimedia records that have changed since {since}")
-            # dateTime comparison might not work as expected if number of digits is not equal, e.g. when user
-            # provides since with date format (2020-12-12). Perhaps I can check
+            """
+            dateTime comparison might not work as expected if number of digits is not equal, e.g. when user
+            provides since with date format (2020-12-12). Perhaps I can check
+            Possible values from the data
+            1970-01-01 00:00:00.0 -> 1970-01-01 00:00:00.0 
+
+            2021-09-13 11:08:51.251
+            2018-05-31T00:00:00Z
+            2021-10-14T07:40:29Z
+            
+            I define a standardized form which has 14 digits minimum (8 + 6), i.e. one digit after the period
+            where should this rewriting of the since argument took place? Not here.
+            """
+
             xpath = f"""
                 /m:application/m:modules/m:module[
                     @name='Multimedia'
@@ -393,7 +416,8 @@ class Sar:  # methods (mostly) in alphabetical order
                     ]
                     and ./m:systemField[
                         @name = '__lastModified'
-                        and translate(m:value,'-:T. ','') > translate('{since}','-:T. ','')
+                        and substring(translate(m:value,'-:.TZ ',''),0, 14) > 
+                        substring(translate('{since}','-:.TZ ',''), 0, 14)
                     ]
                 ]
             """

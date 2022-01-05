@@ -186,8 +186,7 @@ class Module(Helper):
         Should doc be an lxml object or another Module?
         NEW
         * At some point, the method add would change doc so that after
-          completion, the document would no longer be there.
-
+          completion, doc was practically empty.
         """
         # List[Union[_Element, Union[_ElementUnicodeResult, _PyElementUnicodeResult, _ElementStringResult]]]
         doc2 = deepcopy(doc)  # leave doc alone, so we don't change it
@@ -719,22 +718,12 @@ class Module(Helper):
                 moduleN.append(newItemN)
             else:
                 # itemN exists already, now take the newer one
-                xpath = "translate(m:/systemField[@name ='__lastModified']/m:value,'-:. ','')"
-                # TODO: if one the numbers is one longer, cut the last digit
-                oldItemLastModified = oldItemN.xpath(xpath)
-                if len(str(oldItemLastModified)) > 15:
-                    oldItemLastModified = int(str(oldItemLastModified)[:15])
-
-                newItemLastModified = newItemN.xpath(xpath)
-                if len(str(newItemLastModified)) > 15:
-                    newItemLastModified = int(str(newItemLastModified)[:15])
+                oldItemLastModified = self._standardDT(inputN=oldItemN)
+                newItemLastModified = self._standardDT(inputN=newItemN)
 
                 if oldItemLastModified < newItemLastModified:
                     # take newItem
                     oldItemN = newItemN  # this will probably not work, but we can debug that later
-                    # parentN = oldItemN.getparent()
-                    # parentN.remove(oldItemN)
-                    # parentN.append(newItemN)
                     # else: keep oldItem = do nothing
 
     def _dropFields(self, *, element: str, parent: ET = None) -> None:
@@ -758,6 +747,17 @@ class Module(Helper):
         elemL: List[ET] = parent.xpath(f"//m:{element}", namespaces=NSMAP)
         for elemN in elemL:
             elemN.getparent().remove(elemN)
+
+    def _standardDT(self, *, inputN):
+        # since: standard-length is 14 digits now (counting one-based)
+        # TODO: not properly tested or debugged
+        xpath = "translate(m:/systemField[@name ='__lastModified']/m:value,'-:.TZ ','')"
+        new = inputN.xpath(xpath, namespaces=NSMAP)
+        if len(str(new)) > 13: # zero-based Python
+            new = int(str(new)[:13]) 
+        elif len(str(new)) < 13:
+            raise TypeError (f"The 'since' argument is in an expected format ({new} is too short)!") 
+        return new
 
     def _types(self) -> Set:
         """Returns a set of module types in the document."""
