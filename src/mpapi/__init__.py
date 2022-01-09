@@ -1,4 +1,4 @@
-"""An unofficial client for MuseumPlus's API"""
+"""An Unofficial Client for the MuseumPlus API"""
 
 __version__ = "0.1.2"
 credentials = "credentials.py"  # expect credentials in pwd
@@ -12,7 +12,6 @@ if Path(credentials).exists():
 
 
 def mink():
-
     parser = argparse.ArgumentParser(description="Commandline frontend for MpApi.py")
     parser.add_argument("-j", "--job", help="job to run", required=True)
     parser.add_argument("-c", "--conf", help="config file", default="jobs.dsl")

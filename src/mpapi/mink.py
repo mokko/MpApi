@@ -161,8 +161,10 @@ class Mink:
             ID=ID, Type=Type, since=since, offset=offset
         ):
             path = self.project_dir.joinpath(f"{Type}{ID}-chunk{no}.xml")
-            print(f"saving to {path}")
+            chunk.clean()
+            print(f"saving CLEAN to {path}")
             chunk.toFile(path=path)
+            chunk.validate()
             no += 1
 
     def clean(self, args):

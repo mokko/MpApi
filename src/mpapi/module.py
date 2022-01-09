@@ -69,12 +69,12 @@ USAGE:
 
     for eachN in m.iter(parent=rg):
         m.print(eachN)
-
        
     # HELPERS
     m.toFile()
     m.toString()
     m.validate()
+    ...
 """
 
 from typing_extensions import TypeAlias  # only in python 3.9?
@@ -224,6 +224,16 @@ class Module(Helper):
                     # too many indents, so put this in separate method
                     self._compareItems(mtype=mtype, moduleN=moduleN)
 
+    def clean(self) -> None:
+        """
+        New version of the method clean that cleans the present document
+        * drops uuid attributes b/c they sometimes don't validate (Zetcom bug)
+        * drops Werte und Versicherung to not spill our guts
+        * DOES NOT validate.
+        """
+        self.dropUUID()
+        self.dropRepeatableGroup(name="ObjValuationGrp")
+
     def dataField(
         self, *, parent: ET, name: str, dataType: str = None, value: str = None
     ) -> ET:
@@ -272,10 +282,8 @@ class Module(Helper):
         Reports module types and number of moduleItems per type. Multi-type
         ready.
 
-        Returns
-        * a dictionary like this: {'Object': 173, 'Person': 58, 'Multimedia': 608}
-
-        (Internally works on self.etree.)
+        RETURNS
+        * a dictionary {'Object': 173, 'Person': 58, 'Multimedia': 608}
         """
         # report[type] = number_of_items
 
@@ -297,26 +305,22 @@ class Module(Helper):
             report[Type] = len(itemL)
         return report
 
-    def dropUUID(self, parent=None) -> None:
+    def dropUUID(self) -> None:
         """
         Drop all @uuid attributes from the whole document.
         """
-        if parent is None:
-            parent = self.etree
-
-        itemL = parent.xpath("//m:*[@uuid]", namespaces=NSMAP)
+        itemL = self.etree.xpath("//m:*[@uuid]", namespaces=NSMAP)
 
         for eachN in itemL:
             eachN.attrib.pop("uuid", None)  # Why None here?
 
-    def dropRepeatableGroup(self, *, name, parent=None):
+    def dropRepeatableGroup(self, *, name):
         """
-        Drop a repeatableGroup by name. Expects a name, user may provide
-        parent node. If no parent provided uses self.etree.
+        Drop a repeatableGroup by name. Expects the rGrp's name.
         """
-        if parent is None:
-            parent = self.etree
-        rgL = parent.xpath(f"//m:repeatableGroup[@name ='{name}']", namespaces=NSMAP)
+        rgL = self.etree.xpath(
+            f"//m:repeatableGroup[@name ='{name}']", namespaces=NSMAP
+        )
         for rgN in rgL:
             rgN.getparent().remove(rgN)
 
@@ -324,6 +328,10 @@ class Module(Helper):
         """
         Iterates through moduleItems of the module type provided; use
         __iter__ if you want to iterate over all moduleItems.
+
+        USAGE
+        for object in amodule.iter(module="Object")
+            #do something w/ object
 
         EXPECTS
         * module: requested module type to iterate through;
@@ -748,9 +756,14 @@ class Module(Helper):
         for elemN in elemL:
             elemN.getparent().remove(elemN)
 
-    def _standardDT(self, *, inputN):
-        # since: standard-length is 14 digits now (counting one-based)
-        # TODO: not properly tested or debugged
+    def _standardDT(self, *, inputN) -> str:
+        """
+        For a given node containing a dateTime return the date in standard from
+        as string. The standard form omits special symbols such as TZ and
+        space. Also it provides only the first 14 digits, yyyymmddhhmmss b/c
+        they always exist, so the resulting number has the same length. The
+        upshot is that the result can be compared in xpath 1 as a number.
+        """
         xpath = "translate(m:/systemField[@name ='__lastModified']/m:value,'-:.TZ ','')"
         new = inputN.xpath(xpath, namespaces=NSMAP)
         if len(str(new)) > 13:  # zero-based Python
