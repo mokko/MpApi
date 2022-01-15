@@ -9,24 +9,22 @@ Python class representing data in RIA's modules
 
 Thesis: 
 * a module is really a set of moduleItems.
-* What Zetcom calls "item" I call a "record" or a "Datensatz".
-* This class should be called differently, perhaps data or moduleData
+* What Zetcom calls "item" I also call "record" or a "Datensatz" in other contexts.
+* This class should have been called differently, perhaps data or moduleData
+
+Design
+* There is an old interface where every method has named parameters (e.g. 
+    Module(file="path.xml")
+  and there is a new interface which is perhaps more Pythonic
+    m1 + m2
 
 Definition and decisions:
 * zml: the xml language we are dealing with here, there are other schemas for search etc.
 * a multi-type document is one which has multiple types of moduleItem nodes in 
   different modules (Object, Multimedia). Sometimes I call them types, 
   modules or moduletypes (mtypes).
-* Let's go usually go with Zetcom's names
+* Let's usually go with Zetcom's names
 
-Writing ZML from scratch
-This module is in quite a raw state. I wonder in which direction I should take it.
-I started to write xml with it, but I haven't used this feature much in the replacer, so
-perhaps I dont need it.
-
-* Writing more ZML?
-* should I use it to join modules items etc.?
-* the attribute method has to go
 
 USAGE:
     # CONSTRUCTION: 4 ways to make a moduleList
@@ -34,15 +32,21 @@ USAGE:
     m = Module(xml=xml)          # from xml string
     m = Module(tree=lxml.etree)  # from lxml.etree object
     m = Module()                 # new Object item from scratch CHANGED
-    
-    # delete stuff
-    m._dropRG(parent=miN, name="ObjValuationGrp")
-    m._dropFields(parent=miN, type="systemField")
-    m._rmUuidsInReferenceItems(parent=miN)    
 
-    # inspect stuff     
-    m.describe() # mini-statistics
-    m.totalSize (module="Object")
+    # getting the XML out or validate it 
+    m.toFile(path="some.xml")
+    xml_str = m.toString()
+    lxml = m.toET()  # returns lxml etree document
+    m.validate()     # dies if doc doesn't validate
+    
+    # inspect module data     
+    adict = m.describe()          # no of items per mtype
+    m.totalSize(module="Object")  # no of items as per attribute
+    m.actualSize(module="Object") # no of actual items
+    sizeInt = len(m)
+    itemN = m[("Object",12345)]   # lxml element node that if changed, changes
+                                  # m
+    if m:                         # m is True if len(m) > 0 (new)
     
     #iterate through moduleItems
     for item in m:
@@ -51,33 +55,29 @@ USAGE:
     for item in m.iter(module="Object"):
         #do something with object item
 
-    # change xml
+    # delete stuff
+    m.dropRepeatableGroup(parent=miN, name="ObjValuationGrp")
+    m._dropFields(parent=miN, type="systemField")
+    m.clean()  # drops uuid attributes and certain value elements    
+
+    # other changes to xml
     m.totalSizeUpdate() # update for all module types
     m.add(doc=ET)
+    m3 = m1 + m2
 
-    # NEW: Let's write the kind of xml here that the API wants for put requests
+    # WRITING XML FROM SCRATCH
+    # Do i really need to write XML from this class? 
 
-    # WRITING XML FROM SCRATCH --> Do i really need to write XML from this class? 
-    # Maybe I should just abandon that idea
-    mod = Module()
-    obj = mod.module(name="Object")
-    item = mod.moduleItem(parent=obj, hasAttachments="false", id="254808")
-    mod.dataField(parent=item, dataType="Clob", name="ObjTechnicalTermClb", value="Zupfinstrument")
+    m = Module()
+    objModule = m.module(name="Object")
+    item = m.moduleItem(parent=objModule, hasAttachments="false", id="254808")
+    m.dataField(parent=item, dataType="Clob", name="ObjTechnicalTermClb", value="Zupfinstrument")
     rgN = m.repeatableGroup(parent=miN, name=name, size=size)
     rgiN = m.repeatableGroupItem(parent=rgN, id=id)
     m.dataField(parent=rgiN, dataType="Clob", name="ObjTechnicalTermClb", value="Zupfinstrument")
-
-    for eachN in m.iter(parent=rg):
-        m.print(eachN)
-       
-    # HELPERS
-    m.toFile()
-    m.toString()
-    m.validate()
-    ...
 """
 
-from collections import namedtuple  # namedtuples seem to be a hell of a thing
+from collections import namedtuple  # experimenting with namedtuples
 from copy import deepcopy  # for lxml
 from lxml import etree  # type: ignore
 from mpapi.helper import Helper
@@ -100,14 +100,14 @@ Item = namedtuple("Item", ["type", "id"])
 class Module(Helper):
     def __add__(self, m2):
         """
-        join two Modules objects together using + operator:
+        join two Module objects using the + operator:
             m1 = Module(file="one.xml")
             m2 = Module(file="two.xml")
             m3 = m1 + m2
 
         Note
-        * duplicate items are weeded out, i.e. items identical ids are made distinct,
-          only the newest survives
+        * duplicate items are weeded out, i.e. items with identical ids are
+          made distinct, only the newest item survives.
         """
         m3 = Module(tree=deepcopy(self.etree))
         m3.add(doc=m2.etree)  # using internal here instead of method from Helper
