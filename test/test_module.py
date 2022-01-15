@@ -1,5 +1,6 @@
 from mpapi.search import Search
 from mpapi.module import Module
+import lxml
 from lxml import etree  # type: ignore
 import pytest
 
@@ -9,20 +10,25 @@ NSMAP: dict = {"m": "http://www.zetcom.com/ria/ws/module"}
 def test_constructors_only():
     # four different constructors, sort of
     m: MpApi.Module = Module(file="sdata/exhibit20222.xml")
-    assert m
+    assert m  # len(m)>0
     xml = """
     <application xmlns="http://www.zetcom.com/ria/ws/module">
         <modules>
         </modules>
     </application>
     """
+    assert isinstance(m, Module)
     m = Module(xml=xml)
-    assert m
+    assert isinstance(m, Module)
+    assert len(m) == 0
+    assert not (m)  # empty, so False
     ET = etree.fromstring(xml)
     m = Module(tree=ET)
-    assert m
+    assert isinstance(m, Module)
+    assert len(m) == 0
+    assert not (m)
     m = Module()  # from scratch
-    assert m
+    assert not (m)
 
 
 def test_output():
@@ -37,8 +43,10 @@ def test_inspection():
     with pytest.raises(TypeError) as exc_info:
         m.totalSize(module="Object")  # none
     assert m.totalSize(module="Multimedia") == 619
-    desc = m.describe
-    print(desc)  # todo write a good test
+    desc = m.describe()
+    assert isinstance(desc, dict)
+    assert desc == {"Multimedia": 619}
+    # print(desc)
     m.dropUUID()
     assert m.validate()
 
@@ -84,20 +92,66 @@ def test_join():
     m = Module(file="sdata/exhibit20222.xml")
     MM_before = m.totalSize(module="Multimedia")
     assert isinstance(MM_before, int)
+    assert len(m) == 619
 
+    # first add
     ET = etree.parse("sdata/exhibit20222.xml")
+    # print("1st ADD: two identical documents")
     m.add(doc=ET)
+    m.toFile(path="debug.xml")
     MM_after = m.totalSize(module="Multimedia")
     assert MM_before == MM_after
+    # print(len(m))
+    assert len(m) == 619
 
+    # second add
+    # print("2nd ADD")
     ET2 = etree.parse("data/739673.xml")
     Obj_before = Module(tree=ET2).actualSize(module="Object")
     m.add(doc=ET2)
     assert m.totalSize(module="Object") == 1
+    assert len(m) == 620
 
     # there was a version where add(doc=ET) deleted most of the document, so now we
-    # test that doc remains the same
+    # test that doc remains the "same"
     Obj_after = Module(tree=ET2).actualSize(
         module="Object"
     )  # ET2 has to remain the same
     assert Obj_before == Obj_after
+
+
+def test_length():
+    m = Module()
+    assert len(m) == 0
+    m = Module(file="sdata/exhibit20222.xml")
+    assert len(m) == 619
+
+
+def test_getItem():
+    m = Module(file="sdata/exhibit20222.xml")
+    # from collections import namedtuple
+    # Item = namedtuple('Item', ['type', 'id'])
+    itemN = m[("Multimedia", 507201)]
+    # changing itemN will change m; it's not a deep copy
+    assert isinstance(itemN, lxml.etree._Element)
+
+
+def test_str():
+    m1 = Module(file="sdata/exhibit20222.xml")
+    assert isinstance(str(m1), str)
+    # print (m1.__repr__)
+
+
+def test_add():
+    m1 = Module(file="sdata/exhibit20222.xml")
+    m2 = Module(file="sdata/exhibit20222.xml")
+    m3 = m1 + m2
+
+    m1Len = len(m1)
+    assert isinstance(m3, Module)
+    assert len(m3) == m1Len
+    assert m3.__repr__ != m1.__repr__
+
+    m4 = Module(file="data/739673.xml")
+    m5 = m3 + m4
+    assert len(m5) == 620

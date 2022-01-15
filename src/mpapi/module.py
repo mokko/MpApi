@@ -77,11 +77,12 @@ USAGE:
     ...
 """
 
-from typing_extensions import TypeAlias  # only in python 3.9?
-from typing import Union, Iterator, List, Set
+from collections import namedtuple  # namedtuples seem to be a hell of a thing
+from copy import deepcopy  # for lxml
 from lxml import etree  # type: ignore
 from mpapi.helper import Helper
-from copy import deepcopy  # for lxml
+from typing_extensions import TypeAlias  # only in python 3.9?
+from typing import Union, Iterator, List, Set
 
 # xpath 1.0 and lxml don't allow empty string or None for default ns
 dataTypes = {"Clb": "Clob", "Dat": "Date", "Lnu": "Long", "Txt": "Varchar"}
@@ -93,8 +94,45 @@ ET: TypeAlias = etree._Element
 intNone = Union[int, None]
 strNone = Union[str, None]
 
+Item = namedtuple("Item", ["type", "id"])
+
 
 class Module(Helper):
+    def __add__(self, m2):
+        """
+        join two Modules objects together using + operator:
+            m1 = Module(file="one.xml")
+            m2 = Module(file="two.xml")
+            m3 = m1 + m2
+
+        Note
+        * duplicate items are weeded out, i.e. items identical ids are made distinct,
+          only the newest survives
+        """
+        m3 = Module(tree=deepcopy(self.etree))
+        m3.add(doc=m2.etree)  # using internal here instead of method from Helper
+        return m3
+
+    def __getitem__(self, item: Item):
+        """
+        m = Module(xml=someStr)
+        itemN = m[("Object", 1234)]
+
+        EXPECTS
+        * a tuple with mtype and ID
+
+        RETURNS
+        * lxml.etree._Element object
+        """
+        mtype = item[0]
+        ID = item[1]
+
+        itemN = self.etree.xpath(
+            f"/m:application/m:modules/m:module[@name = '{mtype}']/m:moduleItem[@id = '{ID}']",
+            namespaces=NSMAP,
+        )[0]
+        return itemN
+
     def __init__(self, *, file: str = None, tree: ET = None, xml: str = None) -> None:
         """
         There are FOUR ways to make a new Module object. Pick one:
@@ -126,6 +164,44 @@ class Module(Helper):
                 <modules/>
             </application>"""
             self.etree = etree.fromstring(xml, parser)
+
+    def __iter__(self) -> ET:
+        """
+        iterates through all moduleItems, see the method iter if you want to
+        iterate more selectively:
+            m = Module(xml=xml)
+            for moduleItem in m:
+                #do something with moduleItem
+        """
+        apath = f"/m:application/m:modules/m:module/m:moduleItem"
+        itemsN = self.etree.xpath(apath, namespaces=NSMAP)
+        for itemN in itemsN:
+            yield itemN
+
+    def __len__(self):
+        """
+        Returns the number of all moduleItems, similar to actualSize. Also gets
+        used when thruthyness of a module object gets evaluated (where 0 items
+        is considered False=.
+            m = Module()
+            if m:
+                # doesnt get here
+                # NOTE: before __len__ m would have been True
+
+        to check for m's existance:
+            try:
+                m
+            isinstance(m, Module)
+        """
+        return int(
+            self.etree.xpath(
+                f"count(/m:application/m:modules/m:module/m:moduleItem)",
+                namespaces=NSMAP,
+            )
+        )
+
+    def __str__(self):
+        return self.toString()
 
     def actualSize(self, *, module: str) -> int:
         """
@@ -166,6 +242,9 @@ class Module(Helper):
         """
         add a new doc[ument] to the Module, i.e. join two documents.
 
+        This method doesn't return much, certainly not the result document.
+        Instead, it changes self as a side-effect!
+
         Typically, the new module type doesn't exist yet in the old document.
         Then we add a whole module name="{name}" fragment. But it could also
         be that the module of that type already exists, then we want to keep
@@ -190,39 +269,42 @@ class Module(Helper):
         """
         # List[Union[_Element, Union[_ElementUnicodeResult, _PyElementUnicodeResult, _ElementStringResult]]]
         doc2 = deepcopy(doc)  # leave doc alone, so we don't change it
-        moduleL = doc2.xpath(  # newdoc
+        d2moduleL = doc2.xpath(  # newdoc
             "/m:application/m:modules/m:module",
             namespaces=NSMAP,
         )
 
-        for moduleN in moduleL:
+        for d2moduleN in d2moduleL:
             try:
-                mtypeL: List[ET] = moduleN.xpath(
+                d2mtypeL: List[ET] = d2moduleN.xpath(
                     "/m:application/m:modules/m:module/@name", namespaces=NSMAP
                 )
             except:
-                # newdoc appears to be empty
+                # newdoc has no mtypes, so appears empty, nothing to add
                 # print("newdoc appears to be empty")
                 return None
 
-            for mtype in mtypeL:
-                # print(f"newdoc mtype: {mtype}")
-                try:
-                    # Does this module type exist already in old doc?
-                    mod = self.etree.xpath(
-                        "/m:application/m:modules/m:module[@name = '{mtype}']"
-                    )
+            for d2mtype in d2mtypeL:
+                # print(f"newdoc mtype: {d2mtype}")
+                try:  # Does this mtype exist in old doc?
+                    self.etree.xpath(
+                        f"/m:application/m:modules/m:module[@name = '{d2mtype}']",
+                        namespaces=NSMAP,
+                    )[0]
                 except:
-                    # module of mtype doesn't exist yet in old doc, so we add the
-                    # whole module fragment, there can be only one
-                    modules = self.etree.xpath(
+                    # old doc doesn't have this mtype, so we add the whole
+                    # all of d2's modules[@name = {mtype}]/moduleItems to d1
+                    # print (f"d1 doesn't know this mtype {d2mtype}")
+                    d1modules = self.etree.xpath(
                         "/m:application/m:modules", namespaces=NSMAP
                     )[0]
-                    modules.append(moduleN)
+                    d1modules.append(d2moduleN)
                 else:
                     # new doc's mtype exists already in old doc
-                    # too many indents, so put this in separate method
-                    self._compareItems(mtype=mtype, moduleN=moduleN)
+                    # we need to compare each item in d1 and d2
+                    # print("b4 _compareItems")
+                    self._compareItems(mtype=d2mtype, moduleN=d2moduleN)
+        self.totalSizeUpdate()
 
     def clean(self) -> None:
         """
@@ -692,21 +774,10 @@ class Module(Helper):
     # HELPER
     #
 
-    def __iter__(self) -> ET:
-        """
-        m = Module(xml=xml)
-        for moduleItem in m:
-            #do something with moduleItem
-        """
-        apath = f"/m:application/m:modules/m:module/m:moduleItem"
-        itemsN = self.etree.xpath(apath, namespaces=NSMAP)
-        for itemN in itemsN:
-            yield itemN
-
     def _compareItems(self, *, mtype: str, moduleN: ET):
         # new doc's mtype exists already in old doc
         # now compare each moduleItem in new doc
-        newItemsL: List[ET] = moduleN.xpath("./m:moduleItem")
+        newItemsL: List[ET] = moduleN.xpath("./m:moduleItem", namespaces=NSMAP)
         for newItemN in newItemsL:
             newID = int(newItemN.attrib["id"])
             try:
@@ -719,11 +790,11 @@ class Module(Helper):
                 ]  # IDs should be unique
             except:
                 # itemN does not exist in old doc -> copy it over
-                moduleN = self.etree.xpath(
-                    f"/m:application/m:modules/m:module[@name = '{type}']",
+                d1moduleN = self.etree.xpath(
+                    f"/m:application/m:modules/m:module[@name = '{mtype}']",
                     namespaces=NSMAP,
                 )[0]
-                moduleN.append(newItemN)
+                d1moduleN.append(newItemN)
             else:
                 # itemN exists already, now take the newer one
                 oldItemLastModified = self._standardDT(inputN=oldItemN)
@@ -764,14 +835,15 @@ class Module(Helper):
         they always exist, so the resulting number has the same length. The
         upshot is that the result can be compared in xpath 1 as a number.
         """
-        xpath = "translate(m:/systemField[@name ='__lastModified']/m:value,'-:.TZ ','')"
-        new = inputN.xpath(xpath, namespaces=NSMAP)
+        xp = "translate(m:systemField[@name ='__lastModified']/m:value,'-:.TZ ','')"
+        new = inputN.xpath(xp, namespaces=NSMAP)
         if len(str(new)) > 13:  # zero-based Python
             new = int(str(new)[:13])
         elif len(str(new)) < 13:
             raise TypeError(
                 f"The 'since' argument is in an unexpected format ({new} is too short)!"
             )
+        # print(f"***{new}")
         return new
 
     def _types(self) -> Set:
