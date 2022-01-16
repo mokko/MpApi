@@ -30,7 +30,8 @@ class Helper:
             et, pretty_print=True, encoding="unicode"
         )  # why not utf-8?
 
-    def print(self, et=None):
+    # should use __str__ instead -> should go away, deprecated
+    def print(self, et=None): 
         print(self.toString(et=et))
 
     def validate(self, *, mode="module"):

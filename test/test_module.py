@@ -155,3 +155,7 @@ def test_add():
     m4 = Module(file="data/739673.xml")
     m5 = m3 + m4
     assert len(m5) == 620
+    m1 = m1 + m2 # change in place
+    assert len(m1) == 619
+    m5 = m1 + m2 + m3  # more than 2 additions
+    assert len(m5) == 619
