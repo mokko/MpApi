@@ -156,7 +156,6 @@ class Module(Helper):
         elif xml is not None:
             # self.etree = etree.fromstring(xml, parser)
             self.etree = etree.fromstring(bytes(xml, "utf-8"), parser)
-
         elif file is not None:
             self.etree = etree.parse(str(file), parser)
         else:

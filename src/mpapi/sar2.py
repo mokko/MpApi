@@ -242,7 +242,7 @@ class Sar:
         on different types.
 
         Expects
-        * data: a zml string
+        * data: as a Module object
         * adir: directory to save the attachments to
         * since (optional): xs:date or xs:dateTime; if provided will only get attachments
           of media that are newer than this date
@@ -301,7 +301,6 @@ class Sar:
                     ]
                 ]
             """
-        # ET = obj.toET()  # etree.fromstring(bytes(xml, "UTF-8"))
         itemsL = data.xpath(xpath=xpath)
         print(xpath)
         print(
@@ -311,8 +310,9 @@ class Sar:
         # Seems that it is. I see no other field in RIA
         positives = set()
         for itemN in itemsL:
-            itemA = itemN.attrib  # A for attribute
-            mmId = itemA["id"]
+            # itemA = itemN.attrib
+            # mmId = itemA["id"]
+            mmId = itemN.attrib["id"]
             fn_old = itemN.xpath(
                 "m:dataField[@name = 'MulOriginalFileTxt']/m:value/text()",
                 namespaces=NSMAP,
@@ -320,13 +320,11 @@ class Sar:
                 0
             ]  # assuming that there can be only one
             fn = mmId + Path(fn_old).suffix
-            mmPath = Path(adir).joinpath(fn)
-            # print(f"POSITIVE {mmPath}")
-            positives.add(mmPath)
-            # only d/l if doesn't exist yet
-            if not mmPath.exists():
-                print(f" getting {mmPath}")
-                self.api.saveAttachment(module="Multimedia", id=mmId, path=mmPath)
+            mm_fn = Path(adir).joinpath(fn)
+            positives.add(mm_fn)
+            if not mm_fn.exists():  # only d/l if doesn't exist yet
+                print(f" getting {mm_fn}")
+                self.api.saveAttachment(module="Multimedia", id=mmId, path=mm_fn)
         return positives
 
     def search(self, *, query: Search) -> Module:
