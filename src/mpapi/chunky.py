@@ -72,7 +72,6 @@ from mpapi.search import Search
 from mpapi.client import MpApi
 from mpapi.helper import Helper
 from mpapi.module import Module
-from mpapi.sar2 import Sar
 
 NSMAP = {
     "s": "http://www.zetcom.com/ria/ws/module/search",
