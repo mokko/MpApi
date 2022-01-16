@@ -71,6 +71,7 @@ from mpapi.client import MpApi
 from mpapi.module import Module
 from pathlib import Path
 
+# from typing import set
 NSMAP = {
     "s": "http://www.zetcom.com/ria/ws/module/search",
     "m": "http://www.zetcom.com/ria/ws/module",
@@ -80,17 +81,17 @@ ETparser = etree.XMLParser(remove_blank_text=True)
 
 
 class Sar2:
-    def __init__(self, *, baseURL:str, user:str, pw:str) -> None:
+    def __init__(self, *, baseURL: str, user: str, pw: str) -> None:
         self.api = MpApi(baseURL=baseURL, user=user, pw=pw)
         self.user = user
 
-    def _getBy(self, *, module:str, Id:int, field:str, since=None) -> Module:
+    def _getBy(self, *, module: str, Id: int, field: str, since=None) -> Module:
         """
-        Expects 
-        * requested target module type (e.g. "Object"), 
-        * Id (for that object), 
-        * field: a dictionary with a set of fields that are relevant for the 
-          search, 
+        Expects
+        * requested target module type (e.g. "Object"),
+        * Id (for that object),
+        * field: a dictionary with a set of fields that are relevant for the
+          search,
         * since is None or a dateTime; if since is not None, search will only
           look for items that are newer than the provided date.
 
@@ -112,7 +113,7 @@ class Sar2:
             )
         return self.search(query=query)
 
-    def getByApprovalGrp(self, *, Id: int, module: str, since:str = None) -> Module:
+    def getByApprovalGrp(self, *, Id: int, module: str, since: str = None) -> Module:
         """
         ApprovalGrp is the term used in the multimedia module, it's a better label than
         PublicationGrp. So I use it here generically for Freigabe in RIA.
@@ -179,7 +180,7 @@ class Sar2:
             )
         return self.search(query=query)
 
-    def getByExhibit(self, *, Id: int, module: str, since:str = None) -> Module:
+    def getByExhibit(self, *, Id: int, module: str, since: str = None) -> Module:
         """
         Gets a set of items related to a certain exhibit depending on the requested module
 
@@ -217,7 +218,7 @@ class Sar2:
         }
         return self._getBy(module=module, Id=Id, field=fields[module], since=since)
 
-    def getByLocation(self, *, Id: int, module: str, since:str = None) -> Module:
+    def getByLocation(self, *, Id: int, module: str, since: str = None) -> Module:
         """
         Gets items of the requested module type by location id.
 
@@ -232,7 +233,7 @@ class Sar2:
         }
         return self._getBy(module=module, Id=Id, field=fields[module], since=since)
 
-    def saveAttachments(self, *, data:Module, adir:str, since=None) -> Set[str]:
+    def saveAttachments(self, *, data: Module, adir: Path, since=None) -> set[Path]:
         """
         For a set of multimedia moduleItems (provided in xml), download their attachments.
         Attachments are saved to disk with the filename {mulId}.{ext}.
@@ -256,8 +257,6 @@ class Sar2:
         * xpath corrected 20211225
         * optional arg since 20211226
         """
-        ET = obj.toET() #etree.fromstring(bytes(xml, "UTF-8"))
-
         if since is None:
             xpath = """
                 /m:application/m:modules/m:module[
@@ -302,21 +301,24 @@ class Sar2:
                     ]
                 ]
             """
-        itemsL = ET.xpath(xpath, namespaces=NSMAP)
+        # ET = obj.toET()  # etree.fromstring(bytes(xml, "UTF-8"))
+        itemsL = data.xpath(xpath=xpath)
         print(xpath)
         print(
             f" xml has {len(itemsL)} records with attachment=True and Freigabe[@typ='SMB-Digital'] = Ja"
         )
         # Why do i get suffix from old filename? Is that really the best source?
         # Seems that it is. I see no other field in RIA
-        positives = set()  
+        positives = set()
         for itemN in itemsL:
             itemA = itemN.attrib  # A for attribute
             mmId = itemA["id"]
             fn_old = itemN.xpath(
                 "m:dataField[@name = 'MulOriginalFileTxt']/m:value/text()",
                 namespaces=NSMAP,
-            )[0]  # assuming that there can be only one
+            )[
+                0
+            ]  # assuming that there can be only one
             fn = mmId + Path(fn_old).suffix
             mmPath = Path(adir).joinpath(fn)
             # print(f"POSITIVE {mmPath}")
@@ -327,10 +329,10 @@ class Sar2:
                 self.api.saveAttachment(module="Multimedia", id=mmId, path=mmPath)
         return positives
 
-    def search (self, *, query: Search) -> Module:
+    def search(self, *, query: Search) -> Module:
         """
-        Return results for a given search query.  
+        Return results for a given search query.
         """
         query.validate(mode="search")
-        r = self.api.search(query.toString())
-        return Module(r.text)
+        r = self.api.search(xml=query.toString())
+        return Module(xml=r.text)

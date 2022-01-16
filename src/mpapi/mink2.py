@@ -53,12 +53,15 @@ import os
 from pathlib import Path
 import requests
 import sys
+from typing import NewType, Optional, Union
 
 from mpapi.chunky import Chunky
 from mpapi.module import Module
 from mpapi.sar2 import Sar2
 from mpapi.client import MpApi
 from mpapi.search import Search
+
+Since = Optional[str]
 
 ETparser = etree.XMLParser(remove_blank_text=True)
 NSMAP = {
@@ -68,19 +71,23 @@ NSMAP = {
 
 
 class Mink:
-    def __init__(self, *, conf, job, baseURL, user, pw):
+    def __init__(
+        self, *, conf: str, job: str, baseURL: str, user: str, pw: str
+    ) -> None:
         self.sar = Sar2(baseURL=baseURL, user=user, pw=pw)
         self.api = MpApi(baseURL=baseURL, user=user, pw=pw)
         self.chunker = Chunky(chunkSize=1000, baseURL=baseURL, pw=pw, user=user)
         self.conf = conf
         self._parse_conf(job=job)
 
-    def _parse_conf(self, *, job):
-        self.job = job
+    def _parse_conf(self, *, job: str) -> None:
+        """
+        For a job specified on command line, executes the dsl commands in that job.
+        """
+        self.job = job  # job requested to execute from command line
         self.current_job = None  # definition in conf file
-        cmd = []
-        args = []
-        any_job = False
+        args: list = []
+        any_job: bool = False
         # pretty ugly dsl parser...
         with open(self.conf, mode="r") as file:
             c = 0  # line counter
@@ -89,10 +96,10 @@ class Mink:
                 c += 1
                 uncomment = line.split("#", 1)[0].strip()
                 if not uncomment:
-                    continue 
+                    continue
                 line = line.expandtabs(4)
                 indent_lvl = int((len(line) - len(line.lstrip()) + 4) / 4)
-                parts = uncomment.split()
+                parts: list[str] = uncomment.split()
                 if indent_lvl == 1:  # job label
                     if not parts[0].endswith(":"):
                         raise TypeError("Job label has to end with colon")
@@ -104,11 +111,11 @@ class Mink:
                         self._init_log()
                         self.info(f"Project dir: {self.project_dir}")
                     else:
-                        self.project_dir = Path(".")
+                        self.project_dir: Path = Path(".")
                         right_job = False
                     continue
                 elif indent_lvl == 2:
-                    cmd = parts[0]
+                    cmd: str = parts[0]
                     if len(parts) > 1:
                         args = parts[1:]
                     else:
@@ -129,7 +136,7 @@ class Mink:
     # HELPERS
     #
 
-    def _init_log(self):
+    def _init_log(self) -> None:
         now = datetime.datetime.now()
         log_fn = Path(self.project_dir).joinpath(now.strftime("%Y%m%d") + ".log")
         logging.basicConfig(
@@ -141,7 +148,9 @@ class Mink:
             format="%(asctime)s: %(message)s",
         )
 
-    def _getPart(self, *, Id, label, module, Type, since=None) -> Module:
+    def _getPart(
+        self, *, Id: int, label: str, module: str, Type: str, since: str = None
+    ) -> Module:
         """
         Gets a set of moduleItems depending on requested module type. Caches
         results in a file and returns from file cache if that exists already.
@@ -151,11 +160,11 @@ class Mink:
         * Id: Id of that query type
         * module: requested target module type
         * label: a label to be used as part of a filename (for cache)
-        * since: dateTime (optional); if provided only get items newer than 
+        * since: dateTime (optional); if provided only get items newer than
           that date
 
         Returns:
-        * Module objct containing the data 
+        * Module objct containing the data
         """
         fn = self.parts_dir.joinpath(f"{label}-{module}-{Type}{Id}.xml")
         if fn.exists():
@@ -176,18 +185,18 @@ class Mink:
             m.toFile(path=fn)
             return m
 
-    def _mkdirs(self):
-        date = datetime.datetime.today().strftime("%Y%m%d")
-        dir = Path(self.job).joinpath(date)
-        if not Path.is_dir(dir):
-            Path.mkdir(dir, parents=True)
-        self.project_dir = dir
-        self.pix_dir = dir.parent.joinpath("pix")
+    def _mkdirs(self) -> None:
+        date: str = datetime.datetime.today().strftime("%Y%m%d")
+        adir: Path = Path(self.job).joinpath(date)
+        if not Path.is_dir(adir):
+            Path.mkdir(adir, parents=True)
+        self.project_dir = adir
+        self.pix_dir = adir.parent.joinpath("pix")
         self.parts_dir = self.project_dir.joinpath("parts")
         if not self.parts_dir.exists():
             self.parts_dir.mkdir(parents=True)
 
-    def info(self, msg):
+    def info(self, msg: str) -> None:
         logging.info(msg)
         print(msg)
 
@@ -195,10 +204,10 @@ class Mink:
     # MINK's DSL COMMANDs
     #
 
-    def all(self, args):
+    def all(self, args: list) -> None:
         self._parse_conf(job=args[0])
 
-    def chunk(self, args):
+    def chunk(self, args: list) -> None:
         """
         New chunky version of getPack
 
@@ -218,10 +227,10 @@ class Mink:
           So three chunks got written, the fourth aborted, so offset
           would 3 x 1000
         """
-        Type = args[0]
-        ID = args[1]
+        Type: str = args[0]
+        ID: int = args[1]
         try:
-            since = args[2]
+            since: Since = args[2]
         except:
             since = None
 
@@ -251,8 +260,7 @@ class Mink:
             chunk.validate()
             no += 1
 
-
-    def getAttachments(self, args):
+    def getAttachments(self, args: list) -> None:
         """
         Gets (downloads) attachments for module of certain types. Usually writes
         attachments to path as follows:
@@ -291,7 +299,6 @@ class Mink:
             # pretty dirty: assumes that getMedia has been done before
             mm_fn = self.parts_dir.joinpath(f"{label}-Multimedia-{Type}{Id}.xml")
             print(f" looking for multimedia info at {mm_fn}")
-            mmM = Module(file=mm_fn)
 
             # determine target dir
             if since is None:
@@ -302,23 +309,23 @@ class Mink:
                 pix_dir.mkdir()
             print(f" about to check attachments; saving to {pix_dir}")
 
+            mm = Module(file=mm_fn)
             try:
-                expected = self.sar.saveAttachments(obj=mmM, adir=pix_dir, since=since)
+                expected = self.sar.saveAttachments(data=mm, adir=pix_dir, since=since)
             except Exception as e:
                 self.info("Error during saveAttachments")
                 raise e
 
             # do we want to delete those files that are no longer attached?
             for img in os.listdir(pix_dir):
-                img = Path(pix_dir).joinpath(img)  # need resolve here
+                img = pix_dir.joinpath(img)  # need resolve here
                 if img not in expected:
                     print(f"image no longer attached, removing {img}")
                     os.remove(img)
         # currently we dont get attachments that have changed, but keep the same mulId,
         # that case should be rare
 
-
-    def getItem(self, args):
+    def getItem(self, args: list) -> Module:
         """
         gets a single items. Caches item on disk at
             {project_dir}/{id}.xml
@@ -345,8 +352,7 @@ class Mink:
             m.toFile(path=out_fn)
             return m
 
-
-    def getPack(self, args):
+    def getPack(self, args: list) -> None:
         """
         Download object and related information (attachment, media, people), join data
         together and clean it.
@@ -366,11 +372,10 @@ class Mink:
         print(f"GET PACK {args}")
         join_fn = self.join(args)  # write join file
         self.getAttachments(args)  # d/l attachments
-        cleanM = self.clean(args)  # includes validation 
-        return cleanM
+        self.join(args)  # includes validation
+        # if we need to return M, we need to load it
 
-
-    def join(self, args):
+    def join(self, args: list) -> Path:
         Type = args[0]
         Id = args[1]
         label = args[2]
@@ -380,9 +385,7 @@ class Mink:
             since = None
 
         # parts_dir now made during _mkdirs()
-        join_fn = self.parts_dir.joinpath(
-            f"{label}-join-{Type}{Id}.xml"
-        )  
+        join_fn = self.parts_dir.joinpath(f"{label}-join-{Type}{Id}.xml")
 
         if join_fn.exists():
             print(f" join from cache {join_fn}")
@@ -391,27 +394,34 @@ class Mink:
             self.info(f" joining modules, saving to {join_fn}")
 
             # module for target and type refers to the type of selection
-            m = self._getPart(
-                module="Person", Id=Id, Type=Type, label=label, since=since
-            ) + self._getPart(
-                module="Multimedia", Id=Id, Type=Type, label=label, since=since
-            ) + self._getPart(
-                module="Object", Id=Id, Type=Type, label=label, since=since
+            m = (
+                self._getPart(
+                    module="Person", Id=Id, Type=Type, label=label, since=since
+                )
+                + self._getPart(
+                    module="Multimedia", Id=Id, Type=Type, label=label, since=since
+                )
+                + self._getPart(
+                    module="Object", Id=Id, Type=Type, label=label, since=since
+                )
             )
 
             if Type == "exhibit":
-                m = m + self._getPart(
-                    module="Exhibition", Id=Id, Type=Type, label=label, since=since
-                ) + self._getPart(
-                    module="Registrar", Id=Id, Type=Type, label=label, since=since
+                m = (
+                    m
+                    + self._getPart(
+                        module="Exhibition", Id=Id, Type=Type, label=label, since=since
+                    )
+                    + self._getPart(
+                        module="Registrar", Id=Id, Type=Type, label=label, since=since
+                    )
                 )
             m.clean()
             m.validate()
             m.toFile(path=join_fn)
         return join_fn
 
-
-    def pack(self, args):
+    def pack(self, args: list) -> None:
         """
         Pack (or join) all clean files into one bigger package. We act on all
         *-clean-*.xml files in the current project directory and save to
@@ -430,5 +440,4 @@ class Mink:
             for in_fn in self.project_dir.glob("*-join-*.xml"):
                 print(f"Packing file {in_fn}")
                 m = m + Module(file=in_fn)
-            m.toFile(path=str(pack_fn))
-
+            m.toFile(path=pack_fn)

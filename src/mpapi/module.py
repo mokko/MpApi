@@ -81,24 +81,23 @@ from collections import namedtuple  # experimenting with namedtuples
 from copy import deepcopy  # for lxml
 from lxml import etree  # type: ignore
 from mpapi.helper import Helper
+from pathlib import Path
 from typing_extensions import TypeAlias  # only in python 3.9?
-from typing import Union, Iterator, List, Set
+from typing import Any, Iterator, Optional, Union
 
 # xpath 1.0 and lxml don't allow empty string or None for default ns
 dataTypes = {"Clb": "Clob", "Dat": "Date", "Lnu": "Long", "Txt": "Varchar"}
 NSMAP = {"m": "http://www.zetcom.com/ria/ws/module"}
 parser = etree.XMLParser(remove_blank_text=True)
-
 # types
-ET: TypeAlias = etree._Element
-intNone = Union[int, None]
-strNone = Union[str, None]
+# not using lxml-stubs at the moment
+ET = Any
 
 Item = namedtuple("Item", ["type", "id"])
 
 
 class Module(Helper):
-    def __add__(self, m2):
+    def __add__(self, m2):  # pytest complains when I add type hints
         """
         join two Module objects using the + operator:
             m1 = Module(file="one.xml")
@@ -127,13 +126,13 @@ class Module(Helper):
         mtype = item[0]
         ID = item[1]
 
-        itemN = self.etree.xpath(
+        itemN: ET = self.etree.xpath(
             f"/m:application/m:modules/m:module[@name = '{mtype}']/m:moduleItem[@id = '{ID}']",
             namespaces=NSMAP,
         )[0]
         return itemN
 
-    def __init__(self, *, file: str = None, tree: ET = None, xml: str = None) -> None:
+    def __init__(self, *, file: Path = None, tree: ET = None, xml: str = None) -> None:
         """
         There are FOUR ways to make a new Module object. Pick one:
             m = Module(file="path.xml") # from a file
@@ -276,7 +275,7 @@ class Module(Helper):
 
         for d2moduleN in d2moduleL:
             try:
-                d2mtypeL: List[ET] = d2moduleN.xpath(
+                d2mtypeL: list[ET] = d2moduleN.xpath(
                     "/m:application/m:modules/m:module/@name", namespaces=NSMAP
                 )
             except:
@@ -371,7 +370,7 @@ class Module(Helper):
 
         known_types = set()
         report = dict()
-        moduleL: List[ET] = self.etree.xpath(
+        moduleL: list[ET] = self.etree.xpath(
             f"/m:application/m:modules/m:module",
             namespaces=NSMAP,
         )
@@ -380,7 +379,7 @@ class Module(Helper):
             known_types.add(moduleA["name"])
 
         for Type in known_types:
-            itemL: List[ET] = self.etree.xpath(
+            itemL: list[ET] = self.etree.xpath(
                 f"/m:application/m:modules/m:module[@name = '{Type}']/m:moduleItem",
                 namespaces=NSMAP,
             )
@@ -470,7 +469,9 @@ class Module(Helper):
             # might be append instead: modulesN.append(moduleN)...
         return moduleN
 
-    def moduleItem(self, *, parent: ET, ID: int, hasAttachments: strNone = None) -> ET:
+    def moduleItem(
+        self, *, parent: ET, ID: int, hasAttachments: Optional[str] = None
+    ) -> ET:
         """
         Gets moduleItem with that ID or creates a new one.
 
@@ -510,8 +511,8 @@ class Module(Helper):
         *,
         parent: ET,
         name: str,
-        targetModule: strNone = None,
-        multiplicity: strNone = None,
+        targetModule: Optional[str] = None,
+        multiplicity: Optional[str] = None,
     ) -> ET:
         """
         Get existing moduleReference with that name or make new one.
@@ -542,7 +543,7 @@ class Module(Helper):
                 "{http://www.zetcom.com/ria/ws/module}moduleReference",
                 name=name,
                 multiplicity=multiplicity,
-                taretModule=targetModule,
+                targetModule=targetModule,
             )
         return modRefN
 
@@ -608,7 +609,7 @@ class Module(Helper):
             itemsL = None
         return itemsL
 
-    def repeatableGroupItemAdd(self, *, parent: ET, ID: intNone = None):
+    def repeatableGroupItemAdd(self, *, parent: ET, ID: Optional[int] = None):
 
         rGrpItem = etree.SubElement(
             parent,
@@ -777,7 +778,7 @@ class Module(Helper):
     def _compareItems(self, *, mtype: str, moduleN: ET):
         # new doc's mtype exists already in old doc
         # now compare each moduleItem in new doc
-        newItemsL: List[ET] = moduleN.xpath("./m:moduleItem", namespaces=NSMAP)
+        newItemsL: list[ET] = moduleN.xpath("./m:moduleItem", namespaces=NSMAP)
         for newItemN in newItemsL:
             newID = int(newItemN.attrib["id"])
             try:
@@ -823,7 +824,7 @@ class Module(Helper):
         if parent is None:
             parent = self.etree
 
-        elemL: List[ET] = parent.xpath(f"//m:{element}", namespaces=NSMAP)
+        elemL: list[ET] = parent.xpath(f"//m:{element}", namespaces=NSMAP)
         for elemN in elemL:
             elemN.getparent().remove(elemN)
 
@@ -846,7 +847,7 @@ class Module(Helper):
         # print(f"***{new}")
         return new
 
-    def _types(self) -> Set:
+    def _types(self) -> set:
         """Returns a set of module types in the document."""
         knownTypes = set()
         moduleL = self.etree.xpath(

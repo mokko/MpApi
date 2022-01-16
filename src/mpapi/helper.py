@@ -2,9 +2,22 @@ from lxml import etree
 from pathlib import Path
 import pkgutil
 
+# from typing import Any
+# pathlike = NewType("Pathlike", Union[str, Path])
+# ET = NewType("ET", Union [
+ET = any
+
 
 class Helper:
-    def toFile(self, *, path):
+    def fromFile(self, *, path: Path) -> None:
+        self.etree = etree.parse(str(path))
+
+    def fromString(self, *, xml: str) -> None:
+        parser = etree.XMLParser(remove_blank_text=True)
+        self.etree = etree.fromstring(xml, parser)
+
+    def toFile(self, *, path) -> None:
+        # path can be str or Pathlib object as well
         doc = self.etree
         try:
             self._write(path=path, doc=doc)
@@ -12,33 +25,25 @@ class Helper:
             doc = etree.ElementTree(self.etree)
             self._write(path=path, doc=doc)
 
-    def toFile2(self, *, path):  # should not be necessary
+    def toFile2(self, *, path) -> None:  # should not be necessary
         doc = self.etree
         doc.write(str(path), pretty_print=True, method="c14n2")
 
-    def toET(self):
+    def toET(self) -> ET:
         return self.etree
 
-    def _write(self, *, path, doc):
-        # ,pretty_print=True, method="c14n2"
-        doc.write(str(path), pretty_print=True, encoding="UTF-8")
-
-    def toString(self, *, et=None):
+    def toString(self, *, et: ET = None) -> str:
         if et is None:
             et = self.etree
         return etree.tostring(
             et, pretty_print=True, encoding="unicode"
         )  # why not utf-8?
 
-    # should use __str__ instead -> should go away, deprecated
-    def print(self, et=None): 
-        print(self.toString(et=et))
-
-    def validate(self, *, mode="module"):
+    def validate(self, *, mode: str = "module") -> True:
         """
         Validates a whole xml document of the type module.
 
-        Typde defaults to "module", "seach" being the other option currently implemented.
+        Mode defaults to "module", use "seach" if you're validating a query.
         """
 
         if mode == "module":
@@ -55,9 +60,9 @@ class Helper:
         xmlschema.assertValid(self.etree)  # dies if doesn't validate
         return True
 
-    def fromFile(self, *, path):
-        self.etree = etree.parse(str(path))
+    def xpath(self, *, xpath: str):
+        return self.etree.xpath(xpath, namespaces=NSMAP)
 
-    def fromString(self, *, xml):
-        parser = etree.XMLParser(remove_blank_text=True)
-        self.etree = etree.fromstring(xml, parser)
+    def _write(self, *, path, doc) -> None:
+        # ,pretty_print=True, method="c14n2"
+        doc.write(str(path), pretty_print=True, encoding="UTF-8")
