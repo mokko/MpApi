@@ -57,7 +57,7 @@ from typing import NewType, Optional, Union
 
 from mpapi.chunky import Chunky
 from mpapi.module import Module
-from mpapi.sar2 import Sar2
+from mpapi.sar2 import Sar
 from mpapi.client import MpApi
 from mpapi.search import Search
 
@@ -172,13 +172,13 @@ class Mink:
             return Module(file=fn)
         else:
             self.info(f" {module} from remote, saving to {fn}")
-            if type == "approval":
+            if Type == "approval":
                 m = self.sar.getByApprovalGrp(Id=Id, module=module, since=since)
-            elif type == "exhibit":
+            elif Type == "exhibit":
                 m = self.sar.getByExhibit(Id=Id, module=module, since=since)
-            elif type == "group":
+            elif Type == "group":
                 m = self.sar.getByGroup(Id=Id, module=module, since=since)
-            elif type == "loc":
+            elif Type == "loc":
                 m = self.sar.getByLocation(Id=Id, module=module, since=since)
             else:
                 raise TypeError("UNKNOWN type")
@@ -267,7 +267,7 @@ class Mink:
             pix_{label}/{mulId}.{ext}
 
         Currently, getAttachments relies on the file "{label}-Multimedia-{Type}{Id}.xml"
-        for multimedia items. So make sure that this file exists (that getMedia has been
+        for Multimedia items. So make sure that this file exists (that getMedia has been
         called before).
 
         Expects:
@@ -298,7 +298,7 @@ class Mink:
         if att == "attachments":
             # pretty dirty: assumes that getMedia has been done before
             mm_fn = self.parts_dir.joinpath(f"{label}-Multimedia-{Type}{Id}.xml")
-            print(f" looking for multimedia info at {mm_fn}")
+            print(f" looking for Multimedia info at {mm_fn}")
 
             # determine target dir
             if since is None:
@@ -366,14 +366,12 @@ class Mink:
         * arg[4]: since date, optional
 
         Returns
-        * xml as string with a clean, zml document containing at least objects, persons
-          and multimedia
+        * None
         """
         print(f"GET PACK {args}")
-        join_fn = self.join(args)  # write join file
+        join_fn = self.join(args)  # write join file, includes validation
         self.getAttachments(args)  # d/l attachments
-        self.join(args)  # includes validation
-        # if we need to return M, we need to load it
+        # if we need to return M, we need to load it from join_fn
 
     def join(self, args: list) -> Path:
         Type = args[0]
@@ -385,7 +383,7 @@ class Mink:
             since = None
 
         # parts_dir now made during _mkdirs()
-        join_fn = self.parts_dir.joinpath(f"{label}-join-{Type}{Id}.xml")
+        join_fn = self.project_dir.joinpath(f"{label}-join-{Type}{Id}.xml")
 
         if join_fn.exists():
             print(f" join from cache {join_fn}")
@@ -407,14 +405,10 @@ class Mink:
             )
 
             if Type == "exhibit":
-                m = (
-                    m
-                    + self._getPart(
-                        module="Exhibition", Id=Id, Type=Type, label=label, since=since
-                    )
-                    + self._getPart(
-                        module="Registrar", Id=Id, Type=Type, label=label, since=since
-                    )
+                m += self._getPart(
+                    module="Exhibition", Id=Id, Type=Type, label=label, since=since
+                ) + self._getPart(
+                    module="Registrar", Id=Id, Type=Type, label=label, since=since
                 )
             m.clean()
             m.validate()
@@ -424,7 +418,7 @@ class Mink:
     def pack(self, args: list) -> None:
         """
         Pack (or join) all clean files into one bigger package. We act on all
-        *-clean-*.xml files in the current project directory and save to
+        *-join-*.xml files in the current project directory and save to
         $label$date.xml in current working directory.
 
         TODO: clean file has been eliminated. Change the input

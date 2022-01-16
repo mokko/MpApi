@@ -7,6 +7,11 @@ import pkgutil
 # ET = NewType("ET", Union [
 ET = any
 
+NSMAP = {
+    "s": "http://www.zetcom.com/ria/ws/module/search",
+    "m": "http://www.zetcom.com/ria/ws/module",
+}
+
 
 class Helper:
     def fromFile(self, *, path: Path) -> None:

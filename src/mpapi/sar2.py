@@ -1,15 +1,17 @@
 """
-Sar stands for "search and response". It's a higher level interface on top of MpApi that 
-bundles multiple requests in one method, typically a search and a response. 
+Sar stands for search and response. It's a higher level interface on top of 
+MpApi that bundles multiple requests in one method, typically a search and a 
+response. 
 
-I introduce it mainly to clean up the code of the Mink class, so that Mink has to deal less 
-with xml and Sar.py can be tested easier. (Conversely, that means that mink parses DSL 
-config file, writes files and logs report.) 
+I introduce it mainly to clean up the code of the Mink class, so that Mink 
+has to deal less with xml and Sar.py can be tested easier. (Conversely, that 
+means that mink parses DSL config file, writes files and logs report.) 
 
-This is a new version of Sar that typically returns a Module object as a requests reponse.  
+This is a new version of Sar that typically returns a Module object as a 
+requests reponse.  
 
 USAGE
-    import Sar2 from mpapi.sar2
+    import Sar from mpapi.sar2
     import Search from mpapi.search
     import Module from mpapi.module
     sr = Sar(baseURL=baseURL, user=user, pw=pw)
@@ -31,7 +33,7 @@ USAGE
 
     # attachments
     sr.saveAttachments(data=Module(file="a.xml"), adir=dir) 
-        # for moduleItems in data download attachments and save as 
+        # for moduleItems in data download attachments and save as
         #     adir/{mulId}.{ext} 
         # only d/l media with smbfreigabe
 
@@ -58,9 +60,7 @@ The since parameter expects typical xs:dateTime format,e.g.
 but internally it's transformed to a number to compare it in xpath 1.0
     20211014074029 
 then it's reduced to a 14 digit number (resolution seconds) by cutting off 
-additional numbers (referencing fractions of seconds)
-
-So you can use this interal 14 digit format for the since parameter, but you dont have to.
+additional numbers (referencing fractions of seconds).
 """
 
 import os  # b/c Pathlib has troubles with Windows network paths
@@ -80,7 +80,7 @@ NSMAP = {
 ETparser = etree.XMLParser(remove_blank_text=True)
 
 
-class Sar2:
+class Sar:
     def __init__(self, *, baseURL: str, user: str, pw: str) -> None:
         self.api = MpApi(baseURL=baseURL, user=user, pw=pw)
         self.user = user
