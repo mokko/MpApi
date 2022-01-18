@@ -7,7 +7,7 @@ Python class representing data in RIA's modules
       <moduleItem hasAttachments="false" id="254808" uuid="254808">
         ...
 
-Thesis: 
+Theses: 
 * a module is really a set of moduleItems.
 * What Zetcom calls "item" I also call "record" or a "Datensatz" in other contexts.
 * This class should have been called differently, perhaps data or moduleData
@@ -16,7 +16,7 @@ Design
 * There is an old interface where every method has named parameters (e.g. 
     Module(file="path.xml")
   and there is a new interface which is perhaps more Pythonic
-    m1 + m2
+    m3 = m1 + m2
 
 Definition and decisions:
 * zml: the xml language we are dealing with here, there are other schemas for search etc.
@@ -849,7 +849,7 @@ class Module(Helper):
         return new
 
     def _types(self) -> set:
-        """Returns a set of module types in the document."""
+        """Returns a set of module types that exist in the document."""
         knownTypes = set()
         moduleL = self.etree.xpath(
             f"/m:application/m:modules/m:module",
