@@ -1,6 +1,6 @@
 from mpapi.search import Search
 from mpapi.module import Module
-from mpapi.sar2 import Sar
+from mpapi.sar import Sar
 
 with open("sdata/credentials.py") as f:
     exec(f.read())

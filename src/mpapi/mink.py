@@ -1,5 +1,5 @@
 """
-mink2.py: Commandline frontend for MpApi.py
+mink.py: Commandline frontend for MpApi.py
 
 CLI USAGE
     cd projectData
@@ -57,7 +57,7 @@ from typing import NewType, Optional, Union
 
 from mpapi.chunky import Chunky
 from mpapi.module import Module
-from mpapi.sar2 import Sar
+from mpapi.sar import Sar
 from mpapi.client import MpApi
 from mpapi.search import Search
 

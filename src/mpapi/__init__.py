@@ -5,7 +5,7 @@ credentials = "credentials.py"  # expect credentials in pwd
 import argparse
 
 # from mpapi.mink import Mink
-from mpapi.mink2 import Mink
+from mpapi.mink import Mink
 from pathlib import Path
 
 if Path(credentials).exists():

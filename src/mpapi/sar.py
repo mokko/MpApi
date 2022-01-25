@@ -11,7 +11,7 @@ This is a new version of Sar that typically returns a Module object as a
 requests reponse.  
 
 USAGE
-    import Sar from mpapi.sar2
+    import Sar from mpapi.sar
     import Search from mpapi.search
     import Module from mpapi.module
     sr = Sar(baseURL=baseURL, user=user, pw=pw)
