@@ -49,7 +49,7 @@ user=user).
 
 import logging
 from pathlib import Path
-from lxml import etree # type: ignore
+from lxml import etree  # type: ignore
 import importlib
 
 from mpapi.sar import Sar
@@ -57,6 +57,7 @@ from mpapi.client import MpApi
 from mpapi.module import Module
 from mpapi.search import Search
 from typing import Any, Callable, Iterable
+
 NSMAP = {
     "s": "http://www.zetcom.com/ria/ws/module/search",
     "m": "http://www.zetcom.com/ria/ws/module",
@@ -64,7 +65,9 @@ NSMAP = {
 
 
 class Replace:
-    def __init__(self, *, baseURL: str, user: str, pw: str, lazy: bool = False, act: bool = False) -> None:
+    def __init__(
+        self, *, baseURL: str, user: str, pw: str, lazy: bool = False, act: bool = False
+    ) -> None:
         print("baseURL: " + baseURL)
         self.api = MpApi(baseURL=baseURL, user=user, pw=pw)
         self.sar = Sar(baseURL=baseURL, user=user, pw=pw)
@@ -83,10 +86,10 @@ class Replace:
             level=logging.INFO,
         )
 
-    def job(self, *, plugin:str): 
+    def job(self, *, plugin: str):
         """
         Load a job plugin by name. Returns the plugin object
-        
+
         Expects
         * plugin: abbreviated plugin name as str
         """
@@ -94,18 +97,18 @@ class Replace:
         name = "mpapi.replace." + plugin
         mod = importlib.import_module(name)
         Plugin = getattr(mod, plugin)
-        return Plugin() # what type is plugin?
+        return Plugin()  # what type is plugin?
 
-    def loop(self, *, xpath:str, onItem:Callable, mtype: str) -> Iterable:
+    def loop(self, *, xpath: str, onItem: Callable, mtype: str) -> Iterable:
         """
         Generic loop
-        
+
         Expects
         * xpath expression that returns a set of moduleItems
         * onItem callable
         * mtype: module type
         """
-        itemsL = self.ET.xpath(xpath, namespaces=NSMAP) # type: ignore
+        itemsL = self.ET.xpath(xpath, namespaces=NSMAP)  # type: ignore
 
         for itemN in itemsL:
             Id = itemN.attrib["id"]
@@ -117,7 +120,7 @@ class Replace:
     def runPlugin(self, *, plugin: Any, limit: int = -1) -> None:
         """
         runs the plugin which may change the db.
-        Prints the number of changes that have been (act mode) or would have 
+        Prints the number of changes that have been (act mode) or would have
         been made (not act mode).
 
         EXPECTS
@@ -175,7 +178,7 @@ class Replace:
 
     def search(self, *, query: Search, Id: int) -> None:
         """
-        Performs a search, writes results to disk (for debugging and as cache) 
+        Performs a search, writes results to disk (for debugging and as cache)
         and saves result in self.ET
         """
         out_fn = f"temp{Id}.zml.xml"
@@ -184,7 +187,7 @@ class Replace:
             self.ET = Module(file=out_fn).toET()
         else:
             query.validate(mode="search")
-            r = self.sar.search(query=query)  
+            r = self.sar.search(query=query)
             print(f" writing response to temp file: {out_fn}")
-            r.toFile(path=out_fn)  
+            r.toFile(path=out_fn)
             self.ET = r.toET()

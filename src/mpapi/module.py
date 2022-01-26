@@ -91,8 +91,9 @@ parser = etree.XMLParser(remove_blank_text=True)
 # types
 # not using lxml-stubs at the moment
 ET = Any
-
+PathX = Union[Path, str]
 Item = namedtuple("Item", ["type", "id"])
+
 
 class Module(Helper):
     def __add__(self, m2):  # pytest complains when I add type hints
@@ -130,7 +131,7 @@ class Module(Helper):
         )[0]
         return itemN
 
-    def __init__(self, *, file: Union[Path, str] = None, tree: ET = None, xml: str = None) -> None:
+    def __init__(self, *, file: PathX = None, tree: ET = None, xml: str = None) -> None:
         """
         There are FOUR ways to make a new Module object. Pick one:
             m = Module(file="path.xml") # from a file
@@ -152,8 +153,11 @@ class Module(Helper):
         if tree is not None:
             self.etree = tree
         elif xml is not None:
-            # self.etree = etree.fromstring(xml, parser)
-            self.etree = etree.fromstring(bytes(xml, "utf-8"), parser)
+            # fromstring is for xml without encoding declaration
+            if isinstance(xml, bytes):
+                self.etree = etree.fromstring(xml, parser)
+            else:
+                self.etree = etree.fromstring(bytes(xml, "utf-8"), parser)
         elif file is not None:
             self.etree = etree.parse(str(file), parser)
         else:

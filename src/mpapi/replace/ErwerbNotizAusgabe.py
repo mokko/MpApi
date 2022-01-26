@@ -1,8 +1,9 @@
 import datetime
 from lxml import etree
+from mpapi.search import Search
+from mpapi.module import Module
 import re
-from MpApi.Search import Search
-from MpApi.Module import Module
+from typing import Any, Callable
 
 """
 Für die HFObjekte wollen wir ErwerbNotizAusgabe befüllen.
@@ -19,9 +20,11 @@ NSMAP = {
     "m": "http://www.zetcom.com/ria/ws/module",
 }
 
+ET = Any
+
 
 class ErwerbNotizAusgabe:
-    def input(self):
+    def Input(self):
         STO = {
             # Westflügel, Westspange Eröffnung
             "O1.189.01.K1 M13": "4220560",
@@ -53,9 +56,10 @@ class ErwerbNotizAusgabe:
         """
         We want object records without ErwerbNotizAusgabe (i.e. empty)
 
-        It seems impossible to select all records without ErwerbNotizAusgabe in RIA and
-        exactly those. I can only get records with any ErwerbNotiz entry that don't have
-        any entries with the type Ausgabe, not records without any ErwerbNotiz entries.
+        It seems impossible to select all records without ErwerbNotizAusgabe and
+        exactly those in RIA. I can only get records with any ErwerbNotiz entry
+        that don't have any entries with the type Ausgabe, not records without
+        any ErwerbNotiz entries.
 
         Typ (Erwerb. Notiz)->ist nicht gleich: Ausgabe
         """
@@ -94,7 +98,7 @@ class ErwerbNotizAusgabe:
     # STUFF             -
     # --------------------
 
-    def erwerbNotiz(self, *, itemN, user):
+    def erwerbNotiz(self, *, itemN: ET, user: str) -> Callable:
         """
         Just check conditions and transparently trigger correct method
         itemN should be a different moduleItem every time it gets called
@@ -110,7 +114,10 @@ class ErwerbNotizAusgabe:
         if len(rGrpL) > 0:
             # Some kind of Erwerb.Notiz exists
             grpItemL = rGrpL[0].xpath(
-                "m:repeatableGroupItem[m:vocabularyReference/@name = 'TypeVoc' and ./m:vocabularyReference/m:vocabularyReferenceItem/m:formattedValue = 'Ausgabe']",
+                """m:repeatableGroupItem[
+                    m:vocabularyReference/@name = 'TypeVoc' 
+                    and ./m:vocabularyReference/m:vocabularyReferenceItem/m:formattedValue = 'Ausgabe'
+                ]""",
                 namespaces=NSMAP,
             )
             if len(grpItemL) > 0:
@@ -125,7 +132,7 @@ class ErwerbNotizAusgabe:
             print(" ErwerbNotiz doesn't exist yet -> createErwerbNotizAusgabe")
             return self.createErwerbNotizAusgabe(Id=moduleItemId, itemN=itemN)
 
-    def createErwerbNotizAusgabe(self, *, Id, itemN):
+    def createErwerbNotizAusgabe(self, *, Id: int, itemN: ET) -> dict:
         """
         The Id we get is from moduleItem.
         itemN is the whole moduleItem node
