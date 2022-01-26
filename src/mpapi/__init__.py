@@ -4,7 +4,7 @@ __version__ = "0.1.3"
 credentials = "credentials.py"  # expect credentials in pwd
 import argparse
 
-# from mpapi.mink import Mink
+from replace import Replace
 from mpapi.mink import Mink
 from pathlib import Path
 

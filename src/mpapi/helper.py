@@ -1,6 +1,7 @@
 from lxml import etree
 from pathlib import Path
 import pkgutil
+from typing import Union
 
 # from typing import Any
 # pathlike = NewType("Pathlike", Union[str, Path])
@@ -21,7 +22,7 @@ class Helper:
         parser = etree.XMLParser(remove_blank_text=True)
         self.etree = etree.fromstring(xml, parser)
 
-    def toFile(self, *, path) -> None:
+    def toFile(self, *, path: Union[Path, str]) -> None:
         # path can be str or Pathlib object as well
         doc = self.etree
         try:

@@ -25,7 +25,6 @@ Definition and decisions:
   modules or moduletypes (mtypes).
 * Let's usually go with Zetcom's names
 
-
 USAGE:
     # CONSTRUCTION: 4 ways to make a moduleList
     m = Module(file="path.xml")  # load from disc
@@ -95,7 +94,6 @@ ET = Any
 
 Item = namedtuple("Item", ["type", "id"])
 
-
 class Module(Helper):
     def __add__(self, m2):  # pytest complains when I add type hints
         """
@@ -132,7 +130,7 @@ class Module(Helper):
         )[0]
         return itemN
 
-    def __init__(self, *, file: Path = None, tree: ET = None, xml: str = None) -> None:
+    def __init__(self, *, file: Union[Path, str] = None, tree: ET = None, xml: str = None) -> None:
         """
         There are FOUR ways to make a new Module object. Pick one:
             m = Module(file="path.xml") # from a file

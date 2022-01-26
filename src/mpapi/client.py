@@ -83,7 +83,7 @@ class MpApi:
     #
     # B.2 SEARCHING
     #
-    def runSavedQuery(self, *, __id):
+    def runSavedQuery(self, *, id):
         """
         Run a pre-existing saved search
         POST http://.../ria-ws/application/module/{module}/search/savedQuery/{__id}

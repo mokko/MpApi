@@ -1,13 +1,16 @@
-from Search import Search
 import datetime
+from mpapi.search import Search
 
 """
 Set SMBFreigabe for all objects in group with id 117396
+
+First filter for objects in the group that are not yet approved (freigegeben),
+then work on the not approved object.
 """
 
 
 class BoxerAufstand:
-    def input(self):
+    def Input(self):
         r = {
             "3 Wege Boxeraufstand": "117396",
         }
@@ -19,7 +22,7 @@ class BoxerAufstand:
         """
         return "/m:application/m:modules/m:module[@name = 'Object']/m:moduleItem"
 
-    def search(self, id, limit=-1):
+    def search(self, Id, limit=-1):
         """
         Objects in group 117396
         """
@@ -28,7 +31,7 @@ class BoxerAufstand:
         query.addCriterion(
             operator="equalsField",
             field="ObjObjectGroupsRef.__id",
-            value=id,  # using voc id
+            value=Id,  # using voc id
         )
         query.addCriterion(
             operator="notEqualsField",  # notEqualsTerm
@@ -53,19 +56,19 @@ class BoxerAufstand:
 
     def setObjectFreigabe(self, *, node, user):
         """
-        We're inside Objects's nodeItem here
-        We have already filtered out cases where SMBFreigabe exists already
+        We're inside Object's nodeItem here
+        We have already filtered out cases where SMBFreigabe exists
         """
         # print (node)
 
-        id = node.xpath("@id")[0]
+        Id = node.xpath("@id")[0]
         today = datetime.date.today()
         module = "Object"
         xml = f"""
             <application xmlns="http://www.zetcom.com/ria/ws/module">
               <modules>
                 <module name="{module}">
-                  <moduleItem id="{id}">
+                  <moduleItem id="{Id}">
                     <repeatableGroup name="ObjPublicationGrp">
                         <repeatableGroupItem>
                             <dataField dataType="Date" name="ModifiedDateDat">
@@ -91,10 +94,10 @@ class BoxerAufstand:
         payload = {
             "type": "createRepeatableGroup",
             "module": module,
-            "id": id,
+            "id": Id,
             "repeatableGroup": "ObjPublicationGrp",
             "xml": xml,
-            "success": f"{module} {id}: set object smbfreigabe",
+            "success": f"{module} {Id}: set object smbfreigabe",
         }
 
         return payload
