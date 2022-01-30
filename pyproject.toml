@@ -20,5 +20,6 @@ test = [
 ]
 
 [project.scripts]
+du = 'mpapi:du'
 mink = 'mpapi:mink'
 mpReplace = 'mpapi:replace'

@@ -17,27 +17,28 @@ Each criterion can be combined with others using the usual conjunctions (and,
 or, not). 
 
 USAGE
-    s = mpSearch(fromFile="path/to/file")
-    s = mpSearch(fromString=xml)
-    s = mpSearch(module="Object", limit=-1, offset=0)
-    s.offset(value=123) # offset or limit
-    s.AND()
-    s.addCriterion(operator="equalsValue", field="__id", value="1234")
-    s.addCriterion(operator="equalsValue", field="__id", value="1235")
+    q = Search(module="Object") # from scratch
+    q = Search(fromFile="path/to/file")
+    q = Search(fromString=xml)
+    q = Search(module="Object", limit=-1, offset=0)
+    q.offset(value=123) # offset or limit
+    q.AND()
+    q.addCriterion(operator="equalsValue", field="__id", value="1234")
+    q.addCriterion(operator="equalsValue", field="__id", value="1235")
 
     #if you only want certain fields back, list them
-    s.addField("ObjExampleMissing")
+    q.addField("ObjExampleMissing")
 
 #helpers
-    s.print()  # print to STDOUT
-    s.toFile(path="out.xml")
-    s.validate(mode="search")
+    q.print()  # print to STDOUT
+    q.toFile(path="out.xml")
+    q.validate(mode="search")
 
 NEW
-    s.limit(value=10)  # setter, returns int
-    value = s.limit()  # getter, returns int
-    s.offset(value=10) # setter, returns int
-    value = s.offset() # getter, returns int
+    q.limit(value=10)  # setter, returns int
+    value = q.limit()  # getter, returns int
+    q.offset(value=10) # setter, returns int
+    value = q.offset() # getter, returns int
     
 INTERNAL
     self.etree stores the lxml object containing the xml document.
