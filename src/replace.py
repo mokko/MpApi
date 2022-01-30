@@ -114,7 +114,7 @@ class Replace:
             Id = itemN.attrib["id"]
             print(f"{mtype} {Id}")
             count = itemN.xpath("count(//m:moduleItem)", namespaces=NSMAP)
-            # print (f"SYD: {count} inside replace; should be 1")
+            # print (f"{count} inside replace; should be 1")
             yield onItem(itemN=itemN, user=self.user)
 
     def runPlugin(self, *, plugin: Any, limit: int = -1) -> None:

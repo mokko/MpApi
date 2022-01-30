@@ -18,7 +18,7 @@ NSMAP = {
 
 
 class ErwerbNotizAusgabe3(ErwerbNotizAusgabe):  # inheritance!
-    def input(self):
+    def Input(self):
         STO = {
             "BoxerGroup": "117396",
         }

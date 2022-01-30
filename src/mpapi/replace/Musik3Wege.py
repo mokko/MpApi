@@ -7,7 +7,7 @@ Set SMBFreigabe for all objects in group with id 106400
 
 
 class BoxerAufstand:
-    def input(self):
+    def Input(self):
         r = {
             "3Wege Musikinstrumente": "106400",
         }

@@ -15,7 +15,7 @@ marker = "SM8HF"
 
 
 class WestMarker:
-    def input(self):
+    def Input(self):
         STO = {
             # Westflügel, Westspange Eröffnung
             "O1.189.01.K1-M13": "4220560",
@@ -124,9 +124,9 @@ class WestMarker:
             print("   no online description yet, ADDING MY MARK")
             return self.createOnlineDescription(objId=Id)
 
-    def createOnlineDescription(self, *, objId):
+    def createOnlineDescription(self, *, objId) -> dict:
         """
-        Caution: The id we might need here is objId, not the STOid
+        Caution: The id we need here is objId, not the STOid
         """
         rGrpName = "ObjTextOnlineGrp"
         module = "Object"

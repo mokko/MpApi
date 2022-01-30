@@ -18,7 +18,7 @@ NSMAP = {
 
 
 class ErwerbNotizAusgabe2(ErwerbNotizAusgabe):  # inheritance!
-    def input(self):
+    def Input(self):
         STO = {
             "Musikethnologie": "EMMusikethnologie",
         }

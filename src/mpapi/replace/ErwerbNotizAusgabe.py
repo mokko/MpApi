@@ -7,7 +7,7 @@ from typing import Any, Callable
 
 """
 Für die HFObjekte wollen wir ErwerbNotizAusgabe befüllen.
-Wir ändern ErwerbNotizAusgabe nur wenn das Feld leer ist.
+Wir ändern ErwerbNotizAusgabe, nur wenn das Feld leer ist.
 Wir schreiben Inhalte aus anderen Feldern rein. XSLT jetzt in Python reimplementiert.
 
 Typische Fehlermeldungen des Clients

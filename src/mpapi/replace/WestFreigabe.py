@@ -3,7 +3,7 @@ from MpApi.Search import Search
 
 
 class WestFreigabe:
-    def input(self):
+    def Input(self):
         STO = {
             # Westflügel, Westspange Eröffnung
             "O1.189.01.K1 M13": "4220560",

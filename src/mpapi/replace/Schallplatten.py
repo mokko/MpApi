@@ -9,7 +9,7 @@ unfinished, untested
 
 
 class Schallplatten:
-    def input(self):
+    def Input(self):
         r = {
             "Schallplatten": "117396",
         }
@@ -21,7 +21,7 @@ class Schallplatten:
         """
         return "/m:application/m:modules/m:module[@name = 'Object']/m:moduleItem"
 
-    def search(self, id, limit=-1):
+    def search(self, Id, limit=-1):
         """
         Objects
         - in EM-Medienarchiv that have

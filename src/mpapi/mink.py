@@ -74,7 +74,7 @@ class Mink:
     def __init__(
         self, *, conf: str, job: str, baseURL: str, user: str, pw: str
     ) -> None:
-        self.sar = Sar2(baseURL=baseURL, user=user, pw=pw)
+        self.sar = Sar(baseURL=baseURL, user=user, pw=pw)
         self.api = MpApi(baseURL=baseURL, user=user, pw=pw)
         self.chunker = Chunky(chunkSize=1000, baseURL=baseURL, pw=pw, user=user)
         self.conf = conf
