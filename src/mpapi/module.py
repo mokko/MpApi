@@ -47,7 +47,7 @@ USAGE:
                                   # m
     if m:                         # m is True if len(m) > 0 (new)
     
-    #iterate through moduleItems
+    #iterate through all moduleItems
     for item in m:
         #do something with item
 

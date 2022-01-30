@@ -169,17 +169,27 @@ class MpApi:
     #
     # B.4 FIELDs
     #
-    def updateField(self, *, module, id, datafield, xml):
+    def updateField(self, *, module, id, dataField, xml):
         """
         Update a single field of a module item
-        PUT http://.../ria-ws/application/module/{module}/{__id}/{datafield}
+        PUT http://.../ria-ws/application/module/{module}/{__id}/{dataField}
 
-        NB: We dont need a createField method since simple datafields are always created.
+        NB: We dont need a createField method since simple dataFields are always created.
         """
         url = f"{self.appURL}/module/{module}/{id}/{dataField}"
         r = requests.put(url, data=xml, headers=self.headers, auth=self.auth)
         r.raise_for_status()
         return r
+
+    def updateField2(self, *, mtype, ID, dataField, value):
+        m = Module()
+        mm = m.module(name=mtype)
+        item = m.moduleItem(parent=mm, ID=ID)
+        m.dataField(parent=item, name=dataField, value=value)
+        m.validate()
+        m.toFile(path="upField.debug.xml") # needs to go later
+        self.api.updateField(module=mtype, id=ID, dataField=dataField, xml=m.toString())
+
 
     #
     # B.5 REPEATABLE GROUPS
@@ -220,13 +230,13 @@ class MpApi:
         return r
 
     def updateFieldInGroup(
-        self, *, module, id, referenceId, datafield, repeatableGroup
+        self, *, module, id, referenceId, dataField, repeatableGroup
     ):
         """
         Update a single data field of a repeatable group / reference
-        PUT http://.../ria-ws/application/module/{module}/{__id}/{repeatableGroup|reference}/{__referenceId}/{datafield}
+        PUT http://.../ria-ws/application/module/{module}/{__id}/{repeatableGroup|reference}/{__referenceId}/{dataField}
         """
-        url = f"{self.appURL}/module/{module}/{id}/{repeatableGroup}/{referenceId}/{datafield}"
+        url = f"{self.appURL}/module/{module}/{id}/{repeatableGroup}/{referenceId}/{dataField}"
         r = requests.put(url, data=xml, headers=self.headers, auth=self.auth)
         r.raise_for_status()
         return r
