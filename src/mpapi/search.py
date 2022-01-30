@@ -132,7 +132,7 @@ class Search(Helper):
 
     def addCriterion(self, *, operator, field, value=None):
         if operator not in allowedOperators:
-            raise TypeError(f"Unknown operator: '{operator}'")
+            raise ValueError(f"Unknown operator: '{operator}'")
 
         if value is None:
             etree.SubElement(

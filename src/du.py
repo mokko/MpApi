@@ -57,9 +57,9 @@ from mpapi.search import Search
 from openpyxl import load_workbook  # type: ignore
 
 # from openpyxl.styles import PatternFill, colors, Fill
-import openpyxl # type: ignore
-from openpyxl.styles import Font # type: ignore
-from openpyxl.styles.colors import Color # type: ignore
+import openpyxl  # type: ignore
+from openpyxl.styles import Font  # type: ignore
+from openpyxl.styles.colors import Color  # type: ignore
 
 NSMAP = {
     "s": "http://www.zetcom.com/ria/ws/module/search",
@@ -125,7 +125,7 @@ class Du:
         if ws.max_row > 3:
             query.OR()
         IDs = f"A3:A{ws.max_row}"
-        for col in ws[IDs]: #.iter_cols(min_row=3, max_col=1)
+        for col in ws[IDs]:  # .iter_cols(min_row=3, max_col=1)
             for cell in col:
                 print(f"{cell.row} {mtype} {cell.value}")
                 query.addCriterion(
@@ -173,27 +173,27 @@ class Du:
 
     def requestedFields(self) -> dict:
         """
-            Atm, we're only working on cols from the Excel which start with 
-            dataField
-            later we need to search for these fields in the response and
-            write into exactly those columns, so we have to "remember" the fields we picked
+        Atm, we're only working on cols from the Excel which start with
+        dataField
+        later we need to search for these fields in the response and
+        write into exactly those columns, so we have to "remember" the fields we picked
 
-            {
-                1: {  # colNo as int, 1-based
-                    "field": "ObjTechnicalTermClb",  # aka zcName
-                    "full": "dataField.ObjTechnicalTermClb",
-                    "param": "value",
-                }
+        {
+            1: {  # colNo as int, 1-based
+                "field": "ObjTechnicalTermClb",  # aka zcName
+                "full": "dataField.ObjTechnicalTermClb",
+                "param": "value",
             }
+        }
         """
 
-        ws = self.wb.active           # should always activate first sheet
+        ws = self.wb.active  # should always activate first sheet
         requested = dict()
         colL = openpyxl.utils.cell.get_column_letter(ws.max_column)
         labels = f"B2:{colL}2"  # field labels
         for row in ws[labels]:
             for cell in row:
-                #print (f"LLL:{labels} {cell} {cell.value}")
+                # print (f"LLL:{labels} {cell} {cell.value}")
                 if cell.value is not None and cell.value.startswith("dataField"):
                     field = cell.value.split(".", maxsplit=1)[1]
                     requested[cell.column] = {
@@ -208,9 +208,9 @@ class Du:
     def up(self) -> None:
         """
         Loop through the first sheet at self.wb and upload changes to RIA
-        
-        We should try to avoid atomic changes where every changed field 
-        results in one upload. Let's try to loop thru row by row so that all 
+
+        We should try to avoid atomic changes where every changed field
+        results in one upload. Let's try to loop thru row by row so that all
         changes in one row become one upload.
         """
         ws = self.wb.active  # should always activate first sheet
@@ -224,7 +224,7 @@ class Du:
                 cname = f"{colL}{rno}"
                 value = ws[cname].value
                 field = requested[colNo]["field"]
-                print (f"{mtype} {ID} {cname} : {ws[cname].value}")
+                print(f"{mtype} {ID} {cname} : {ws[cname].value}")
                 # This is the atomic approach that I wanted to avoid
                 # Before I make a change check if value is different from existing value?
                 # I think the database doesn't make a change if value is the same, so I could
@@ -232,58 +232,64 @@ class Du:
                 # Should I check if someone changed the record since we created the Excel?
                 # Then we need to save a date some in the excel and compare last modified with it
                 self._updateField(mtype=mtype, ID=ID, dataField=field, value=value)
-      
-#
-# private
-#
- 
+
+    #
+    # private
+    #
+
     def _updateField(self, *, mtype: str, ID: int, dataField: str, value: str) -> None:
-        """ 
-            If I write the same Sachbegriff to a record that already exists, 
-            the timestamp gets updated, but the log entry has no entry. I 
-            usually want to avoid that.
-            
-            Also: don't change the online record (back to a old state) if it has 
-            been changed since the download of the data to Excel.
-            
-            Potentially, I could do some of these tests earlier, so I dont have 
-            to repeat them for every field in the same row.
+        """
+        If I write the same Sachbegriff to a record that already exists,
+        the timestamp gets updated, but the log entry has no entry. I
+        usually want to avoid that.
+
+        Also: don't change the online record (back to a old state) if it has
+        been changed since the download of the data to Excel.
+
+        Potentially, I could do some of these tests earlier, so I dont have
+        to repeat them for every field in the same row.
         """
         q = Search(module=mtype)
-        q.addCriterion(
-            operator="equalsField", field="__id", value=str(ID)
-        )
-        q.addField(field = "__lastModified")
-        q.addField(field = dataField)
+        q.addCriterion(operator="equalsField", field="__id", value=str(ID))
+        q.addField(field="__lastModified")
+        q.addField(field=dataField)
         q.validate(mode="search")
-        #q.toFile(path="query.debug.xml")
+        # q.toFile(path="query.debug.xml")
         m = self.sar.search(query=q)
-        #m.toFile(path="date.debug.xml")
+        # m.toFile(path="date.debug.xml")
         item = m[mtype, ID]
-        lastMod = item.xpath("""m:systemField[
-            @name = '__lastModified']/m:value/text()"""
-            , namespaces=NSMAP)[0]
-        oldValue = item.xpath(f"""m:dataField[
-            @name = '{dataField}']/m:value/text()"""
-            , namespaces=NSMAP)[0]
-        ws = self.wb.active           # should always activate first sheet
-        downloadTime=ws["B1"]
-        #print (f"oldValue {oldValue} {lastMod}")
+        lastMod = item.xpath(
+            """m:systemField[
+            @name = '__lastModified']/m:value/text()""",
+            namespaces=NSMAP,
+        )[0]
+        oldValue = item.xpath(
+            f"""m:dataField[
+            @name = '{dataField}']/m:value/text()""",
+            namespaces=NSMAP,
+        )[0]
+        ws = self.wb.active  # should always activate first sheet
+        downloadTime = ws["B1"]
+        # print (f"oldValue {oldValue} {lastMod}")
         if oldValue != value:
             # Excel has different value than online RIA
-            print ("INFO: Value changed, update may be required")
+            print("INFO: Value changed, update may be required")
             if lastMod < downloadTime:
                 # online RIA entry is older than Excel download
-                print ("INFO: Excel is newer than online data, update required")
-                self.api.updateField2(mtype=mtype, ID=ID, dataField=dataField, value=value)
+                print("INFO: Excel is newer than online data, update required")
+                self.api.updateField2(
+                    mtype=mtype, ID=ID, dataField=dataField, value=value
+                )
             else:
-                print ("WARNING: Value has been changed online since download to Excel (no update)")
-        #else:
-            #print ("Value already online (no update)")
+                print(
+                    "WARNING: Value has been changed online since download to Excel (no update)"
+                )
+        # else:
+        # print ("Value already online (no update)")
 
     def _rowById(self, *, ID: int) -> int:
         ws = self.wb.active  # should always activate first sheet
-        # I could write an index of IDs to memory to save time; 
+        # I could write an index of IDs to memory to save time;
         # not necessary atm
         for col in ws.iter_cols(min_row=2, min_col=1, max_col=1):
             for cell in col:

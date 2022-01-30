@@ -187,9 +187,8 @@ class MpApi:
         item = m.moduleItem(parent=mm, ID=ID)
         m.dataField(parent=item, name=dataField, value=value)
         m.validate()
-        m.toFile(path="upField.debug.xml") # needs to go later
+        # m.toFile(path="upField.debug.xml")  # needs to go later
         self.api.updateField(module=mtype, id=ID, dataField=dataField, xml=m.toString())
-
 
     #
     # B.5 REPEATABLE GROUPS
