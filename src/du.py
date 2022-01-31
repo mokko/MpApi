@@ -21,11 +21,12 @@ FORMAT OF THE EXCEL FILE
 
 The excel format in words: 
 * Exceptions at the beginning  
-    B1 provides the date of the last download 
-    A2 module type to which ids belong, e.g. Object.
-* Rest of colum lists the IDs
+    B1 provides the date of the last download; du enters the date automatically 
+    during download
+    A2 module type to which ids belong, e.g. Object
+* Rest of column A lists the IDs
 * You may also list respective IdentNr in the second row for your orientation.
-* The rest of the _second row_ should be the fieldnames you want to download. 
+* The rest of the second row should be the fieldnames you want to download. 
   You should use the internal fieldnames (probably using a special notation 
   which is not determined yet.)
 * at this point du works only the first Excel sheet, but this may change in the
@@ -45,19 +46,18 @@ KNOWN LIMITATIONS
 * If Excel file is still opened in Excel, it is locked and this script can't 
   run (Permission denied). -> Close Excel 
 * there is a Unix command with the same name
+* currently we only allow the modules Object, Person, Multimedia
 """
 
-import argparse  # will disappear when code moved to __init__
 from datetime import datetime
-from lxml import etree
+from lxml import etree  # type: ignore
 from mpapi.client import MpApi
 from mpapi.sar import Sar
 from mpapi.module import Module
 from mpapi.search import Search
-from openpyxl import load_workbook  # type: ignore
 
-# from openpyxl.styles import PatternFill, colors, Fill
 import openpyxl  # type: ignore
+from openpyxl import load_workbook  # type: ignore
 from openpyxl.styles import Font  # type: ignore
 from openpyxl.styles.colors import Color  # type: ignore
 
@@ -79,7 +79,7 @@ class Du:
         self.wb = load_workbook(filename=Input)
 
         ws = self.wb.active  # should always activate first sheet
-        A2 = ws["A2"].value  # could also be called mtype
+        A2 = ws["A2"].value
         if A2 not in known_modules:
             raise ValueError(f"Error: A2 is not a known module ´{A2}´")
 
@@ -116,7 +116,8 @@ class Du:
 
         ws = self.wb.active  # should always activate first sheet
         mtype = ws["A2"].value
-        ws["B1"] = datetime.now()
+        now = datetime.now()
+        ws["B1"] = now.isoformat()
         ws["B1"].font = Font(color="005655")
 
         query = Search(module=mtype)
@@ -133,6 +134,7 @@ class Du:
                 )
 
         requested = self.requestedFields()
+        print(requested)
         for colNo in requested:
             query.addField(field=requested[colNo]["field"])
 
@@ -141,8 +143,6 @@ class Du:
         print("Executing query...")
         m = self.sar.search(query=query)
         m.toFile(path="response.debug.xml")
-
-        print(requested)
 
         for colNo in requested:
             print(f"FF {colNo}")
@@ -225,12 +225,7 @@ class Du:
                 value = ws[cname].value
                 field = requested[colNo]["field"]
                 print(f"{mtype} {ID} {cname} : {ws[cname].value}")
-                # This is the atomic approach that I wanted to avoid
-                # Before I make a change check if value is different from existing value?
-                # I think the database doesn't make a change if value is the same, so I could
-                # conceivably omit the check
-                # Should I check if someone changed the record since we created the Excel?
-                # Then we need to save a date some in the excel and compare last modified with it
+                # This is the atomic per field approach that I wanted to avoid
                 self._updateField(mtype=mtype, ID=ID, dataField=field, value=value)
 
     #
@@ -256,24 +251,29 @@ class Du:
         q.validate(mode="search")
         # q.toFile(path="query.debug.xml")
         m = self.sar.search(query=q)
-        # m.toFile(path="date.debug.xml")
-        item = m[mtype, ID]
-        lastMod = item.xpath(
-            """m:systemField[
-            @name = '__lastModified']/m:value/text()""",
-            namespaces=NSMAP,
-        )[0]
-        oldValue = item.xpath(
-            f"""m:dataField[
-            @name = '{dataField}']/m:value/text()""",
-            namespaces=NSMAP,
-        )[0]
-        ws = self.wb.active  # should always activate first sheet
-        downloadTime = ws["B1"]
+        m.toFile(path="check.debug.xml")
+        item = m[mtype, ID]  # type: ignore
+        # dateutil.parser.isoparse?
+        lastMod = datetime.fromisoformat(
+            item.xpath(
+                "m:systemField[@name = '__lastModified']/m:value/text()",
+                namespaces=NSMAP,
+            )[0]
+        )
+        try:
+            onlineValue = item.xpath(
+                f"m:dataField[@name = '{dataField}']/m:value/text()",
+                namespaces=NSMAP,
+            )[0]
+        except:
+            onlineValue = None
+        ws = self.wb.active
+        downloadTime = ws["B1"].value
+
         # print (f"oldValue {oldValue} {lastMod}")
-        if oldValue != value:
+        if onlineValue != value:
             # Excel has different value than online RIA
-            print("INFO: Value changed, update may be required")
+            print(f"INFO: online {onlineValue} <-> Excel {value}")
             if lastMod < downloadTime:
                 # online RIA entry is older than Excel download
                 print("INFO: Excel is newer than online data, update required")
@@ -284,14 +284,12 @@ class Du:
                 print(
                     "WARNING: Value has been changed online since download to Excel (no update)"
                 )
-        # else:
-        # print ("Value already online (no update)")
 
     def _rowById(self, *, ID: int) -> int:
-        ws = self.wb.active  # should always activate first sheet
-        # I could write an index of IDs to memory to save time;
-        # not necessary atm
-        for col in ws.iter_cols(min_row=2, min_col=1, max_col=1):
+        ws = self.wb.active
+        # I could write an index of IDs to memory to save time; but not now
+        IDs = f"A3:A{ws.max_row}"
+        for col in ws[IDs]:
             for cell in col:
                 if cell.value == ID:
                     return cell.row

@@ -182,13 +182,19 @@ class MpApi:
         return r
 
     def updateField2(self, *, mtype, ID, dataField, value):
+        """Higher order version of updateField which creates its own xml
+
+        Note according to newer practice ID is spelled with capital letters
+        here on purpose.
+        """
+
         m = Module()
         mm = m.module(name=mtype)
         item = m.moduleItem(parent=mm, ID=ID)
         m.dataField(parent=item, name=dataField, value=value)
         m.validate()
         # m.toFile(path="upField.debug.xml")  # needs to go later
-        self.api.updateField(module=mtype, id=ID, dataField=dataField, xml=m.toString())
+        self.updateField(module=mtype, id=ID, dataField=dataField, xml=m.toString())
 
     #
     # B.5 REPEATABLE GROUPS

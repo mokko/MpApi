@@ -15,6 +15,8 @@ if Path(credentials).exists():
 
 
 def du():
+    if not Path(credentials).exists():
+        raise ValueError("ERROR: Credentials not found!")
     parser = argparse.ArgumentParser(
         description="du - the download/upload tool for mpapi"
     )
