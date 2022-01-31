@@ -254,7 +254,9 @@ class Du:
         m.toFile(path="check.debug.xml")
         item = m[mtype, ID]  # type: ignore
         # dateutil.parser.isoparse?
-        lastMod = datetime.fromisoformat(
+        import dateutil.parser
+
+        lastMod = dateutil.parser.isoparse(
             item.xpath(
                 "m:systemField[@name = '__lastModified']/m:value/text()",
                 namespaces=NSMAP,
