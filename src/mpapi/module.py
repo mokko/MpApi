@@ -69,7 +69,7 @@ USAGE:
 
     m = Module()
     objModule = m.module(name="Object")
-    item = m.moduleItem(parent=objModule, hasAttachments="false", id="254808")
+    item = m.moduleItem(parent=objModule, hasAttachments="false", ID="254808")
     m.dataField(parent=item, dataType="Clob", name="ObjTechnicalTermClb", value="Zupfinstrument")
     rgN = m.repeatableGroup(parent=miN, name=name, size=size)
     rgiN = m.repeatableGroupItem(parent=rgN, id=id)
@@ -161,6 +161,7 @@ class Module(Helper):
         elif file is not None:
             self.etree = etree.parse(str(file), parser)
         else:
+            # missing <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
             xml = f"""
             <application xmlns="http://www.zetcom.com/ria/ws/module">
                 <modules/>

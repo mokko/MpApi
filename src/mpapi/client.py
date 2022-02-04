@@ -112,6 +112,20 @@ class MpApi:
         r.raise_for_status()
         return r
 
+    def search2(self, *, query: Search) -> Module:
+        """
+        Perform a search, similar to normal search, but with different
+        parameters and return values
+
+        EXPECTS
+        * Search object
+        RETURNS
+        * Module object
+        """
+        query.validate(mode="search")
+        r = self.search(xml=query.toString())
+        return Module(xml=r.text)
+
     #
     # B.3 WHOLE MODULE ITEMS
     #
@@ -134,6 +148,14 @@ class MpApi:
         r.raise_for_status()
         return r
 
+    def getItem2(self, *, mtype: str, ID: int) -> Module:
+        """
+        Like getItem, but with modern parameter names and returns Module
+        object.
+        """
+        r = self.getItem(module=mtype, id=ID)
+        return Module(xml=r.text)
+
     def createItem(self, *, module, xml):
         """
         Create new module item or items.
@@ -145,6 +167,18 @@ class MpApi:
         r = requests.post(url, data=xml, headers=self.headers, auth=self.auth)
         r.raise_for_status()
         return r
+
+    def createItem2(self, *, mtype, xml):
+        """
+        Like createItem, but with modern parameter names and returns Module
+        object.
+
+        DESIGN
+        Alternatively, createItem2 could expect xml as etree, but that wouldn't
+        save anything, so no.
+        """
+        r = self.createItem(module=mtype, xml=xml)
+        return Module(xml=r.text)
 
     def updateItem(self, *, module, id, xml):
         """
@@ -185,7 +219,10 @@ class MpApi:
         """Higher order version of updateField which creates its own xml
 
         Note according to newer practice ID is spelled with capital letters
-        here on purpose.
+        here on purpose and parameter ´module´ is referred here as mtype as it
+        is less ambiguous.
+
+        Does the API return anything  meaningful?
         """
 
         m = Module()
@@ -193,7 +230,7 @@ class MpApi:
         item = m.moduleItem(parent=mm, ID=ID)
         m.dataField(parent=item, name=dataField, value=value)
         m.validate()
-        # m.toFile(path="upField.debug.xml")  # needs to go later
+        m.toFile(path="upField.debug.xml")  # needs to go later
         self.updateField(module=mtype, id=ID, dataField=dataField, xml=m.toString())
 
     #

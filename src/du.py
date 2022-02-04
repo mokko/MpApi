@@ -50,6 +50,7 @@ KNOWN LIMITATIONS
 """
 
 from datetime import datetime
+import dateutil.parser
 from lxml import etree  # type: ignore
 from mpapi.client import MpApi
 from mpapi.sar import Sar
@@ -253,9 +254,6 @@ class Du:
         m = self.sar.search(query=q)
         m.toFile(path="check.debug.xml")
         item = m[mtype, ID]  # type: ignore
-        # dateutil.parser.isoparse?
-        import dateutil.parser
-
         lastMod = dateutil.parser.isoparse(
             item.xpath(
                 "m:systemField[@name = '__lastModified']/m:value/text()",

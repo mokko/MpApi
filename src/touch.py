@@ -1,44 +1,35 @@
-import argparse
-import logging
-import os
-import sys
-
-
-credentials = "emem1.py"  # in pwd
-with open(credentials) as f:
-    exec(f.read())
-
-from lxml import etree
-from mpapi.client import MpApi
-
 """
-Touch Replace Plugin
+Touch For MpApi
 
 ==Problem==
-If a multimedia record is smb approved, but the linked object record is not updated,
-recherche.smb doesn't show the multimedia asset. 
+If an asset is smb approved after the linked object, the photo might not be 
+visible on recherche.smb. 
 
-In order to show it, we manually update the record (e.g. by adding and deleting a 
-space in the object record) which triggers the update of the record with the asset on 
-recherche.smb. 
+In order to show it, we manually update the object record in RIA which usually 
+triggers an update of that record on recherche.smb. 
 
 ==Workaround==
-Obviously, the recherche.smb update mechanism should be cleverer, but until this happens
-I suggest a workaround where we automate the manual update using this update script.
+Obviously, the recherche.smb update mechanism should be cleverer, but until 
+this happens I suggest a workaround where we automate the manual update using 
+this update script.
 
 ==Pseudo-Algorithm==
 
-Let's use the pack zml file with objects and assets that we get from MpApi. Using lxml,
+Let's begin with the pack zml file with objects and assets that we get from MpApi. 
+
+pack cache
 * we loop thru the object moduleItems, 
 * identify linked multimedia moduleItems, 
-* double check that resouces are smb-approved
-* compare lastModified date of object with lastModified of asset
-* if the asset's is newer than the object's
+* check that resouces are smb-approved
+* compare object's lastModified with asset's lastModified
+* if the asset is newer than the object
 * update the object record so it has a newer date
+live
+* if online lastMod is still the save as in cache
 
 ==Scope==
-For the time being, we only do this for HF Objects, but in the future we can do it for 
-all object records which have a smb approval.
+For the time being, we only do this for HF Objects, but in the future we could 
+apply the same process on other object records which have a smb approval.
 
 Why touch?
 	"touch is a command used to update the access date and/or modification date of a 
@@ -49,16 +40,24 @@ Execute me in a dir with a credentials.py file.
 
 """
 
+from datetime import datetime
+import dateutil.parser
+import logging
+from lxml import etree  # type: ignore
+from mpapi.client import MpApi
+from mpapi.module import Module
+from mpapi.search import Search
+import os
+import sys
+
 NSMAP = {
     "s": "http://www.zetcom.com/ria/ws/module/search",
     "m": "http://www.zetcom.com/ria/ws/module",
 }
 
-ETparser = etree.XMLParser(remove_blank_text=True)
-
 
 class Touch:
-    def __init__(self, *, Input, act=False):
+    def __init__(self, *, act: bool = False, baseURL: str, user: str, pw: str) -> None:
         self.api = MpApi(baseURL=baseURL, user=user, pw=pw)
         self.act = act
         print(f"act = {act}")
@@ -70,44 +69,36 @@ class Touch:
             level=logging.INFO,
         )
 
+    def pack(self, *, Input: str) -> None:
         report = {
             "approvedAssets": 0,
             "ObjRecordsNeedingUpdate": 0,
         }  # one-based numbers
 
         print(f"about to parse input {Input}")
-        ET = etree.parse(str(Input), ETparser)
-        self.ET = ET
 
-        objItems = ET.xpath(
-            "/m:application/m:modules/m:module[@name = 'Object']/m:moduleItem",
-            namespaces=NSMAP,
-        )
+        m = Module(file=Input)
 
-        mmItems = ET.xpath(
-            "/m:application/m:modules/m:module[@name = 'Multimedia']/m:moduleItem",
-            namespaces=NSMAP,
-        )
+        report["ObjectModuleItems"] = m.actualSize(module="Object")
+        report["MultimediaModuleItems"] = m.actualSize(module="Multimedia")
 
-        report["ObjectModuleItems"] = len(objItems) + 1
-        report["MultimediaModuleItems"] = len(mmItems) + 1
-
-        for itemN in objItems:
+        for itemN in m.iter(module="Object"):
             objId = itemN.xpath("@id")[0]
             objLastModified = itemN.xpath(
                 "m:systemField[@name = '__lastModified']/m:value/text()",
                 namespaces=NSMAP,
             )[0]
-            print(f"objId {objId}")  # {objLastModified}
+            # print(f"objId {objId}")  # {objLastModified}
             mulRefs = itemN.xpath(
                 "m:moduleReference[@name = 'ObjMultimediaRef']/m:moduleReferenceItem/@moduleItemId",
                 namespaces=NSMAP,
             )
 
+            ET = m.toET()
             for mulId in mulRefs:
                 # print (f"   ref {mulId}")
                 try:
-                    mmItem = ET.xpath(
+                    mmItem = ET.xpath(  # type: ignore
                         f"""/m:application/m:modules/m:module[
                         @name = 'Multimedia']/m:moduleItem[@id = '{mulId}' and 
                         ./m:repeatableGroup[@name ='MulApprovalGrp']
@@ -117,7 +108,7 @@ class Touch:
                         ]""",
                         namespaces=NSMAP,
                     )[0]
-                except:
+                except:  # it's not an error to have no relatives
                     pass
                 else:
                     report["approvedAssets"] = report["approvedAssets"] + 1
@@ -130,55 +121,113 @@ class Touch:
                         report["ObjRecordsNeedingUpdate"] = (
                             report["ObjRecordsNeedingUpdate"] + 1
                         )
-                        print("   Object older than asset")  # : objId {objId}
-                        if act is True:
-                            self.touch(objId=objId)
-                            break  # only one touch per object
+                        print(
+                            f"objId {objId} Object in cache older than asset in cache"
+                        )
+                        self.touch(objId=objId, lastMod=objLastModified)
+                        break  # only one touch per object
         print(report)
 
-    def touch(self, *, objId):
+    def touch(self, *, objId: int, lastMod: str) -> None:
         # dont rely on a cache file as it might be too old
-        r = self.api.getItem(module="Object", id=objId)
-        xml = r.text.encode()
-        # print (r.content)
-        itemN = etree.fromstring(xml)
-        objekttypN = itemN.xpath(
-            """/m:application/m:modules/m:module[
-            @name='Object']/m:moduleItem/m:vocabularyReference[@name = 'ObjCategoryVoc']""",
+        q = Search(module="Object")
+        q.addCriterion(operator="equalsField", field="__id", value=str(objId))
+        q.addField(field="ObjTechnicalTermClb")
+        q.addField(field="__lastModified")
+        q.validate(mode="search")
+        m = self.api.search2(query=q)
+        item = m["Object", objId]  # type: ignore
+
+        lastModNew = item.xpath(
+            "m:systemField[@name = '__lastModified']/m:value/text()",
             namespaces=NSMAP,
         )[0]
-        fragment = etree.tostring(objekttypN)
-        print(fragment)
-        """    
-        <vocabularyReference name="ObjCategoryVoc" id="30349" instanceName="ObjCategoryVgr">
-          <vocabularyReferenceItem id="3206608" name="Allgemein">
-            <formattedValue language="en">Allgemein</formattedValue>
-          </vocabularyReferenceItem>
-        </vocabularyReference>  
+        try:
+            sachbegriff = item.xpath(
+                "m:dataField[@name = 'ObjTechnicalTermClb']/m:value/text()",
+                namespaces=NSMAP,
+            )[0]
+        except:
+            sachbegriff = None
         """
-        whole = f"""
-        <application xmlns="http://www.zetcom.com/ria/ws/module">
-            <modules name="Object">
-                <moduleItem>
-                    {fragment}
-                </moduleItem>
-            </modules>
-        </application>
+        <dataField dataType="Clob" name="ObjTechnicalTermClb">
+          <value>Oboe</value>
+        </dataField>
         """
+        if sachbegriff is None:  # can I upload None? Probably not...
+            print("WARN: sachbegriff is none")
+        else:
+            if lastMod == lastModNew:
+                print(" record not changed since the cache was made, would try writing")
+                if self.act is True:
+                    self.api.updateField2(
+                        mtype="Object",
+                        ID=objId,
+                        dataField="ObjTechnicalTermClb",
+                        value=sachbegriff,
+                    )
+            # else: lastMod has changed, so somebody already changed the record
 
-        self.api.updateItem(
-            module="Object", id=objId, xml=itemX
-        )  # works but updates too many fields
-        raise TypeError("TE")
+    # not at all dry
+    def single(self, *, objId: int) -> None:
+        q = Search(module="Object")
+        q.addCriterion(operator="equalsField", field="__id", value=str(objId))
+        q.addField(field="ObjTechnicalTermClb")
+        q.addField(field="__lastModified")
+        q.validate(mode="search")
+        m = self.api.search2(query=q)
+        item = m["Object", objId]  # type: ignore
+
+        lastModNew = item.xpath(
+            "m:systemField[@name = '__lastModified']/m:value/text()",
+            namespaces=NSMAP,
+        )[0]
+        try:
+            sachbegriff = item.xpath(
+                "m:dataField[@name = 'ObjTechnicalTermClb']/m:value/text()",
+                namespaces=NSMAP,
+            )[0]
+        except:
+            sachbegriff = None
+        """
+        <dataField dataType="Clob" name="ObjTechnicalTermClb">
+          <value>Oboe</value>
+        </dataField>
+        """
+        if sachbegriff is None:  # can I upload None? Probably not...
+            print("WARN: sachbegriff is none")
+        else:
+            print(f" sachbegriff {sachbegriff}")
+            if self.act is True:
+                self.api.updateField2(
+                    mtype="Object",
+                    ID=objId,
+                    dataField="ObjTechnicalTermClb",
+                    value=sachbegriff,
+                )
+            else:
+                print(" would try to touch if in acting mode")
 
 
 if __name__ == "__main__":
+    import argparse
+
+    credentials = "emem1.py"  # in pwd
+    credentials = "credentials.py"  # in pwd
+    with open(credentials) as f:
+        exec(f.read())
+
     parser = argparse.ArgumentParser(
-        description="Update lastModified date of object records if the multimedia's lastModified is newer"
+        description="""Update lastModified date of object records if the 
+        multimedia's has smb approval and its lastModified is newer"""
     )
     parser.add_argument(
-        "-i", "--input", required=True, help="source pack file from MpApi"
+        "-i", "--input", required=False, help="source pack file from MpApi"
     )
+    parser.add_argument(
+        "-s", "--single", required=False, help="objID for single record"
+    )
+
     parser.add_argument(
         "-a",
         "--act",
@@ -186,5 +235,8 @@ if __name__ == "__main__":
         action="store_true",
     )
     args = parser.parse_args()
-
-    Touch(Input=args.input, act=args.act)
+    t = Touch(act=args.act, baseURL=baseURL, pw=pw, user=user)  # type: ignore
+    if args.input is not None:
+        t.pack(Input=args.input)
+    elif args.single is not None:
+        t.single(objId=args.single)
