@@ -317,11 +317,11 @@ class Mink:
                 raise e
 
             # do we want to delete those files that are no longer attached?
-            for img in os.listdir(pix_dir):
-                img = pix_dir.joinpath(img)  # need resolve here
-                if img not in expected:
-                    print(f"image no longer attached, removing {img}")
-                    os.remove(img)
+            # for img in os.listdir(pix_dir):
+            #    img = pix_dir.joinpath(img)  # need resolve here
+            #    if img not in expected:
+            #        print(f"image no longer attached, removing {img}")
+            #        os.remove(img)
         # currently we dont get attachments that have changed, but keep the same mulId,
         # that case should be rare
 
