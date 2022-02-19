@@ -111,7 +111,40 @@ class Sar:
                 field="__lastModified",
                 value=since,  # "2021-12-23T12:00:00.0"
             )
-        return self.search(query=query)
+        return self.api.search2(query=query)
+
+    def checkApproval(self, *, ID: int, mtype: str) -> bool:
+        """
+        For a record, check if it has an approval for SMB-Digital. Currently only
+        works module type Object.
+
+        /m:moduleItem[
+                @id = ID]/m:repeatableGroup[
+                @name = 'ObjPublicationGrp']/m:repeatableGroupItem[
+                    m:vocabularyReference[
+                    @name='PublicationVoc']/m:vocabularyReferenceItem[@name='Ja'] and
+                    m:vocabularyReference[
+                    @name='TypeVoc']/m:vocabularyReferenceItem[@id='2600643']
+                ]
+        """
+        if mtype != "Object":
+            raise ValueError("ERROR: checkApproval currently only works for Object")
+
+        m = self.api.getItem2(mtype=mtype, ID=ID)
+        r = m.xpath(
+            path=f"""/m:application/m:modules/m:module[
+                @name = '{mtype}']/m:moduleItem[
+                @id = {ID}]/m:repeatableGroup[
+                @name = 'ObjPublicationGrp']/m:repeatableGroupItem[
+                    m:vocabularyReference[@name='PublicationVoc']/m:vocabularyReferenceItem[@name='Ja'] 
+                    and m:vocabularyReference[@name='TypeVoc']/m:vocabularyReferenceItem[@id = 2600647]
+                ]
+        """
+        )
+        if len(r) > 0:
+            return True
+        else:
+            return False
 
     def getByApprovalGrp(self, *, Id: int, module: str, since: str = None) -> Module:
         """
@@ -178,7 +211,7 @@ class Sar:
                 field="__lastModified",
                 value=since,  # "2021-12-23T12:00:00.0"
             )
-        return self.search(query=query)
+        return self.api.search2(query=query)
 
     def getByExhibit(self, *, Id: int, module: str, since: str = None) -> Module:
         """
@@ -301,7 +334,7 @@ class Sar:
                     ]
                 ]
             """
-        itemsL = data.xpath(xpath=xpath)
+        itemsL = data.xpath(path=xpath)  # new xpath method...
         print(xpath)
         print(
             f" xml has {len(itemsL)} records with attachment=True and Freigabe[@typ='SMB-Digital'] = Ja"
@@ -328,9 +361,4 @@ class Sar:
         return positives
 
     def search(self, *, query: Search) -> Module:
-        """
-        Return results for a given search query.
-        """
-        query.validate(mode="search")
-        r = self.api.search(xml=query.toString())
-        return Module(xml=r.text)
+        return self.api.search2(query=query)

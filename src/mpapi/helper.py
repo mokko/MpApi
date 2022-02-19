@@ -26,10 +26,10 @@ class Helper:
         # path can be str or Pathlib object as well
         doc = self.etree
         try:
-            self._write(path=path, doc=doc)
+            self._write(path=str(path), doc=doc)
         except:
             doc = etree.ElementTree(self.etree)
-            self._write(path=path, doc=doc)
+            self._write(path=str(path), doc=doc)
 
     def toFile2(self, *, path) -> None:  # should not be necessary
         doc = self.etree

@@ -775,6 +775,9 @@ class Module(Helper):
                 vri.set("id", str(ID))
         return vri
 
+    def xpath(self, *, path):
+        return self.etree.xpath(path, namespaces=NSMAP)
+
     #
     # HELPER
     #
