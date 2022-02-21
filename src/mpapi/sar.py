@@ -35,7 +35,7 @@ USAGE
     sr.saveAttachments(data=Module(file="a.xml"), adir=dir) 
         # for moduleItems in data download attachments and save as
         #     adir/{mulId}.{ext} 
-        # only d/l media with smbfreigabe
+        # only download media with smbfreigabe
 
     # moved to Module now
     m.clean()    # cleans m as a side-effect
@@ -43,6 +43,9 @@ USAGE
     m3 = m1 + m2 # distinct join/add 
 
 NEW
+* we're slowly transitioning from 
+   id -> Id -> ID
+   module -> mtype
 2022-01
 * more abstraction by returning Module, simplification by removing redundant helper methods
 * type hints added (again)
@@ -117,29 +120,20 @@ class Sar:
         """
         For a record, check if it has an approval for SMB-Digital. Currently only
         works module type Object.
-
-        /m:moduleItem[
-                @id = ID]/m:repeatableGroup[
-                @name = 'ObjPublicationGrp']/m:repeatableGroupItem[
-                    m:vocabularyReference[
-                    @name='PublicationVoc']/m:vocabularyReferenceItem[@name='Ja'] and
-                    m:vocabularyReference[
-                    @name='TypeVoc']/m:vocabularyReferenceItem[@id='2600643']
-                ]
         """
         if mtype != "Object":
             raise ValueError("ERROR: checkApproval currently only works for Object")
 
+        # 2600647 = SMB-Digital
         m = self.api.getItem2(mtype=mtype, ID=ID)
         r = m.xpath(
-            path=f"""/m:application/m:modules/m:module[
+            f"""/m:application/m:modules/m:module[
                 @name = '{mtype}']/m:moduleItem[
                 @id = {ID}]/m:repeatableGroup[
                 @name = 'ObjPublicationGrp']/m:repeatableGroupItem[
                     m:vocabularyReference[@name='PublicationVoc']/m:vocabularyReferenceItem[@name='Ja'] 
                     and m:vocabularyReference[@name='TypeVoc']/m:vocabularyReferenceItem[@id = 2600647]
-                ]
-        """
+                ]"""
         )
         if len(r) > 0:
             return True
@@ -215,11 +209,13 @@ class Sar:
 
     def getByExhibit(self, *, Id: int, module: str, since: str = None) -> Module:
         """
-        Gets a set of items related to a certain exhibit depending on the requested module
+        Gets a set of items related to a certain exhibit depending on the
+        requested module.
 
-        * id is the exhibitId,
-        * module is the requested module
-        * since is None or a date; if a date is provided, gets only items newer than date
+        * id is an exhibitId,
+        * module is the requested module (of the results)
+        * since is None or a date; if a date is provided, gets only items newer
+          than date
 
         if module is Multimedia
             gets multimedia (records) in exhibit with that id
@@ -361,4 +357,5 @@ class Sar:
         return positives
 
     def search(self, *, query: Search) -> Module:
+        """Modern search that expects and returns objects"""
         return self.api.search2(query=query)

@@ -37,7 +37,6 @@ USAGE:
     xml_str = m.toString()
     lxml = m.toET()  # returns lxml etree document
     m.validate()     # dies if doc doesn't validate
-    
     # inspect module data     
     adict = m.describe()          # no of items per mtype
     m.totalSize(module="Object")  # no of items as per attribute
@@ -46,6 +45,7 @@ USAGE:
     itemN = m[("Object",12345)]   # lxml element node that if changed, changes
                                   # m
     if m:                         # m is True if len(m) > 0 (new)
+    nodeL = m.xpath(path="/m:application") # m's shortcut to lxml xpath
     
     #iterate through all moduleItems
     for item in m:
@@ -125,9 +125,8 @@ class Module(Helper):
         mtype = item[0]
         ID = item[1]
 
-        itemN: ET = self.etree.xpath(
-            f"/m:application/m:modules/m:module[@name = '{mtype}']/m:moduleItem[@id = '{ID}']",
-            namespaces=NSMAP,
+        itemN: ET = self.xpath(
+            f"/m:application/m:modules/m:module[@name = '{mtype}']/m:moduleItem[@id = '{ID}']"
         )[0]
         return itemN
 
@@ -177,7 +176,7 @@ class Module(Helper):
                 #do something with moduleItem
         """
         apath = f"/m:application/m:modules/m:module/m:moduleItem"
-        itemsN = self.etree.xpath(apath, namespaces=NSMAP)
+        itemsN = self.xpath(apath)
         for itemN in itemsN:
             yield itemN
 
@@ -196,12 +195,7 @@ class Module(Helper):
                 m
             isinstance(m, Module)
         """
-        return int(
-            self.etree.xpath(
-                f"count(/m:application/m:modules/m:module/m:moduleItem)",
-                namespaces=NSMAP,
-            )
-        )
+        return int(self.xpath(f"count(/m:application/m:modules/m:module/m:moduleItem)"))
 
     def __str__(self):
         return self.toString()
@@ -231,9 +225,8 @@ class Module(Helper):
         """
         try:
             return int(
-                self.etree.xpath(
-                    f"count(/m:application/m:modules/m:module[@name ='{module}']/m:moduleItem)",
-                    namespaces=NSMAP,
+                self.xpath(
+                    f"count(/m:application/m:modules/m:module[@name ='{module}']/m:moduleItem)"
                 )
             )
         except:
@@ -290,17 +283,14 @@ class Module(Helper):
             for d2mtype in d2mtypeL:
                 # print(f"newdoc mtype: {d2mtype}")
                 try:  # Does this mtype exist in old doc?
-                    self.etree.xpath(
-                        f"/m:application/m:modules/m:module[@name = '{d2mtype}']",
-                        namespaces=NSMAP,
+                    self.xpath(
+                        f"/m:application/m:modules/m:module[@name = '{d2mtype}']"
                     )[0]
                 except:
                     # old doc doesn't have this mtype, so we add the whole
                     # all of d2's modules[@name = {mtype}]/moduleItems to d1
                     # print (f"d1 doesn't know this mtype {d2mtype}")
-                    d1modules = self.etree.xpath(
-                        "/m:application/m:modules", namespaces=NSMAP
-                    )[0]
+                    d1modules = self.xpath("/m:application/m:modules")[0]
                     d1modules.append(d2moduleN)
                 else:
                     # new doc's mtype exists already in old doc
@@ -374,18 +364,14 @@ class Module(Helper):
 
         known_types = set()
         report = dict()
-        moduleL: list[ET] = self.etree.xpath(
-            f"/m:application/m:modules/m:module",
-            namespaces=NSMAP,
-        )
+        moduleL: list[ET] = self.xpath(f"/m:application/m:modules/m:module")
         for moduleN in moduleL:
             moduleA = moduleN.attrib
             known_types.add(moduleA["name"])
 
         for Type in known_types:
-            itemL: list[ET] = self.etree.xpath(
-                f"/m:application/m:modules/m:module[@name = '{Type}']/m:moduleItem",
-                namespaces=NSMAP,
+            itemL: list[ET] = self.xpath(
+                f"/m:application/m:modules/m:module[@name = '{Type}']/m:moduleItem"
             )
             report[Type] = len(itemL)
         return report
@@ -394,7 +380,7 @@ class Module(Helper):
         """
         Drop all @uuid attributes from the whole document.
         """
-        itemL = self.etree.xpath("//m:*[@uuid]", namespaces=NSMAP)
+        itemL = self.xpath("//m:*[@uuid]")
 
         for eachN in itemL:
             eachN.attrib.pop("uuid", None)  # Why None here?
@@ -403,9 +389,7 @@ class Module(Helper):
         """
         Drop a repeatableGroup by name. Expects the rGrp's name.
         """
-        rgL = self.etree.xpath(
-            f"//m:repeatableGroup[@name ='{name}']", namespaces=NSMAP
-        )
+        rgL = self.xpath(f"//m:repeatableGroup[@name ='{name}']")
         for rgN in rgL:
             rgN.getparent().remove(rgN)
 
@@ -429,7 +413,7 @@ class Module(Helper):
           should we simply use lxml for that?
         """
         apath = f"/m:application/m:modules/m:module[@name ='{module}']/m:moduleItem"
-        itemsN = self.etree.xpath(apath, namespaces=NSMAP)
+        itemsN = self.xpath(apath)
         for itemN in itemsN:
             yield itemN
 
@@ -458,13 +442,12 @@ class Module(Helper):
               ...
         """
         try:
-            moduleN = self.etree.xpath(
-                f"/m:application/m:modules/m:module[@name='{name}']", namespaces=NSMAP
-            )[0]
-        except:
-            modulesN = self.etree.xpath("/m:application/m:modules", namespaces=NSMAP)[
+            moduleN = self.xpath(f"/m:application/m:modules/m:module[@name='{name}']")[
                 0
-            ]  # should always exist
+            ]
+        except:
+            # should always exist
+            modulesN = self.xpath("/m:application/m:modules")[0]
             moduleN = etree.SubElement(
                 modulesN,
                 "{http://www.zetcom.com/ria/ws/module}module",
@@ -655,9 +638,8 @@ class Module(Helper):
         """
         try:
             return int(
-                self.etree.xpath(
-                    f"/m:application/m:modules/m:module[@name ='{module}']/@totalSize",
-                    namespaces=NSMAP,
+                self.xpath(
+                    f"/m:application/m:modules/m:module[@name ='{module}']/@totalSize"
                 )[0]
             )
         except:
@@ -680,14 +662,12 @@ class Module(Helper):
         knownTypes = self._types()
 
         for Type in knownTypes:
-            itemsL = self.etree.xpath(
-                f"/m:application/m:modules/m:module[@name = '{Type}']/m:moduleItem",
-                namespaces=NSMAP,
+            itemsL = self.xpath(
+                f"/m:application/m:modules/m:module[@name = '{Type}']/m:moduleItem"
             )
             try:
-                moduleN = self.etree.xpath(
-                    f"/m:application/m:modules/m:module[@name = '{Type}']",
-                    namespaces=NSMAP,
+                moduleN = self.xpath(
+                    f"/m:application/m:modules/m:module[@name = '{Type}']"
                 )[0]
                 attributes = moduleN.attrib
                 attributes["totalSize"] = int(len(itemsL))
@@ -775,7 +755,14 @@ class Module(Helper):
                 vri.set("id", str(ID))
         return vri
 
-    def xpath(self, *, path):
+    def xpath(self, path: str) -> ET:
+        """
+        Shortcut to access the data in a Module object using lxml's xpath;
+        use m: for Zetcom's Module namespace.
+
+        Note: This is the first method with a positional argument that I write
+        in a long time.
+        """
         return self.etree.xpath(path, namespaces=NSMAP)
 
     #
@@ -790,17 +777,15 @@ class Module(Helper):
             newID = int(newItemN.attrib["id"])
             try:
                 # item with that ID exists already
-                oldItemN = self.etree.xpath(
-                    f"/m:application/m:modules/m:module[@name = '{mtype}']/m:moduleItem[@id = '{newID}']",
-                    namespaces=NSMAP,
+                oldItemN = self.xpath(
+                    f"/m:application/m:modules/m:module[@name = '{mtype}']/m:moduleItem[@id = '{newID}']"
                 )[
                     0
                 ]  # IDs should be unique
             except:
                 # itemN does not exist in old doc -> copy it over
-                d1moduleN = self.etree.xpath(
-                    f"/m:application/m:modules/m:module[@name = '{mtype}']",
-                    namespaces=NSMAP,
+                d1moduleN = self.xpath(
+                    f"/m:application/m:modules/m:module[@name = '{mtype}']"
                 )[0]
                 d1moduleN.append(newItemN)
             else:
@@ -845,7 +830,7 @@ class Module(Helper):
         """
         xp = "translate(m:systemField[@name ='__lastModified']/m:value,'-:.TZ ','')"
         new = inputN.xpath(xp, namespaces=NSMAP)
-        if len(str(new)) > 13:  # zero-based Python
+        if len(str(new)) > 13:  # zero-based Python, so 13 is 14
             new = int(str(new)[:13])
         elif len(str(new)) < 13:
             raise TypeError(
@@ -857,10 +842,7 @@ class Module(Helper):
     def _types(self) -> set:
         """Returns a set of module types that exist in the document."""
         knownTypes = set()
-        moduleL = self.etree.xpath(
-            f"/m:application/m:modules/m:module",
-            namespaces=NSMAP,
-        )
+        moduleL = self.xpath(f"/m:application/m:modules/m:module")
 
         for moduleN in moduleL:
             moduleA = moduleN.attrib
