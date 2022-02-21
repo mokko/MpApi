@@ -287,7 +287,7 @@ class Sar:
         * optional arg since 20211226
         """
         if since is None:
-            xpath = """
+            xp = """
                 /m:application/m:modules/m:module[
                     @name='Multimedia'
                 ]/m:moduleItem[
@@ -314,7 +314,7 @@ class Sar:
             where should this rewriting of the since argument took place? Not here.
             """
 
-            xpath = f"""
+            xp = f"""
                 /m:application/m:modules/m:module[
                     @name='Multimedia'
                 ]/m:moduleItem[
@@ -330,8 +330,8 @@ class Sar:
                     ]
                 ]
             """
-        itemsL = data.xpath(path=xpath)  # new xpath method...
-        print(xpath)
+        itemsL = data.xpath(xp)  # new xpath method...
+        # print(xp)
         print(
             f" xml has {len(itemsL)} records with attachment=True and Freigabe[@typ='SMB-Digital'] = Ja"
         )
@@ -354,6 +354,8 @@ class Sar:
             if not mm_fn.exists():  # only d/l if doesn't exist yet
                 print(f" getting {mm_fn}")
                 self.api.saveAttachment(module="Multimedia", id=mmId, path=mm_fn)
+            else:
+                print(f" {mm_fn} exists already")
         return positives
 
     def search(self, *, query: Search) -> Module:
