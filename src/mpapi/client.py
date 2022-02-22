@@ -1,12 +1,3 @@
-import requests
-
-# import logging
-from requests.auth import HTTPBasicAuth
-from requests.structures import CaseInsensitiveDict
-from lxml import etree  # currently only necessary for getSession
-from mpapi.search import Search
-from mpapi.module import Module
-
 """
 MpApi - MuseumPlus API Client  
 
@@ -28,12 +19,24 @@ SEE ALSO:
 """
 
 
+# import logging
+from requests.auth import HTTPBasicAuth
+from requests.structures import CaseInsensitiveDict
+from lxml import etree  # type: ignore
+from mpapi.search import Search
+from mpapi.module import Module
+from typing import Any, Union
+import requests
+
+ET: Any
+
+
 class MpApi:
-    def __init__(self, *, baseURL, user, pw):
+    def __init__(self, *, baseURL: str, user: str, pw: str) -> None:
         self.baseURL = baseURL
         self.appURL = baseURL + "/ria-ws/application"
         self.auth = HTTPBasicAuth(user, pw)
-        headers = CaseInsensitiveDict()
+        headers: CaseInsensitiveDict = CaseInsensitiveDict()
         headers["Content-Type"] = "application/xml"
         headers["Accept"] = "application/xml;charset=UTF-8"
         self.headers = headers
@@ -41,7 +44,7 @@ class MpApi:
     #
     # A SESSION
     #
-    def getSessionKey(self):
+    def getSessionKey(self) -> str:  # should be int?
         """
         GET http://.../ria-ws/application/session
         """
@@ -62,7 +65,7 @@ class MpApi:
     #
     # B.1 DATA DEFINITIONs
     #
-    def getDefinition(self, *, module=None):
+    def getDefinition(self, *, module: str = None) -> requests.Response:
         """
         Retrieve the data definition of a single or of all modules
         GET http://.../ria-ws/application/module/{module}/definition/
@@ -83,39 +86,65 @@ class MpApi:
     #
     # B.2 SEARCHING
     #
-    def runSavedQuery(self, *, id):
+    def runSavedQuery(self, *, id: int, mtype: str, xml: str) -> requests.Response:
         """
         Run a pre-existing saved search
         POST http://.../ria-ws/application/module/{module}/search/savedQuery/{__id}
+
+        Quote from http://docs.zetcom.com/ws/:
+        A request body must be provided, in order to control the paging. For example:
+
+        <application
+            xmlns="http://www.zetcom.com/ria/ws/module/search"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.zetcom.com/ria/ws/module/search http://www.zetcom.com/ria/ws/module/search/search_1_4.xsd">
+            <modules>
+              <module name="Object">
+                <search limit="10" offset="0" />
+              </module>
+            </modules>
+        </application>
         """
-        url = f"{self.appURL}/module/{module}/search/savedQuery/{id}"
+        url = f"{self.appURL}/module/{mtype}/search/savedQuery/{id}"
         r = requests.post(url, data=xml, headers=self.headers, auth=self.auth)
         r.raise_for_status()
         return r
 
-    def search(self, *, xml):
+    def _search(self, *, queryET) -> requests.Response:
         """
-        Perform an ad-hoc search for modules items
-        POST http://.../ria-ws/application/module/{module}/search/
+        A version of the search method that expects the query as etree document
+        and returns requests response.
+        """
 
-        New: We're getting the module from the xml to avoid mistakes from redundancy.
-        """
-        tree = self.ETfromString(xml=xml)
-        module = tree.xpath(
+        mtype = queryET.xpath(
             "/s:application/s:modules/s:module/@name",
             namespaces={"s": "http://www.zetcom.com/ria/ws/module/search"},
-        )
-        if not module[0]:
+        )[0]
+        if not mtype:
             raise TypeError("Unknown module")
-        url = f"{self.appURL}/module/{module[0]}/search"
-        r = requests.post(url, data=xml, headers=self.headers, auth=self.auth)
+        url = f"{self.appURL}/module/{mtype}/search"
+        r = requests.post(
+            url,
+            data=etree.tostring(queryET, encoding="unicode"),
+            headers=self.headers,
+            auth=self.auth,
+        )
         r.raise_for_status()
         return r
+
+    def search(self, *, xml: str) -> requests.Response:
+        """
+        Perform an ad-hoc search for modules items
+        POST http://.../ria-ws/application/module/{mtype}/search/
+
+        New: We're getting the mtype from the xml to avoid errors.
+        """
+        queryET = self.ETfromString(xml=xml)
+        return self._search(queryET=queryET)
 
     def search2(self, *, query: Search) -> Module:
         """
-        Perform a search, similar to normal search, but with different
-        parameters and return values
+        Perform a search, but with modern parameters and return values
 
         EXPECTS
         * Search object
@@ -123,13 +152,13 @@ class MpApi:
         * Module object
         """
         query.validate(mode="search")
-        r = self.search(xml=query.toString())
+        r = self._search(queryET=query.toET())
         return Module(xml=r.text)
 
     #
     # B.3 WHOLE MODULE ITEMS
     #
-    def getItem(self, *, module, id):
+    def getItem(self, *, module: str, id: int) -> requests.Response:
         """
         Get a single module item
         GET http://.../ria-ws/application/module/{module}/{__id}
@@ -156,7 +185,7 @@ class MpApi:
         r = self.getItem(module=mtype, id=ID)
         return Module(xml=r.text)
 
-    def createItem(self, *, module, xml):
+    def createItem(self, *, module: str, xml: str) -> requests.Response:
         """
         Create new module item or items.
         POST http://.../ria-ws/application/module/{module}
@@ -168,7 +197,7 @@ class MpApi:
         r.raise_for_status()
         return r
 
-    def createItem2(self, *, mtype, xml):
+    def createItem2(self, *, mtype: str, xml: str) -> Module:
         """
         Like createItem, but with modern parameter names and returns Module
         object.
@@ -180,7 +209,7 @@ class MpApi:
         r = self.createItem(module=mtype, xml=xml)
         return Module(xml=r.text)
 
-    def updateItem(self, *, module, id, xml):
+    def updateItem(self, *, module: str, id: int, xml: str) -> requests.Response:
         """
         Update all fields of a module item
         PUT http://.../ria-ws/application/module/{module}/{__id}
@@ -190,7 +219,7 @@ class MpApi:
         r.raise_for_status()
         return r
 
-    def deleteItem(self, *, module, id):
+    def deleteItem(self, *, module: str, id: int) -> requests.Response:
         """
         Delete a module item
         DELETE http://.../ria-ws/application/module/{module}/{__id}
@@ -203,7 +232,9 @@ class MpApi:
     #
     # B.4 FIELDs
     #
-    def updateField(self, *, module, id, dataField, xml):
+    def updateField(
+        self, *, module: str, id: int, dataField: str, xml: str
+    ) -> requests.Response:
         """
         Update a single field of a module item
         PUT http://.../ria-ws/application/module/{module}/{__id}/{dataField}
@@ -215,7 +246,9 @@ class MpApi:
         r.raise_for_status()
         return r
 
-    def updateField2(self, *, mtype, ID, dataField, value):
+    def updateField2(
+        self, *, mtype: str, ID: int, dataField: str, value: str
+    ) -> requests.Response:
         """Higher order version of updateField which creates its own xml
 
         Note according to newer practice ID is spelled with capital letters
@@ -230,13 +263,24 @@ class MpApi:
         item = m.moduleItem(parent=mm, ID=ID)
         m.dataField(parent=item, name=dataField, value=value)
         m.validate()
-        m.toFile(path="upField.debug.xml")  # needs to go later
-        self.updateField(module=mtype, id=ID, dataField=dataField, xml=m.toString())
+        # m.toFile(path="upField.debug.xml")  # needs to go later
+        return self.updateField(
+            module=mtype, id=ID, dataField=dataField, xml=m.toString()
+        )
 
     #
     # B.5 REPEATABLE GROUPS
     #
-    def createReference(self, *, module, id, groupId, reference, repeatableGroup, xml):
+    def createReference(
+        self,
+        *,
+        module: str,
+        id: int,
+        groupId: int,
+        reference: str,
+        repeatableGroup: str,
+        xml: str,
+    ) -> requests.Response:
         """
         Add a reference to a reference field within a repeatable group
         POST http://.../ria-ws/application/module/{module}/{__id}/{repeatableGroup}/{__groupId}/{reference}
@@ -249,7 +293,9 @@ class MpApi:
         r.raise_for_status()
         return r
 
-    def createRepeatableGroup(self, *, module, id, repeatableGroup, xml):
+    def createRepeatableGroup(
+        self, *, module: str, id: int, repeatableGroup: str, xml: str
+    ) -> requests.Response:
         """
         Create repeatable group / reference
         #POST http://.../ria-ws/application/module/{module}/{__id}/{repeatableGroup|reference}
@@ -260,7 +306,9 @@ class MpApi:
         r.raise_for_status()
         return r
 
-    def updateRepeatableGroup(self, *, module, id, referenceId, repeatableGroup, xml):
+    def updateRepeatableGroup(
+        self, *, module: str, id: int, referenceId: int, repeatableGroup: str, xml: str
+    ) -> requests.Response:
         """
         Update all fields of repeatable groups / references
         PUT http://.../ria-ws/application/module/{module}/{__id}/{repeatableGroup|reference}/{__referenceId}
@@ -272,8 +320,15 @@ class MpApi:
         return r
 
     def updateFieldInGroup(
-        self, *, module, id, referenceId, dataField, repeatableGroup
-    ):
+        self,
+        *,
+        module: str,
+        id: int,
+        referenceId: int,
+        dataField: str,
+        repeatableGroup: str,
+        xml: str,
+    ) -> requests.Response:
         """
         Update a single data field of a repeatable group / reference
         PUT http://.../ria-ws/application/module/{module}/{__id}/{repeatableGroup|reference}/{__referenceId}/{dataField}
@@ -283,7 +338,9 @@ class MpApi:
         r.raise_for_status()
         return r
 
-    def deleteRepeatableGroup(self, *, module, id, referenceId, repeatableGroup):
+    def deleteRepeatableGroup(
+        self, *, module: str, id: int, referenceId: str, repeatableGroup: str
+    ) -> requests.Response:
         """
         Delete a complete repeatable group / reference
         DELETE http://.../ria-ws/application/module/{module}/{__id}/{repeatableGroup|reference}/{__referenceId}
@@ -294,8 +351,15 @@ class MpApi:
         return r
 
     def deleteReferenceInGroup(
-        self, *, module, id, groupId, referenceId, repeatableGroup
-    ):
+        self,
+        *,
+        module: str,
+        id: int,
+        groupId: str,
+        reference: str,
+        referenceId: int,
+        repeatableGroup: str,
+    ) -> requests.Response:
         """
         Delete a reference contained within a repeatable group
         DELETE http://.../ria-ws/application/module/{module}/{__id}/{repeatableGroup}/{__groupId}/{reference}/{__referenceId}
@@ -309,7 +373,7 @@ class MpApi:
     # C ATTACHMENTs AND THUMBNAILs
     #
 
-    def getAttachment(self, *, module, id):
+    def getAttachment(self, *, module: str, id: int) -> requests.Response:
         """
         GET http://.../ria-ws/application/module/{module}/{__id}/attachment
         Get an attachment for a specified module item. You should use the GET method with
@@ -334,7 +398,7 @@ class MpApi:
         self.headers["Accept"] = oldAccept
         return r
 
-    def saveAttachment(self, *, module, id, path):
+    def saveAttachment(self, *, module: str, id: int, path: str) -> None:
         """
         Streaming version of getAttachment that saves attachment directly to disk.
 
@@ -359,13 +423,12 @@ class MpApi:
 
         self.headers["Accept"] = oldAccept
 
-    def getThumbnail(self, *, module, id, path):
+    def getThumbnail(self, *, module: str, id: int, path: str) -> requests.Response:
         """
         Get the thumbnail of a module item attachment
         GET http://.../ria-ws/application/module/{module}/{__id}/thumbnail
         """
         url = f"{self.appURL}/module/{module}/{id}/thumbnail"
-        r.raise_for_status()  # todo: replace with r.raise_for_status()?
         oldAccept = self.headers["Accept"]
         self.headers["Accept"] = "application/octet-stream"
         r = requests.get(url, headers=self.headers, auth=self.auth)
@@ -373,7 +436,7 @@ class MpApi:
         self.headers["Accept"] = oldAccept
         return r  # r.content
 
-    def updateAttachment(self, *, module, id, path):
+    def updateAttachment(self, *, module: str, id: int, path: str) -> requests.Response:
         """
         Add or update the attachment of a module item, as a base64 encoded XML
         Add or update the attachment of a module item, as a binary stream
@@ -387,7 +450,7 @@ class MpApi:
         r.raise_for_status()
         return r
 
-    def deleteAttachment(self, *, module, id):
+    def deleteAttachment(self, *, module: str, id: int) -> requests.Response:
         """
         Delete the attachment of a module item
         DELETE http://.../ria-ws/application/module/{module}/{__id}/attachment
@@ -400,7 +463,7 @@ class MpApi:
     #
     # D RESPONSE orgunit
     #
-    def getOrgUnits(self, *, module):
+    def getOrgUnits(self, *, module: str) -> requests.Response:
         """
         Get the list of writable orgUnits for a module
         GET http://.../ria-ws/application/module/{module}/orgunit
@@ -415,7 +478,7 @@ class MpApi:
     # EXPORT aka report -> LATER
     #
 
-    def listReports(self, module):
+    def listReports(self, module: str) -> requests.Response:
         """
         Get a list of available exports / reports for a module
         GET http://.../ria-ws/application/module/{module}/export
@@ -431,7 +494,9 @@ class MpApi:
         r.raise_for_status()
         return r
 
-    def reportModuleItem(self, *, module, itemId, exportId):
+    def reportModuleItem(
+        self, *, module: str, itemId: int, exportId: int
+    ) -> requests.Response:
         """
         Export a single module item via the reporting system
         GET http://.../ria-ws/application/module/{module}/{__id}/export/{id}
@@ -447,7 +512,7 @@ class MpApi:
         self.headers["Accept"] = oldAccept
         return r
 
-    def reportModuleItems(self, *, module, id, xml):
+    def reportModuleItems(self, *, module: str, id: int, xml: str) -> requests.Response:
         """
         Export multiple module items via the reporting system
         POST http://.../ria-ws/application/module/{module}/export/{id}
@@ -463,7 +528,7 @@ class MpApi:
     # Labels, Node Classes, TermClassLabel, Node, Term, nodeParents, nodeRelations
     # get, add, delete and sometimes update
     #
-    def vInfo(self, *, instanceName, id=None):
+    def vInfo(self, *, instanceName: str, id: int = None) -> requests.Response:
         """
         Shows the vocabulary instance information for the give vocabulary.
         GET http://.../ria-ws/application/vocabulary/instances/{instanceName}
@@ -479,20 +544,23 @@ class MpApi:
     def vGetNodes(
         self,
         *,
-        instanceName,
-        offset=0,
-        limit=100,
-        termContent=None,
-        status=None,
-        nodeName=None,
-    ):
+        instanceName: str,
+        offset: int = 0,
+        limit: int = 100,
+        termContent: str = None,
+        status: str = None,
+        nodeName: str = None,
+    ) -> requests.Response:
         """
         The request returns available vocabulary nodes of the vocabulary instance.
         GET http://.../ria-ws/application/vocabulary/instances/{instanceName}/nodes/search
         Todo: json response
         """
         url = f"{self.appURL}/vocabulary/instances/{instanceName}/nodes/search"
-        params = {"offset": offset, "limit": limit}
+        params: dict[str, Union[int, str]] = {
+            "offset": offset,
+            "limit": limit,
+        }  # dict[str, int, str]
         # for each in termContent, status, nodeName:
         if termContent is not None:
             params["termContent"] = termContent
@@ -503,7 +571,7 @@ class MpApi:
         r = requests.get(url, headers=self.headers, auth=self.auth, params=params)
         return r
 
-    def vUpdate(self, *, instanceName, xml):
+    def vUpdate(self, *, instanceName: str, xml: str) -> requests.Response:
         """
         Update Vocabulary Instance
         PUT https://.../ria-ws/application/vocabulary/instances/{instanceName}
@@ -514,7 +582,7 @@ class MpApi:
         return r
 
     # LABELS
-    def vGetLabels(self, *, instanceName):
+    def vGetLabels(self, *, instanceName: str) -> requests.Response:
         """
         Get Vocabulary Instance labels
         GET https://.../ria-ws/application/vocabulary/instances/{instanceName}/labels
@@ -523,7 +591,7 @@ class MpApi:
         r = requests.get(url, headers=self.headers, auth=self.auth)
         return r
 
-    def vAddLabel(self, *, instanceName, xml):
+    def vAddLabel(self, *, instanceName: str, xml: str) -> requests.Response:
         """
         Add Vocabulary Instance label
         POST https://.../ria-ws/application/vocabulary/instances/{instanceName}/labels
@@ -532,7 +600,7 @@ class MpApi:
         r = requests.post(url, headers=self.headers, auth=self.auth, data=xml)
         return r
 
-    def vDelLabel(self, *, instanceName, language):
+    def vDelLabel(self, *, instanceName: str, language: str) -> requests.Response:
         """
         Delete Vocabulary Instance label
         DELETE https://.../ria-ws/application/vocabulary/instances/{instanceName}/labels/{language}
@@ -542,7 +610,7 @@ class MpApi:
         return r
 
     # NODE CLASSES
-    def vGetNodeClasses(self, *, instanceName):
+    def vGetNodeClasses(self, *, instanceName: str) -> requests.Response:
         """
         Get Vocabulary Instance Node Classes
         GET https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodeClasses
@@ -551,7 +619,7 @@ class MpApi:
         r = requests.get(url, headers=self.headers, auth=self.auth)
         return r
 
-    def vAddNodeClass(self, *, instanceName, xml):
+    def vAddNodeClass(self, *, instanceName: str, xml: str) -> requests.Response:
         """
         Add Vocabulary Instance Node Class
         POST https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodeClasses
@@ -560,7 +628,9 @@ class MpApi:
         r = requests.post(url, headers=self.headers, auth=self.auth, data=xml)
         return r
 
-    def vAddNodeClassLabel(self, *, instanceName, className, xml):
+    def vAddNodeClassLabel(
+        self, *, instanceName: str, className: str, xml: str
+    ) -> requests.Response:
         """
         Add Vocabulary Instance Node Class Label
         POST https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodeClasses/{className}/labels
@@ -569,7 +639,9 @@ class MpApi:
         r = requests.post(url, headers=self.headers, auth=self.auth, data=xml)
         return r
 
-    def vDelNodeClassLabel(self, *, instanceName, className, language):
+    def vDelNodeClassLabel(
+        self, *, instanceName: str, className: str, language: str
+    ) -> requests.Response:
         """
         Delete Vocabulary Instance Node Class Label
         DELETE https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodeClasses/{className}/labels/{language}
@@ -578,7 +650,7 @@ class MpApi:
         r = requests.delete(url, headers=self.headers, auth=self.auth)
         return r
 
-    def vDelNodeClass(self, *, instanceName, className):
+    def vDelNodeClass(self, *, instanceName: str, className: str) -> requests.Response:
         """
         Delete Vocabulary Instance Node Class
         DELETE https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodeClasses/{className}
@@ -590,7 +662,7 @@ class MpApi:
         return r
 
     # TERM CLASSES
-    def vGetTermClasses(self, *, instanceName):
+    def vGetTermClasses(self, *, instanceName: str) -> requests.Response:
         """
         Get Vocabulary Instance Term Classes
         GET https://.../ria-ws/application/vocabulary/instances/{instanceName}/termClasses
@@ -599,7 +671,7 @@ class MpApi:
         r = requests.get(url, headers=self.headers, auth=self.auth)
         return r
 
-    def vAddTermClass(self, *, instanceName, xml):
+    def vAddTermClass(self, *, instanceName: str, xml: str) -> requests.Response:
         """
         Add Vocabulary Instance Term Class
         POST https://.../ria-ws/application/vocabulary/instances/{instanceName}/termClasses
@@ -608,7 +680,7 @@ class MpApi:
         r = requests.post(url, headers=self.headers, auth=self.auth, data=xml)
         return r
 
-    def vDelTermClass(self, *, instanceName, className):
+    def vDelTermClass(self, *, instanceName: str, className: str) -> requests.Response:
         """
         Delete Vocabulary Instance Term Class
         DELETE https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodeClasses/{className}
@@ -620,7 +692,9 @@ class MpApi:
         return r
 
     # TermClassLabel
-    def vAddTermClassLabel(self, *, instanceName, className, xml):
+    def vAddTermClassLabel(
+        self, *, instanceName: str, className: str, xml: str
+    ) -> requests.Response:
         """
         Add Vocabulary Instance Term Class Label
         POST https://.../ria-ws/application/vocabulary/instances/{instanceName}/termClasses/{className}/labels
@@ -629,7 +703,9 @@ class MpApi:
         r = requests.post(url, headers=self.headers, auth=self.auth, data=xml)
         return r
 
-    def vDelTermClassLabel(self, *, instanceName, className, language):
+    def vDelTermClassLabel(
+        self, *, instanceName: str, className: str, language: str
+    ) -> requests.Response:
         """
         Delete Vocabulary Instance Term Class Label
         DELETE https://.../ria-ws/application/vocabulary/instances/{instanceName}/termClasses/{className}/labels/{language}
@@ -639,7 +715,7 @@ class MpApi:
         return r
 
     # vocabularyNode
-    def vNodeByIdentifier(self, *, instanceName, id):
+    def vNodeByIdentifier(self, *, instanceName: str, id: int) -> requests.Response:
         """
         Get Vocabulary Node by identifier
         GET https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodes/{id}
@@ -648,7 +724,7 @@ class MpApi:
         r = requests.get(url, headers=self.headers, auth=self.auth)
         return r
 
-    def vAddNode(self, *, instanceName, xml):
+    def vAddNode(self, *, instanceName: str, xml: str) -> requests.Response:
         """
         Add Vocabulary Node
         POST https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodes
@@ -657,7 +733,7 @@ class MpApi:
         r = requests.post(url, headers=self.headers, auth=self.auth, data=xml)
         return r
 
-    def vDelNode(self, *, instanceName, id):
+    def vDelNode(self, *, instanceName: str, id: int) -> requests.Response:
         """
         Delete Vocabulary Node
         DELETE https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodes/{id}
@@ -666,7 +742,7 @@ class MpApi:
         r = requests.delete(url, headers=self.headers, auth=self.auth)
         return r
 
-    def vUpdateNode(self, *, instanceName, id, xml):
+    def vUpdateNode(self, *, instanceName: str, id: int, xml: str) -> requests.Response:
         """
         Update Vocabulary Node
         PUT https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodes/{id}
@@ -676,7 +752,9 @@ class MpApi:
         return r
 
     # TERM
-    def vAddTerm(self, *, instanceName, nodeId, xml):
+    def vAddTerm(
+        self, *, instanceName: str, nodeId: int, xml: str
+    ) -> requests.Response:
         """
         Add Vocabulary Term
         POST https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodes/{nodeId}/terms
@@ -685,7 +763,9 @@ class MpApi:
         r = requests.post(url, headers=self.headers, auth=self.auth, data=xml)
         return r
 
-    def vUpdateTerm(self, *, instanceName, nodeId, termId, xml):
+    def vUpdateTerm(
+        self, *, instanceName: str, nodeId: str, termId: int, xml: str
+    ) -> requests.Response:
         """
         Update Vocabulary Term
         PUT https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodes/{nodeId}/terms/{termId}
@@ -694,7 +774,9 @@ class MpApi:
         r = requests.put(url, headers=self.headers, auth=self.auth, data=xml)
         return r
 
-    def vDelTerm(self, *, instanceName, nodeId, termId):
+    def vDelTerm(
+        self, *, instanceName: str, nodeId: int, termId: int
+    ) -> requests.Response:
         """
         Delete Vocabulary Term
         DELETE https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodes/{nodeId}/terms/{termId}
@@ -704,7 +786,7 @@ class MpApi:
         return r
 
     # NodeParent
-    def vNodeParents(self, instanceName, nodeId):
+    def vNodeParents(self, *, instanceName: str, nodeId: int) -> requests.Response:
         """
         Get Vocabulary Node Parents / Default Node Relations
         GET https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodes/{nodeId}/parents/
@@ -716,7 +798,9 @@ class MpApi:
         r = requests.delete(url, headers=self.headers, auth=self.auth)
         return r
 
-    def vAddNodeParent(self, instanceName, nodeId, xml):
+    def vAddNodeParent(
+        self, *, instanceName: str, nodeId: int, xml: str
+    ) -> requests.Response:
         """
         Add Vocabulary Node Parent / Default Node Relations
         POST https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodes/{nodeId}/parents/
@@ -727,7 +811,9 @@ class MpApi:
         r = requests.post(url, headers=self.headers, auth=self.auth, data=xml)
         return r
 
-    def vDelNodeParent(self, instanceName, nodeId, parentNodeId):
+    def vDelNodeParent(
+        self, *, instanceName: str, nodeId: int, parentNodeId: int
+    ) -> requests.Response:
         """
         Delete Vocabulary Node Parent / Default Node Relations
         DELETE https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodes/{nodeId}/parents/{parentNodeId}
@@ -737,7 +823,7 @@ class MpApi:
         return r
 
     # nodeRelations
-    def vNodeRelations(self, instanceName, nodeId):
+    def vNodeRelations(self, *, instanceName: str, nodeId: int) -> requests.Response:
         """
         Get Vocabulary Node Relations / Advanced Node Relations
         GET https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodes/{nodeId}/relations/
@@ -746,7 +832,9 @@ class MpApi:
         r = requests.get(url, headers=self.headers, auth=self.auth)
         return r
 
-    def vAddNodeRelation(self, instanceName, nodeId, xml):
+    def vAddNodeRelation(
+        self, instanceName: str, nodeId: int, xml: str
+    ) -> requests.Response:
         """
         Add Vocabulary Node Relation / Advanced Node Relations
         POST https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodes/{nodeId}/relations/
@@ -755,7 +843,9 @@ class MpApi:
         r = requests.get(url, headers=self.headers, auth=self.auth, data=xml)
         return r
 
-    def vDelNodeRelation(self, instanceName, nodeId, relationId):
+    def vDelNodeRelation(
+        self, instanceName: str, nodeId: int, relationId: str
+    ) -> requests.Response:
         """
         Delete Vocabulary Node Relation / Advanced Node Relations
         DELETE https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodes/{nodeId}/parents/{relationId}
@@ -768,14 +858,14 @@ class MpApi:
     # HELPERS
     #
 
-    def ETfromString(self, *, xml):
+    def ETfromString(self, *, xml: str) -> etree:
         return etree.fromstring(bytes(xml, "UTF-8"))
 
-    def toFile(self, *, xml, path):
+    def toFile(self, *, xml: str, path: str) -> None:
         with open(path, "w", encoding="UTF-8") as f:
             f.write(xml)
 
-    def completeXML(self, *, fragment):
+    def completeXML(self, *, fragment: str) -> str:
         """
         Expects a moduleItem as xml string, returns a whole
         document as xml string.
@@ -791,23 +881,3 @@ class MpApi:
         </application>
         """
         return whole
-
-
-if __name__ == "__main__":
-    from pathlib import Path
-
-    with open("../sdata/credentials.py") as f:
-        exec(f.read())
-
-    def save(content, path):
-        with open(path, "wb") as f:
-            f.write(r.content)
-
-    print(f"{baseURL}:{user}:{pw}")
-    api = MpApi(baseURL=baseURL, user=user, pw=pw)
-    r = api.reportModuleItem(module="Object", itemId="744767", exportId="45003")
-    save(r.content, "report45003.xml")
-    r = api.reportModuleItem(module="Object", itemId="744767", exportId="48014")
-    save(r.content, "report48014.xml")
-    r = api.reportModuleItem(module="Object", itemId="744767", exportId="57028")
-    save(r.content, "report57028.xml")
