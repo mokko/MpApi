@@ -457,7 +457,7 @@ class Module(Helper):
         return moduleN
 
     def moduleItem(
-        self, *, parent: ET, ID: int, hasAttachments: Optional[str] = None
+        self, *, parent: ET, ID: int = None, hasAttachments: Optional[str] = None
     ) -> ET:
         """
         Gets moduleItem with that ID or creates a new one.
@@ -529,10 +529,27 @@ class Module(Helper):
                 parent,
                 "{http://www.zetcom.com/ria/ws/module}moduleReference",
                 name=name,
-                multiplicity=multiplicity,
+                # multiplicity=multiplicity,
                 targetModule=targetModule,
             )
         return modRefN
+
+    def moduleReferenceItem(self, *, parent: ET, moduleItemId: int):
+        """
+        Get existing moduleReferenceIte with that name or make new one.
+        """
+        try:
+            mri = parent.xpath(
+                f"./m:moduleReferenceItem[@moduleItemId = {moduleItemId}]",
+                namespaces=NSMAP,
+            )[0]
+        except:
+            mri = etree.SubElement(
+                parent,
+                "{http://www.zetcom.com/ria/ws/module}moduleReferenceItem",
+                moduleItemId=str(moduleItemId),
+            )
+        return mri
 
     def repeatableGroup(self, *, parent: ET, name: str, size: int = None):
         """
@@ -701,9 +718,10 @@ class Module(Helper):
         """
         try:
             vr = parent.xpath(
-                "m:vocabularyReference[@name = '{name}']", namespaces=NSMAP
+                f"m:vocabularyReference[@name = '{name}']", namespaces=NSMAP
             )[0]
         except:
+            # print (f"vr with name {name} doesn't exist yet")
             vr = etree.SubElement(
                 parent,
                 "{http://www.zetcom.com/ria/ws/module}vocabularyReference",
@@ -743,8 +761,8 @@ class Module(Helper):
         """
         try:
             vri = parent.xpath(
-                "m:vocabularyReferenceItem[@name = '{name}']", namespaces=NSMAP
-            )
+                f"m:vocabularyReferenceItem[@name = '{name}']", namespaces=NSMAP
+            )[0]
         except:
             vri = etree.SubElement(
                 parent,

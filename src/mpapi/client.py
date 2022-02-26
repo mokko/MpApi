@@ -197,7 +197,7 @@ class MpApi:
         r.raise_for_status()
         return r
 
-    def createItem2(self, *, mtype: str, xml: str) -> Module:
+    def createItem2(self, *, mtype: str, data: Module) -> Module:
         """
         Like createItem, but with modern parameter names and returns Module
         object.
@@ -206,7 +206,7 @@ class MpApi:
         Alternatively, createItem2 could expect xml as etree, but that wouldn't
         save anything, so no.
         """
-        r = self.createItem(module=mtype, xml=xml)
+        r = self.createItem(module=mtype, xml=data.toString())
         return Module(xml=r.text)
 
     def updateItem(self, *, module: str, id: int, xml: str) -> requests.Response:
