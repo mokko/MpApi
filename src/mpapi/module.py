@@ -529,9 +529,10 @@ class Module(Helper):
                 parent,
                 "{http://www.zetcom.com/ria/ws/module}moduleReference",
                 name=name,
-                # multiplicity=multiplicity,
                 targetModule=targetModule,
             )
+            if multiplicity is not None:
+                modRefN.set("multiplicity", multiplicity)
         return modRefN
 
     def moduleReferenceItem(self, *, parent: ET, moduleItemId: int):
