@@ -1,5 +1,5 @@
 import datetime
-from MpApi.Search import Search
+from mpapi.search import Search
 
 
 class WestFreigabe:
@@ -41,9 +41,7 @@ class WestFreigabe:
         Nicht freigegeben can be expressed in two ways SMBFreigabe = No or no SMBFreigabe
         in any case we leave records alone that have SMBFreigabe already.
 
-        Currently we also select VEs. One way to exclude it to use container
-        AKu-Alle Sammlungen OR EM-AlleSammlungen. I dont know how to do this
-
+        We used to also select VEs. Now we exclude Primärverpackungen.
         """
         query = Search(module="Object", limit=limit)
         query.AND()

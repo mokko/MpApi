@@ -1,10 +1,12 @@
 import datetime
 import importlib
 from lxml import etree
-from Search import Search
-from Module import Module
+from mpapi.search import Search
+from mpapi.module import Module
+from mpapi.replace.ErwerbNotizAusgabe import ErwerbNotizAusgabe
 import re
-from Replace.ErwerbNotizAusgabe import ErwerbNotizAusgabe
+
+# from Replace.ErwerbNotizAusgabe import ErwerbNotizAusgabe
 
 """
  Loop thru the objects of one group and write erwerbNotizAusgabe
@@ -19,10 +21,13 @@ NSMAP = {
 
 class ErwerbNotizAusgabe3(ErwerbNotizAusgabe):  # inheritance!
     def Input(self):
-        STO = {
-            "BoxerGroup": "117396",
+        groups = {
+            "M42W": "181396",
+            "M44W": "179396",
+            "M45W": "181397",
+            "M45Wii": "179397",
         }
-        return STO
+        return groups
 
     def search(self, Id, limit=-1):
         """
