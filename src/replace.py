@@ -138,7 +138,7 @@ class Replace:
             self.search(query=query, Id=Input[key])
             xpath = plugin.loop()
             moduleType = xpath.split("'")[1]  # not particularly generic
-            # print (f"T{moduleType}")
+            print(f"T{moduleType}")
             onItem = plugin.onItem()
             for payload in self.loop(xpath=xpath, onItem=onItem, mtype=moduleType):
                 # print (f"XML {payload['xml']}") -> use file debug.xml instead

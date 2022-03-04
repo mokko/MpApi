@@ -19,12 +19,11 @@ Interface: I am looking for a decent easy-to-implement interface
 """
 
 import datetime
-
-from Search import Search
+from mpapi.search import Search
 
 
 class DigiP:
-    def input(self):
+    def Input(self):
         return {"locId": "4220557"}
 
     def loop(self):

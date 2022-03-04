@@ -114,7 +114,7 @@ class Search(Helper):
             xmlns="http://www.zetcom.com/ria/ws/module/search" 
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
             xsi:schemaLocation="http://www.zetcom.com/ria/ws/module/search 
-            http://www.zetcom.com/ria/ws/module/search/search_1_1.xsd">
+            http://www.zetcom.com/ria/ws/module/search/search_1_6.xsd">
             <modules>
                 <module name="{module}">
                     <search limit="{limit}" offset="{offset}">
@@ -126,6 +126,9 @@ class Search(Helper):
             </application>"""
             parser = etree.XMLParser(remove_blank_text=True)
             self.etree = etree.fromstring(xml, parser)
+
+            # lastN is state; state is bad
+            # lastN is used in addCriterion and _addConjunction
             self.lastN = self.etree.xpath(
                 "/s:application/s:modules/s:module/s:search/s:expert", namespaces=NSMAP
             )[0]
@@ -199,6 +202,9 @@ class Search(Helper):
     #
     # private helpers
     #
+
+    def endConjunction(self):
+        self.lastN = self.lastN.getparent()
 
     def _addConjunction(self, *, Type):
         """
