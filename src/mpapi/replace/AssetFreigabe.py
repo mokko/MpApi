@@ -33,12 +33,10 @@ from mpapi.replace.DigiP import DigiP
 
 class AssetFreigabe(DigiP):
     def Input(self):
-        print("GH")
         return {"nothing": "yet"}
 
-    def search(self, Id, limit=limit):
-        query = Search(module="Multimedia", limit=100)  # was limit=limit
-        # 2nd criteria
+    def search(self, Id, limit=-1):
+        query = Search(module="Multimedia", limit=limit)
         query.AND()
         # 3rd criteria
         # query.AND()
@@ -48,6 +46,7 @@ class AssetFreigabe(DigiP):
             value="1816002",  # using vocId SMB-Digital = 1816002
         )
 
+        # 2nd criteria
         query.OR()
         query.addCriterion(
             operator="equalsField",  # notEqualsTerm
