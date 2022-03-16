@@ -1,5 +1,5 @@
 """
-Anna wants to SMB-approve practically all fotos by two fotographers in the AKu
+Anna wants to SMB-approve practically all fotos by two photographers of the AKu
 
 Fotografen:
 look for assets
@@ -20,9 +20,6 @@ AKu-Ostasiatische Kunst -> AKuOstasiatischeKunst
 excluded
 AKu-Fremdbesitz
 AKu-Primärverpackungen
-
-__orgUnit
-
 """
 
 import datetime
