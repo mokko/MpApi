@@ -14,7 +14,12 @@ Which are the modules our instance knows
     - InventoryNumber, Literature, Movement, Multimedia, MultimediaGroup, Object, ObjectGroup
     - Ownership, OrganisationUnit, Place, Parameter, Registrar, Person, Search, Task, Template
     - User, UserGroup
-SEE ALSO: 
+
+ENCODING SCHEME
+    - RIA dishes out UTF-8 and requests that also in our configuration
+    - mpapi 
+
+SEE ALSO
     http://docs.zetcom.com/ws
 """
 
@@ -43,7 +48,7 @@ class MpApi:
     def _delete(self, url):
         r = requests.delete(url, headers=self.headers, auth=self.auth)
         r.raise_for_status()
-        print(f"DEL ENC {r.encoding}")
+        # print(f"DEL ENC {r.encoding}")
         # r.encoding = "utf-8"
         return r
 
@@ -53,21 +58,21 @@ class MpApi:
         else:
             r = requests.get(url, headers=self.headers, auth=self.auth, params=params)
         r.raise_for_status()
-        print(f"GET ENC {r.encoding}")
+        # print(f"GET ENC {r.encoding}")
         # r.encoding = "utf-8"
         return r
 
     def _post(self, url, *, data):
         r = requests.post(url, data=data, headers=self.headers, auth=self.auth)
         r.raise_for_status()
-        print(f"POST ENC {r.encoding}")
+        # print(f"POST ENC {r.encoding}")
         # r.encoding = "utf-8"
         return r
 
     def _put(self, url, *, data):
         r = requests.put(url, data=xml, headers=self.headers, auth=self.auth)
         r.raise_for_status()
-        print(f"PUT ENC {r.encoding}")
+        # print(f"PUT ENC {r.encoding}")
         # r.encoding = "utf-8"
         return r
 
@@ -87,7 +92,7 @@ class MpApi:
 
         return self._post(
             url,
-            data=etree.tostring(queryET, encoding="unicode"),
+            data=etree.tostring(queryET),  # encoding="unicode"
         )
 
     #

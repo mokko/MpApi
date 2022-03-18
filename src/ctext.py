@@ -2,10 +2,11 @@
 
 Import C-Texts to RIA. This will be a two-step process.
 (1) We parse A. Schäfer's Excel sheets (one at a time) and write the required
-    info into a new Excel file sanitizing it somewhat on the way; in this step 
-    we also look up the objIds from RIA plus possibly other information.
+    info into a new Excel file sanitizing it somewhat on the way; 
+    in this step we also look up the objIds from RIA (plus possibly other 
+    information).
 (2) we manually proof-reading the new Excel and potentially correct it    
-(3) we upload the new Excel
+(3) we upload stuff from the new Excel to RIA
 
 Let's find good names 
 (A) for the products: 
@@ -102,6 +103,7 @@ class Ctext:
             if kennung_en is not None:
                 en += f"\n\n{kennung_en}"
 
+            # todo: fix this html, when we can see it in RIA
             de_html = "<html>"
             if zeichen is not None:
                 de_html += zeichen.strip() + "<br/>"
