@@ -27,7 +27,7 @@ USAGE
     q.addCriterion(operator="equalsValue", field="__id", value="1235")
 
     #if you only want certain fields back, list them
-    q.addField("ObjExampleMissing")
+    q.addField(field="__id")
 
 #helpers
     q.print()  # print to STDOUT

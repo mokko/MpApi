@@ -75,6 +75,6 @@ class AssetFreigabe(DigiP):
                 value=orgUnit,
             )
 
-        print(query.toFile(path="query.xml"))
+        # print(query.toFile(path="query.xml"))
         query.validate(mode="search")
         return query
