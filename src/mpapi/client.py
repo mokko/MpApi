@@ -16,8 +16,7 @@ Which are the modules our instance knows
     - User, UserGroup
 
 ENCODING SCHEME
-    - RIA dishes out UTF-8 and requests that also in our configuration
-    - mpapi 
+    - RIA dishes out and requests UTF-8; mpapi should do that too
 
 SEE ALSO
     http://docs.zetcom.com/ws

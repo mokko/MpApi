@@ -10,8 +10,8 @@ Import C-Texts to RIA. This will be a two-step process.
 
 Let's find good names 
 (A) for the products: 
-- A.Schäfer's Excel files are the original Excels
-- The Excel sheets that I create are the proofing files; the rewritten Excel
+- A.Schäfer's files are the __original_Excels__
+- The Excel sheets that I create are __the_proofing_files__
 
 (B) for the stages:
 - initial conversion
@@ -19,8 +19,11 @@ Let's find good names
 - upload to RIA
 
 USAGE
-    ctext --input original.xslx --output m39-rewrite.xslx  # step 1
-    ctext --upload m39-rewrite.xslx  # step 3
+    # step 1
+    ctext --input original.xslx --output m39-proof.xslx  
+    # step 2 happens in Excel (without this program)
+    # step 3
+    ctext --upload m39-proof.xslx  
 """
 
 import argparse
@@ -41,12 +44,14 @@ class Ctext:
 
     def _ingestSheet(self, sheet) -> None:
         """
-        Read in orignal Excel and prepare sheet for rewrite Excel
+        Process the original Excel (in sheet) and prepare the proofing Excel;
+        as a side-effect stores proofing excel to self.wb2 (and self.ws2).
+
         EXPECTS
-        - sheet
+        - sheet: openpyxl sheet
 
         RETURNS
-        - nothing; side-effect: self.ws2
+        - nothing
         """
         print(f"*max row: {self.ws2.max_row}")  # 1-based
         ws2 = self.ws2
@@ -106,117 +111,97 @@ class Ctext:
             # todo: fix this html, when we can see it in RIA
             de_html = "<html>"
             if zeichen is not None:
-                de_html += zeichen.strip() + "<br/>"
-            if künstler_de is not None and künstler_de != "./.":
-                de_html += künstler_de.strip() + "<br/>"
+                zeichen = zeichen.strip()
+                de_html += zeichen + "<br/>"
+            if künstler_de == "./.":
+                künstler_de = None
+            if künstler_de is not None:
+                künstler_de = künstler_de.strip()
+                de_html += künstler_de + "<br/>"
             if titel_de is not None:
-                de_html += f"<p><b>{titel_de.strip()}</b></p>"
+                titel_de = titel_de.strip()
+                de_html += f"<p><b>{titel_de}</b></p>"
             if kennung_de is not None:
-                de_html += f"<p>{kennung_de.strip()}</p>"
+                kennung_de = kennung_de.strip()
+                de_html += f"<p>{kennung_de}</p>"
             de_html += "</html>"
 
             en_html = "<html>"
             if zeichen is not None:
-                en_html += zeichen.strip() + "<br/>"
-            if künstler_en is not None and künstler_en != "./.":
-                en_html += künstler_en.strip() + "<br/>"
+                en_html += zeichen + "<br/>"
+            if künstler_en == "./.":
+                künstler_en = None
+            if künstler_en is not None:
+                künstler_en = künstler_en.strip()
+                en_html += künstler_en + "<br/>"
             if titel_en is not None:
-                en_html += f"<p><b>{titel_en.strip()}</b></p>"
+                titel_en = titel_en.strip()
+                en_html += f"<p><b>{titel_en}</b></p>"
             if kennung_de is not None:
-                en_html += f"<p>{kennung_en.strip()}</p>"
+                kennung_en = kennung_en.strip()
+                en_html += f"<p>{kennung_en}</p>"
             en_html += "</html>"
 
             # mapping internal fields to new Excel fields
             ws2[f"C{new_row}"] = identNrXLS
             ws2[f"D{new_row}"] = de
+            ws2[f"D{new_row}"].style = "wrap"
             ws2[f"E{new_row}"] = en
+            ws2[f"E{new_row}"].style = "wrap"
             ws2[f"F{new_row}"] = sheet[f"B{rno}"].value  # element
             ws2[f"G{new_row}"] = sheet.title  # Blatt
-            ws2[f"H{new_row}"] = self.Input  # Datei
+            ws2[f"H{new_row}"] = self.origFn  # Datei
             ws2[f"I{new_row}"] = de_html
-            ws2[f"J{new_row}"] = en_html
-
-            ws2[f"D{new_row}"].style = "wrap"
-            ws2[f"E{new_row}"].style = "wrap"
             ws2[f"I{new_row}"].style = "wrap"
+            ws2[f"J{new_row}"] = en_html
             ws2[f"J{new_row}"].style = "wrap"
-
-            # if new_row > 6:
-            #    raise TypeError ("Let's stop here!")
+            ws2[f"K{new_row}"] = zeichen
+            ws2[f"L{new_row}"] = künstler_de
+            ws2[f"M{new_row}"] = künstler_en
+            ws2[f"N{new_row}"] = titel_de
+            ws2[f"O{new_row}"] = titel_en
+            ws2[f"P{new_row}"] = kennung_de
+            ws2[f"P{new_row}"].style = "wrap"
+            ws2[f"Q{new_row}"] = kennung_en
+            ws2[f"Q{new_row}"].style = "wrap"
 
     def _initProof(self) -> None:
         """
-        Initialize rewrite Excel (self.ws2).
+        Initialize rewrite Excel (self.ws2). As a side effect: creates a new
+        Excel in memory (self.wb2 with active sheet in self.ws2)
+
+        Expects nothing and returns nothing
         """
-        self.wb2 = Workbook(encoding="utf8")  # new (proof)
+        self.wb2 = Workbook()  # new Excel
         ws2 = self.wb2.active
         self.ws2 = ws2
         ws2["A1"] = "objId(RIA)"
         ws2["B1"] = "IdentNr(RIA)"
         ws2["C1"] = "IdentNr(xlsx)"
         ws2["D1"] = "C-Text de"
+        ws2.column_dimensions["D"].width = 45
         ws2["E1"] = "C-Text en"
+        ws2.column_dimensions["E"].width = 45
         ws2["F1"] = "Element"
         ws2["G1"] = "Blatt"
         ws2["H1"] = "Datei"
         ws2["I1"] = "de_html"
+        ws2.column_dimensions["I"].width = 45
         ws2["J1"] = "en_html"
+        ws2.column_dimensions["J"].width = 45
+        ws2["K1"] = "zeichen"
+        ws2["L1"] = "künstler_de"
+        ws2["M1"] = "künstler_en"
+        ws2["N1"] = "titel_de"
+        ws2["O1"] = "titel_en"
+        ws2["P1"] = "kennung_de"
+        ws2.column_dimensions["P"].width = 45
+        ws2["Q1"] = "kennung_en"
+        ws2.column_dimensions["Q"].width = 45
 
         ns = NamedStyle(name="wrap")
         ns.alignment = Alignment(vertical="top", wrap_text=True)
         self.wb2.add_named_style(ns)
-
-        ws2.column_dimensions["D"].width = 45
-        ws2.column_dimensions["E"].width = 45
-        ws2.column_dimensions["I"].width = 45
-        ws2.column_dimensions["J"].width = 45
-
-    def ingest(self, *, Input, output) -> None:
-        """
-        Rewrite original Excel file and save as output
-
-        Expects
-        - Input: original Excel file
-        - output: path for rewritten output filename
-        """
-        wb1 = load_workbook(Input, encoding="utf8")  # original
-        self.Input = Input
-        self._initProof()
-        if output is None:
-            raise ValueError("Error: No output specified!")
-
-        # should write multiple sheets from origin into one sheet at proofing stLooage
-        for sheet in wb1:
-            if sheet.title != "Info zur Datei":
-                self._ingestSheet(sheet)
-        openpyxl.writer.excel.save_workbook(self.wb2, output)
-
-    def riaLookup(self, *, proof=None) -> None:
-        """
-        For every identNr from Excel, look up objId and IdentNr from RIA
-        and write the results back to the proofing Excel (self.ws2).
-        """
-        if proof is not None:
-            self.wb2 = load_workbook(proof)
-            self.ws2 = self.wb2.active
-            output = proof
-
-        ws2 = self.ws2
-        max_row = self.ws2.max_row
-        print("*Entering ria lookup")
-        print(f"**max row: {max_row}")  # 1-based
-
-        for rno in range(2, max_row + 1):
-            riaObjId = ws2[f"A{rno}"].value
-            xslIdentNr = ws2[f"C{rno}"].value
-            if riaObjId is None:
-                newID = self._lookup(identNr=xslIdentNr, limit=1)
-                if newID is not None:
-                    ws2[f"A{rno}"] = newID
-                    openpyxl.writer.excel.save_workbook(self.wb2, output)
-                print(f"***row #{rno} {riaObjId} {xslIdentNr} -> {newID}")
-
-        # openpyxl.writer.excel.save_workbook(self.wb2, output)
 
     def _lookup(self, *, identNr, limit=-1):
         """
@@ -227,7 +212,7 @@ class Ctext:
         if you want to send it encoded in UTF-8.
         """
 
-        print(f"-----------LOOKING UP objId for identNr {identNr}")
+        # print(f"-----------LOOKING UP objId for identNr {identNr}")
         q = Search(module="Object", limit=limit)
         q.AND()
         q.addCriterion(
@@ -263,6 +248,7 @@ class Ctext:
                     "/m:application/m:modules/m:module[@name = 'Object']/m:moduleItem/@id"
                 )[0]
             except:
+                print("WARN: xpath fails; zero results?")
                 newID = None
         else:
             print(f"WARN: multiple or zero results {size}")
@@ -270,25 +256,94 @@ class Ctext:
         # print (f"newID: {newID}")
         return newID
 
-    def upload(self, *, Input) -> None:
-        pass
+    def ingest(self, *, origFn, proofFn) -> None:
+        """
+        Rewrite original Excel input to the proofing Excel and save at provided
+        path.
+
+        Expects
+        - origFn: path to original Excel file
+        - proofFn: path for rewritten proofing Excel file
+
+        Returns nothing.
+        """
+        wb1 = load_workbook(origFn)  # original
+        self.origFn = origFn  # used in _ingestSheet
+        self._initProof()
+
+        # writes multiple sheets from origin into one sheet at proofFn
+        for sheet in wb1:
+            if sheet.title != "Info zur Datei":
+                self._ingestSheet(sheet)
+        openpyxl.writer.excel.save_workbook(self.wb2, proofFn)
+
+    def riaLookup(self, *, proofFn) -> None:
+        """
+        For every identNr from Excel, look up objId and IdentNr from RIA and
+        write the results back to the proofing Excel (self.ws2). Save proofing
+        Excel after every lookup, so that in case of interruptions, requests
+        don't have to be repeated.
+
+        Expects
+        - proofFn: loation for proofing Excel
+
+        Returns nothing
+        """
+        if not hasattr(self, "wb2"):
+            self.wb2 = load_workbook(proof)
+            self.ws2 = self.wb2.active
+
+        ws2 = self.ws2
+        max_row = self.ws2.max_row
+        print("*Entering ria lookup")
+        print(f"**max row: {max_row}")  # 1-based
+
+        for rno in range(2, max_row + 1):
+            riaObjId = ws2[f"A{rno}"].value
+            xslIdentNr = ws2[f"C{rno}"].value
+            if riaObjId is None:
+                newID = self._lookup(identNr=xslIdentNr, limit=1)
+                if newID is not None:
+                    ws2[f"A{rno}"] = newID
+                    openpyxl.writer.excel.save_workbook(self.wb2, proofFn)
+                print(f"***row #{rno} {riaObjId} {xslIdentNr} -> {newID}")
+
+    def upload(self, *, proofFn) -> None:
+        """
+        We beginn with
+        """
+        self.wb2 = load_workbook(proofFn)
+        ws2 = self.wb2.active
+        max_row = self.ws2.max_row
+        print("*Entering UPLOAD step")
+        print(f"**max row: {max_row}")  # 1-based
+
+        for rno in range(2, max_row + 1):
+            riaObjId = ws2[f"A{rno}"].value
+            if riaObjId is not None:
+                self._upload(row="row")
+
+    def _upload(self, *, row):
+        """
+        mpapi-part
+        """
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Upload c-texts in two steps")
-    parser.add_argument("-i", "--input", help="path to Excel input file")
-    parser.add_argument("-o", "--output", help="path to new Excel (proofs)")
+    parser.add_argument("-o", "--orig", help="path to Excel input file")
+    parser.add_argument("-p", "--proof", help="path to proofing Excel)")
     parser.add_argument("-l", "--lookup", help="path to proofing Excel")
-    parser.add_argument("-u", "--upload", help="path to new Excel for upload")
+    parser.add_argument("-u", "--upload", help="path to proofing Excel")
     args = parser.parse_args()
 
     ct = Ctext(user=user, pw=pw, baseURL=baseURL)
-    if args.input is not None:
-        ct.ingest(Input=args.input, output=args.output)
-        ct.riaLookup(proof=args.output)
+    if args.orig is not None:
+        ct.ingest(origFn=args.orig, proofFn=args.proof)
+        ct.riaLookup(proofFn=args.proof)
 
     if args.lookup:
-        ct.riaLookup(proof=args.lookup)
+        ct.riaLookup(proofFn=args.lookup)
 
     if args.upload is not None:
-        ct.upload(Input=args.upload)
+        ct.upload(proofFn=args.upload)
