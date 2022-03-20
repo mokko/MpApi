@@ -33,13 +33,15 @@ from mpapi.module import Module
 import openpyxl
 from openpyxl import load_workbook, Workbook
 from openpyxl.styles import NamedStyle, Alignment, Font
+import pprint
+from typing import Optional
 
 with open("credentials.py") as f:
     exec(f.read())
 
 
 class Ctext:
-    def __init__(self, *, user, pw, baseURL) -> None:
+    def __init__(self, *, user: str, pw: str, baseURL: str) -> None:
         self.client = MpApi(baseURL=baseURL, user=user, pw=pw)
 
     def _ingestSheet(self, sheet) -> None:
@@ -81,11 +83,11 @@ class Ctext:
             kennung_en = kennung_en.translate(mt)
 
             # DEBUGGING
-            print(f"z {zeichen}")
-            print(f"kü {künstler_de} || {künstler_en}")
-            print(f"ti {titel_de} || {titel_en}")
-            print(f"ke {kennung_de}")
-            print(f"ke {kennung_en}")
+            # print(f"z {zeichen}")
+            # print(f"kü {künstler_de} || {künstler_en}")
+            # print(f"ti {titel_de} || {titel_en}")
+            # print(f"ke {kennung_de}")
+            # print(f"ke {kennung_en}")
 
             # deal with None and join fields
             de = ""
@@ -176,7 +178,7 @@ class Ctext:
         ws2 = self.wb2.active
         self.ws2 = ws2
         ws2["A1"] = "objId(RIA)"
-        ws2["B1"] = "IdentNr(RIA)"
+        ws2["B1"] = "Bereich(RIA)"
         ws2["C1"] = "IdentNr(xlsx)"
         ws2["D1"] = "C-Text de"
         ws2.column_dimensions["D"].width = 45
@@ -203,7 +205,7 @@ class Ctext:
         ns.alignment = Alignment(vertical="top", wrap_text=True)
         self.wb2.add_named_style(ns)
 
-    def _lookup(self, *, identNr, limit=-1):
+    def _lookup(self, *, identNr: str, limit: int = -1) -> Optional[str]:
         """
         Some unicode/latin-1 mess is happening here...
 
@@ -237,6 +239,7 @@ class Ctext:
                 value=orgUnit,
             )
         q.addField(field="__id")
+        q.addField(field="__orgUnit")
         q.validate(mode="search")
         # print(q.toString())
         m = self.client.search2(query=q)
@@ -250,13 +253,85 @@ class Ctext:
             except:
                 print("WARN: xpath fails; zero results?")
                 newID = None
+            try:
+                bereich = m.xpath(
+                    """/m:application/m:modules/m:module[
+                        @name = 'Object'
+                    ]/m:moduleItem/m:systemField[
+                        @name = '__orgUnit'
+                    ]/m:value/text()
+                    """
+                )[0]
+            except:
+                bereich = None
+            if newID is not None and bereich is None:
+                raise ValueError("ERROR: bereich should exist")
+            # print (f"***bereich:{bereich}")
         else:
             print(f"WARN: multiple or zero results {size}")
             newID = None
-        # print (f"newID: {newID}")
-        return newID
+            bereich = None
+        return newID, bereich
 
-    def ingest(self, *, origFn, proofFn) -> None:
+    def _upload(self, *, row: dict) -> None:
+        """
+        Uploads contents of row to RIA.
+
+        expects a row as dictionary
+        returns nothing much
+
+        First we write only C-Text in Texte, later we might also fill up
+        onlineBeschreibung with parts of the info here.
+        """
+        self._upTexte(row=row)
+        self._upTexteOnline(row=row)
+
+        pp = pprint.PrettyPrinter(indent=4)
+        pp.pprint(row)
+
+    def _upTexte(self, *, row: dict):
+        """
+        DF: a label is a record in field cluster Texte with the qualifier
+            typ = "Label"
+
+        Mapping Vorschlag
+            Typ: Label
+            Ausstellung: keine
+            Anlass: Ausstellung
+            Sprache: de
+            Text HTML: <gesamter formatierter Label-Text>
+
+        Update Policy:
+        - dont overwrite existing labels; i.e. if label exists already, do
+          nothing so as to make recurring executions harmless
+        - If label doesn't exist yet (not a single label exists yet), add new
+          label according to mapping above.
+
+        1. search: We have to get the current record from RIA; do we only get records that dont
+        have label yet?
+        x. loop through results -> not applicable here since we only get a single result. Dont
+        need to check that since objID are reasonbly unique.
+        2. Since the search is strict and weeds out records with existing
+        label, we only have one change: that we create a completely new label
+
+        """
+        print("_upTexte")
+
+    def _upTexteOnline(self, *, row: dict):
+        """
+        DF: onlineText is an record/entry in Texte Online with typ = "Online Beschreibung"
+
+        Typically, if an onlineText exists already, we leave it alone. The only exception is
+        if the text contains only of "SM8HF". In this case, we add our new text anyways.
+
+        - search record for objId, get texte cluster
+        - investigate onlineTexte cluster; if doesn't exist or only contains [SM8HF], continue
+        - if cluster doesn't exist yet, create new texteOnline
+        - if cluster exists and only includes [SM8HF], add new text
+        """
+        pass
+
+    def ingest(self, *, origFn: str, proofFn: str) -> None:
         """
         Rewrite original Excel input to the proofing Excel and save at provided
         path.
@@ -277,7 +352,7 @@ class Ctext:
                 self._ingestSheet(sheet)
         openpyxl.writer.excel.save_workbook(self.wb2, proofFn)
 
-    def riaLookup(self, *, proofFn) -> None:
+    def riaLookup(self, *, proofFn: str) -> None:
         """
         For every identNr from Excel, look up objId and IdentNr from RIA and
         write the results back to the proofing Excel (self.ws2). Save proofing
@@ -290,7 +365,7 @@ class Ctext:
         Returns nothing
         """
         if not hasattr(self, "wb2"):
-            self.wb2 = load_workbook(proof)
+            self.wb2 = load_workbook(proofFn)
             self.ws2 = self.wb2.active
 
         ws2 = self.ws2
@@ -302,31 +377,42 @@ class Ctext:
             riaObjId = ws2[f"A{rno}"].value
             xslIdentNr = ws2[f"C{rno}"].value
             if riaObjId is None:
-                newID = self._lookup(identNr=xslIdentNr, limit=1)
+                newID, bereich = self._lookup(identNr=xslIdentNr, limit=1)
                 if newID is not None:
                     ws2[f"A{rno}"] = newID
+                if bereich is not None:
+                    ws2[f"B{rno}"] = bereich
                     openpyxl.writer.excel.save_workbook(self.wb2, proofFn)
-                print(f"***row #{rno} {riaObjId} {xslIdentNr} -> {newID}")
+                    print(f"***row #{rno} {riaObjId} {xslIdentNr} -> {newID} {bereich}")
 
-    def upload(self, *, proofFn) -> None:
+    def upload(self, *, proofFn: str) -> None:
         """
-        We beginn with
+        Let's keep the Excel stuff here and move the mpapi stuff into a extra
+        method.
         """
         self.wb2 = load_workbook(proofFn)
         ws2 = self.wb2.active
-        max_row = self.ws2.max_row
-        print("*Entering UPLOAD step")
-        print(f"**max row: {max_row}")  # 1-based
+        max_row = ws2.max_row
+        print(f"*Entering UPLOAD step max row: {max_row}")  # 1-based
 
-        for rno in range(2, max_row + 1):
-            riaObjId = ws2[f"A{rno}"].value
+        # row to dict
+        rno = 1  # one-based row counter
+        headings = []  # zero-based
+        for row in ws2.iter_rows(min_row=1, max_col=17):  # leave out params here?
+            riaObjId = row[0].value
+            print(f"riaObjId {riaObjId}")
+            cno = 0  # zero-based cell counter
+            rowDict = {}
+            for cell in row:
+                if rno == 1:
+                    headings.append(cell.value)
+                else:
+                    rowDict[headings[cno]] = cell.value
+                    cno += 1
+            # only attempt RIA update if an objId has been identified
             if riaObjId is not None:
-                self._upload(row="row")
-
-    def _upload(self, *, row):
-        """
-        mpapi-part
-        """
+                self._upload(row=rowDict)
+            rno += 1
 
 
 if __name__ == "__main__":
