@@ -120,6 +120,8 @@ class Sar:
         """
         For a record, check if it has an approval for SMB-Digital. Currently only
         works module type Object.
+
+        Returns True or False.
         """
         if mtype != "Object":
             raise ValueError("ERROR: checkApproval currently only works for Object")

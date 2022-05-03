@@ -198,7 +198,7 @@ class MpApi:
         loadThumbnailLarge | type: boolean | default: false | load large thumbnail
         loadThumbnailExtraLarge | type: boolean | default: false | load extra large thumbnail
         """
-        return requests._get(f"{self.appURL}/module/{module}/{id}")
+        return self._get(f"{self.appURL}/module/{module}/{id}")
 
     def getItem2(self, *, mtype: str, ID: int) -> Module:
         """
