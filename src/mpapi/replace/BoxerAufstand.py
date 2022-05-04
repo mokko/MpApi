@@ -24,7 +24,7 @@ class BoxerAufstand:
 
     def search(self, Id, limit=-1):
         """
-        Objects in group 117396
+        Objects in group with the ID specified in parameter ID
         """
         query = Search(module="Object", limit=limit)
         query.AND()
@@ -47,21 +47,21 @@ class BoxerAufstand:
 
     def onItem(self):
         """
-        I cant decide if I should run independent jobs for the marker and for
+        I can't decide if I should run independent jobs for the marker and for
         SMB Freigabe or everything should be in one thing.
 
         for every identified record, set SMBFreigabe
         """
         return self.setObjectFreigabe  # returns a callback
 
-    def setObjectFreigabe(self, *, node, user):
+    def setObjectFreigabe(self, *, itemN, user):
         """
         We're inside Object's nodeItem here
         We have already filtered out cases where SMBFreigabe exists
         """
         # print (node)
 
-        Id = node.xpath("@id")[0]
+        Id = itemN.xpath("@id")[0]
         today = datetime.date.today()
         module = "Object"
         xml = f"""
