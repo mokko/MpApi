@@ -69,6 +69,8 @@ NSMAP = {
     "m": "http://www.zetcom.com/ria/ws/module",
 }
 
+allowed_commands = ["all", "chunk", "getItem", "getPack", "pack"]
+
 
 class Mink:
     def __init__(
@@ -122,10 +124,13 @@ class Mink:
                         args = []
                     if right_job is True:
                         # print(f"**{cmd} {args}")
-                        getattr(self, cmd)(args)
+                        if cmd in allowed_commands:
+                            getattr(self, cmd)(args)
+                        else:
+                            raise SyntaxError(f"ERROR: Command {cmd} not recogized")
                 elif indent_lvl > 2:
                     print(f"indent lvl: {indent_lvl} {parts}")
-                    raise TypeError("Too many indents in dsl file")
+                    raise SyntaxError("ERROR: Too many indents in dsl file")
 
         if any_job is False:
             print(
