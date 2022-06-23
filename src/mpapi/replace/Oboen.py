@@ -16,4 +16,3 @@ class Oboen(BoxerAufstand):
             "Oboen": "184398",
         }
         return r
-        

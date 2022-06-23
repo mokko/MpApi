@@ -22,10 +22,12 @@ NSMAP = {
 class ErwerbNotizAusgabe3(ErwerbNotizAusgabe):  # inheritance!
     def Input(self):
         groups = {
-            "M42W": "181396",
-            "M44W": "179396",
-            "M45W": "181397",
-            "M45Wii": "179397",
+            # "M42W": "181396",
+            # "M44W": "179396",
+            # "M45W": "181397",
+            # "M45Wii": "179397",
+            "M22": "250398",
+            "M24": "250400",
         }
         return groups
 
