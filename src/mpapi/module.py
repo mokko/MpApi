@@ -175,7 +175,7 @@ class Module(Helper):
             for moduleItem in m:
                 #do something with moduleItem
         """
-        apath = f"/m:application/m:modules/m:module/m:moduleItem"
+        apath = "/m:application/m:modules/m:module/m:moduleItem"
         itemsN = self.xpath(apath)
         for itemN in itemsN:
             yield itemN
@@ -184,18 +184,18 @@ class Module(Helper):
         """
         Returns the number of all moduleItems, similar to actualSize. Also gets
         used when thruthyness of a module object gets evaluated (where 0 items
-        is considered False=.
+        is considered False).
             m = Module()
             if m:
                 # doesnt get here
-                # NOTE: before __len__ m would have been True
 
-        to check for m's existance:
+        to check for m's existence:
             try:
                 m
+        to check type:
             isinstance(m, Module)
         """
-        return int(self.xpath(f"count(/m:application/m:modules/m:module/m:moduleItem)"))
+        return int(self.xpath("count(/m:application/m:modules/m:module/m:moduleItem)"))
 
     def __str__(self):
         return self.toString()
