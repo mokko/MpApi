@@ -10,9 +10,13 @@ license = {file = "LICENSE"}
 classifiers = ["License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)"]
 dynamic = ["version", "description"]
 keywords = ["museum", "museumPlus", "api client"]
+# datetime should be included in Python
+# dateutil used in du.py
 dependencies = [
-    "requests >=2.6",
+	"dateutil", 
     "lxml",
+    "requests >=2.6",
+	"typing_extensions",
 ]
 [project.optional-dependencies]
 test = [
