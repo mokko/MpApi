@@ -32,6 +32,7 @@ from typing import Any, Union
 import requests
 
 ET: Any
+ETparser = etree.XMLParser(remove_blank_text=True)
 
 
 class MpApi:
@@ -141,6 +142,12 @@ class MpApi:
         Run a pre-existing saved search
         POST http://.../ria-ws/application/module/{module}/search/savedQuery/{__id}
 
+        N.B. / Caveats
+        - Currently only queries targeting the Object module are supported! Ideally,
+          client.py would extract that piece of information from the query.
+        - api does not support since. If you need that include that since date in your
+          RIA query.
+
         Quote from http://docs.zetcom.com/ws/:
         A request body must be provided, in order to control the paging. For example:
 
@@ -157,6 +164,45 @@ class MpApi:
         """
         url = f"{self.appURL}/module/{mtype}/search/savedQuery/{id}"
         return self._post(url, data=xml)
+
+    def runSavedQuery2(
+        self, *, ID: int, Type: str, limit: int = -1, offset: int = 0
+    ):  # -> ET
+        """
+        Higher level version of runSavedQuery where you specify limit and
+        offset instead of an xml snippet.
+
+        N.B. Currently only queries targeting the Object module are supported!
+
+        Expects
+        - ID: integer
+        - Type: target type (module type of the results)
+        - limit
+        - offset
+        Returns
+        - result document as etree object
+        """
+        xml = f"""
+        <application 
+            xmlns="http://www.zetcom.com/ria/ws/module/search" 
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+            xsi:schemaLocation="http://www.zetcom.com/ria/ws/module/search 
+            http://www.zetcom.com/ria/ws/module/search/search_1_6.xsd">
+            <modules>
+              <module name="Object">
+                <search limit="{limit}" offset="{offset}" />
+              </module>
+            </modules>
+        </application>
+        """
+
+        q = Search(fromString=xml)
+        q.validate(mode="search")
+
+        print("-----------------------")
+        print(xml)
+        r = self.runSavedQuery(id=ID, mtype=Type, xml=q.toString())
+        return etree.fromstring(r.content, ETparser)
 
     def search(self, *, xml: str) -> requests.Response:
         """

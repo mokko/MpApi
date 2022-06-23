@@ -14,7 +14,7 @@
 
     THE PROBLEM 
     * A search returns more items (=results) than I can digest, i.e over 1 GB,
-      i typically cant process xml files anymore.
+      i typically can't process xml files anymore with the memory in my laptop.
 
     THE SOLUTION
     * to split up the response in chunks (aka blocks or pages) and to deal with
@@ -61,7 +61,8 @@
     * This time I want to return document as etree, b/c in the long term I 
       expect that this solution will be faster than converting between etree 
       and string repeatedly.
-    * Should we write chunks to disk? No
+    * Should we write chunks to disk? No. That's not chunky's job. Should be 
+      done by mink etc.
     * Let's experiment with type hints again; we're using Python 3.9 type hints
 """
 
@@ -90,6 +91,8 @@ baseURL: str
 pw: str
 user: str
 
+allowed_types = ["approval", "exhibit", "group", "loc", "query"]
+
 
 class Chunky(Helper):
     def __init__(self, *, chunkSize: int, baseURL: str, pw: str, user: str) -> None:
@@ -105,7 +108,7 @@ class Chunky(Helper):
 
         EXPECTS
         * ID:
-        * Type: type of the ID (approval, location, group, exhibit) TODO
+        * Type: type of the ID (approval, exhibit, group, loc[ation], query)
         * since: xs:DateTime (more or less)
         * offset: initial offset to ignore object hits
 
@@ -113,10 +116,16 @@ class Chunky(Helper):
         * iterator [chunk: Module]: an indepedent chunk with persons,
           multimedia and objects
         """
+        if Type not in allowed_types:
+            raise SyntaxError(f"Error: Chunk type not recognized: {Type}")
+
         lastChunk: bool = False
         while not lastChunk:
             chunk = Module()  # make a new zml module document
-            partET = self._getObjects(Type="group", ID=ID, offset=offset, since=since)
+            if Type == "query":
+                partET = self._savedQuery(Type=Type, ID=ID, offset=offset)
+            else:
+                partET = self._getObjects(Type=Type, ID=ID, offset=offset, since=since)
             chunk.add(doc=partET)
 
             # all related Multimedia and Persons items, no chunking
@@ -170,13 +179,16 @@ class Chunky(Helper):
     # private methods
     #
 
+    def _savedQuery(self, *, Type: str, ID: int, offset: int = 0):
+        return self.api.runSavedQuery2(Type="Object", ID=ID, offset=offset)
+
     def _getObjects(
         self, *, Type: str, ID: int, offset: int, since: since = None
     ) -> ET:
         """
         A part is the result from a single request, e.g. for one module type.
         EXPECTS
-        * type: requested target module type
+        * Type: requested target module type
         * ID: of requested group
         * offset: offset for search query
         * since: dateTime string; TODO
@@ -191,9 +203,9 @@ class Chunky(Helper):
         """
         fields: dict = {  # TODO: untested
             "approval": "ObjPublicationGrp.TypeVoc",
+            "exhibit": "ObjRegistrarRef.RegExhibitionRef.__id",
             "group": "ObjObjectGroupsRef.__id",
             "loc": "ObjCurrentLocationVoc",
-            "exhibit": "ObjRegistrarRef.RegExhibitionRef.__id",
         }
 
         s = Search(module="Object", limit=self.chunkSize, offset=offset)
@@ -213,7 +225,7 @@ class Chunky(Helper):
                 field="__lastModified",
                 value=since,  # "2021-12-23T12:00:00.0"
             )
-        # s.print()
+        print(s.toString())
         s.validate(mode="search")
         r = self.api.search(xml=s.toString())
         # print(f"status {r.status_code}")
@@ -241,15 +253,17 @@ class Chunky(Helper):
 
         if len(IDs) == 0:
             # raise IndexError("No related IDs found!")?
-            print(f"***No related {target} IDs found {IDs}")
+            print(
+                f"***Warning: No related {target} IDs found {IDs}"
+            )  # this is not an ERROR
             return None
 
         # use limit=0 for a deterministic search as RIA's response provides the
         # number of search results limit -1 not documented at
         # http://docs.zetcom.com/ws/ seems to return all results
         s = Search(module=target, limit=-1, offset=0)
+        relIDs = set(IDs)  # IDs are not necessarily unique, but we want unique
         count = 1  # one-based out of tradition; counting unique IDs
-        relIDs = set(IDs)  # IDs are not unique, but we want unique
         for ID in sorted(relIDs):
             # print(f"{target} {ID}")
             if count == 1 and len(relIDs) > 1:
@@ -272,7 +286,7 @@ class Chunky(Helper):
         s.validate(mode="search")
         r = self.api.search(xml=s.toString())
         # DEBUG
-        with open("DEBUGresponse.xml", "wb") as binary_file:
-            # Write bytes to file
-            binary_file.write(r.content)
+        # with open("DEBUGresponse.xml", "wb") as binary_file:
+        # Write bytes to file
+        #    binary_file.write(r.content)
         return etree.fromstring(r.content, ETparser)
