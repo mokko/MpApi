@@ -255,14 +255,16 @@ class Mink:
         offset = (no - 1) * self.chunker.chunkSize
         print(f" next chunk {no}; offset:{offset}")
 
+        # getByType returns Module, not ET
         for chunk in self.chunker.getByType(
             ID=ID, Type=Type, since=since, offset=offset
         ):
-            path = self.project_dir.joinpath(f"{Type}{ID}-chunk{no}.xml")
-            chunk.clean()
-            print(f"saving CLEAN to {path}")
-            chunk.toFile(path=path)
-            chunk.validate()
+            if chunk:  # Module is true if it has more than 0 items
+                path = self.project_dir.joinpath(f"{Type}{ID}-chunk{no}.xml")
+                chunk.clean()
+                print(f"saving CLEAN to {path}")
+                chunk.toFile(path=path)
+                chunk.validate()
             no += 1
 
     def getAttachments(self, args: list) -> None:
