@@ -11,9 +11,9 @@ classifiers = ["License :: OSI Approved :: GNU General Public License v3 or late
 dynamic = ["version", "description"]
 keywords = ["museum", "museumPlus", "api client"]
 # datetime should be included in Python
-# dateutil used in du.py
+# typing_extensions makes newer typing features available to older Pythons 
 dependencies = [
-	"dateutil", 
+	"flit",
     "lxml",
     "requests >=2.6",
 	"typing_extensions",
@@ -24,6 +24,5 @@ test = [
 ]
 
 [project.scripts]
-du = 'mpapi:du'
 mink = 'mpapi:mink'
 mpReplace = 'mpapi:replace'

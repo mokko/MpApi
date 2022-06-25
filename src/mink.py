@@ -56,9 +56,9 @@ import sys
 from typing import NewType, Optional, Union
 
 from mpapi.chunky import Chunky
+from mpapi.client import MpApi
 from mpapi.module import Module
 from mpapi.sar import Sar
-from mpapi.client import MpApi
 from mpapi.search import Search
 
 Since = Optional[str]

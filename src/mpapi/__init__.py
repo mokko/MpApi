@@ -4,7 +4,6 @@ __version__ = "0.1.3"
 credentials = "credentials.py"  # expect credentials in pwd
 import argparse
 
-from du import Du
 from replace import Replace
 from mink import Mink
 from pathlib import Path
@@ -12,19 +11,6 @@ from pathlib import Path
 if Path(credentials).exists():
     with open(credentials) as f:
         exec(f.read())
-
-
-def du():
-    if not Path(credentials).exists():
-        raise ValueError("ERROR: Credentials not found!")
-    parser = argparse.ArgumentParser(
-        description="du - the download/upload tool for mpapi"
-    )
-    parser.add_argument("-c", "--cmd", help="'down' or 'up'", required=True)
-    parser.add_argument("-i", "--input", help="path to Excel sheet", required=True)
-    args = parser.parse_args()
-    du = Du(cmd=args.cmd, Input=args.input, baseURL=baseURL, pw=pw, user=user)
-
 
 def mink():
     parser = argparse.ArgumentParser(description="Commandline frontend for MpApi.py")
