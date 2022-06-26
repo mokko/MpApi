@@ -748,6 +748,9 @@ class Module(Helper):
         self._dropFieldsByName(element="dataField", name="ObjInventoryDateDat")
         self._dropFieldsByName(element="dataField", name="DatestampFromFuzzySearchLnu")
         self._dropFieldsByName(element="dataField", name="DatestampToFuzzySearchLnu")
+        self._dropFieldsByName(element="moduleReference", name="ObjObjectGroupsRef")
+        self._dropFieldsByName(element="moduleReference", name="ObjMultimediaRef")
+
 
     def vocabularyReference(
         self, *, parent: ET, name: str, instanceName: str, ID: int = None
