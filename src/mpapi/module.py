@@ -26,7 +26,7 @@ Definition and decisions:
 * Let's usually go with Zetcom's names
 
 USAGE:
-    # CONSTRUCTION: 4 ways to make a moduleList
+    # CONSTRUCTION: 4 ways to make a module
     m = Module(file="path.xml")  # load from disc
     m = Module(xml=xml)          # from xml string
     m = Module(tree=lxml.etree)  # from lxml.etree object
@@ -37,7 +37,8 @@ USAGE:
     xml_str = m.toString()
     lxml = m.toET()  # returns lxml etree document
     m.validate()     # dies if doc doesn't validate
-    # inspect module data     
+
+    # inspecting module data     
     adict = m.describe()          # no of items per mtype
     m.totalSize(module="Object")  # no of items as per attribute
     m.actualSize(module="Object") # no of actual items
@@ -54,9 +55,11 @@ USAGE:
     for item in m.iter(module="Object"):
         #do something with object item
 
-    # delete stuff
+    # deleting stuff
     m.dropRepeatableGroup(parent=miN, name="ObjValuationGrp")
     m._dropFields(parent=miN, type="systemField")
+    m._dropFieldsByName(element="repeatableGroup", name="ObjValuationGrp)
+    m._dropAttribs(xpath="m://dataField", name="uuid")
     m.clean()  # drops uuid attributes and certain value elements    
 
     # other changes to xml
@@ -714,18 +717,21 @@ class Module(Helper):
         self._dropFields(element="formattedValue")
 
         # upload form does not allow id
-        self._dropAttrib(xpath="//m:moduleItem", attrib="id")
+        self._dropAttribs(xpath="//m:moduleItem", attrib="id")
         # do we need to eliminate size attributes in repeatableGroups?
-        self._dropAttrib(xpath="//m:repeatableGroup", attrib="size")
+        self._dropAttribs(xpath="//m:repeatableGroup", attrib="size")
 
         # various attributes in moduleReference? name we need to keep
         # <moduleReference name="InvNumberSchemeRef" targetModule="InventoryNumber" multiplicity="N:1" size="1">
-        self._dropAttrib(xpath="//m:moduleReference", attrib="targetModule")
-        self._dropAttrib(xpath="//m:moduleReference", attrib="multiplicity")
-        self._dropAttrib(xpath="//m:moduleReference", attrib="size")
-        self._dropAttrib(xpath="//m:vocabularyReference", attrib="id")
-        self._dropAttrib(xpath="//m:vocabularyReference", attrib="instanceName")
-        self._dropAttrib(xpath="//m:vocabularyReferenceItem", attrib="name")
+        self._dropAttribs(xpath="//m:moduleReference", attrib="targetModule")
+        self._dropAttribs(xpath="//m:moduleReference", attrib="multiplicity")
+        self._dropAttribs(xpath="//m:moduleReference", attrib="size")
+        self._dropAttribs(xpath="//m:vocabularyReference", attrib="id")
+        self._dropAttribs(xpath="//m:vocabularyReference", attrib="instanceName")
+        self._dropAttribs(xpath="//m:vocabularyReferenceItem", attrib="name")
+        self._dropAttribs(xpath="//m:module", attrib="totalSize")
+        self._dropAttribs(xpath="//m:moduleItem", attrib="hasAttachments")
+        self._dropAttribs(xpath="//m:dataField", attrib="dataType")
 
         # modifiedBy, modifiedDate
         #    <dataField dataType="Varchar" name="ModifiedByTxt">
@@ -862,7 +868,7 @@ class Module(Helper):
                     oldItemN = newItemN  # this will probably not work, but we can debug that later
                     # else: keep oldItem = do nothing
 
-    def _dropAttrib(self, *, attrib, xpath):
+    def _dropAttribs(self, *, attrib, xpath):
         elemL: list[ET] = self.etree.xpath(xpath, namespaces=NSMAP)
         for elemN in elemL:
             try:
