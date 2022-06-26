@@ -3,14 +3,14 @@
 __version__ = "0.1.3"
 credentials = "credentials.py"  # expect credentials in pwd
 import argparse
-
-from replace import Replace
 from mink import Mink
 from pathlib import Path
+from replace import Replace
 
 if Path(credentials).exists():
     with open(credentials) as f:
         exec(f.read())
+
 
 def mink():
     parser = argparse.ArgumentParser(description="Commandline frontend for MpApi.py")
@@ -21,7 +21,7 @@ def mink():
 
 
 def replace():
-    credentials = "emem1.py"  # in pwd
+    # credentials = "emem1.py"  # in pwd
     parser = argparse.ArgumentParser(description="Command line frontend for Replace.py")
     parser.add_argument(
         "-l",
