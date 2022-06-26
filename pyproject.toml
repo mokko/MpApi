@@ -14,7 +14,7 @@ keywords = ["museum", "museumPlus", "api client"]
 # typing_extensions makes newer typing features available to older Pythons 
 dependencies = [
 	"flit",
-    "lxml",
+    "lxml >=4.8.0", #pathlike objects
     "requests >=2.6",
 	"typing_extensions",
 ]
