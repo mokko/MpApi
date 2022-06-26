@@ -304,7 +304,8 @@ class Module(Helper):
         New version of the method clean that cleans the present document
         * drops uuid attributes b/c they sometimes don't validate (Zetcom bug)
         * drops Werte und Versicherung to not spill our guts
-        * DOES NOT validate.
+        * this method doesn't do any validation
+        SEE ALSO sanitize
         """
         self.dropUUID()
         self.dropRepeatableGroup(name="ObjValuationGrp")
@@ -692,6 +693,50 @@ class Module(Helper):
             except:
                 pass  # it is not an error if a file has no items that can be counted
 
+    def uploadForm(self) -> None:
+        """
+        Rewrites module in upload form. Expects module in download form.
+
+        Download form is the xml that comes out of RIA, upload form is the form
+        RIA expects for uploads.
+
+        We save data in self.etree.
+
+        Transformations
+        - drop all virtualFields, systemFields, formattedValue
+
+        QUESTIONS:
+        - Returns a copy or rewrites itself? Act as clean, so rewrite itself
+        """
+
+        self._dropFields(element="systemField")
+        self._dropFields(element="virtualField")
+        self._dropFields(element="formattedValue")
+
+        # upload form does not allow id
+        self._dropAttrib(xpath="//m:moduleItem", attrib="id")
+        # do we need to eliminate size attributes in repeatableGroups?
+        self._dropAttrib(xpath="//m:repeatableGroup", attrib="size")
+
+        # various attributes in moduleReference? name we need to keep
+        # <moduleReference name="InvNumberSchemeRef" targetModule="InventoryNumber" multiplicity="N:1" size="1">
+        self._dropAttrib(xpath="//m:moduleReference", attrib="targetModule")
+        self._dropAttrib(xpath="//m:moduleReference", attrib="multiplicity")
+        self._dropAttrib(xpath="//m:moduleReference", attrib="size")
+        self._dropAttrib(xpath="//m:vocabularyReference", attrib="id")
+        self._dropAttrib(xpath="//m:vocabularyReference", attrib="instanceName")
+        self._dropAttrib(xpath="//m:vocabularyReferenceItem", attrib="name")
+
+        # modifiedBy, modifiedDate
+        #    <dataField dataType="Varchar" name="ModifiedByTxt">
+        #      <value>EM_EM</value>
+        #    </dataField>
+        #    <dataField dataType="Date" name="ModifiedDateDat">
+        #      <value>2010-05-07</value>
+        #    </dataField>
+        self._dropFieldsByName(element="dataField", name="ModifiedByTxt")
+        self._dropFieldsByName(element="dataField", name="ModifiedDateDat")
+
     def vocabularyReference(
         self, *, parent: ET, name: str, instanceName: str, ID: int = None
     ) -> ET:
@@ -817,6 +862,14 @@ class Module(Helper):
                     oldItemN = newItemN  # this will probably not work, but we can debug that later
                     # else: keep oldItem = do nothing
 
+    def _dropAttrib(self, *, attrib, xpath):
+        elemL: list[ET] = self.etree.xpath(xpath, namespaces=NSMAP)
+        for elemN in elemL:
+            try:
+                del elemN.attrib[attrib]
+            except KeyError:
+                pass
+
     def _dropFields(self, *, element: str, parent: ET = None) -> None:
         """
         removes all elements of the kind {element}.
@@ -829,15 +882,32 @@ class Module(Helper):
         EXPECTS
         * parent (optional): lxml element; if not specified, acts on Module's
           whole internal document.
-
-
         """
+
         if parent is None:
             parent = self.etree
 
         elemL: list[ET] = parent.xpath(f"//m:{element}", namespaces=NSMAP)
         for elemN in elemL:
             elemN.getparent().remove(elemN)
+
+    def _dropFieldsByName(self, *, element: str, name: str) -> None:
+        """
+        Drop all fields with specified @name.
+        """
+        # print(f"+++//m:{element}[@name = {name}]")
+
+        elemL: list[ET] = self.etree.xpath(
+            f"//m:{element}[@name = '{name}']", namespaces=NSMAP
+        )
+        for elemN in elemL:
+            # print(f"-----------{elemN}")
+            elemN.getparent().remove(elemN)
+
+    def _dropIdentNr(self) -> None:
+        """
+        We want to eliminate identNr as part of sanitizing xml for upload form.
+        """
 
     def _standardDT(self, *, inputN) -> str:
         """

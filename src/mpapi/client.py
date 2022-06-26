@@ -266,12 +266,12 @@ class MpApi:
 
     def createItem2(self, *, mtype: str, data: Module) -> Module:
         """
-        Like createItem, but with modern parameter names and returns Module
+        Like createItem, but with modern parameters and returns Module
         object.
 
         DESIGN
-        Alternatively, createItem2 could expect xml as etree, but that wouldn't
-        save anything, so no.
+        - Alternatively, createItem2 could expect xml as etree, but that wouldn't
+          save anything, so no.
         """
         r = self.createItem(module=mtype, xml=data.toString())
         return Module(xml=r.text)
