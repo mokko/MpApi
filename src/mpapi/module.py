@@ -732,7 +732,9 @@ class Module(Helper):
         self._dropAttribs(xpath="//m:module", attrib="totalSize")
         self._dropAttribs(xpath="//m:moduleItem", attrib="hasAttachments")
         self._dropAttribs(xpath="//m:dataField", attrib="dataType")
-
+        self._dropAttribs(xpath="//m:repeatableGroupItem", attrib="id")
+        self._dropAttribs(xpath="//m:moduleReferenceItem", attrib="seqNo")
+        self._dropAttribs(xpath="//m:compositeItem", attrib="seqNo")
         # modifiedBy, modifiedDate
         #    <dataField dataType="Varchar" name="ModifiedByTxt">
         #      <value>EM_EM</value>
@@ -742,6 +744,10 @@ class Module(Helper):
         #    </dataField>
         self._dropFieldsByName(element="dataField", name="ModifiedByTxt")
         self._dropFieldsByName(element="dataField", name="ModifiedDateDat")
+        self._dropFieldsByName(element="dataField", name="ObjRecordCreatedByTxt")
+        self._dropFieldsByName(element="dataField", name="ObjInventoryDateDat")
+        self._dropFieldsByName(element="dataField", name="DatestampFromFuzzySearchLnu")
+        self._dropFieldsByName(element="dataField", name="DatestampToFuzzySearchLnu")
 
     def vocabularyReference(
         self, *, parent: ET, name: str, instanceName: str, ID: int = None
