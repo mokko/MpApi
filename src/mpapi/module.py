@@ -533,8 +533,10 @@ class Module(Helper):
                 parent,
                 "{http://www.zetcom.com/ria/ws/module}moduleReference",
                 name=name,
-                targetModule=targetModule,
             )
+            if targetModule is not None:
+                modRefN.set("targetModule", targetModule)
+
             if multiplicity is not None:
                 modRefN.set("multiplicity", multiplicity)
         return modRefN
@@ -749,7 +751,7 @@ class Module(Helper):
         self._dropFieldsByName(element="moduleReference", name="ObjMultimediaRef")
 
     def vocabularyReference(
-        self, *, parent: ET, name: str, instanceName: str, ID: int = None
+        self, *, parent: ET, name: str, instanceName: str = None, ID: int = None
     ) -> ET:
         """
         Get vocabularyReference with that name if it exists or make a new one.
@@ -783,13 +785,18 @@ class Module(Helper):
                 parent,
                 "{http://www.zetcom.com/ria/ws/module}vocabularyReference",
                 name=name,
-                instanceName=instanceName,
             )
+
+            if instanceName is not None:
+                vr.set("instanceName", instanceName)
+
             if ID is not None:
                 vr.set("id", str(ID))
         return vr
 
-    def vocabularyReferenceItem(self, *, parent: ET, name: str, ID: int = None) -> ET:
+    def vocabularyReferenceItem(
+        self, *, parent: ET, name: str = None, ID: int = None
+    ) -> ET:
         """
         Get an existing vocabularyReferenceItem (vri) with that name or make a
         new one and return it.
@@ -824,8 +831,9 @@ class Module(Helper):
             vri = etree.SubElement(
                 parent,
                 "{http://www.zetcom.com/ria/ws/module}vocabularyReferenceItem",
-                name=name,
             )
+            if name is not None:
+                vri.set("name", name)
             if ID is not None:
                 vri.set("id", str(ID))
         return vri
