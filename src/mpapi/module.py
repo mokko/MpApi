@@ -589,44 +589,41 @@ class Module(Helper):
                 rGrp.set("size", size)
         return rGrp
 
-    def repeatableGroupItems(self, *, parent: ET):
+    def repeatableGroupItem(self, *, parent: ET, ID: int = None):
         """
-        Returns existing rGrpItem (only getter).
+        Returns first existing rGrpItem (getter) or makes a new one, if no rGrpItem
+        exists.
 
         EXPECTS
         * parent: lxml node
         * ID (optional)
 
         RETURNS
-        * lxml node LIST
+        * lxml node
 
         DESIGN
         * Do we really want to create an element with an id? Seems like
           MuseumPlus should create that ID.
+        * Old version used to return a list of nodes
 
         <repeatableGroup name="ObjObjectNumberGrp" size="1">
           <repeatableGroupItem id="20414895">
             <dataField dataType="Varchar" name="InventarNrSTxt">
               <value>I C 7723</value>
         """
-        try:
-            itemsL = parent.xpath(
-                f"./m:repeatableGroupItem",
+        try:  # getter
+            itemN = parent.xpath(
+                "./m:repeatableGroupItem",
                 namespaces=NSMAP,
+            )[0]
+        except:  # setter
+            itemN = etree.SubElement(
+                parent,
+                "{http://www.zetcom.com/ria/ws/module}repeatableGroupItem",
             )
-        except:
-            itemsL = None
-        return itemsL
-
-    def repeatableGroupItemAdd(self, *, parent: ET, ID: Optional[int] = None):
-
-        rGrpItem = etree.SubElement(
-            parent,
-            "{http://www.zetcom.com/ria/ws/module}repeatableGroupItem",
-        )
-        if ID is not None:
-            rGrpItem.set("id", str(ID))
-        return rGrpItem
+            if ID is not None:
+                itemN.set("id", str(ID))
+        return itemN
 
     def totalSize(self, *, module: str) -> int:
         """
@@ -750,7 +747,6 @@ class Module(Helper):
         self._dropFieldsByName(element="dataField", name="DatestampToFuzzySearchLnu")
         self._dropFieldsByName(element="moduleReference", name="ObjObjectGroupsRef")
         self._dropFieldsByName(element="moduleReference", name="ObjMultimediaRef")
-
 
     def vocabularyReference(
         self, *, parent: ET, name: str, instanceName: str, ID: int = None

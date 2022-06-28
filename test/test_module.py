@@ -75,8 +75,8 @@ def test_from_scratch_interface():
     )
     m.vocabularyReferenceItem(parent=vrN, ID=3206642, name="Musikinstrument")
     rGrpN = m.repeatableGroup(parent=itemN, name="ObjObjectNumberGrp", size="1")
-    rGrpItemsL = m.repeatableGroupItems(parent=rGrpN)
-    rGrpItemN = m.repeatableGroupItemAdd(parent=rGrpN, ID=99999998)
+    rGrpItemN = m.repeatableGroupItem(parent=rGrpN, ID=99999998)
+    rGrpItemN = m.repeatableGroupItem(parent=rGrpN)
     m.dataField(parent=rGrpItemN, name="InventarNrSTxt", value="I C 7723")
     assert m.validate()
 
