@@ -543,19 +543,16 @@ class Module(Helper):
 
     def moduleReferenceItem(self, *, parent: ET, moduleItemId: int):
         """
-        Get existing moduleReferenceIte with that name or make new one.
+        Make a new moduleReferenceIte.
+        
+        NEW
+        - no more getter
         """
-        try:
-            mri = parent.xpath(
-                f"./m:moduleReferenceItem[@moduleItemId = {moduleItemId}]",
-                namespaces=NSMAP,
-            )[0]
-        except:
-            mri = etree.SubElement(
-                parent,
-                "{http://www.zetcom.com/ria/ws/module}moduleReferenceItem",
-                moduleItemId=str(moduleItemId),
-            )
+        mri = etree.SubElement(
+            parent,
+            "{http://www.zetcom.com/ria/ws/module}moduleReferenceItem",
+            moduleItemId=str(moduleItemId),
+        )
         return mri
 
     def repeatableGroup(self, *, parent: ET, name: str, size: int = None):
@@ -593,8 +590,7 @@ class Module(Helper):
 
     def repeatableGroupItem(self, *, parent: ET, ID: int = None):
         """
-        Returns first existing rGrpItem (getter) or makes a new one, if no rGrpItem
-        exists.
+        Make a new rGrpItem
 
         EXPECTS
         * parent: lxml node
@@ -607,17 +603,13 @@ class Module(Helper):
         * Do we really want to create an element with an id? Seems like
           MuseumPlus should create that ID.
         * Old version used to return a list of nodes
+        * No more getter
 
         <repeatableGroup name="ObjObjectNumberGrp" size="1">
           <repeatableGroupItem id="20414895">
             <dataField dataType="Varchar" name="InventarNrSTxt">
               <value>I C 7723</value>
         """
-        try:  # getter
-            itemN = parent.xpath(
-                "./m:repeatableGroupItem",
-                namespaces=NSMAP,
-            )[0]
         except:  # setter
             itemN = etree.SubElement(
                 parent,
