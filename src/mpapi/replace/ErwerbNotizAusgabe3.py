@@ -26,8 +26,9 @@ class ErwerbNotizAusgabe3(ErwerbNotizAusgabe):  # inheritance!
             # "M44W": "179396",
             # "M45W": "181397",
             # "M45Wii": "179397",
-            "M22": "250398",
-            "M24": "250400",
+            # "M22": "250398",
+            # "M24": "250400",
+            "M21": 250397  # should be integer
         }
         return groups
 
@@ -45,7 +46,7 @@ class ErwerbNotizAusgabe3(ErwerbNotizAusgabe):  # inheritance!
         query.addCriterion(
             operator="equalsField",
             field="ObjObjectGroupsRef.__id",
-            value=Id,  # using voc id
+            value=srt(Id),  # using voc id
         )
         # We need full records, so no fields here
         # query.print()

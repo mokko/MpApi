@@ -544,7 +544,7 @@ class Module(Helper):
     def moduleReferenceItem(self, *, parent: ET, moduleItemId: int):
         """
         Make a new moduleReferenceIte.
-        
+
         NEW
         - no more getter
         """
@@ -600,8 +600,6 @@ class Module(Helper):
         * lxml node
 
         DESIGN
-        * Do we really want to create an element with an id? Seems like
-          MuseumPlus should create that ID.
         * Old version used to return a list of nodes
         * No more getter
 
@@ -610,13 +608,12 @@ class Module(Helper):
             <dataField dataType="Varchar" name="InventarNrSTxt">
               <value>I C 7723</value>
         """
-        except:  # setter
-            itemN = etree.SubElement(
-                parent,
-                "{http://www.zetcom.com/ria/ws/module}repeatableGroupItem",
-            )
-            if ID is not None:
-                itemN.set("id", str(ID))
+        itemN = etree.SubElement(
+            parent,
+            "{http://www.zetcom.com/ria/ws/module}repeatableGroupItem",
+        )
+        if ID is not None:
+            itemN.set("id", str(ID))
         return itemN
 
     def totalSize(self, *, module: str) -> int:
@@ -642,7 +639,7 @@ class Module(Helper):
         NEW
         * Used to return None when requested object didn't exist, now raises
           TypeError.
-        * Todo write tests for the erros this method can throw!
+        * Todo write tests for the errors this method can throw!
 
         EXAMPLE
         <application xmlns="http://www.zetcom.com/ria/ws/module">
