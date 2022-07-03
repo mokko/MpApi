@@ -46,7 +46,7 @@ class ErwerbNotizAusgabe3(ErwerbNotizAusgabe):  # inheritance!
         query.addCriterion(
             operator="equalsField",
             field="ObjObjectGroupsRef.__id",
-            value=srt(Id),  # using voc id
+            value=str(Id),  # using voc id
         )
         # We need full records, so no fields here
         # query.print()
