@@ -1,8 +1,18 @@
 # INSTALLING MpApi
+## directly from github
+> pip install git+https://github.com/mokko/MpApi#egg=MpApi
 
-pip install git+https://github.com/mokko/MpApi#egg=MpApi
+## new clone
+git clone https://github.com/mokko/MpApi.git
+> cd MpApi
+> pip install
+or
+> flit install
 
+## from existing git clone
 Or try this for editable install 
+> cd MpApu
+> git pull
 > pip install -e .
 
 ## Prerequisites
@@ -14,19 +24,16 @@ Or try this for editable install
 * some others?
 
 ## Configuration
-I put my configuration and all the data in a directory sdata that 
-place inside the MpApi directory.
+I put my configuration and all the data in a directory sdata and 
+place that inside the MpApi directory.
 
 MpApi expects two configuration files 
 - credentials: e.g. in credentials.py
-- a description of the jobs you planning to run: jobs.dsl
+- jobs.dsl: a description of the jobs you planning to run 
 
 Credentials.py has three lines in pure Python:
-
 >		user = "EM_XY"
->
 >		pw = "pass"
->
 >		baseURL = "https://museumplus-produktiv.spk-berlin.de:8181/MpWeb-mpBerlinStaatlicheMuseen" # this instance is behind a firewall
 
 Here is a section my jobs.dsl
@@ -45,5 +52,4 @@ Tip: Execute mink from the dir in which you placed credentials.py; this will be 
 Try mink to see if everything is installed correctly:
 
 >	mink -h 	
->
 >	mink -j HF-EM-Module

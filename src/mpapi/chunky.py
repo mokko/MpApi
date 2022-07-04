@@ -225,7 +225,7 @@ class Chunky(Helper):
                 field="__lastModified",
                 value=since,  # "2021-12-23T12:00:00.0"
             )
-        print(s.toString())
+        # print(s.toString())
         s.validate(mode="search")
         r = self.api.search(xml=s.toString())
         # print(f"status {r.status_code}")
