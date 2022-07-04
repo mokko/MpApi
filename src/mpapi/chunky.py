@@ -73,6 +73,7 @@ from mpapi.search import Search
 from mpapi.client import MpApi
 from mpapi.helper import Helper
 from mpapi.module import Module
+from mpapi.sar import Sar
 
 NSMAP = {
     "s": "http://www.zetcom.com/ria/ws/module/search",
@@ -98,9 +99,16 @@ class Chunky(Helper):
     def __init__(self, *, chunkSize: int, baseURL: str, pw: str, user: str) -> None:
         self.chunkSize = chunkSize
         self.api = MpApi(baseURL=baseURL, user=user, pw=pw)
+        self.sar = Sar(baseURL=baseURL, user=user, pw=pw)
 
     def getByType(
-        self, *, ID, Type, since: since = None, offset: int = 0
+        self,
+        *,
+        ID,
+        Type,
+        since: since = None,
+        offset: int = 0,
+        attachment: str = "nothing",
     ) -> Iterator[Module]:
         """
         Get a pack based on approval [group], location, group or exhibit.
@@ -139,6 +147,16 @@ class Chunky(Helper):
             offset = offset + self.chunkSize
             actualNo = chunk.actualSize(module="Object")
             # print(f"*** actual VS chunkSize: {actualNo} VS {self.chunkSize}")
+
+            if attachment == "attachment":
+                print("Trying to get attachments for this chunk...")
+                try:
+                    expected = self.sar.saveAttachments(
+                        data=chunk, adir=pix_dir, since=since
+                    )
+                except Exception as e:
+                    self.info("Error during saveAttachments")
+                    raise e
 
             if actualNo < self.chunkSize:
                 lastChunk = True

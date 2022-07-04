@@ -218,9 +218,10 @@ class Mink:
 
         Expects
         * args: a list with arguments that it passes along;
-        * args[0]: type of the ID (approval, loc, exhibit or group)
+        * args[0]: type of the ID (approval, exhibit, group, loc, query)
         * args[1]: ID
-        * args[2] (optional): since date
+        * args[2]: attachment
+        * args[3] (optional): since date
 
         * args[]: label (used for filename) -> not used ATM
         * args[]: attachments -> not implemented, not needed ATM
@@ -234,8 +235,9 @@ class Mink:
         """
         Type: str = args[0]
         ID: int = args[1]
+        attachment = args[2]
         try:
-            since: Since = args[2]
+            since: Since = args[3]
         except:
             since = None
 
@@ -257,7 +259,7 @@ class Mink:
 
         # getByType returns Module, not ET
         for chunk in self.chunker.getByType(
-            ID=ID, Type=Type, since=since, offset=offset
+            ID=ID, Type=Type, since=since, offset=offset, attachment=attachment
         ):
             if chunk:  # Module is true if it has more than 0 items
                 path = self.project_dir.joinpath(f"{Type}{ID}-chunk{no}.xml")
