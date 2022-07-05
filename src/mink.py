@@ -281,7 +281,7 @@ class Mink:
 
         Expects:
         * arg: list with parameters
-        * arg[0]: type (exhibit, group, approval or loc)
+        * arg[0]: type (approval, exhibit, group or loc)
         * arg[1]: id of the respective type
         * arg[2]: label (used for filenames)
         * arg[3]: only if string "attachments", will d/l them (optional)
