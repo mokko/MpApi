@@ -68,8 +68,6 @@ USAGE:
     m3 = m1 + m2
 
     # WRITING XML FROM SCRATCH
-    # Do i really need to write XML from this class? 
-
     m = Module()
     objModule = m.module(name="Object")
     item = m.moduleItem(parent=objModule, hasAttachments="false", ID="254808")

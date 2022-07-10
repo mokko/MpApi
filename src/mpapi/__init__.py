@@ -20,6 +20,15 @@ def mink():
     m = Mink(job=args.job, conf=args.conf, baseURL=baseURL, pw=pw, user=user)
 
 
+def getAttachments():
+    parser = argparse.ArgumentParser(description="getAttachments for MpApi")
+    parser.add_argument(
+        "-j", "--job", required=True, help="pick a job from getAttachments.jobs file"
+    )
+    args = parser.parse_args()
+    GetAttachments(baseURL=baseURL, job=args.job, user=user, pw=pw)
+
+
 def replace():
     # credentials = "emem1.py"  # in pwd
     parser = argparse.ArgumentParser(description="Command line frontend for Replace.py")

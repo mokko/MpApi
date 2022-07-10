@@ -119,7 +119,7 @@ class Sar:
     def checkApproval(self, *, ID: int, mtype: str) -> bool:
         """
         For a record, check if it has an approval for SMB-Digital. Currently only
-        works module type Object.
+        works for module type Object.
 
         Returns True or False.
         """
@@ -269,9 +269,6 @@ class Sar:
         For a set of multimedia moduleItems (provided in xml), download their attachments.
         Attachments are saved to disk with the filename {mulId}.{ext}.
 
-        Typcially will process moduleItems of type Multimedia (aka media). Might also work
-        on different types.
-
         Expects
         * data: as a Module object
         * adir: directory to save the attachments to
@@ -281,8 +278,14 @@ class Sar:
         Returns
         * a set with the paths of the identified attachments; can be counted
 
-        New
+        Caveats
+        * is restricted to assets that have SMB-Dgital approval; now I want also none-restricted
+          ones.
+        * works only on multimedia items; other module types' items are ignored -> for now that is
+          an acceptable limitation. Why would I need attachments from other mtypes atm.
         * uses streaming to save memory.
+
+        New
         * downloads only attachments with approval (Typ = "SMB-Freigabe" and Freigabe =
           "Ja")
         * xpath corrected 20211225
@@ -332,15 +335,30 @@ class Sar:
                     ]
                 ]
             """
-        itemsL = data.xpath(xp)  # new xpath method...
         # print(xp)
         print(
             f" xml has {len(itemsL)} records with attachment=True and Freigabe[@typ='SMB-Digital'] = Ja"
         )
+        return self._saveAttachments(moduleItemL=data.xpath(xp), adir=adir, since=since)
+
+    def _saveAttachments(
+        self, *, moduleItemL: list, adir: Path, since=None
+    ) -> set[Path]:
+        """
+        the L in moduleItemL stands for nodeList. So it expects a list of nodes instead of
+
+        a whole document.
+
+        Apparently, what I want is to split up one long xpath expression into multiple
+
+        nodeList = document.xpath(A)
+        nodeList2 = nodeList.xpathNL(B)
+        """
+
         # Why do i get suffix from old filename? Is that really the best source?
         # Seems that it is. I see no other field in RIA
         positives = set()
-        for itemN in itemsL:
+        for itemN in moduleItemL:
             # itemA = itemN.attrib
             # mmId = itemA["id"]
             mmId = itemN.attrib["id"]
@@ -363,3 +381,13 @@ class Sar:
     def search(self, *, query: Search) -> Module:
         """Modern search that expects and returns objects"""
         return self.api.search2(query=query)
+
+    def xpathNL(self, *, path: str, nodeList: list) -> list:
+        """Like xpath, but expects a nodeList; returns a nodeList.
+
+        UNTESTED
+        """
+        new = list()
+        for node in nodeList:
+            new.expand(node.xpath(path, namespaces=NSMAP))
+        return new

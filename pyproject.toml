@@ -26,3 +26,4 @@ test = [
 [project.scripts]
 mink = 'mpapi:mink'
 mpReplace = 'mpapi:replace'
+getAttachments = 'mpapi:getAttachments'
