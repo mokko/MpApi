@@ -449,10 +449,17 @@ class MpApi:
         """
         Streaming version of getAttachment that saves attachment directly to disk.
 
-        Expects module (e.g. "Multimedia"), id and path (filename) to save attachment
+        Expects
+        - module: module type (e.g. "Multimedia"),
+        - id: item id in specified module (int)
+        - path: filename/path to save attachment to
         to.
 
         Returns nothing useful. UNTESTED!
+
+        Note: There is another saveAttachment in Sar.py
+
+
         """
         url = f"{self.appURL}/module/{module}/{id}/attachment"
 
