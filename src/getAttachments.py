@@ -138,12 +138,3 @@ class GetAttachments:
         config.read(conf_fn)
         print(f"* Using job '{self.job}' from {conf_fn}")
         self.conf = config[self.job]
-
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="getAttachments for MpApi")
-    parser.add_argument(
-        "-j", "--job", required=True, help="location of getAttachments.jobs file"
-    )
-    args = parser.parse_args()
-    GetAttachments(baseURL=baseURL, job=args.job, user=user, pw=pw)
