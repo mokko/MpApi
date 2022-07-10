@@ -445,7 +445,7 @@ class MpApi:
         self.headers["Accept"] = oldAccept
         return r
 
-    def saveAttachment(self, *, module: str, id: int, path: str) -> None:
+    def saveAttachment(self, *, module: str = "Multimedia", id: int, path: str) -> None:
         """
         Streaming version of getAttachment that saves attachment directly to disk.
 
