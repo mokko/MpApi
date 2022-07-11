@@ -3,6 +3,7 @@
 __version__ = "0.1.5"
 credentials = "credentials.py"  # expect credentials in pwd
 import argparse
+from getAttachments import GetAttachments
 from mink import Mink
 from pathlib import Path
 from replace import Replace
