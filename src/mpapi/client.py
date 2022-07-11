@@ -445,7 +445,7 @@ class MpApi:
         self.headers["Accept"] = oldAccept
         return r
 
-    def saveAttachment(self, *, module: str = "Multimedia", id: int, path: str) -> None:
+    def saveAttachment(self, *, module: str = "Multimedia", id: int, path: str) -> int:
         """
         Streaming version of getAttachment that saves attachment directly to disk.
 
@@ -455,11 +455,9 @@ class MpApi:
         - path: filename/path to save attachment to
         to.
 
-        Returns nothing useful. UNTESTED!
+        Returns id if successful.
 
-        Note: There is another saveAttachment in Sar.py
-
-
+        Note: There is a similar saveAttachments in Sar.py that calls this one.
         """
         url = f"{self.appURL}/module/{module}/{id}/attachment"
 
@@ -475,8 +473,8 @@ class MpApi:
             with open(path, "wb") as f:
                 for chunk in r.iter_content(chunk_size=8192):
                     f.write(chunk)
-
         self.headers["Accept"] = oldAccept
+        return id
 
     def getThumbnail(self, *, module: str, id: int, path: str) -> requests.Response:
         """

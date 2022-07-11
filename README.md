@@ -7,15 +7,10 @@ Libraries
 * sar.py     - search and response; slightly higher level client; specific to Berlin instance
 * chunky.py  - search responses in chunks
 
-Frontends and CLI utils
-* mink.py    - command line frontend for MpApi; write your own jobs in jobs.dsl
-* getItem.py - just download one moduleItem to your taste
-* replace.py - mechanism for mass search/replace tasks (still early in 
-			   development)
-
-Scripts (installed in path)
-* mink
-* MPreplace
+Scripts (installed in path, all for the command line)
+* mink       - write your own jobs and execute them with mink
+* MPreplace  - replace things in RIA
+* getAttachments - download attachments from multimedia items (using groups)
 
 Example Plugins for Replace.py
 * see replace/*
@@ -25,6 +20,8 @@ Requirements
 * lxml
 * requests
 
-
 For Testing
 * pytest 
+
+# Version History
+0.1.5 20220710 adds getAttachments script.

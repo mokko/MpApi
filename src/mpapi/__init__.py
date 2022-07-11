@@ -1,6 +1,6 @@
 """An Unofficial Client for the MuseumPlus API"""
 
-__version__ = "0.1.4"
+__version__ = "0.1.5"
 credentials = "credentials.py"  # expect credentials in pwd
 import argparse
 from mink import Mink

@@ -13,6 +13,8 @@ Hauke:
     id: 12345
     restriction: None | freigegeben
     name: dateiname| mulid
+
+Todo: implement location, exhibition
 """
 
 import argparse
@@ -24,13 +26,13 @@ from mpapi.search import Search
 from pathlib import Path
 
 conf_fn = "getAttachments.jobs"
-credentials = "credentials.py"  # expect credentials in pwd
+# credentials = "credentials.py"  # expect credentials in pwd
 response_cache = "_ga_response.xml"  # for debugging purposes
 NSMAP = {"m": "http://www.zetcom.com/ria/ws/module"}
 
-if Path(credentials).exists():
-    with open(credentials) as f:
-        exec(f.read())
+# if Path(credentials).exists():
+#    with open(credentials) as f:
+#        exec(f.read())
 
 
 class GetAttachments:
@@ -51,7 +53,7 @@ class GetAttachments:
 
         self.process_response(data=m)
 
-    def process_response(self, *, data):
+    def process_response(self, *, data: Module):  # returns nothing useful
         no = data.actualSize(module="Multimedia")
         name_policy = self.conf["name"]
         print(f"* {no} digital assets found")
@@ -63,7 +65,7 @@ class GetAttachments:
             print(f"* Making dir {out_dir}")
             out_dir.mkdir(parents=True)
 
-        print(f"* response has {len(data)} asset items")
+        print(f"* response has {no} asset items")
 
         for item in data.iter(module="Multimedia"):
             ID = item.get("id")
@@ -101,37 +103,42 @@ class GetAttachments:
                 print("\tno attachment")
 
     def query(self):
+        """
+        Restriction: Currently, only gets attachments from Multimedia.
+        """
         print(f"* type: {self.conf['type']}")
         print(f"* id: {self.conf['id']}")  # id is group id
         qu = Search(module="Multimedia")
+        if self.conf["restriction"] == "freigegeben":
+            qu.AND()
         if self.conf["type"] == "group":
-            # should get all assets of the objects in the given group
-            if self.conf["restriction"] == "freigegeben":
-                qu.AND()
-            qu.addCriterion(
+            qu.addCriterion(  #  get all assets of the objects in a given group
                 operator="equalsField",
                 field="MulObjectRef.ObjObjectGroupsRef.__id",
                 value=self.conf["id"],
             )
-            if self.conf["restriction"] == "freigegeben":
-                qu.addCriterion(
-                    operator="equalsField",
-                    field="MulApprovalGrp.TypeVoc",
-                    value="1816002",  # SMB-Digital; search wants str
-                )
-                qu.addCriterion(
-                    operator="equalsField",
-                    field="MulApprovalGrp.ApprovalVoc",
-                    value="4160027",  # Ja
-                )
-            qu.addField(field="MulOriginalFileTxt")  # speeds up query a lot!
-            qu.validate(mode="search")
-            print(f"* about to execute query\n{qu.toString()}")
-            return self.api.search2(query=qu)
         else:
             raise TypeError(f"ERROR: This type is not known! {self.conf['type']}")
+        if self.conf["restriction"] == "freigegeben":
+            qu.addCriterion(
+                operator="equalsField",
+                field="MulApprovalGrp.TypeVoc",
+                value="1816002",  # SMB-Digital; search wants str
+            )
+            qu.addCriterion(
+                operator="equalsField",
+                field="MulApprovalGrp.ApprovalVoc",
+                value="4160027",  # Ja
+            )
+        qu.addField(field="MulOriginalFileTxt")  # speeds up query a lot!
+        qu.validate(mode="search")
+        print(f"* about to execute query\n{qu.toString()}")
+        return self.api.search2(query=qu)
 
     def setup_conf(self):
+        """
+        Saves configuration for selected job in self.conf
+        """
         config = configparser.ConfigParser()
         if not Path(conf_fn).exists():
             raise SyntaxError(f"ERROR: conf file not found! {conf_fn}")

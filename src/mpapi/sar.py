@@ -336,10 +336,11 @@ class Sar:
                 ]
             """
         # print(xp)
+        itemsL = data.xpath(xp)
         print(
             f" xml has {len(itemsL)} records with attachment=True and Freigabe[@typ='SMB-Digital'] = Ja"
         )
-        return self._saveAttachments(moduleItemL=data.xpath(xp), adir=adir, since=since)
+        return self._saveAttachments(moduleItemL=itemsL, adir=adir, since=since)
 
     def _saveAttachments(
         self, *, moduleItemL: list, adir: Path, since=None
