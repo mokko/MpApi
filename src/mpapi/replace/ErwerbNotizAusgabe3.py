@@ -30,8 +30,9 @@ class ErwerbNotizAusgabe3(ErwerbNotizAusgabe):  # inheritance!
             # "M24": "250400",
             # "M21": 250397  # is int now, used to be str
             # "M26": 250402,
-            "m51": 26816,
+            # "m51": 26816,
             # "m52": 29032,
+            "m23": 250399
         }
         return groups
 

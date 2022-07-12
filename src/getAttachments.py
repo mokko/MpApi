@@ -1,20 +1,21 @@
 """
-getAttachments from RIA
+getAttachments downloads attachments from RIA
 
-Command line client to download attachments from RIA groups.
-    getAttachments -j Hauke 
-will put attachments in dir ./Hauke/20220708
-
-Two configuration files are needed 
-- credentials.py (in pwd)
-- getAttachments.jobs (in pwd, using normal config format)
-Hauke:
+create a configuration file that describes one or multiple jobs
+e.g. getAttachments.jobs
+label:
     type: group
     id: 12345
     restriction: None | freigegeben
-    name: dateiname| mulid
+    name: dateiname | mulid
+(where | indicates the possible options).
 
-Todo: implement location, exhibition
+You also need the credentials.py file in the pwd.
+
+    getAttachments -j label
+will put attachments in dir 
+    ./label/20220708
+where the current date is used for the second directory.
 """
 
 import argparse
@@ -26,13 +27,8 @@ from mpapi.search import Search
 from pathlib import Path
 
 conf_fn = "getAttachments.jobs"
-# credentials = "credentials.py"  # expect credentials in pwd
-response_cache = "_ga_response.xml"  # for debugging purposes
+response_cache = "_ga_response.xml"  # for debugging
 NSMAP = {"m": "http://www.zetcom.com/ria/ws/module"}
-
-# if Path(credentials).exists():
-#    with open(credentials) as f:
-#        exec(f.read())
 
 
 class GetAttachments:
@@ -41,16 +37,13 @@ class GetAttachments:
         self.job = job
         self.setup_conf()
 
-        if Path(response_cache).exists():
-            print(f"* loading response cache from '{response_cache}'")
-            m = Module(file=response_cache)
-        else:
-            print(
-                f"* launching new query; will write response cache to '{response_cache}'"
-            )
-            m = self.query()
-            m.toFile(path=response_cache)  # debug
-
+        # if Path(response_cache).exists():
+        #    print(f"* loading response cache from '{response_cache}'")
+        #    m = Module(file=response_cache)
+        # else:
+        print(f"* launching new query")
+        m = self.query()
+        m.toFile(path=response_cache)  # debug
         self.process_response(data=m)
 
     def process_response(self, *, data: Module):  # returns nothing useful
@@ -84,7 +77,7 @@ class GetAttachments:
                     f"{ID}.jpg"  # use mulId as a fallback if no dateiname in RIA
                 )
                 # there is a chance that this file is no jpg
-            print(f"*  mulId {ID} {hasAttachments}")  # {dateiname}
+            print(f"*  mulId {ID}")  # {dateiname}
             if name_policy == "mulId":
                 ext = Path(dateiname).suffix
                 path = out_dir.joinpath(f"{ID}{ext}")
@@ -111,10 +104,35 @@ class GetAttachments:
         qu = Search(module="Multimedia")
         if self.conf["restriction"] == "freigegeben":
             qu.AND()
+        elif self.conf["type"] == "approval":
+            raise SyntaxError("ERROR: approval group mode not implemented yet!")
         if self.conf["type"] == "group":
-            qu.addCriterion(  #  get all assets of the objects in a given group
+            qu.addCriterion(  #  get assets attached to objects in a given group
                 operator="equalsField",
                 field="MulObjectRef.ObjObjectGroupsRef.__id",
+                value=self.conf["id"],
+            )
+        elif self.conf["type"] == "exhibit":
+            print("WARN: exhibit mode not tested yet!")
+            qu.addCriterion(  #  get assets attached to objects in a given exhibition
+                operator="equalsField",
+                field="MulObjectRef.ObjRegistrarRef.RegExhibitionRef.__id",
+                value=self.conf["id"],
+            )
+        elif self.conf["type"] == "loc":
+            print("WARN: location mode not tested yet!")
+            qu.addCriterion(  #  get assets attached to objects at a given location
+                operator="equalsField",
+                field="MulObjectRef.ObjCurrentLocationVoc",
+                value=self.conf["id"],
+            )
+
+        elif self.conf["type"] == "restExhibit":
+            # get assets attached to restauration records attached to an exhibit
+            # photos are typically not SMB-approved
+            qu.addCriterion(
+                operator="equalsField",
+                field="MulConservationRef.ConExhibitionRef.__id",
                 value=self.conf["id"],
             )
         else:
