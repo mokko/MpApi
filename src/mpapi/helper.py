@@ -22,6 +22,9 @@ class Helper:
         parser = etree.XMLParser(remove_blank_text=True)
         self.etree = etree.fromstring(xml, parser)
 
+    def print(self) -> None:
+        print(self.toString())
+
     def toFile(self, *, path: Union[Path, str]) -> None:
         # path can be str or Pathlib object as well
         doc = self.etree
