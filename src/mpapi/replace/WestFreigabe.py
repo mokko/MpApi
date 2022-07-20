@@ -83,8 +83,8 @@ class WestFreigabe:
 
     def setObjectFreigabe(self, *, itemN, user):
         """
-        We're inside Object's nodeItem here
-        We've already filtered out cases where SMBFreigabe exists already
+        We're inside Object's nodeItem here. We've already filtered out cases
+        where SMBFreigabe exists, so only cases remain without SMBFreigabe.
         """
         Id = itemN.xpath("@id")[0]
         print("   setting freigabe")
