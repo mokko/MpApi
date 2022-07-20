@@ -4,7 +4,7 @@ from lxml import etree
 from Search import Search
 from Module import Module
 import re
-from Replace.ErwerbNotizAusgabe import ErwerbNotizAusgabe
+from mpapi.replace.ErwerbNotizAusgabe import ErwerbNotizAusgabe
 
 """
  Loop thru the SMB-freigegebenen objects of one Bereich and write erwerbNotizAusgabe
