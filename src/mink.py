@@ -176,10 +176,12 @@ class Mink:
             print(f" {module} from cache {fn}")
             return Module(file=fn)
         else:
+            # print (f"GH TYPE {Type}")
             self.info(f" {module} from remote, saving to {fn}")
             if Type == "approval":
                 m = self.sar.getByApprovalGrp(Id=Id, module=module, since=since)
             elif Type == "exhibit":
+                # print ("***GH Exhibit")
                 m = self.sar.getByExhibit(Id=Id, module=module, since=since)
             elif Type == "group":
                 m = self.sar.getByGroup(Id=Id, module=module, since=since)
@@ -414,11 +416,13 @@ class Mink:
             )
 
             if Type == "exhibit":
+                print(" d: about to get exhibit...")
                 m += self._getPart(
                     module="Exhibition", Id=Id, Type=Type, label=label, since=since
                 ) + self._getPart(
                     module="Registrar", Id=Id, Type=Type, label=label, since=since
                 )
+            print(" d: start cleaning")
             m.clean()
             m.validate()
             m.toFile(path=join_fn)

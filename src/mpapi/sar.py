@@ -98,6 +98,9 @@ class Sar:
         * since is None or a dateTime; if since is not None, search will only
           look for items that are newer than the provided date.
 
+        Returns
+        * Module object
+
         Should only get called from getByExhibit, getByGroup, getByLocation
         """
         query = Search(module=module)
@@ -231,7 +234,8 @@ class Sar:
             gets a single exhibit record with that id
         """
         if module == "Exhibition":  # api.getItem should be faster than sar
-            return self.api.getItem(module=module, id=Id)
+            r = self.api.getItem(module=module, id=Id)
+            return Module(xml=r.text)
 
         fields: dict = {
             "Multimedia": "MulObjectRef.ObjRegistrarRef.RegExhibitionRef.__id",

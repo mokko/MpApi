@@ -225,7 +225,9 @@ class MpApi:
         """
         query.validate(mode="search")
         r = self._search(queryET=query.toET())
-        return Module(xml=r.text)
+        m = Module(xml=r.text)
+        # print (f"ACTUAL SIZE: {m.actualSize()}")
+        return m
 
     #
     # B.3 WHOLE MODULE ITEMS
