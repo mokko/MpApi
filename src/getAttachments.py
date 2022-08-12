@@ -35,14 +35,14 @@ class GetAttachments:
     def __init__(self, *, baseURL: str, job: str, user: str, pw: str) -> None:
         self.api = MpApi(baseURL=baseURL, user=user, pw=pw)
         self.job = job
-        self.setup_conf()
+        self.setup_conf()  # writes to self.conf
 
         # if Path(response_cache).exists():
         #    print(f"* loading response cache from '{response_cache}'")
         #    m = Module(file=response_cache)
         # else:
         print(f"* launching new query")
-        m = self.query()
+        m = self.query()  # returns response as Module
         m.toFile(path=response_cache)  # debug
         self.process_response(data=m)
 
@@ -100,7 +100,7 @@ class GetAttachments:
         Restriction: Currently, only gets attachments from Multimedia.
         """
         print(f"* type: {self.conf['type']}")
-        print(f"* id: {self.conf['id']}")  # id is group id
+        print(f"* id: {self.conf['id']}")
         qu = Search(module="Multimedia")
         if self.conf["restriction"] == "freigegeben":
             qu.AND()
@@ -113,7 +113,6 @@ class GetAttachments:
                 value=self.conf["id"],
             )
         elif self.conf["type"] == "exhibit":
-            print("WARN: exhibit mode not tested yet!")
             qu.addCriterion(  #  get assets attached to objects in a given exhibition
                 operator="equalsField",
                 field="MulObjectRef.ObjRegistrarRef.RegExhibitionRef.__id",
