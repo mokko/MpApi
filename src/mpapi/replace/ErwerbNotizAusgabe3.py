@@ -9,7 +9,7 @@ import re
 # from Replace.ErwerbNotizAusgabe import ErwerbNotizAusgabe
 
 """
- Loop thru the objects of one group and write erwerbNotizAusgabe
+ Loop thru the objects of one or more group and write erwerbNotizAusgabe
  if there is none already, using the data from various fields
 """
 
@@ -56,7 +56,11 @@ class ErwerbNotizAusgabe3(ErwerbNotizAusgabe):  # inheritance!
             # "E57480" : 29602,
             # "E57490" : 29551,
             # "RA275" : 29603
-            "M27Amazonas": 292398
+            # "M25KeramikNeu": 305398,
+            # "M27AmazonienNeu": 305399,
+            # "M56Theater": 285396,
+            "m43TibetNepal": 31329,
+            "m43Schlagintweit": 30425,
         }
         return groups
 

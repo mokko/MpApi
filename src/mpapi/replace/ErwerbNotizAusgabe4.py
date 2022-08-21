@@ -28,7 +28,13 @@ ET = Any
 
 class ErwerbNotizAusgabe4(ErwerbNotizAusgabe):
     def Input(self):
-        STO = {"M25": 20220}
+        STO = {
+            "WAF18": 23626,
+            "WAF20": 23466,
+            "WAF3132": 252804,
+            "WAF55": 23545,
+            "WAF58": 24124,
+        }
         return STO
 
     def search(self, Id, limit=-1):

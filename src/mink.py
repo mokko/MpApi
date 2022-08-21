@@ -104,7 +104,9 @@ class Mink:
                 parts: list[str] = uncomment.split()
                 if indent_lvl == 1:  # job label
                     if not parts[0].endswith(":"):
-                        raise TypeError("Job label has to end with colon")
+                        raise SyntaxError(
+                            f"Job label has to end with colon: line {c} {parts[0]}"
+                        )
                     self.current_job = parts[0][:-1]
                     if self.current_job == job:
                         right_job = True

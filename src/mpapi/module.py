@@ -702,8 +702,8 @@ class Module(Helper):
         self._dropFields(element="virtualField")
         self._dropFields(element="formattedValue")
 
-        # upload form does not allow id
-        self._dropAttribs(xpath="//m:moduleItem", attrib="id")
+        # upload sometimes wants id, sometimes not
+        # self._dropAttribs(xpath="//m:moduleItem", attrib="id")
         # do we need to eliminate size attributes in repeatableGroups?
         self._dropAttribs(xpath="//m:repeatableGroup", attrib="size")
 
@@ -718,7 +718,8 @@ class Module(Helper):
         self._dropAttribs(xpath="//m:module", attrib="totalSize")
         self._dropAttribs(xpath="//m:moduleItem", attrib="hasAttachments")
         self._dropAttribs(xpath="//m:dataField", attrib="dataType")
-        self._dropAttribs(xpath="//m:repeatableGroupItem", attrib="id")
+        # sometimes we want to have the rGrpItem@id
+        # self._dropAttribs(xpath="//m:repeatableGroupItem", attrib="id")
         self._dropAttribs(xpath="//m:moduleReferenceItem", attrib="seqNo")
         self._dropAttribs(xpath="//m:compositeItem", attrib="seqNo")
         # modifiedBy, modifiedDate
