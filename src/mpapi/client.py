@@ -274,8 +274,13 @@ class MpApi:
         DESIGN
         - Alternatively, createItem2 could expect xml as etree, but that wouldn't
           save anything, so no.
-        """
+
         r = self.createItem(module=mtype, xml=data.toString())
+        data.toString()
+        """
+        ET = data.toET()
+        xml = etree.tostring(ET, pretty_print=True)
+        r = self.createItem(module=mtype, xml=xml)
         return Module(xml=r.text)
 
     def updateItem(self, *, module: str, id: int, xml: str) -> requests.Response:

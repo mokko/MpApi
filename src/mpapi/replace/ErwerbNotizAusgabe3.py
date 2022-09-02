@@ -59,8 +59,9 @@ class ErwerbNotizAusgabe3(ErwerbNotizAusgabe):  # inheritance!
             # "M25KeramikNeu": 305398,
             # "M27AmazonienNeu": 305399,
             # "M56Theater": 285396,
-            "m43TibetNepal": 31329,
-            "m43Schlagintweit": 30425,
+            # "m43TibetNepal": 31329,
+            # "m43Schlagintweit": 30425,
+            "m25KeramikII": 313398
         }
         return groups
 
