@@ -121,12 +121,15 @@ class Sar:
 
     def checkApproval(self, *, ID: int, mtype: str) -> bool:
         """
-        For a record, check if it has an approval for SMB-Digital. Currently only
+        For a record, check if it has an approval for SMB-Digital. Currently, only
         works for module type Object.
 
         Returns True or False.
         """
-        if mtype != "Object":
+        if mtype == "Literature":
+            print("WARN: Approval not checked for mtype Literature")
+            return True
+        elif mtype != "Object":
             raise ValueError("ERROR: checkApproval currently only works for Object")
 
         # 2600647 = SMB-Digital

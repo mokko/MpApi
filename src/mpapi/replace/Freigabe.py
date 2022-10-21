@@ -6,10 +6,12 @@ from mpapi.replace.WestFreigabe import WestFreigabe
 class Freigabe(WestFreigabe):
     def Input(self):
         groups = {  # Wechsel 2022-03
-            "M42W": "181396",
-            "M44W": "179396",
-            "M45W": "181397",
-            "M45Wii": "179397",
+            # "M42W": "181396",
+            # "M44W": "179396",
+            # "M45W": "181397",
+            # "M45Wii": "179397",
+            "HF Objekte EM": 321406,
+            "HF Objekte AKu": 321407,
         }
         return groups
 
@@ -27,7 +29,7 @@ class Freigabe(WestFreigabe):
         query.addCriterion(
             operator="equalsField",
             field="ObjObjectGroupsRef.__id",
-            value=Id,  # using voc id
+            value=str(Id),  # using voc id
         )
         query.addCriterion(
             operator="notEqualsField",  # notEqualsTerm

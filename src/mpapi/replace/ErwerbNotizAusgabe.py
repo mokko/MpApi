@@ -37,7 +37,7 @@ class ErwerbNotizAusgabe:
             # "O2.160.02.B2 SM Afrika": "4220747",
             # "O3.014.B2 M61": "4220964",
             # "O3.021.B3 M44": "4220994",
-            "O3.090.K1 M43StuSamZ-Asien": "4221084",
+            # "O3.090.K1 M43StuSamZ-Asien": "4221084",
             # "O3.097.K2 M42": "4221123",
             # "O3.125.02.B2 M60": "4221168",
             # "O3.126.P3 M62": "4221189",
@@ -384,7 +384,11 @@ class ErwerbNotizAusgabe:
         if part["art"] is not None:
             satz = part["art"]
         if part["von"] is not None:
-            if part["jahr"] <= 1950 or part["von"] in deadOrPermission:
+            if (
+                part["jahr"] <= 1950
+                or part["von"] in deadOrPermission
+                or part["jahr"] == 99999
+            ):
                 if satz != "":
                     satz += " "
                 satz += f"von {part['von']}"

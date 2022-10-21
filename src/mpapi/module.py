@@ -43,8 +43,7 @@ USAGE:
     m.totalSize(module="Object")  # no of items as per attribute
     m.actualSize(module="Object") # no of actual items
     sizeInt = len(m)
-    itemN = m[("Object",12345)]   # lxml element node that if changed, changes
-                                  # m
+    itemN = m[("Object",12345)]   # lxml element node that if changed, changes m
     if m:                         # m is True if len(m) > 0 (new)
     nodeL = m.xpath(path="/m:application") # m's shortcut to lxml xpath
     
