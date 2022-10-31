@@ -152,6 +152,13 @@ class Search(Helper):
             )
 
     def addField(self, *, field):
+        """
+        should add field to query to limit response to listed fields
+
+        I just noticed that there are situations where this method doesn't work, e.g.
+        when trying to run a saved query which has no element below search.
+        """
+
         try:
             selectN = self.etree.xpath(
                 "/s:application/s:modules/s:module/s:search/s:select", namespaces=NSMAP

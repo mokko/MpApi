@@ -166,13 +166,11 @@ class MpApi:
         return self._post(url, data=xml)
 
     def runSavedQuery2(
-        self, *, ID: int, Type: str, limit: int = -1, offset: int = 0
+        self, *, ID: int, Type: str = "Object", limit: int = -1, offset: int = 0
     ):  # -> ET
         """
         Higher level version of runSavedQuery where you specify limit and
-        offset instead of an xml snippet.
-
-        N.B. Currently only queries targeting the Object module are supported!
+        offset with parameters and return result as Module object.
 
         Expects
         - ID: integer
@@ -181,6 +179,11 @@ class MpApi:
         - offset
         Returns
         - result document as etree object
+
+        New
+        - in a previous version, this method was restricted to Object module
+          (as Type).
+
         """
         xml = f"""
         <application 
@@ -189,7 +192,7 @@ class MpApi:
             xsi:schemaLocation="http://www.zetcom.com/ria/ws/module/search 
             http://www.zetcom.com/ria/ws/module/search/search_1_6.xsd">
             <modules>
-              <module name="Object">
+              <module name="{Type}">
                 <search limit="{limit}" offset="{offset}" />
               </module>
             </modules>
