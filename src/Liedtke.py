@@ -28,6 +28,12 @@ if __name__ == "__main__":
         field="ObjPublicationGrp.PublicationVoc",
         value=str(1810139),  # Ja
     )
+    # DEBUG
+    # q.addCriterion(
+    #    operator="equalsField",  # notEqualsTerm
+    #    field="__orgUnit",  # __orgUnit is not allowed in Zetcom's own search.xsd
+    #    value="EMAmEthnologie",
+    # )
 
     q.validate(mode="search")
     print("Query validates, about to launch query")
@@ -35,5 +41,6 @@ if __name__ == "__main__":
     q.addField(field="__id")
 
     m = client.search2(query=q)
-    print("Saving query to response.xml")
-    m.toFile(path="response.xml")
+    out = "response2.xml"
+    print(f"Saving query to {out}")
+    m.toFile(path=out)
