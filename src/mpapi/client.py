@@ -43,6 +43,8 @@ class MpApi:
         headers: CaseInsensitiveDict = CaseInsensitiveDict()
         headers["Content-Type"] = "application/xml"
         headers["Accept"] = "application/xml;charset=UTF-8"
+        headers["Accept-Language"] = "de"
+
         self.headers = headers
 
     def _delete(self, url):
