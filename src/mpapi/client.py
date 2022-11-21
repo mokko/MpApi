@@ -37,18 +37,26 @@ ETparser = etree.XMLParser(remove_blank_text=True)
 
 class MpApi:
     def __init__(self, *, baseURL: str, user: str, pw: str) -> None:
-        self.baseURL = baseURL
-        self.appURL = baseURL + "/ria-ws/application"
-        self.auth = HTTPBasicAuth(user, pw)
-        headers: CaseInsensitiveDict = CaseInsensitiveDict()
-        headers["Content-Type"] = "application/xml"
-        headers["Accept"] = "application/xml;charset=UTF-8"
-        headers["Accept-Language"] = "de"
+        #self.baseURL = baseURL
+        #self.appURL = baseURL + "/ria-ws/application"
+        #self.auth = HTTPBasicAuth(user, pw)
+        #headers: CaseInsensitiveDict = CaseInsensitiveDict()
+        #headers["Content-Type"] = "application/xml"
+        #headers["Accept"] = "application/xml;charset=UTF-8"
+        #headers["Accept-Language"] = "de"
+        #self.headers = headers
 
-        self.headers = headers
+        s = requests.Session()
+        s.auth = (user, pw)
+        s.headers.update({
+            'Content-Type': 'application/xml',
+            'Accept': 'application/xml;charset=UTF-8',
+            'Accept-Language': 'de'
+        })
+        self.session = s
 
     def _delete(self, url):
-        r = requests.delete(url, headers=self.headers, auth=self.auth)
+        r = self.session.delete(url)
         r.raise_for_status()
         # print(f"DEL ENC {r.encoding}")
         # r.encoding = "utf-8"
@@ -56,23 +64,23 @@ class MpApi:
 
     def _get(self, url, *, params=None):
         if params is None:
-            r = requests.get(url, headers=self.headers, auth=self.auth)
+            r = self.session.get(url)
         else:
-            r = requests.get(url, headers=self.headers, auth=self.auth, params=params)
+            r = self.session.get(url, params=params)
         r.raise_for_status()
         # print(f"GET ENC {r.encoding}")
         # r.encoding = "utf-8"
         return r
 
     def _post(self, url, *, data):
-        r = requests.post(url, data=data, headers=self.headers, auth=self.auth)
+        r = self.session.post(url, data=data)
         r.raise_for_status()
         # print(f"POST ENC {r.encoding}")
         # r.encoding = "utf-8"
         return r
 
     def _put(self, url, *, data):
-        r = requests.put(url, data=xml, headers=self.headers, auth=self.auth)
+        r = self.session.put(url, data=xml)
         r.raise_for_status()
         # print(f"PUT ENC {r.encoding}")
         # r.encoding = "utf-8"
@@ -450,11 +458,11 @@ class MpApi:
 
         url = f"{self.appURL}/module/{module}/{id}/attachment"
 
-        headers = self.headers  # is this a true copy?
-        oldAccept = self.headers["Accept"]
-        self.headers["Accept"] = "application/octet-stream"
-        r = self._get(url)
-        self.headers["Accept"] = oldAccept
+        #headers = self.headers  # is this a true copy?
+        #oldAccept = self.headers["Accept"]
+        #self.headers["Accept"] = "application/octet-stream"
+        r = self._get(url, params={'Accept': 'application/octet-stream'})
+        #self.headers["Accept"] = oldAccept
         return r
 
     def saveAttachment(self, *, module: str = "Multimedia", id: int, path: str) -> int:
@@ -473,19 +481,19 @@ class MpApi:
         """
         url = f"{self.appURL}/module/{module}/{id}/attachment"
 
-        headers = self.headers  # is this a true copy?
-        oldAccept = self.headers["Accept"]
-        self.headers["Accept"] = "application/octet-stream"
-        r = requests.get(url, stream=True, headers=self.headers, auth=self.auth)
+        #headers = self.headers  # is this a true copy?
+        #oldAccept = self.headers["Accept"]
+        #self.headers["Accept"] = "application/octet-stream"
+        r = self._get(url, stream=True, headers={'Accept': 'application/octet-stream'})
         r.raise_for_status()  # todo: replace with r.raise_for_status()?
 
         # exception: not using _get
-        with requests.get(url, stream=True, headers=self.headers, auth=self.auth) as r:
+        with self.session.get(url, stream=True, headers={'Accept': 'application/octet-stream'}) as r:
             r.raise_for_status()
             with open(path, "wb") as f:
                 for chunk in r.iter_content(chunk_size=8192):
                     f.write(chunk)
-        self.headers["Accept"] = oldAccept
+        #self.headers["Accept"] = oldAccept
         return id
 
     def getThumbnail(self, *, module: str, id: int, path: str) -> requests.Response:
@@ -619,7 +627,7 @@ class MpApi:
         if nodeName is not None:
             params["nodeName"] = nodeName
         return self._get(url, params=params)
-        # r = requests.get(url, headers=self.headers, auth=self.auth, params=params)
+        # r = self.session.get(url, headers=self.headers, auth=self.auth, params=params)
 
     def vUpdate(self, *, instanceName: str, xml: str) -> requests.Response:
         """
