@@ -480,10 +480,7 @@ class MpApi:
         GET http://.../ria-ws/application/module/{module}/{__id}/thumbnail
         """
         url = f"{self.appURL}/module/{module}/{id}/thumbnail"
-        oldAccept = self.headers["Accept"]
-        self.headers["Accept"] = "application/octet-stream"
-        r = self._get(url)
-        self.headers["Accept"] = oldAccept
+        r = self._get(url, headers={"Accept": "application/octet-stream"})
         return r  # r.content
 
     def updateAttachment(self, *, module: str, id: int, path: str) -> requests.Response:
@@ -545,11 +542,8 @@ class MpApi:
             Content-Type: application/octet-stream
             Content-Disposition: attachment;filename={random-file-name}.{export-specific-file-extension}
         """
-        oldAccept = self.headers["Accept"]
-        self.headers["Accept"] = "application/octet-stream"
         url = f"{self.appURL}/module/{module}/{itemId}/export/{exportId}"
-        r = self._get(url)
-        self.headers["Accept"] = oldAccept
+        r = self._get(url, headers={"Accept": "application/octet-stream"})
         return r
 
     def reportModuleItems(self, *, module: str, id: int, xml: str) -> requests.Response:
