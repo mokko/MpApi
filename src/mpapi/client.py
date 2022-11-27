@@ -24,14 +24,13 @@ SEE ALSO
 
 # import logging
 from requests.auth import HTTPBasicAuth
-from requests.structures import CaseInsensitiveDict
 from lxml import etree  # type: ignore
 from mpapi.search import Search
 from mpapi.module import Module
 from typing import Any, Union
 import requests
 
-ET: Any
+# ET: Any
 ETparser = etree.XMLParser(remove_blank_text=True)
 
 
@@ -67,7 +66,7 @@ class MpApi:
         return r
 
     def _put(self, url, *, data):
-        r = self.session.put(url, data=xml)
+        r = self.session.put(url, data=data)
         r.raise_for_status()
         return r
 
@@ -128,6 +127,12 @@ class MpApi:
             url = self.appURL + "/module/" + module + "/definition"
 
         return self._get(url)
+
+    def getDefinition2(self, *, mtype: str = None) -> requests.Response:
+        """
+        Return the data definition for a single or all modules
+        """
+        return self.getDefinition(module=mtype)
 
     #
     # B.2 SEARCHING
@@ -227,9 +232,14 @@ class MpApi:
         # print (f"ACTUAL SIZE: {m.actualSize()}")
         return m
 
-    #
-    # B.3 WHOLE MODULE ITEMS
-    #
+    """
+    B.3 WHOLE MODULE ITEMS
+    r = createItem2(mtype="Object", data=m)
+    m = getItem2(mtype="Object", ID=123)
+    r = updateItem2(mtype="Object", data=m)
+    r = deleteItem2(mtype="Object", ID=123)
+    """
+
     def getItem(self, *, module: str, id: int) -> requests.Response:
         """
         Get a single module item
@@ -260,6 +270,11 @@ class MpApi:
         POST http://.../ria-ws/application/module/{module}
 
         Is there a return value? I would like to know the id
+
+        Zetcom writes: Create new module items. Adds module items including repeatable
+        groups and references. The method returns a small response including the
+        identifier of the newly created module item. Limitation on the size of the
+        request may apply depending of the application container configuration.
         """
         url = self.appURL + "/module/" + module
         return self._post(url, data=xml)
@@ -276,6 +291,7 @@ class MpApi:
         r = self.createItem(module=mtype, xml=data.toString())
         data.toString()
         """
+        # why are we not using Module's toString method?
         ET = data.toET()
         xml = etree.tostring(ET, pretty_print=True)
         r = self.createItem(module=mtype, xml=xml)
@@ -283,23 +299,45 @@ class MpApi:
 
     def updateItem(self, *, module: str, id: int, xml: str) -> requests.Response:
         """
-        Update all fields of a module item
+        Updates a module item with all of its fields and references.
+
         PUT http://.../ria-ws/application/module/{module}/{__id}
         """
         url = f"{self.appURL}/module/{module}/{id}"
         return self._put(url, data=xml)
 
+    def updateItem2(self, *, mtype: str, ID: int, data: Module) -> requests.Response:
+        """
+        v2 with other param names and data provided as Module object.
+        """
+        xml = data.toString()
+        print(xml)
+        return self.updateItem(module=mtype, id=ID, xml=xml)
+
     def deleteItem(self, *, module: str, id: int) -> requests.Response:
         """
         Delete a module item
         DELETE http://.../ria-ws/application/module/{module}/{__id}
+
+        What is the return value?
         """
         url = f"{self.appURL}/module/{module}/{id}"
         return self._delete(url)
 
-    #
-    # B.4 FIELDs
-    #
+    def deleteItem2(self, *, mtype: str, ID: int) -> requests.Response:
+        """What is the return value?"""
+        return self.deleteItem(module=mtype, id=ID)
+
+    """
+    B.4 FIELDs
+    r = updateField2(mtype="Object", ID=123, dataField="OgrNameTxt", value="ein Titel")
+
+    Read: Just get all fields instead of one or mark fields you want in the search to 
+    get mostly that one.
+    
+    How do I create and delete a field? There don't seem to be specific endpoints
+    """
+
     def updateField(
         self, *, module: str, id: int, dataField: str, xml: str
     ) -> requests.Response:
@@ -307,7 +345,7 @@ class MpApi:
         Update a single field of a module item
         PUT http://.../ria-ws/application/module/{module}/{__id}/{dataField}
 
-        NB: We dont need a createField method since simple dataFields are always created.
+        NB: We don't need a createField method since simple dataFields are always created.
         """
         url = f"{self.appURL}/module/{module}/{id}/{dataField}"
         return self._put(url, data=xml)
@@ -321,7 +359,7 @@ class MpApi:
         here on purpose and parameter ´module´ is referred here as mtype as it
         is less ambiguous.
 
-        Does the API return anything  meaningful?
+        Does the API return anything meaningful? HTTP response, I guess
         """
 
         m = Module()
@@ -334,9 +372,12 @@ class MpApi:
             module=mtype, id=ID, dataField=dataField, xml=m.toString()
         )
 
-    #
-    # B.5 REPEATABLE GROUPS
-    #
+    """
+    B.5 REPEATABLE GROUPS and module|vocabulary references
+    createReference (no createReference2 yet)
+    createRepeatableGroup 
+    """
+
     def createReference(
         self,
         *,
@@ -348,25 +389,82 @@ class MpApi:
         xml: str,
     ) -> requests.Response:
         """
-        Add a reference to a reference field within a repeatable group
+        Zetcom says: "Add a reference to a reference field within a repeatable group".
+        I am not sure what that means. But the example is described as follows: "Add a
+        repeatable group item of type AdrContactGrp to an Address with ID 29011." So
+        I think this adds/creates a ReferenceItem or repeatableGroupItem to an existing
+        reference or repeatableGroup. Or it creates a reference inside a rGrp which is more
+        like looking at the example. Then it should be called 'createReferenceInsideGroup'.
+
         POST http://.../ria-ws/application/module/{module}/{__id}/{repeatableGroup}/{__groupId}/{reference}
 
-        Remember that xml is different during downloads than for uploads.
+        Remember that the xml is different during downloads than for uploads.
         Upload xml omitts, for example, formattedValues.
+
+        Zetcom's example is
+
+        <application xmlns="http://www.zetcom.com/ria/ws/module">
+          <modules>
+            <module name="Address"> --> module
+              <moduleItem id="29011"> --> __id
+                <repeatableGroup name="AdrContactGrp"> --> rGrp
+                  <repeatableGroupItem> --> no groupId
+                    <dataField name="ValueTxt">
+                      <value>max_muster</value>
+                    </dataField>
+                    <vocabularyReference name="TypeVoc"> -> reference
+                      <vocabularyReferenceItem id="30158" />
+                    </vocabularyReference>
+                  </repeatableGroupItem>
+                </repeatableGroup>
+              </moduleItem>
+            </module>
+          </modules>
+        </application>
         """
         url = f"{self.appURL}/module/{module}/{id}/{repeatableGroup}/{groupId}/{reference}"
         return self._post(url, data=xml)
+
+    def createReferenceItem2(
+        self, *, mtype: str, ID: int, rGrp: str, groupId: int, reference: str
+    ):
+        return self.createReference(
+            module=mtype, id=ID, reference=reference, groupId=groupId
+        )
 
     def createRepeatableGroup(
         self, *, module: str, id: int, repeatableGroup: str, xml: str
     ) -> requests.Response:
         """
-        Create repeatable group / reference
-        #POST http://.../ria-ws/application/module/{module}/{__id}/{repeatableGroup|reference}
+        Z: Create a new repeatable group or reference and add it to the module item specified by
+        the {__id}
+        MM: Create a new rGrpItem to an existing rGrp or new vRefItem/mRefItem to existing
+        references.
+
+        POST http://.../ria-ws/application/module/{module}/{__id}/{repeatableGroup|reference}
+
+        Zetcom's example: Add a repeatable group item of type AdrContactGrp to an Address with
+        ID 29011.
+
         eg. https://<host>/<application>/ria-ws/application/module/Address/29011/AdrContactGrp
         """
         url = f"{self.appURL}/module/{module}/{id}/{repeatableGroup}"
         return self._post(url, data=xml)
+
+    def createGrpItem2(
+        self, *, mtype: str, ID: int, grpref: str, xml: str
+    ) -> requests.Response:  # nodes is lxml.etree
+        """
+        I believe this creates a new rGrpItem for an existing rGrp or an vRefItem/mRefItem for
+        existing references.
+
+        The first time I am using this, xml as str is more convenient than ET's nodes. Let's see
+        if this is the case in the future as well.
+        """
+        # xml = etree.tostring(node)
+        return self.createRepeatableGroup(
+            module=mtype, id=ID, repeatableGroup=grpref, xml=xml
+        )
 
     def updateRepeatableGroup(
         self, *, module: str, id: int, referenceId: int, repeatableGroup: str, xml: str
@@ -374,10 +472,43 @@ class MpApi:
         """
         Update all fields of repeatable groups / references
         PUT http://.../ria-ws/application/module/{module}/{__id}/{repeatableGroup|reference}/{__referenceId}
+
+        me: It looks like this is NOT updating all fields of a repeatable group, but all fields of rGrpItem
+        instead.
+
+        PUT http://.../ria-ws/application/module/{module}/{__id}/{repeatableGroup|reference}/{__repeatableGroupId|__referenceId}
+
         """
         url = f"{self.appURL}/module/{module}/{id}/{repeatableGroup}/{referenceId}"
         # xml = xml.encode()
         return self._put(url, data=xml)
+
+    def updateRepeatableGroup2(
+        self, *, mtype: str, ID: int, referenceId: int, repeatableGroup: str, node
+    ) -> requests.Response:
+        """
+        Deprecated version. Please use updateRepeatableGroupItem2 instead
+        """
+        xml = etree.tostring(node)
+        return updateRepeatableGroup(
+            module=mtype,
+            id=ID,
+            referenceId=referenceId,
+            repeatableGroup=repeatableGroup,
+            xml=xml,
+        )
+
+    def updateRepeatableGroupItem2(
+        self, *, mtype: str, ID: int, referenceId: int, repeatableGroup: str, node
+    ) -> requests.Response:
+        xml = etree.tostring(node)
+        return updateRepeatableGroup(
+            module=mtype,
+            id=ID,
+            referenceId=referenceId,
+            repeatableGroup=repeatableGroup,
+            xml=xml,
+        )
 
     def updateFieldInGroup(
         self,
@@ -514,6 +645,10 @@ class MpApi:
         """
         url = f"{self.appURL}/module/{module}/orgunit"
         return self._get(url)
+
+    def getOrgUnits2(self, *, mtype: str) -> Module:
+        r = self.getOrgUnits(module=mtype)
+        return Module(xml=r.text)
 
     #
     # EXPORT aka report -> LATER
