@@ -2,7 +2,7 @@
 I want Multimedia 271188 on disk
 """
 import requests
-from search import Search
+from mpapi.search import Search
 from lxml import etree  # necessary?
 from mpapi.module import Module
 from mpapi.client import MpApi
