@@ -86,7 +86,10 @@ from typing import Any, Iterator, Optional, Union
 
 # xpath 1.0 and lxml don't allow empty string or None for default ns
 dataTypes = {"Clb": "Clob", "Dat": "Date", "Lnu": "Long", "Txt": "Varchar"}
-NSMAP = {"m": "http://www.zetcom.com/ria/ws/module"}
+NSMAP = {
+    "m": "http://www.zetcom.com/ria/ws/module",
+    "o": "http://www.zetcom.com/ria/ws/module/orgunit",
+}
 parser = etree.XMLParser(remove_blank_text=True)
 # types
 # not using lxml-stubs at the moment
@@ -708,9 +711,9 @@ class Module(Helper):
 
         # various attributes in moduleReference? name we need to keep
         # <moduleReference name="InvNumberSchemeRef" targetModule="InventoryNumber" multiplicity="N:1" size="1">
-        self._dropAttribs(xpath="//m:moduleReference", attrib="targetModule")
-        self._dropAttribs(xpath="//m:moduleReference", attrib="multiplicity")
-        self._dropAttribs(xpath="//m:moduleReference", attrib="size")
+        # self._dropAttribs(xpath="//m:moduleReference", attrib="targetModule")
+        # self._dropAttribs(xpath="//m:moduleReference", attrib="multiplicity")
+        # self._dropAttribs(xpath="//m:moduleReference", attrib="size")
         self._dropAttribs(xpath="//m:vocabularyReference", attrib="id")
         self._dropAttribs(xpath="//m:vocabularyReference", attrib="instanceName")
         self._dropAttribs(xpath="//m:vocabularyReferenceItem", attrib="name")
@@ -719,8 +722,8 @@ class Module(Helper):
         self._dropAttribs(xpath="//m:dataField", attrib="dataType")
         # sometimes we want to have the rGrpItem@id
         # self._dropAttribs(xpath="//m:repeatableGroupItem", attrib="id")
-        self._dropAttribs(xpath="//m:moduleReferenceItem", attrib="seqNo")
-        self._dropAttribs(xpath="//m:compositeItem", attrib="seqNo")
+        # self._dropAttribs(xpath="//m:moduleReferenceItem", attrib="seqNo")
+        # self._dropAttribs(xpath="//m:compositeItem", attrib="seqNo")
         # modifiedBy, modifiedDate
         #    <dataField dataType="Varchar" name="ModifiedByTxt">
         #      <value>EM_EM</value>

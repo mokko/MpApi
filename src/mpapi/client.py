@@ -466,6 +466,27 @@ class MpApi:
             module=mtype, id=ID, repeatableGroup=grpref, xml=xml
         )
 
+    def addMRefItem(self, *, mtype: str, mItemId: int, ref: str, refId: int):
+        """
+        Add a moduleReferenceItem to an existing moduleReference.
+
+        Not sure if it already is sufficiently abstracted to work everywhere we need
+        to add mRefItems.
+        """
+
+        xml = f"""<application xmlns="http://www.zetcom.com/ria/ws/module">
+          <modules>
+            <module name="{mtype}">
+              <moduleItem id="{grpId}">
+                <moduleReference name="{rGrp}" targetModule="Object" multiplicity="M:N">
+                  <moduleReferenceItem moduleItemId="{objId}"/>
+                </moduleReference>
+              </moduleItem>
+            </module>
+          </modules>
+        </application>"""
+        return self.client.createGrpItem2(mtype=mtype, ID=mItemId, grpref=ref, xml=xml)
+
     def updateRepeatableGroup(
         self, *, module: str, id: int, referenceId: int, repeatableGroup: str, xml: str
     ) -> requests.Response:

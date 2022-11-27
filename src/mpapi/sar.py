@@ -119,6 +119,30 @@ class Sar:
             )
         return self.api.search2(query=query)
 
+    def addGrpItem(self, *, mtype: str, mItemId: int, gType: str, ref: str, refId: int):
+        """
+        UNTESTED. DO NOT USE
+
+        addGrpItem (mtype, mItemId, gtype, ref, refId)
+
+        add a groupItem where a group can be a repeatableGroup, a vocabularyReference or a moduleReference.
+        """
+        xml = f"""<application xmlns="http://www.zetcom.com/ria/ws/module">
+          <modules>
+            <module name="{mtype}">
+              <moduleItem id="{grpId}">
+                <{gType} name="{rGrp}" targetModule="Object" multiplicity="M:N">
+                  <{gType}Item {gType}Id="{objId}"/>
+                </{gType}>
+              </moduleItem>
+            </module>
+          </modules>
+        </application>"""
+
+        r = self.client.createGrpItem2(
+            mtype="ObjectGroup", ID=grpId, grpref=rGrp, xml=xml
+        )
+
     def checkApproval(self, *, ID: int, mtype: str) -> bool:
         """
         For a record, check if it has an approval for SMB-Digital. Currently, only
