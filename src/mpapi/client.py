@@ -1,11 +1,17 @@
 """
-MpApi - MuseumPlus API Client  
+MpApi - Unofficial Open Source Client for MuseumPlus MpRIA 
 
 USAGE
     api = MpApi(baseURL=baseURL, user=user, pw=pw)
     r = api.getItem(module="Object", id="12345")
     key = api.getSessionKey()
     api.toFile(response=r, path="path/to/file.xml")
+
+This client should have all of Zetcom's endpoints. I might add some additional methods 
+for convenience. To not break compatibility, there are multiple versions of the methods.
+
+The version 1 implementation is minimalistic, version 2 uses a more systematic argument 
+names and generally returns higher level Module objects.
 
 Which are the modules our instance knows
     - _SystemMessage, SystemCopyScheme, _SystemJob
@@ -107,7 +113,7 @@ class MpApi:
         return key
 
     #
-    # B REQUESTS WITH module.xsd response
+    # B REQUESTS WITH module.xsd response?
     #
     # B.1 DATA DEFINITIONs
     #
@@ -135,7 +141,7 @@ class MpApi:
         return self.getDefinition(module=mtype)
 
     #
-    # B.2 SEARCHING
+    # B.2 SEARCH
     #
     def runSavedQuery(self, *, id: int, mtype: str, xml: str) -> requests.Response:
         """
