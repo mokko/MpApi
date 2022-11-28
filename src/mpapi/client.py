@@ -466,26 +466,56 @@ class MpApi:
             module=mtype, id=ID, repeatableGroup=grpref, xml=xml
         )
 
-    def addMRefItem(self, *, mtype: str, mItemId: int, ref: str, refId: int):
+    def addModRefItem(
+        self, *, mtype: str, modItemId: int, refName: str, refId: int
+    ) -> requests.Response:
         """
         Add a moduleReferenceItem to an existing moduleReference.
 
         Not sure if it already is sufficiently abstracted to work everywhere we need
         to add mRefItems.
+
+        Untested.
+        Ideally, we'll make a version that accepts multiple refIds -> v3?
         """
 
         xml = f"""<application xmlns="http://www.zetcom.com/ria/ws/module">
           <modules>
             <module name="{mtype}">
-              <moduleItem id="{grpId}">
-                <moduleReference name="{rGrp}" targetModule="Object" multiplicity="M:N">
-                  <moduleReferenceItem moduleItemId="{objId}"/>
+              <moduleItem id="{modItemId}">
+                <moduleReference name="{refName}" targetModule="Object" multiplicity="M:N">
+                  <moduleReferenceItem moduleItemId="{refId}"/>
                 </moduleReference>
               </moduleItem>
             </module>
           </modules>
         </application>"""
-        return self.client.createGrpItem2(mtype=mtype, ID=mItemId, grpref=ref, xml=xml)
+        return self.createGrpItem2(mtype=mtype, ID=modItemId, grpref=refName, xml=xml)
+
+    def addModRefItem3(
+        self, *, mType: str, modItemId: int, refName: str, refIds: list
+    ) -> requests.Response:
+        """
+        Like addModRefItem2, but accepts a list of refIds. Untested.
+        """
+        xml = f"""<application xmlns="http://www.zetcom.com/ria/ws/module">
+          <modules>
+            <module name="{mtype}">
+              <moduleItem id="{modItemId}">
+                <moduleReference name="{refName}" targetModule="Object" multiplicity="M:N"/>
+              </moduleItem>
+            </module>
+          </modules>
+        </application>"""
+        docN = ET.xml(xml)
+        modRef = docN.xpath("//m:moduleReference", namespaces=NSMAP)[0]
+        for refId in refIds:
+            etree.SubElement(
+                modRef, "m:moduleReferenceItem", {"moduleItemId": refId}, NSMAP
+            )
+        return self.createGrpItem2(
+            mtype=mType, ID=modItemId, grpref=refName, xml=docN.tostring()
+        )  # encoding="UTF8"
 
     def updateRepeatableGroup(
         self, *, module: str, id: int, referenceId: int, repeatableGroup: str, xml: str
