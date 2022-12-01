@@ -4,12 +4,21 @@ MpApi - Unofficial Open Source Client for MuseumPlus MpRIA Version 2
 Experimental - Not yet tested
 
 USAGE
-
+    from mpapi.client2 import Client2
+    c = Client2(baseURL=baseURL, user=user, pw=pw)
+    m = c.getDefinition(modType="Object")
+    
+Consistent Interface
+    modType refers to module/@name so perhaps should be called modName
+    tType refers to module/@name of the target, e.g. the search results
+    
+    should we call modType modType instead to be more consistent?
+    see modItemId
 """
 
 from requests.auth import HTTPBasicAuth
 from lxml import etree  # type: ignore
-from mpapi.client import Client
+from mpapi.client import MpApi
 from mpapi.search import Search
 from mpapi.module import Module
 from typing import Any, Union
@@ -18,7 +27,7 @@ import requests
 ETparser = etree.XMLParser(remove_blank_text=True)
 
 
-class client2:
+class Client2:
     def __init__(self, *, baseURL: str, user: str, pw: str) -> None:
         self.appURL = baseURL + "/ria-ws/application"
         self.session = requests.Session()
@@ -37,11 +46,12 @@ class client2:
     #
     # B.1 DATA DEFINITIONs
     #
-    def getDefinition(self, *, mType: str = None) -> requests.Response:
+    def getDefinition(self, *, modType: str = None) -> Module:
         """
         Return the data definition for a single or all modules
         """
-        return self.client.getDefinition(module=mType)
+        r = self.client.getDefinition(module=modType)
+        return Module(xml=r.text)
 
     def runSavedQuery(
         self, *, searchId: int, tType: str = "Object", limit: int = -1, offset: int = 0
@@ -60,7 +70,8 @@ class client2:
 
         New
         - in a previous version, this method was restricted to Object module
-          (as Type).
+          (as tType)
+        - previous version used to return etree Objects instead of Module
 
         """
         xml = f"""
@@ -80,10 +91,10 @@ class client2:
         q = Search(fromString=xml)
         q.validate(mode="search")
 
-        print("-----------------------")
         print(xml)
         r = self.client.runSavedQuery(id=searchId, mtype=tType, xml=q.toString())
-        return etree.fromstring(r.content, ETparser)
+        # return etree.fromstring(r.content, ETparser)
+        return Module(xml=r.text)
 
     #
     # B.2 SEARCHING
@@ -100,19 +111,17 @@ class client2:
         """
         query.validate(mode="search")
         r = self.client._search(queryET=query.toET())
-        m = Module(xml=r.text)
-        # print (f"ACTUAL SIZE: {m.actualSize()}")
-        return m
+        return Module(xml=r.text)
 
     """
     B.3 WHOLE MODULE ITEMS
-    r = createItem2(mtype="Object", data=m)
-    m = getItem2(mtype="Object", ID=123)
-    r = updateItem2(mtype="Object", data=m)
-    r = deleteItem2(mtype="Object", ID=123)
+    r = createItem2(modtype="Object", data=m)
+    m = getItem2(modtype="Object", modItemId=123)
+    r = updateItem2(modtype="Object", data=m)
+    r = deleteItem2(modtype="Object", modItemId=123)
     """
 
-    def getItem(self, *, mType: str, modItemId: int) -> Module:
+    def getItem(self, *, modType: str, modItemId: int) -> Module:
         """
         Like getItem, but with modern parameter names and returns Module
         object.
@@ -120,7 +129,7 @@ class client2:
         r = self.client.getItem(module=mtype, id=ID)
         return Module(xml=r.text)
 
-    def createItem(self, *, mType: str, data: Module) -> Module:
+    def createItem(self, *, modType: str, data: Module) -> Module:
         """
         Like createItem, but with modern parameters and returns Module
         object.
@@ -139,18 +148,18 @@ class client2:
         return Module(xml=r.text)
 
     def updateItem(
-        self, *, mType: str, modItemId: int, data: Module
+        self, *, modType: str, modItemId: int, data: Module
     ) -> requests.Response:
         """
         v2 with other param names and data provided as Module object.
         """
         xml = data.toString()
         # print(xml)
-        return self.client.updateItem(module=mType, id=modItemId, xml=xml)
+        return self.client.updateItem(module=modType, id=modItemId, xml=xml)
 
-    def deleteItem(self, *, mType: str, modItemId: int) -> requests.Response:
+    def deleteItem(self, *, modType: str, modItemId: int) -> requests.Response:
         """What is the return value?"""
-        return self.client.deleteItem(module=mType, id=modItemId)
+        return self.client.deleteItem(module=modType, id=modItemId)
 
     """
     B.4 FIELDs
@@ -163,7 +172,7 @@ class client2:
     """
 
     def updateField(
-        self, *, mType: str, modItemId: int, dataField: str, value: str
+        self, *, modType: str, modItemId: int, dataField: str, value: str
     ) -> requests.Response:
         """Higher order version of updateField which creates its own xml
 
@@ -181,7 +190,7 @@ class client2:
         m.validate()
         # m.toFile(path="upField.debug.xml")  # needs to go later
         return self.client.updateField(
-            module=mType, id=modItemId, dataField=dataField, xml=m.toString()
+            module=modType, id=modItemId, dataField=dataField, xml=m.toString()
         )
 
     """
@@ -191,17 +200,17 @@ class client2:
     """
 
     def createReferenceItem(
-        self, *, mType: str, modItemId: int, grpName: str, grpId: int, refName: str
+        self, *, modType: str, modItemId: int, grpName: str, grpId: int, refName: str
     ):
         return self.client.createReference(
-            module=mType,
+            module=modType,
             id=modItemId,
             reference=grpName,
             groupId=grpId,  # refName missing
         )
 
     def createGrpItem(
-        self, *, mType: str, modItemId: int, grpref: str, xml: str
+        self, *, modType: str, modItemId: int, grpref: str, xml: str
     ) -> requests.Response:  # nodes is lxml.etree
         """
         I believe this creates a new rGrpItem for an existing rGrp or an vRefItem/mRefItem for
@@ -212,11 +221,11 @@ class client2:
         """
         # xml = etree.tostring(node)
         return self.client.createRepeatableGroup(
-            module=mType, id=modItemId, repeatableGroup=grpref, xml=xml
+            module=modType, id=modItemId, repeatableGroup=grpref, xml=xml
         )
 
     def addModRefItem3(
-        self, *, mType: str, modItemId: int, refName: str, refIds: list
+        self, *, modType: str, modItemId: int, refName: str, refIds: list
     ) -> requests.Response:
         """
         Like addModRefItem2, but accepts a list of refIds. Untested.
@@ -237,11 +246,11 @@ class client2:
                 modRef, "m:moduleReferenceItem", {"moduleItemId": refId}, NSMAP
             )
         return self.createGrpItem(
-            mtype=mType, ID=modItemId, grpref=refName, xml=docN.tostring()
+            mtype=modType, ID=modItemId, grpref=refName, xml=docN.tostring()
         )  # encoding="UTF8"
 
     def updateRepeatableGroupItem(
-        self, *, mType: str, modItemId: int, refId: int, grpName: str, node
+        self, *, modType: str, modItemId: int, refId: int, grpName: str, node
     ) -> requests.Response:
         xml = etree.tostring(node)
         return updateRepeatableGroup(
@@ -255,6 +264,12 @@ class client2:
     #
     # D RESPONSE orgunit
     #
-    def getOrgUnits(self, *, mType: str) -> Module:
-        r = self.client.getOrgUnits(module=mType)
+    def getOrgUnits(self, *, modType: str) -> Module:
+        """
+        Returns writable OrgUnits for a specific module type. Defaults to ObjectGroup
+        at the moment.
+
+        Used to write debug file to disk.
+        """
+        r = self.client.getOrgUnits(module=modType)
         return Module(xml=r.text)

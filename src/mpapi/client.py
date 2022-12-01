@@ -2,24 +2,14 @@
 MpApi - Unofficial Open Source Client for MuseumPlus MpRIA 
 
 USAGE
-    api = MpApi(baseURL=baseURL, user=user, pw=pw)
-    r = api.getItem(module="Object", id="12345")
-    key = api.getSessionKey()
-    api.toFile(response=r, path="path/to/file.xml")
+    client = MpApi(baseURL=baseURL, user=user, pw=pw)
+    r = client.getItem(module="Object", id="12345")
+    client.toFile(response=r, path="path/to/file.xml")
+    ... todo: some more examples
 
-This client should have all of Zetcom's endpoints. I might add some additional methods 
-for convenience. To not break compatibility, there are multiple versions of the methods.
-
-The version 1 implementation is minimalistic, version 2 uses a more systematic argument 
-names and generally returns higher level Module objects.
-
-Which are the modules our instance knows
-    - _SystemMessage, SystemCopyScheme, _SystemJob
-    - Accessory, Address, AddressGroup, CollectionActivity, Conservation, Contract
-    - Datasource, DefDimension, DefLiterature, Exhibition, Event, Function, FunctionGenerator
-    - InventoryNumber, Literature, Movement, Multimedia, MultimediaGroup, Object, ObjectGroup
-    - Ownership, OrganisationUnit, Place, Parameter, Registrar, Person, Search, Task, Template
-    - User, UserGroup
+This will become the low-level, bare-knuckles and minimalistic client interface that should have  
+all of Zetcom's endpoints and simply implements them. A slightly higher level interface can be 
+found at client2.py
 
 ENCODING SCHEME
     - RIA dishes out and requests UTF-8; mpapi should do that too

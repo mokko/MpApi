@@ -239,7 +239,10 @@ class Mink:
         """
         Type: str = args[0]
         ID: int = args[1]
-        attachment = args[2]
+        try:
+            attachment = args[2]
+        except:
+            attachment = None
         try:
             since: Since = args[3]
         except:

@@ -111,7 +111,7 @@ class Chunky(Helper):
         attachment: str = "nothing",
     ) -> Iterator[Module]:
         """
-        Get a pack based on approval [group], location, group or exhibit.
+        Get a pack based on approval [group], location, group, exhibit or query.
         Yields independent chunks.
 
         EXPECTS
@@ -129,12 +129,12 @@ class Chunky(Helper):
 
         lastChunk: bool = False
         while not lastChunk:
-            chunk = Module()  # make a new zml module document
+            chunkData = Module()  # make a new zml module document
             if Type == "query":
                 partET = self._savedQuery(Type=Type, ID=ID, offset=offset)
             else:
                 partET = self._getObjects(Type=Type, ID=ID, offset=offset, since=since)
-            chunk.add(doc=partET)
+            chunkData.add(doc=partET)
 
             # all related Multimedia and Persons items, no chunking
             for targetType in ["Multimedia", "Person"]:
@@ -142,17 +142,17 @@ class Chunky(Helper):
                     part=partET, target=targetType, since=since
                 )
                 if relatedET is not None:
-                    chunk.add(doc=relatedET)
+                    chunkData.add(doc=relatedET)
 
             offset = offset + self.chunkSize
-            actualNo = chunk.actualSize(module="Object")
+            actualNo = chunkData.actualSize(module="Object")
             # print(f"*** actual VS chunkSize: {actualNo} VS {self.chunkSize}")
 
             if attachment == "attachment":
                 print("Trying to get attachments for this chunk...")
                 try:
                     expected = self.sar.saveAttachments(
-                        data=chunk, adir=pix_dir, since=since
+                        data=chunkData, adir=pix_dir, since=since
                     )
                 except Exception as e:
                     self.info("Error during saveAttachments")
@@ -160,7 +160,7 @@ class Chunky(Helper):
 
             if actualNo < self.chunkSize:
                 lastChunk = True
-            yield chunk
+            yield chunkData
 
     def search(self, query: Search, since: since = None, offset: int = 0):
         """
@@ -172,33 +172,35 @@ class Chunky(Helper):
         """
         lastChunk: bool = False
         while not lastChunk:
-            chunk = Module()  # make a new zml module document
+            chunkData = Module()  # make a new zml module document
             query.offset = offset  # todo in search
             r = self.api.search(xml=query.toString())
             partET = etree.fromstring(r.content, ETparser)
-            chunk.add(doc=partET)
+            chunkData.add(doc=partET)
             # all related Multimedia and Persons items, no chunking
             for targetType in ["Multimedia", "Person"]:
                 relatedET = self._relatedItems(
                     part=partET, target=targetType, since=since
                 )
                 if relatedET is not None:
-                    chunk.add(doc=relatedET)
+                    chunkData.add(doc=relatedET)
 
             offset = offset + self.chunkSize
-            actualNo = chunk.actualSize(module="Object")
+            actualNo = chunkData.actualSize(module="Object")
             # print(f"*** actual VS chunkSize: {actualNo} VS {self.chunkSize}")
 
             if actualNo < self.chunkSize:
                 lastChunk = True
-            yield chunk
+            yield chunkData
 
     #
     # private methods
     #
 
     def _savedQuery(self, *, Type: str, ID: int, offset: int = 0):
-        return self.api.runSavedQuery2(Type="Object", ID=ID, offset=offset)
+        return self.api.runSavedQuery2(
+            Type="Object", ID=ID, offset=offset, limit=self.chunkSize
+        )
 
     def _getObjects(
         self, *, Type: str, ID: int, offset: int, since: since = None
