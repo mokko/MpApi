@@ -73,8 +73,8 @@ from mpapi.search import Search
 from mpapi.client import MpApi
 from mpapi.module import Module
 from pathlib import Path
+from typing import Union
 
-# from typing import set
 NSMAP = {
     "s": "http://www.zetcom.com/ria/ws/module/search",
     "m": "http://www.zetcom.com/ria/ws/module",
@@ -143,12 +143,12 @@ class Sar:
             mtype="ObjectGroup", ID=grpId, grpref=rGrp, xml=xml
         )
 
-    def checkApproval(self, *, ID: int, mtype: str) -> bool:
+    def checkApproval(self, *, ID: int, mtype: str) -> Union[bool, Module]:
         """
         For a record, check if it has an approval for SMB-Digital. Currently, only
         works for module type Object.
 
-        Returns True or False.
+        Used to returns True or False, now returns the checked record, which evauates True.
         """
         if mtype == "Literature":
             print("WARN: Approval not checked for mtype Literature")
@@ -168,7 +168,8 @@ class Sar:
                 ]"""
         )
         if len(r) > 0:
-            return True
+            # only if object is approved, we return the record as Module object
+            return m
         else:
             return False
 

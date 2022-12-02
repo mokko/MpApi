@@ -1,5 +1,7 @@
 """
 
+EXPERIMENTAL / USE AT YOUR OWN RISK / UNTESTED
+
 ObjectGroup: create, update, delete ObjectGroups as well as items in such groups.
 
 For example: Download (get) an existing ObjectGroup record and save it locally/

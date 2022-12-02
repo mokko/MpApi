@@ -198,7 +198,6 @@ class MpApi:
         q = Search(fromString=xml)
         q.validate(mode="search")
 
-        print("-----------------------")
         print(xml)
         r = self.runSavedQuery(id=ID, mtype=Type, xml=q.toString())
         return etree.fromstring(r.content, ETparser)
