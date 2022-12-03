@@ -3,6 +3,9 @@ MpApi - Unofficial Open Source Client for MuseumPlus MpRIA Version 2
 
 Experimental - Not yet tested
 
+This is another iteration of the interface in which I take more liberties in 
+order achieve a plausible, consistent and practical interface.
+
 USAGE
     from mpapi.client2 import Client2
     c = Client2(baseURL=baseURL, user=user, pw=pw)
@@ -39,7 +42,7 @@ class Client2:
                 "Accept-Language": "de",
             }
         )
-        self.client = Client(baseURL=baseURL, user=user, pw=pw)
+        self.client = MpApi(baseURL=baseURL, user=user, pw=pw)
 
     #
     # B REQUESTS WITH module.xsd response
@@ -123,10 +126,10 @@ class Client2:
 
     def getItem(self, *, modType: str, modItemId: int) -> Module:
         """
-        Like getItem, but with modern parameter names and returns Module
+        Like getItem, but with modern parameters and returns Module
         object.
         """
-        r = self.client.getItem(module=mtype, id=ID)
+        r = self.client.getItem(module=modType, id=modItemId)
         return Module(xml=r.text)
 
     def createItem(self, *, modType: str, data: Module) -> Module:

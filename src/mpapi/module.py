@@ -62,7 +62,7 @@ USAGE:
     m.clean()  # drops uuid attributes and certain value elements    
 
     # other changes to xml
-    m.totalSizeUpdate() # update for all module types
+    m.updateTotalSize() # update for all module types
     m.add(doc=ET)
     m3 = m1 + m2
 
@@ -114,7 +114,7 @@ class Module(Helper):
         m3.add(doc=m2.etree)  # using internal here instead of method from Helper
         return m3
 
-    def __getitem__(self, item: Item):
+    def __getitem__(self, item: Item) -> ET:
         """
         m = Module(xml=someStr)
         itemN = m[("Object", 1234)]
@@ -126,7 +126,7 @@ class Module(Helper):
         * lxml.etree._Element object
         """
         mtype = item[0]
-        ID = item[1]
+        ID = str(item[1])
 
         itemN: ET = self.xpath(
             f"/m:application/m:modules/m:module[@name = '{mtype}']/m:moduleItem[@id = '{ID}']"
@@ -300,7 +300,34 @@ class Module(Helper):
                     # we need to compare each item in d1 and d2
                     # print("b4 _compareItems")
                     self._compareItems(mtype=d2mtype, moduleN=d2moduleN)
-        self.totalSizeUpdate()
+        self.updateTotalSize()
+
+    def existsItem(self, *, mtype: str, modItemId: int):
+
+        try:
+            self.__getitem__([(mtype, newId)])
+        except:
+            return False
+        else:
+            return True
+
+    def addItem(self, *, itemN: ET, mtype: str):
+        """
+        Adds a moduleItem to the internal Module object where item is an moduleItem etree node.
+
+        Todo: We're currently not checking if item (with that modItemId) exists already. Do we
+        want to del the old and add the new?
+        """
+
+        newN = deepcopy(itemN)  # dont touch the original
+        newId = newN.get("id")
+        if self.existsItem(mtype=mtype, modItemId=id):
+            self.delItem(mtype=mtype, modItemId=modItemId)
+
+        # it's conceivable that internal module has no module[@name=mtype] yet
+        moduleN = self.module(name=mtype)
+        moduleN.append(newN)
+        self.updateTotalSize()
 
     def clean(self) -> None:
         """
@@ -355,6 +382,17 @@ class Module(Helper):
             )
             valueN.text = value
         return dataFieldN
+
+    def delItem(self, *, modItemId: int, mtype: str):
+        itemN = self.xpath(
+            """/m:application/m:modules/m:module[
+            @name = '{mtype}'
+        ]/m:moduleItem[
+            @id = '{str(modItemId)}'
+        ]"""
+        )[0]
+
+        itemN.getparent().remove(itemN)
 
     def describe(self) -> dict:
         """
@@ -450,7 +488,7 @@ class Module(Helper):
                 0
             ]
         except:
-            # should always exist
+            # modules should always exist, module doesn't
             modulesN = self.xpath("/m:application/m:modules")[0]
             moduleN = etree.SubElement(
                 modulesN,
@@ -620,7 +658,7 @@ class Module(Helper):
         """
         Report the totalSize of a requested module (as provided by the xml
         attribute of the same name not by counter moduleItems). It's getter
-        only , use totalSizeUpdate for writing attributes after counting
+        only , use updateTotalSize for writing attributes after counting
         moduleItems.
 
         If the requested module type or the attribute doesn't exist,
@@ -657,7 +695,7 @@ class Module(Helper):
                 f"Requested module '{module}' or attribute totalSize doesn't exist"
             )
 
-    def totalSizeUpdate(self) -> None:
+    def updateTotalSize(self) -> None:
         """
         Update or create the totalSize attribute for all module types in the
         document.
@@ -671,18 +709,21 @@ class Module(Helper):
         """
         knownTypes = self._types()
 
-        for Type in knownTypes:
+        for modType in knownTypes:
+            # items per modType
             itemsL = self.xpath(
-                f"/m:application/m:modules/m:module[@name = '{Type}']/m:moduleItem"
+                f"/m:application/m:modules/m:module[@name = '{modType}']/m:moduleItem"
             )
             try:
                 moduleN = self.xpath(
-                    f"/m:application/m:modules/m:module[@name = '{Type}']"
+                    f"/m:application/m:modules/m:module[@name = '{modType}']"
                 )[0]
-                attributes = moduleN.attrib
-                attributes["totalSize"] = int(len(itemsL))
             except:
-                pass  # it is not an error if a file has no items that can be counted
+                pass  # it's not an error if file has no items that can be counted
+            else:
+                # print (f".............updating totalSize for {modType}")
+                attributes = moduleN.attrib
+                attributes["totalSize"] = str(int(len(itemsL)))
 
     def uploadForm(self) -> None:
         """
