@@ -148,7 +148,10 @@ class Sar:
         For a record, check if it has an approval for SMB-Digital. Currently, only
         works for module type Object.
 
-        Used to returns True or False, now returns the checked record, which evauates True.
+        Returns True or False.
+
+        I was considering returning the checked record, but that is too hackish. No longer used
+        in fixRelatedWorks in zml2lido.
         """
         if mtype == "Literature":
             print("WARN: Approval not checked for mtype Literature")
@@ -168,8 +171,7 @@ class Sar:
                 ]"""
         )
         if len(r) > 0:
-            # only if object is approved, we return the record as Module object
-            return m
+            return True
         else:
             return False
 
