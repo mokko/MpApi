@@ -313,15 +313,17 @@ class Module(Helper):
 
     def addItem(self, *, itemN: ET, mtype: str):
         """
-        Adds a moduleItem to the internal Module object where item is an moduleItem etree node.
+        Adds a moduleItem to the internal Module object where item is an etree node.
 
-        Todo: We're currently not checking if item (with that modItemId) exists already. Do we
-        want to del the old and add the new?
+        New:
+        - We're now checking if item (with that modItemId) exists already. If so, we're
+          discarding the old item before adding the new one.
+        - We're working on a deepcopy; otherwise we have xml chaos
         """
 
         newN = deepcopy(itemN)  # dont touch the original
-        newId = newN.get("id")
-        if self.existsItem(mtype=mtype, modItemId=id):
+        modItemId = newN.get("id")
+        if self.existsItem(mtype=mtype, modItemId=modItemId):
             self.delItem(mtype=mtype, modItemId=modItemId)
 
         # it's conceivable that internal module has no module[@name=mtype] yet
