@@ -303,7 +303,6 @@ class Module(Helper):
         self.updateTotalSize()
 
     def existsItem(self, *, mtype: str, modItemId: int):
-
         try:
             self.__getitem__([(mtype, newId)])
         except:

@@ -126,19 +126,17 @@ class Client2:
 
     def getItem(self, *, modType: str, modItemId: int) -> Module:
         """
-        Like getItem, but with modern parameters and returns Module
-        object.
+        Like getItem, but with modern parameters and returns Module object.
         """
         r = self.client.getItem(module=modType, id=modItemId)
         return Module(xml=r.text)
 
     def createItem(self, *, modType: str, data: Module) -> Module:
         """
-        Like createItem, but with modern parameters and returns Module
-        object.
+        Like createItem, but with modern parameters and returns Module object.
 
         DESIGN
-        - Alternatively, createItem2 could expect xml as etree, but that wouldn't
+        - Alternatively, createItem could expect xml as etree, but that wouldn't
           save anything, so no.
 
         r = self.createItem(module=mtype, xml=data.toString())
