@@ -265,6 +265,8 @@ class Module(Helper):
         NEW
         * At some point, the method add would change doc so that after
           completion, doc was practically empty.
+        * The current implmentation is very slow; it takes ca. 20 min to add a
+          couple thousand records.
         """
         # List[Union[_Element, Union[_ElementUnicodeResult, _PyElementUnicodeResult, _ElementStringResult]]]
         doc2 = deepcopy(doc)  # leave doc alone, so we don't change it
@@ -301,14 +303,6 @@ class Module(Helper):
                     # print("b4 _compareItems")
                     self._compareItems(mtype=d2mtype, moduleN=d2moduleN)
         self.updateTotalSize()
-
-    def existsItem(self, *, mtype: str, modItemId: int):
-        try:
-            self.__getitem__([(mtype, newId)])
-        except:
-            return False
-        else:
-            return True
 
     def addItem(self, *, itemN: ET, mtype: str):
         """
@@ -435,6 +429,14 @@ class Module(Helper):
         rgL = self.xpath(f"//m:repeatableGroup[@name ='{name}']")
         for rgN in rgL:
             rgN.getparent().remove(rgN)
+
+    def existsItem(self, *, mtype: str, modItemId: int):
+        try:
+            self.__getitem__([(mtype, newId)])
+        except:
+            return False
+        else:
+            return True
 
     def iter(self, *, module: str = "Object") -> Iterator:
         """
