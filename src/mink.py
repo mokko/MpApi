@@ -223,27 +223,32 @@ class Mink:
         * args: a list with arguments that it passes along;
         * args[0]: type of the ID (approval, exhibit, group, loc, query)
         * args[1]: ID
-        * args[2]: attachment
-        * args[3] (optional): since date
+        * args[2]: target type (new, only optional when args[3] and args[4} are not used)
+        * args[3]: attachment (optional, only optional if args[4] is not used)
+        * args[4]: since date (optional)
 
         NEW
         * If last run was aborted, you can restart where you left off, so exisiting chunks
-          are not downloaded again.
-        * Currently only saved_queries requesting objects are possible
+          are not downloaded again. Target is only actually needed for savedQueries.
+        * You can use queries that target something else than objects
         """
         Type: str = args[0]
         ID: int = args[1]
         try:
-            attachment = args[2]
+            target: str = args[2]
+        except:
+            target: str = "Object"  # default value
+        try:
+            attachment = args[3]
         except:
             attachment = None
         try:
-            since: Since = args[3]
+            since: Since = args[4]
         except:
             since = None
 
         print(
-            f" CHUNKER: {Type}-{ID} since:{since} chunkSize: {self.chunker.chunkSize}"
+            f" CHUNKER: {Type}-{ID} since:{since} chunkSize: {self.chunker.chunkSize} "
         )
         no = 1
 
@@ -260,7 +265,12 @@ class Mink:
 
         # getByType returns Module, not ET
         for chunk in self.chunker.getByType(
-            ID=ID, Type=Type, since=since, offset=offset, attachment=attachment
+            ID=ID,
+            Type=Type,
+            target=target,
+            since=since,
+            offset=offset,
+            attachment=attachment,
         ):
             if chunk:  # Module is true if it has more than 0 items
                 path = self.project_dir / f"{Type}{ID}-chunk{no}.xml"

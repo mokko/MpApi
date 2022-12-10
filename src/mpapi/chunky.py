@@ -106,6 +106,7 @@ class Chunky(Helper):
         *,
         ID,
         Type,
+        target="Object",
         since: since = None,
         offset: int = 0,
         attachment: str = "nothing",
@@ -123,6 +124,12 @@ class Chunky(Helper):
         RETURNS
         * iterator [chunk: Module]: an indepedent chunk with persons,
           multimedia and objects
+
+        Note
+        * Type here is ambiguous, sometimes it corresponds to modType (e.g. object); in
+          other cases it doesn't reflect the modType of the returned results (e.g. query
+          can return objects or persons.
+        * Curently, we only allow saved queries that request Objects
         """
         if Type not in allowed_types:
             raise SyntaxError(f"Error: Chunk type not recognized: {Type}")
@@ -131,7 +138,7 @@ class Chunky(Helper):
         while not lastChunk:
             chunkData = Module()  # new zml Module object
             if Type == "query":
-                partET = self._savedQuery(Type="Object", ID=ID, offset=offset)
+                partET = self._savedQuery(Type=target, ID=ID, offset=offset)
             else:
                 partET = self._getObjects(Type=Type, ID=ID, offset=offset, since=since)
             chunkData.add(doc=partET)
