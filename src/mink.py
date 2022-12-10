@@ -261,7 +261,7 @@ class Mink:
                 no -= 1
 
         offset = (no - 1) * self.chunker.chunkSize
-        print(f" next chunk {no}; offset:{offset}")
+        # print(f" next chunk {no}; offset:{offset}")
 
         # getByType returns Module, not ET
         for chunk in self.chunker.getByType(
@@ -275,7 +275,7 @@ class Mink:
             if chunk:  # Module is true if it has more than 0 items
                 path = self.project_dir / f"{Type}{ID}-chunk{no}.xml"
                 chunk.clean()
-                print(f"saving chunk to {path}")
+                print(f"saving chunk {path}")
                 chunk.toFile(path=path)
                 chunk.validate()
             no += 1

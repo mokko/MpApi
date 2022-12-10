@@ -208,11 +208,6 @@ class Chunky(Helper):
     # private methods
     #
 
-    def _savedQuery(self, *, Type: str = "Object", ID: int, offset: int = 0):
-        return self.api.runSavedQuery2(
-            Type=Type, ID=ID, offset=offset, limit=self.chunkSize
-        )
-
     def _getObjects(
         self, *, Type: str, ID: int, offset: int, since: since = None
     ) -> ET:
@@ -283,10 +278,7 @@ class Chunky(Helper):
         )
 
         if len(IDs) == 0:
-            # raise IndexError("No related IDs found!")?
-            print(
-                f"***Warning: No related {target} IDs found {IDs}"
-            )  # this is not an ERROR
+            print(f"***WARN: No related {target} IDs found!")  # this is not an ERROR
             return None
 
         # use limit=0 for a deterministic search as RIA's response provides the
@@ -321,3 +313,8 @@ class Chunky(Helper):
         # Write bytes to file
         #    binary_file.write(r.content)
         return etree.fromstring(r.content, ETparser)
+
+    def _savedQuery(self, *, Type: str = "Object", ID: int, offset: int = 0):
+        return self.api.runSavedQuery2(
+            Type=Type, ID=ID, offset=offset, limit=self.chunkSize
+        )
