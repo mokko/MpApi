@@ -129,9 +129,9 @@ class Chunky(Helper):
 
         lastChunk: bool = False
         while not lastChunk:
-            chunkData = Module()  # make a new zml module document
+            chunkData = Module()  # new zml Module object
             if Type == "query":
-                partET = self._savedQuery(Type=Type, ID=ID, offset=offset)
+                partET = self._savedQuery(Type="Object", ID=ID, offset=offset)
             else:
                 partET = self._getObjects(Type=Type, ID=ID, offset=offset, since=since)
             chunkData.add(doc=partET)
@@ -197,9 +197,9 @@ class Chunky(Helper):
     # private methods
     #
 
-    def _savedQuery(self, *, Type: str, ID: int, offset: int = 0):
+    def _savedQuery(self, *, Type: str = "Object", ID: int, offset: int = 0):
         return self.api.runSavedQuery2(
-            Type="Object", ID=ID, offset=offset, limit=self.chunkSize
+            Type=Type, ID=ID, offset=offset, limit=self.chunkSize
         )
 
     def _getObjects(

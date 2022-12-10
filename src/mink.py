@@ -173,7 +173,7 @@ class Mink:
         Returns:
         * Module objct containing the data
         """
-        fn = self.parts_dir.joinpath(f"{label}-{module}-{Type}{Id}.xml")
+        fn = self.parts_dir / f"{label}-{module}-{Type}{Id}.xml"
         if fn.exists():
             print(f" {module} from cache {fn}")
             return Module(file=fn)
@@ -196,14 +196,13 @@ class Mink:
 
     def _mkdirs(self) -> None:
         date: str = datetime.datetime.today().strftime("%Y%m%d")
-        adir: Path = Path(self.job).joinpath(date)
+        adir: Path = Path(self.job) / date
         if not Path.is_dir(adir):
             Path.mkdir(adir, parents=True)
         self.project_dir = adir
-        self.pix_dir = adir.parent.joinpath("pix")
-        self.parts_dir = self.project_dir.joinpath("parts")
-        if not self.parts_dir.exists():
-            self.parts_dir.mkdir(parents=True)
+        self.pix_dir = adir.parent / "pix"
+        # We dont need parts dir when in chunk mode
+        self.parts_dir = self.project_dir / "parts"
 
     def info(self, msg: str) -> None:
         logging.info(msg)
@@ -227,15 +226,10 @@ class Mink:
         * args[2]: attachment
         * args[3] (optional): since date
 
-        * args[]: label (used for filename) -> not used ATM
-        * args[]: attachments -> not implemented, not needed ATM
-
         NEW
-        * I would like the ability to start where the last run stopped. To do
-          so, we need to establish the last chunk on disk and its number and
-          then calculate the offset.
-          So three chunks got written, the fourth aborted, so offset
-          would 3 x 1000
+        * If last run was aborted, you can restart where you left off, so exisiting chunks
+          are not downloaded again.
+        * Currently only saved_queries requesting objects are possible
         """
         Type: str = args[0]
         ID: int = args[1]
@@ -253,9 +247,9 @@ class Mink:
         )
         no = 1
 
-        path2 = self.project_dir.joinpath(f"{Type}{ID}-chunk{no}.xml")
+        path2 = self.project_dir / f"{Type}{ID}-chunk{no}.xml"
         while path2.exists():
-            path2 = self.project_dir.joinpath(f"{Type}{ID}-chunk{no}.xml")
+            path2 = self.project_dir / f"{Type}{ID}-chunk{no}.xml"
             no += 1
         else:
             if no > 1:
@@ -269,9 +263,9 @@ class Mink:
             ID=ID, Type=Type, since=since, offset=offset, attachment=attachment
         ):
             if chunk:  # Module is true if it has more than 0 items
-                path = self.project_dir.joinpath(f"{Type}{ID}-chunk{no}.xml")
+                path = self.project_dir / f"{Type}{ID}-chunk{no}.xml"
                 chunk.clean()
-                print(f"saving CLEAN to {path}")
+                print(f"saving chunk to {path}")
                 chunk.toFile(path=path)
                 chunk.validate()
             no += 1
@@ -313,7 +307,7 @@ class Mink:
 
         if att == "attachments":
             # pretty dirty: assumes that getMedia has been done before
-            mm_fn = self.parts_dir.joinpath(f"{label}-Multimedia-{Type}{Id}.xml")
+            mm_fn = self.parts_dir / f"{label}-Multimedia-{Type}{Id}.xml"
             print(f" looking for Multimedia info at {mm_fn}")
 
             # determine target dir
@@ -357,7 +351,7 @@ class Mink:
         """
         module = args[0]
         Id = args[1]
-        out_fn = self.project_dir.joinpath(args[1] + ".xml")
+        out_fn = self.project_dir / args[1] + ".xml"
         if out_fn.exists():
             print(f" Item from cache {out_fn}")
             return Module(file=out_fn)
@@ -398,8 +392,12 @@ class Mink:
         except:
             since = None
 
+        # let's only make parts dir if we need it...
+        if not self.parts_dir.exists():
+            self.parts_dir.mkdir(parents=True)
+
         # parts_dir now made during _mkdirs()
-        join_fn = self.project_dir.joinpath(f"{label}-join-{Type}{Id}.xml")
+        join_fn = self.project_dir / f"{label}-join-{Type}{Id}.xml"
 
         if join_fn.exists():
             print(f" join from cache {join_fn}")
@@ -443,7 +441,7 @@ class Mink:
         """
         label = str(self.project_dir.parent.name)
         date = str(self.project_dir.name)
-        pack_fn = self.project_dir.joinpath(f"../{label}{date}.xml").resolve()
+        pack_fn = self.project_dir / f"../{label}{date}.xml".resolve()
         if pack_fn.exists():
             print(f"Pack file exists already, no overwrite: {pack_fn}")
         else:
