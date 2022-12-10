@@ -24,10 +24,7 @@ DSL COMMANDs
     getItem : save a single item to disk
     getPack : for a single id, get multi-type info (Objects, Multimedia, Persons...)
     pack    : pack together several (clean) files
-
-    Usually called from inside chunk and getPack:
     getAttachments: downloads attachments for given module data
-    join    : reads parts, joins and cleans them and writes join-file
 
 MPAPI CLASSES
     SEARCH -> CLIENT -> MODULE
@@ -44,6 +41,7 @@ New
 * Experimenting with sar2 for a cleaner interface. 20220116
 * I eliminated some DSL commands that I haven't been using and integrated clean into join 20220116
 * TODO: getPack ends now with a cleaned join file, so programs that expect clean file need to change
+* 20221210: use separate command getAttachments to d/l attachments 
 """
 
 import datetime
@@ -93,11 +91,10 @@ class Mink:
         # pretty ugly dsl parser...
         with open(self.conf, mode="r") as file:
             c = 0  # line counter
-            error = 0
             for line in file:
                 c += 1
                 uncomment = line.split("#", 1)[0].strip()
-                if not uncomment:
+                if uncomment.isspace() or not uncomment:
                     continue
                 line = line.expandtabs(4)
                 indent_lvl = int((len(line) - len(line.lstrip()) + 4) / 4)
@@ -197,7 +194,7 @@ class Mink:
     def _mkdirs(self) -> None:
         date: str = datetime.datetime.today().strftime("%Y%m%d")
         adir: Path = Path(self.job) / date
-        if not Path.is_dir(adir):
+        if not adir.is_dir():
             Path.mkdir(adir, parents=True)
         self.project_dir = adir
         self.pix_dir = adir.parent / "pix"
@@ -295,8 +292,7 @@ class Mink:
         * arg[0]: type (approval, exhibit, group or loc)
         * arg[1]: id of the respective type
         * arg[2]: label (used for filenames)
-        * arg[3]: only if string "attachments", will d/l them (optional)
-        * arg[4]: timestamp (optional); if specified, d/l attachents to subdir pix_update
+        * arg[3]: timestamp (optional); if specified, d/l attachents to subdir pix_update
         """
 
         # print(f"***{args}")
@@ -304,37 +300,29 @@ class Mink:
         Id = args[1]
         label = args[2]
         try:
-            since = args[4]
+            since = args[3]
         except:
             since = None
+
+        # pretty dirty: assumes that getMedia has been done before
+        mm_fn = self.parts_dir / f"{label}-Multimedia-{Type}{Id}.xml"
+        print(f" looking for Multimedia info at {mm_fn}")
+
+        # determine target dir
+        if since is None:
+            pix_dir = Path(f"{self.pix_dir}_{label}")
+        else:
+            pix_dir = Path(f"{self.pix_dir}_update")
+        if not pix_dir.exists():
+            pix_dir.mkdir()
+        print(f" about to check attachments; saving to {pix_dir}")
+
+        mm = Module(file=mm_fn)
         try:
-            args[3]
-        except:
-            print(" not downloading attachments")
-            att = None
-        else:  # executed if no exceptions were raised in the try block.
-            att = str(args[3]).lower().strip()
-
-        if att == "attachments":
-            # pretty dirty: assumes that getMedia has been done before
-            mm_fn = self.parts_dir / f"{label}-Multimedia-{Type}{Id}.xml"
-            print(f" looking for Multimedia info at {mm_fn}")
-
-            # determine target dir
-            if since is None:
-                pix_dir = Path(f"{self.pix_dir}_{label}")
-            else:
-                pix_dir = Path(f"{self.pix_dir}_update")
-            if not pix_dir.exists():
-                pix_dir.mkdir()
-            print(f" about to check attachments; saving to {pix_dir}")
-
-            mm = Module(file=mm_fn)
-            try:
-                expected = self.sar.saveAttachments(data=mm, adir=pix_dir, since=since)
-            except Exception as e:
-                self.info("Error during saveAttachments")
-                raise e
+            expected = self.sar.saveAttachments(data=mm, adir=pix_dir, since=since)
+        except Exception as e:
+            self.info("Error during saveAttachments")
+            raise e
 
             # do we want to delete those files that are no longer attached?
             # for img in os.listdir(pix_dir):
@@ -382,15 +370,13 @@ class Mink:
         * arg[0]: type (approval, exhibit or group)
         * arg[1]: id
         * arg[2]: label
-        * arg[3]: attachments
-        * arg[4]: since date, optional
+        * arg[3]: since date, optional
 
         Returns
         * None
         """
         print(f"GET PACK {args}")
         join_fn = self.join(args)  # write join file, includes validation
-        self.getAttachments(args)  # d/l attachments
         # if we need to return M, we need to load it from join_fn
 
     def join(self, args: list) -> Path:
