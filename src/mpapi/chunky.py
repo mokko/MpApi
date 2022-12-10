@@ -117,9 +117,12 @@ class Chunky(Helper):
 
         EXPECTS
         * ID:
-        * Type: type of the ID (approval, exhibit, group, loc[ation], query)
+        * Type: type of the chunk and the ID (approval, exhibit, group, loc[ation],
+          query)
         * since: xs:DateTime (more or less)
         * offset: initial offset to ignore object hits
+        * attachment: "attachment" or any other string
+        * target: result module type, only used with query
 
         RETURNS
         * iterator [chunk: Module]: an indepedent chunk with persons,
@@ -130,6 +133,7 @@ class Chunky(Helper):
           other cases it doesn't reflect the modType of the returned results (e.g. query
           can return objects or persons.
         * Curently, we only allow saved queries that request Objects
+        * Chunk type specifies which id is used (query, exhibit, group)
         """
         if Type not in allowed_types:
             raise SyntaxError(f"Error: Chunk type not recognized: {Type}")
