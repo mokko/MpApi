@@ -20,10 +20,10 @@ DIR STRUCTURE
 
 DSL COMMANDs
     all     : chain together several jobs
-    chunk   : paginted version of getPack
+    chunk   : paginated version of getPack
     getItem : save a single item to disk
     getPack : for a single id, get multi-type info (Objects, Multimedia, Persons...)
-    pack    : pack together several clean files (todo: join)
+    pack    : pack together several (clean) files
 
     Usually called from inside chunk and getPack:
     getAttachments: downloads attachments for given module data
