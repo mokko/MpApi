@@ -31,7 +31,9 @@ ETparser = etree.XMLParser(remove_blank_text=True)
 
 
 class Client2:
-    def __init__(self, *, baseURL: str, user: str, pw: str) -> None:
+    def __init__(
+        self, *, baseURL: str, user: str, pw: str, acceptLang: str = "de"
+    ) -> None:
         self.appURL = baseURL + "/ria-ws/application"
         self.session = requests.Session()
         self.session.auth = (user, pw)
@@ -39,10 +41,10 @@ class Client2:
             {
                 "Content-Type": "application/xml",
                 "Accept": "application/xml;charset=UTF-8",
-                "Accept-Language": "de",
+                "Accept-Language": acceptLang,
             }
         )
-        self.client = MpApi(baseURL=baseURL, user=user, pw=pw)
+        self.client = MpApi(baseURL=baseURL, user=user, pw=pw, acceptLang=acceptLang)
 
     #
     # B REQUESTS WITH module.xsd response
