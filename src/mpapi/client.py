@@ -31,7 +31,9 @@ ETparser = etree.XMLParser(remove_blank_text=True)
 
 
 class MpApi:
-    def __init__(self, *, baseURL: str, user: str, pw: str) -> None:
+    def __init__(
+        self, *, baseURL: str, user: str, pw: str, acceptLang: str = "de"
+    ) -> None:
         self.appURL = baseURL + "/ria-ws/application"
         s = requests.Session()
         s.auth = (user, pw)
@@ -39,7 +41,7 @@ class MpApi:
             {
                 "Content-Type": "application/xml",
                 "Accept": "application/xml;charset=UTF-8",
-                "Accept-Language": "de",
+                "Accept-Language": acceptLang,
             }
         )
         self.session = s
