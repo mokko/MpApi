@@ -408,7 +408,7 @@ class Mink:
 
     def _mkdirs(self) -> None:
         date: str = datetime.datetime.today().strftime("%Y%m%d")
-        projct_dir: Path = Path(self.job) / date
+        project_dir: Path = Path(self.job) / date
         if not project_dir.is_dir():
             Path.mkdir(project_dir, parents=True)
         self.project_dir = project_dir
