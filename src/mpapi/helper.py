@@ -2,6 +2,7 @@ from lxml import etree
 from pathlib import Path
 import pkgutil
 from typing import Union
+from zipfile import ZipFile, ZIP_LZMA
 
 # from typing import Any
 # pathlike = NewType("Pathlike", Union[str, Path])
@@ -47,6 +48,29 @@ class Helper:
         return etree.tostring(
             et, pretty_print=True, encoding="unicode"
         )  # why not utf-8?
+
+    def toZip(self, *, path: Union[Path, str]) -> None:
+        """
+        Save module data to a zip file
+
+        Expects path as str or path object
+        path is full path ending on to xml
+        Do we need to split dir
+
+        path: AKu/260k/20221201/query513067-chunk1.xml
+        zip_path: AKu/260k/20221201/query513067-chunk1.zip
+        short_path: query513067-chunk1.xml
+        """
+        short_path = Path(path).name
+        zip_path = Path(path).with_suffix(".zip")
+
+        with ZipFile(
+            zip_path, "w", compression=ZIP_LZMA
+        ) as zip:  # default compression is ZIP_STORED
+            zip.writestr(
+                short_path,
+                etree.tostring(self.etree, pretty_print=True, encoding="unicode"),
+            )
 
     def validate(self, *, mode: str = "module") -> True:
         """

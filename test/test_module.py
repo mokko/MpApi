@@ -159,3 +159,8 @@ def test_add():
     assert len(m1) == 619
     m5 = m1 + m2 + m3  # more than 2 additions
     assert len(m5) == 619
+
+
+def test_toZip():
+    m1 = Module(file="sdata/exhibit20222.xml")
+    m1.toZip(path="sdata/exhibit20222.xml")

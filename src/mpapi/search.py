@@ -127,7 +127,7 @@ class Search(Helper):
             parser = etree.XMLParser(remove_blank_text=True)
             self.etree = etree.fromstring(xml, parser)
 
-            # lastN is state; state is bad
+            # lastN is a state; state is bad
             # lastN is used in addCriterion and _addConjunction
             self.lastN = self.etree.xpath(
                 "/s:application/s:modules/s:module/s:search/s:expert", namespaces=NSMAP
