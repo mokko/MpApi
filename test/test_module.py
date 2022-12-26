@@ -42,10 +42,10 @@ def test_inspection():
     m = Module(file="sdata/exhibit20222.xml")
     with pytest.raises(TypeError) as exc_info:
         m.totalSize(module="Object")  # none
-    assert m.totalSize(module="Multimedia") == 619
+    assert m.totalSize(module="Multimedia") == 642
     desc = m.describe()
     assert isinstance(desc, dict)
-    assert desc == {"Multimedia": 619}
+    assert desc == {"Multimedia": 642}
     # print(desc)
     m.dropUUID()
     assert m.validate()
@@ -92,7 +92,7 @@ def test_join():
     m = Module(file="sdata/exhibit20222.xml")
     MM_before = m.totalSize(module="Multimedia")
     assert isinstance(MM_before, int)
-    assert len(m) == 619
+    assert len(m) == 642
 
     # first add
     ET = etree.parse("sdata/exhibit20222.xml")
@@ -102,7 +102,7 @@ def test_join():
     MM_after = m.totalSize(module="Multimedia")
     assert MM_before == MM_after
     # print(len(m))
-    assert len(m) == 619
+    assert len(m) == 642
 
     # second add
     # print("2nd ADD")
@@ -110,7 +110,7 @@ def test_join():
     Obj_before = Module(tree=ET2).actualSize(module="Object")
     m.add(doc=ET2)
     assert m.totalSize(module="Object") == 1
-    assert len(m) == 620
+    assert len(m) == 643
 
     # there was a version where add(doc=ET) deleted most of the document, so now we
     # test that doc remains the "same"
@@ -124,7 +124,7 @@ def test_length():
     m = Module()
     assert len(m) == 0
     m = Module(file="sdata/exhibit20222.xml")
-    assert len(m) == 619
+    assert len(m) == 642
 
 
 def test_getItem():
@@ -154,11 +154,11 @@ def test_add():
 
     m4 = Module(file="data/739673.xml")
     m5 = m3 + m4
-    assert len(m5) == 620
+    assert len(m5) == 643
     m1 = m1 + m2  # change in place
-    assert len(m1) == 619
+    assert len(m1) == 642
     m5 = m1 + m2 + m3  # more than 2 additions
-    assert len(m5) == 619
+    assert len(m5) == 642
 
 
 def test_toZip():

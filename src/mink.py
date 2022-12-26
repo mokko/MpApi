@@ -58,6 +58,7 @@ from mpapi.client import MpApi
 from mpapi.module import Module
 from mpapi.sar import Sar
 from mpapi.search import Search
+from zipfile import ZipFile, ZIP_LZMA
 
 Since = Optional[str]
 
@@ -67,7 +68,8 @@ NSMAP = {
     "m": "http://www.zetcom.com/ria/ws/module",
 }
 
-allowed_commands = ["all", "chunk", "getItem", "getPack", "pack"]
+allowed_commands = ["all", "attachments", "chunk", "getItem", "getPack", "pack"]
+chunkSize = 1000
 
 
 class Mink:
@@ -76,7 +78,7 @@ class Mink:
     ) -> None:
         self.sar = Sar(baseURL=baseURL, user=user, pw=pw)
         self.api = MpApi(baseURL=baseURL, user=user, pw=pw)
-        self.chunker = Chunky(chunkSize=1000, baseURL=baseURL, pw=pw, user=user)
+        self.chunker = Chunky(chunkSize=chunkSize, baseURL=baseURL, pw=pw, user=user)
         self.conf = conf
         self._parse_conf(job=job)
 
@@ -100,7 +102,7 @@ class Mink:
         Expects:
         * arg[0]: type (approval, exhibit, group or loc)
         * arg[1]: id of the respective type
-        * arg[2]: label (used for filenames) or chunk
+        * arg[2]: label (used for filenames) or "chunk" to trigger chunk mode
         * arg[3]: timestamp (optional); if specified, d/l attachents to subdir pix_update
 
         It relies on user having downloaded the respective data beforehand,i.e.
@@ -119,7 +121,7 @@ class Mink:
 
         # print(f"***{args}")
         Type = args[0]
-        Id = args[1]
+        ID = args[1]
         label = args[2]
         try:
             since = args[3]
@@ -137,19 +139,20 @@ class Mink:
 
         if label == "chunk":
             no = 1
-            mm_fn = self.project_dir
-            while mm_fn.exists():
-                mm_fn = self.project_dir / f"{Type}{Id}-chunk{n}.xml"
-                print(f" looking for multimedia info at {mm_fn}")
-                self._getAttachments(From=mm_fn)
+            while (
+                chunk_fn := self._chunkPath(Type=Type, ID=ID, no=no, suffix=".zip")
+            ).exists():
+                print(f" looking for multimedia info at {chunk_fn}")
+                self._getAttachments(From=chunk_fn, pix_dir=pix_dir)
                 no += 1
+                # chunk_fn = self.chunkPath(Type=Type, ID=ID, no=no, suffix=".zip")
         else:
             # pretty dirty: assumes that getMedia has been done before
             # todo - we could trigger a new get if this file doesn't exist
             # or we trust the user to do the right thing?
-            mm_fn = self.parts_dir / f"{label}-Multimedia-{Type}{Id}.xml"
+            mm_fn = self.parts_dir / f"{label}-Multimedia-{Type}{ID}.xml"
             print(f" looking for Multimedia info at {mm_fn}")
-            self._getAttachments(From=mm_fn)
+            self._getAttachments(From=mm_fn, pix_dir=pix_dir)
 
     def chunk(self, args: list) -> None:
         """
@@ -184,18 +187,14 @@ class Mink:
         print(
             f" CHUNKER: {Type}-{ID} since:{since} chunkSize: {self.chunker.chunkSize} "
         )
-        no = 1
 
-        path2 = self.project_dir / f"{Type}{ID}-chunk{no}.xml"
-        while path2.exists():
-            path2 = self.project_dir / f"{Type}{ID}-chunk{no}.xml"
-            no += 1
-        else:
-            if no > 1:
-                no -= 1
-
-        offset = (no - 1) * self.chunker.chunkSize
-        # print(f" next chunk {no}; offset:{offset}")
+        # ignore chunks already on disk
+        no, offset = self._fastforward(Type=Type, ID=ID, suffix=".zip")
+        print(f" next chunk {no}; offset:{offset}")
+        # how can i know if this is the last chunk?
+        # Test if the last chunk has less items than chunkSize OR
+        # Do another request to RIA and see if it comes back empty?
+        # we go the second route
 
         # getByType returns Module, not ET
         for chunk in self.chunker.getByType(
@@ -205,13 +204,16 @@ class Mink:
             since=since,
             offset=offset,
         ):
-            if chunk:  # Module is true if it has more than 0 items
-                path = self.project_dir / f"{Type}{ID}-chunk{no}.xml"
+            if chunk:  # Module is True if >0 items
+                # print(f"###chunk size:{chunk.actualSize(module='Object')}")
+                chunk_fn = self._chunkPath(Type=Type, ID=ID, no=no, suffix=".xml")
                 chunk.clean()
-                print(f"saving chunk {path}")
-                chunk.toFile(path=path)
+                self.info(f"zipping chunk {chunk_fn}")
+                chunk.toZip(path=chunk_fn)
                 chunk.validate()
-            no += 1
+                no += 1
+            # else:
+            #    print("###Chunk empty")
 
     def getItem(self, args: list) -> Module:
         """
@@ -339,21 +341,49 @@ class Mink:
     # HELPERS
     #
 
-    def _init_log(self) -> None:
-        now = datetime.datetime.now()
-        log_fn = Path(self.project_dir).joinpath(now.strftime("%Y%m%d") + ".log")
-        logging.basicConfig(
-            datefmt="%Y%m%d %I:%M:%S %p",
-            filename=log_fn,
-            filemode="a",  # append now since we're starting a new folder
-            # every day now anyways.
-            level=logging.DEBUG,
-            format="%(asctime)s: %(message)s",
-        )
+    def _chunkPath(self, *, Type, ID, no, suffix):
+        return self.project_dir / f"{Type}{ID}-chunk{no}{suffix}"
 
-    def _getAttachments(self, *, From: Path, since: str):
+    def _fastforward(self, *, Type, ID, suffix):
+        """
+        Given the usual params for a chunk filename (i.e. Type,ID, suffix), we loop
+        thru existing chunk files and return number of the last existing chunk file as
+        well as the corresponding offset.
+        """
+        no = 1
+        while (
+            chunk_fn := self._chunkPath(Type=Type, ID=ID, no=no, suffix=suffix)
+        ).exists():
+            # chunk_fn = self._chunkPath(Type=Type, ID=ID, no=no, suffix=suffix)
+            no += 1
+        else:
+            if no > 1:
+                no -= 1
+
+        offset = (no - 1) * self.chunker.chunkSize
+        return no, offset
+        # print(f" next chunk {no}; offset:{offset}")
+
+    def _getAttachments(
+        self, *, From: Path, pix_dir: Path, since: Optional[str] = None
+    ):
+        """
+        Save all attachments from one zml file. File can be xml or zip file.
+
+        New:
+        - chunks are expected to be zipped.
+        """
+        short_path = Path(From.name).with_suffix(".xml")
+
+        if From.suffix == ".zip":
+            with ZipFile(From, "r") as zippy:
+                ET = etree.parse(zippy.open(str(short_path)))
+            FromM = Module(tree=ET)
+        else:
+            FromM = Module(file=From)
+
         try:
-            expected = self.sar.saveAttachments(data=From, adir=pix_dir, since=since)
+            expected = self.sar.saveAttachments(data=FromM, adir=pix_dir, since=since)
         except Exception as e:
             self.info("Error during saveAttachments")
             raise e
@@ -405,6 +435,18 @@ class Mink:
                 raise TypeError("UNKNOWN type")
             m.toFile(path=fn)
             return m
+
+    def _init_log(self) -> None:
+        now = datetime.datetime.now()
+        log_fn = Path(self.project_dir).joinpath(now.strftime("%Y%m%d") + ".log")
+        logging.basicConfig(
+            datefmt="%Y%m%d %I:%M:%S %p",
+            filename=log_fn,
+            filemode="a",  # append now since we're starting a new folder
+            # every day now anyways.
+            level=logging.DEBUG,
+            format="%(asctime)s: %(message)s",
+        )
 
     def _mkdirs(self) -> None:
         date: str = datetime.datetime.today().strftime("%Y%m%d")

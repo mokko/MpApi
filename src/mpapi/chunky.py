@@ -109,31 +109,29 @@ class Chunky(Helper):
         target="Object",
         since: since = None,
         offset: int = 0,
-        attachment: str = "nothing",
     ) -> Iterator[Module]:
         """
-        Get a pack based on approval [group], location, group, exhibit or query.
+        Get a pack based on approval [group], loc[ation], group, exhibit or query.
         Yields independent chunks.
 
         EXPECTS
         * ID:
-        * Type: type of the chunk and the ID (approval, exhibit, group, loc[ation],
+        * Type: type of the chunk and the ID (approval, exhibit, group, loc,
           query)
         * since: xs:DateTime (more or less)
         * offset: initial offset to ignore object hits
-        * attachment: "attachment" or any other string
-        * target: result module type, only used with query
+        * target: result module type (only used with query)
 
         RETURNS
         * iterator [chunk: Module]: an indepedent chunk with persons,
           multimedia and objects
 
-        Note
+        Note / New
+        * no more attachments
         * Type here is ambiguous, sometimes it corresponds to modType (e.g. object); in
           other cases it doesn't reflect the modType of the returned results (e.g. query
           can return objects or persons.
         * Curently, we only allow saved queries that request Objects
-        * Chunk type specifies which id is used (query, exhibit, group)
         """
         if Type not in allowed_types:
             raise SyntaxError(f"Error: Chunk type not recognized: {Type}")
@@ -147,29 +145,19 @@ class Chunky(Helper):
                 partET = self._getObjects(Type=Type, ID=ID, offset=offset, since=since)
             chunkData.add(doc=partET)
 
-            # all related Multimedia and Persons items, no chunking
-            for targetType in ["Multimedia", "Person"]:
-                relatedET = self._relatedItems(
-                    part=partET, target=targetType, since=since
-                )
-                if relatedET is not None:
-                    chunkData.add(doc=relatedET)
-
-            offset = offset + self.chunkSize
-            actualNo = chunkData.actualSize(module="Object")
-            # print(f"*** actual VS chunkSize: {actualNo} VS {self.chunkSize}")
-
-            if attachment == "attachment":
-                print("Trying to get attachments for this chunk...")
-                try:
-                    expected = self.sar.saveAttachments(
-                        data=chunkData, adir=pix_dir, since=since
+            # only look for related data if there is something in current chunk
+            if chunkData:
+                # all related Multimedia and Persons items, no chunking
+                for targetType in ["Multimedia", "Person"]:
+                    relatedET = self._relatedItems(
+                        part=partET, target=targetType, since=since
                     )
-                except Exception as e:
-                    self.info("Error during saveAttachments")
-                    raise e
+                    if relatedET is not None:
+                        chunkData.add(doc=relatedET)
 
-            if actualNo < self.chunkSize:
+            offset += self.chunkSize  # wrong for last chunk
+            actualSize = chunkData.actualSize(module="Object")
+            if actualSize < self.chunkSize:
                 lastChunk = True
             yield chunkData
 
