@@ -285,13 +285,27 @@ class MpApi:
           save anything, so no.
 
         r = self.createItem(module=mtype, xml=data.toString())
-        data.toString()
         """
         # why are we not using Module's toString method?
         ET = data.toET()
         xml = etree.tostring(ET, pretty_print=True)
         r = self.createItem(module=mtype, xml=xml)
         return Module(xml=r.text)
+
+    def createItem3(self, *, data: Module) -> int:
+        """
+        Like createItem2 only mtype comes from data and method returns id of the newly
+        created record
+        """
+
+        mtype = data.extract_mtype()
+        m = self.createItem2(mtype=mtype, data=data)
+        objIdL = m.xpath("/m:application/m:modules/m:module/m:moduleItem/@id")
+        if len(objIdL) == 0:
+            raise ValueError("Response contains no id")  # should not happen
+        if len(objIdL) > 1:
+            raise ValueError("Response contains multiple ids")  # should not happen
+        return int(objIdL[0])
 
     def updateItem(self, *, module: str, id: int, xml: str) -> requests.Response:
         """

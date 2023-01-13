@@ -81,7 +81,6 @@ from copy import deepcopy  # for lxml
 from lxml import etree  # type: ignore
 from mpapi.helper import Helper
 from pathlib import Path
-from typing_extensions import TypeAlias  # only in python 3.9?
 from typing import Any, Iterator, Optional, Union
 
 # xpath 1.0 and lxml don't allow empty string or None for default ns
@@ -438,6 +437,29 @@ class Module(Helper):
         else:
             return True
 
+    def extract_mtypes(self) -> list:
+        """
+        extracts the mtype; currently meant for cases where Module object has a single record
+
+        What if multiple types exist? Should we return a list?
+        """
+        return self.xpath("/m:application/m:modules/m:module/@name")
+
+    def extract_mtype(self) -> str:
+        """
+        Return mtype of single record.
+
+        Raises ValueError if zero or more than 1 mtypes in data
+        """
+
+        mtypeL = self.xpath("/m:application/m:modules/m:module/@name")
+        if len(mtypeL) == 0:
+            raise ValueError("Data has no content")
+        if len(mtypeL) > 1:
+            raise ValueError("Only one record expected")
+
+        return mtypeL[0]
+
     def iter(self, *, module: str = "Object") -> Iterator:
         """
         Iterates through moduleItems of the module type provided; use
@@ -727,6 +749,47 @@ class Module(Helper):
                 # print (f".............updating totalSize for {modType}")
                 attributes = moduleN.attrib
                 attributes["totalSize"] = str(int(len(itemsL)))
+
+    def _parse_ident_in_parts(self, *, nr):
+        partsL = [x.strip() for x in nr.split()]
+        part1 = partsL[0]
+        part2 = " " + partsL[1]
+        part3 = " ".join(partsL[2:])
+
+        return [part1, part2, part3]
+
+    def _rewrite_identNr(self, newNr) -> Any:  # Module
+        """
+        Attempts to rewrite the internal record using the new identNr.
+        """
+        # Let's drop original identNr - if any
+        # should be called dropField, element is some type, perhaps etype
+        self._dropFieldsByName(element="dataField", name="ObjObjectNumberTxt")
+        self._dropFieldsByName(element="repeatableGroup", name="ObjObjectNumberGrp")
+        # ObjOtherNumberGrp is similar - could warn about it ?
+        partsL = self._parse_ident_in_parts(nr=newNr)
+        # print (f"partsL {partsL}")
+
+        itemN = self.xpath("/m:application/m:modules/m:module/m:moduleItem")[0]
+        # print (f"mItemN {itemN}")
+
+        # we dont know if the order or position of fields is important to Zetcom
+        rGrpN = self.repeatableGroup(parent=itemN, name="ObjObjectNumberGrp")
+        grpItemN = self.repeatableGroupItem(parent=rGrpN)
+        self.dataField(parent=grpItemN, name="InventarNrSTxt", value=newNr)
+        self.dataField(parent=grpItemN, name="Part1Txt", value=partsL[0])
+        self.dataField(parent=grpItemN, name="Part2Txt", value=partsL[1])
+        if not partsL[2] == "":  # .isspace()
+            self.dataField(parent=grpItemN, name="Part3Txt", value=partsL[2])
+        self.dataField(parent=grpItemN, name="SortLnu", value="1")
+        vr = self.vocabularyReference(parent=grpItemN, name="DenominationVoc")
+        self.vocabularyReferenceItem(parent=vr, ID=2737051)  # Ident. Nr.
+        mrN = self.moduleReference(parent=grpItemN, name="InvNumberSchemeRef")
+
+        # where do I get that info from? realy necessary?
+        self.moduleReferenceItem(
+            parent=mrN, moduleItemId="68"
+        )  # EM-Südsee/Australien VIII B
 
     def uploadForm(self) -> None:
         """

@@ -1,5 +1,5 @@
 [build-system]
-requires = ["flit_core >=3.2,<4"]
+requires = ["flit_core >=3.2"]
 build-backend = "flit_core.buildapi"
 
 [project]
@@ -27,3 +27,5 @@ test = [
 mink = 'mpapi:mink'
 mpReplace = 'mpapi:replace'
 getAttachments = 'mpapi:getAttachments'
+getItem = 'mpapi:getItem'
+updateItem = 'mpapi:updateItem'

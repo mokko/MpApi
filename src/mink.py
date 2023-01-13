@@ -38,6 +38,7 @@ MPAPI CLASSES
     mink2   : CLI frontend
 
 New
+* chunks are now zipped to save disk space 20221226
 * Experimenting with sar2 for a cleaner interface. 20220116
 * I eliminated some DSL commands that I haven't been using and integrated clean into join 20220116
 * TODO: getPack ends now with a cleaned join file, so programs that expect clean file need to change
@@ -145,7 +146,6 @@ class Mink:
                 print(f" looking for multimedia info at {chunk_fn}")
                 self._getAttachments(From=chunk_fn, pix_dir=pix_dir)
                 no += 1
-                # chunk_fn = self.chunkPath(Type=Type, ID=ID, no=no, suffix=".zip")
         else:
             # pretty dirty: assumes that getMedia has been done before
             # todo - we could trigger a new get if this file doesn't exist
@@ -190,7 +190,7 @@ class Mink:
 
         # ignore chunks already on disk
         no, offset = self._fastforward(Type=Type, ID=ID, suffix=".zip")
-        print(f" next chunk {no}; offset:{offset}")
+        print(f" fast forwarded to chunk no {no} with offset {offset}")
         # how can i know if this is the last chunk?
         # Test if the last chunk has less items than chunkSize OR
         # Do another request to RIA and see if it comes back empty?
@@ -212,8 +212,8 @@ class Mink:
                 chunk.toZip(path=chunk_fn)
                 chunk.validate()
                 no += 1
-            # else:
-            #    print("###Chunk empty")
+            else:
+                print("Chunk empty; we're at the end")
 
     def getItem(self, args: list) -> Module:
         """
@@ -354,7 +354,6 @@ class Mink:
         while (
             chunk_fn := self._chunkPath(Type=Type, ID=ID, no=no, suffix=suffix)
         ).exists():
-            # chunk_fn = self._chunkPath(Type=Type, ID=ID, no=no, suffix=suffix)
             no += 1
         else:
             if no > 1:
