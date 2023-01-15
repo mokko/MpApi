@@ -750,46 +750,13 @@ class Module(Helper):
                 attributes = moduleN.attrib
                 attributes["totalSize"] = str(int(len(itemsL)))
 
-    def _parse_ident_in_parts(self, *, nr):
+    def _parse_ident_in_parts(self, *, nr):  # xxx
         partsL = [x.strip() for x in nr.split()]
         part1 = partsL[0]
         part2 = " " + partsL[1]
         part3 = " ".join(partsL[2:])
 
         return [part1, part2, part3]
-
-    def _rewrite_identNr(self, newNr) -> Any:  # Module
-        """
-        Attempts to rewrite the internal record using the new identNr.
-        """
-        # Let's drop original identNr - if any
-        # should be called dropField, element is some type, perhaps etype
-        self._dropFieldsByName(element="dataField", name="ObjObjectNumberTxt")
-        self._dropFieldsByName(element="repeatableGroup", name="ObjObjectNumberGrp")
-        # ObjOtherNumberGrp is similar - could warn about it ?
-        partsL = self._parse_ident_in_parts(nr=newNr)
-        # print (f"partsL {partsL}")
-
-        itemN = self.xpath("/m:application/m:modules/m:module/m:moduleItem")[0]
-        # print (f"mItemN {itemN}")
-
-        # we dont know if the order or position of fields is important to Zetcom
-        rGrpN = self.repeatableGroup(parent=itemN, name="ObjObjectNumberGrp")
-        grpItemN = self.repeatableGroupItem(parent=rGrpN)
-        self.dataField(parent=grpItemN, name="InventarNrSTxt", value=newNr)
-        self.dataField(parent=grpItemN, name="Part1Txt", value=partsL[0])
-        self.dataField(parent=grpItemN, name="Part2Txt", value=partsL[1])
-        if not partsL[2] == "":  # .isspace()
-            self.dataField(parent=grpItemN, name="Part3Txt", value=partsL[2])
-        self.dataField(parent=grpItemN, name="SortLnu", value="1")
-        vr = self.vocabularyReference(parent=grpItemN, name="DenominationVoc")
-        self.vocabularyReferenceItem(parent=vr, ID=2737051)  # Ident. Nr.
-        mrN = self.moduleReference(parent=grpItemN, name="InvNumberSchemeRef")
-
-        # where do I get that info from? realy necessary?
-        self.moduleReferenceItem(
-            parent=mrN, moduleItemId="68"
-        )  # EM-Südsee/Australien VIII B
 
     def uploadForm(self) -> None:
         """
@@ -1027,11 +994,11 @@ class Module(Helper):
 
     def _standardDT(self, *, inputN) -> str:
         """
-        For a given node containing a dateTime return the date in standard from
-        as string. The standard form omits special symbols such as TZ and
-        space. Also it provides only the first 14 digits, yyyymmddhhmmss b/c
-        they always exist, so the resulting number has the same length. The
-        upshot is that the result can be compared in xpath 1 as a number.
+        For a given node containing a dateTime return the date in "standard form"
+        as string. The standard form omits special symbols such as TZ and space.
+        Also it provides only the first 14 digits, yyyymmddhhmmss b/c they always
+        exist, so the resulting number has always the same length. The upshot is
+        that the result can be compared in xpath v1 as a number.
         """
         xp = "translate(m:systemField[@name ='__lastModified']/m:value,'-:.TZ ','')"
         new = inputN.xpath(xp, namespaces=NSMAP)

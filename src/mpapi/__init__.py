@@ -57,13 +57,16 @@ def getItem():
     parser.add_argument(
         "-t", "--mtype", help="module type (Object, Multimedia etc.)", default="Object"
     )
+    parser.add_argument(
+        "-u", "--upload", help="Save in upload form", action="store_true"
+    )
     parser.add_argument("-i", "--ID", help="ID")
     parser.add_argument("-v", "--version", help="Display version information")
+    args = parser.parse_args()
 
     if args.version:
         print(f"Version: {__version__}")
         sys.exit(0)
-    args = parser.parse_args()
 
     c = MpApi(baseURL=baseURL, pw=pw, user=user)
     m = c.getItem2(mtype=args.mtype, ID=args.ID)
