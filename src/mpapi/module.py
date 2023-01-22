@@ -774,7 +774,14 @@ class Module(Helper):
         - Returns a copy or rewrites itself? Act as clean, so rewrite itself
         """
 
-        self._dropFields(element="systemField")
+        # we want to preserve systemField:__orgUnit
+        # self._dropFields(element="systemField")
+        self._dropFieldsByName(element="systemField", name="__id")
+        self._dropFieldsByName(element="systemField", name="__lastModifiedUser")
+        self._dropFieldsByName(element="systemField", name="__createdUser")
+        self._dropFieldsByName(element="systemField", name="__created")
+        self._dropFieldsByName(element="systemField", name="__uuid")
+
         self._dropFields(element="virtualField")
         self._dropFields(element="formattedValue")
 
@@ -965,6 +972,8 @@ class Module(Helper):
         EXPECTS
         * parent (optional): lxml element; if not specified, acts on Module's
           whole internal document.
+
+        e.g. self._dropFields(element="systemField")
         """
 
         if parent is None:

@@ -708,6 +708,11 @@ class MpApi:
         return self._get(url)
 
     def getOrgUnits2(self, *, mtype: str) -> Module:
+        """
+        OrgUnit has its own schema.
+        http://docs.zetcom.com/framework-public/_attachments/ws/module/orgunit/orgunit_1_0.xsd
+        Although we treat the response as module data, it seems to work.
+        """
         r = self.getOrgUnits(module=mtype)
         return Module(xml=r.text)
 
