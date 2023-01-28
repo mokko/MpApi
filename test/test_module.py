@@ -31,7 +31,8 @@ def test_constructors_only():
 
 
 def test_nsmap():
-    print(NSMAP)
+    # print(NSMAP)
+    assert NSMAP["m"] is not None
 
 
 def test_output():
