@@ -21,6 +21,7 @@ SEE ALSO
 # import logging
 from requests.auth import HTTPBasicAuth
 from lxml import etree  # type: ignore
+from mpapi.constants import NSMAP
 from mpapi.search import Search
 from mpapi.module import Module
 from typing import Any, Union
@@ -203,6 +204,12 @@ class MpApi:
         r = self.runSavedQuery(id=ID, mtype=Type, xml=q.toString())
         return etree.fromstring(r.content, ETparser)
 
+    def runSavedQuery3(
+        self, *, ID: int, Type: str = "Object", limit: int = -1, offset: int = 0
+    ) -> Module:
+        tree = self.runSavedQuery2(ID=ID, Type=Type, limit=limit, offset=offset)
+        return Module(tree=tree)
+
     def search(self, *, xml: str) -> requests.Response:
         """
         Perform an ad-hoc search for modules items
@@ -321,8 +328,17 @@ class MpApi:
         v2 with other param names and data provided as Module object.
         """
         xml = data.toString()
-        print(xml)
+        # print(xml)
         return self.updateItem(module=mtype, id=ID, xml=xml)
+
+    def updateItem3(self, *, mtype: str, ID: int, data: Module) -> requests.Response:
+        """
+        v3 return value Module object.
+        """
+        xml = data.toString()
+        # print(xml)
+        ret = self.updateItem(module=mtype, id=ID, xml=xml)
+        return Module(xml=ret.text)
 
     def deleteItem(self, *, module: str, id: int) -> requests.Response:
         """
@@ -355,7 +371,8 @@ class MpApi:
         Update a single field of a module item
         PUT http://.../ria-ws/application/module/{module}/{__id}/{dataField}
 
-        NB: We don't need a createField method since simple dataFields are always created.
+        NB: We don't need a createField method since simple dataFields are always
+        created.
         """
         url = f"{self.appURL}/module/{module}/{id}/{dataField}"
         return self._put(url, data=xml)
@@ -535,7 +552,7 @@ class MpApi:
         PUT http://.../ria-ws/application/module/{module}/{__id}/{repeatableGroup|reference}/{__referenceId}
 
         me: It looks like this is NOT updating all fields of a repeatable group, but all fields of rGrpItem
-        instead.
+        instead. -> new name updateRepeatableGroupItem
 
         PUT http://.../ria-ws/application/module/{module}/{__id}/{repeatableGroup|reference}/{__repeatableGroupId|__referenceId}
 
@@ -562,8 +579,27 @@ class MpApi:
     def updateRepeatableGroupItem2(
         self, *, mtype: str, ID: int, referenceId: int, repeatableGroup: str, node
     ) -> requests.Response:
+        """
+        Version that requires xml as etree
+        """
         xml = etree.tostring(node)
         return updateRepeatableGroup(
+            module=mtype,
+            id=ID,
+            referenceId=referenceId,
+            repeatableGroup=repeatableGroup,
+            xml=xml,
+        )
+
+    def updateRepeatableGroupItem3(
+        self, *, mtype: str, ID: int, referenceId: int, repeatableGroup: str, xml: str
+    ) -> requests.Response:
+        """
+        Version that accepts xml as string.
+
+        todo. Cant we construct the xml from the parameters provided?
+        """
+        return self.updateRepeatableGroup(
             module=mtype,
             id=ID,
             referenceId=referenceId,

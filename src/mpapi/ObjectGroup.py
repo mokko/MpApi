@@ -52,11 +52,7 @@ from mpapi.client2 import Client2
 # from mpapi.client import MpApi
 from mpapi.search import Search
 from mpapi.module import Module
-
-NSMAP = {
-    "m": "http://www.zetcom.com/ria/ws/module",
-    "o": "http://www.zetcom.com/ria/ws/module/orgunit",
-}
+from mpapi.constants import NSMAP
 
 
 class ObjectGroup:

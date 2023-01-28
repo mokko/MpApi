@@ -56,6 +56,7 @@ from typing import NewType, Optional, Union
 
 from mpapi.chunky import Chunky
 from mpapi.client import MpApi
+from mpapi.constants import NSMAP
 from mpapi.module import Module
 from mpapi.sar import Sar
 from mpapi.search import Search
@@ -64,10 +65,6 @@ from zipfile import ZipFile, ZIP_LZMA
 Since = Optional[str]
 
 ETparser = etree.XMLParser(remove_blank_text=True)
-NSMAP = {
-    "s": "http://www.zetcom.com/ria/ws/module/search",
-    "m": "http://www.zetcom.com/ria/ws/module",
-}
 
 allowed_commands = ["all", "attachments", "chunk", "getItem", "getPack", "pack"]
 chunkSize = 1000

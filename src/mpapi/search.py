@@ -66,9 +66,10 @@ EXAMPLE
 from pathlib import Path
 from lxml import etree  # type: ignore
 from mpapi.helper import Helper
+from mpapi.constants import NSMAP
 
 # xpath 1.0 and lxml don't empty string or None for default ns
-NSMAP = {"s": "http://www.zetcom.com/ria/ws/module/search"}
+
 
 allowedOperators = {
     "betweenIncl",

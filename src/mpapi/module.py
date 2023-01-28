@@ -79,16 +79,13 @@ USAGE:
 from collections import namedtuple  # experimenting with namedtuples
 from copy import deepcopy  # for lxml
 from lxml import etree  # type: ignore
+from mpapi.constants import NSMAP
 from mpapi.helper import Helper
 from pathlib import Path
 from typing import Any, Iterator, Optional, Union
 
 # xpath 1.0 and lxml don't allow empty string or None for default ns
 dataTypes = {"Clb": "Clob", "Dat": "Date", "Lnu": "Long", "Txt": "Varchar"}
-NSMAP = {
-    "m": "http://www.zetcom.com/ria/ws/module",
-    "o": "http://www.zetcom.com/ria/ws/module/orgunit",
-}
 parser = etree.XMLParser(remove_blank_text=True)
 # types
 # not using lxml-stubs at the moment

@@ -1,15 +1,11 @@
 from lxml import etree
 from MpApi.Module import Module
 from MpApi.Search import Search
+from mpapi.constants import NSMAP
 
 """
     set marker SM8HF in onlineBeschreibung if it doesn't exist yet
 """
-
-NSMAP = {
-    "s": "http://www.zetcom.com/ria/ws/module/search",
-    "m": "http://www.zetcom.com/ria/ws/module",
-}
 
 marker = "SM8HF"
 

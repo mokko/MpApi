@@ -54,14 +54,10 @@ import importlib
 
 from mpapi.sar import Sar
 from mpapi.client import MpApi
+from mpapi.constants import NSMAP
 from mpapi.module import Module
 from mpapi.search import Search
 from typing import Any, Callable, Iterable
-
-NSMAP = {
-    "s": "http://www.zetcom.com/ria/ws/module/search",
-    "m": "http://www.zetcom.com/ria/ws/module",
-}
 
 
 class Replace:

@@ -1,9 +1,8 @@
+from mpapi.constants import NSMAP
 from mpapi.chunky import Chunky
 from mpapi.module import Module
 from lxml import etree  # type: ignore
 from typing import Union
-
-NSMAP: dict = {"m": "http://www.zetcom.com/ria/ws/module"}
 
 # types
 since = Union[str, None]

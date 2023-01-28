@@ -1,10 +1,9 @@
+from mpapi.constants import NSMAP
 from mpapi.search import Search
 from mpapi.module import Module
 import lxml
 from lxml import etree  # type: ignore
 import pytest
-
-NSMAP: dict = {"m": "http://www.zetcom.com/ria/ws/module"}
 
 
 def test_constructors_only():
@@ -29,6 +28,10 @@ def test_constructors_only():
     assert not (m)
     m = Module()  # from scratch
     assert not (m)
+
+
+def test_nsmap():
+    print(NSMAP)
 
 
 def test_output():
@@ -81,10 +84,16 @@ def test_from_scratch_interface():
     assert m.validate()
 
 
-def test_drops_other_changes():
+def test_drops():
     m = Module(file="sdata/exhibit20222.xml")
+    uuid = m.xpath("/m:application/m:modules/m:module/m:moduleItem/@uuid")[0]
+    assert uuid == "507201"
     m.dropUUID()
-    # ... TODO: some methods are missing
+    try:
+        uuid = m.xpath("/m:application/m:modules/m:module/m:moduleItem/@uuid")
+    except:
+        assert 1 == 1
+
     assert m.validate()
 
 

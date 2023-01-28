@@ -1,4 +1,5 @@
 from lxml import etree
+from mpapi.constants import NSMAP
 from pathlib import Path
 import pkgutil
 from typing import Union
@@ -8,11 +9,6 @@ from zipfile import ZipFile, ZIP_LZMA
 # pathlike = NewType("Pathlike", Union[str, Path])
 # ET = NewType("ET", Union [
 ET = any
-
-NSMAP = {
-    "s": "http://www.zetcom.com/ria/ws/module/search",
-    "m": "http://www.zetcom.com/ria/ws/module",
-}
 
 
 class Helper:
