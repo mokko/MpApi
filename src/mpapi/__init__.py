@@ -1,6 +1,7 @@
-"""An Unofficial Client for the MuseumPlus API"""
+"""An Unofficial Open Source Client for the MuseumPlus API"""
 
-__version__ = "0.1.5"
+__version__ = "0.1.6"
+# v0.1.6 without old replace
 credentials = "credentials.py"  # expect credentials in pwd
 import argparse
 from getAttachments import GetAttachments
