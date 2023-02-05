@@ -79,14 +79,13 @@ USAGE:
 from collections import namedtuple  # experimenting with namedtuples
 from copy import deepcopy  # for lxml
 from lxml import etree  # type: ignore
-from mpapi.constants import NSMAP
+from mpapi.constants import NSMAP, parser
 from mpapi.helper import Helper
 from pathlib import Path
 from typing import Any, Iterator, Optional, Union
 
 # xpath 1.0 and lxml don't allow empty string or None for default ns
 dataTypes = {"Clb": "Clob", "Dat": "Date", "Lnu": "Long", "Txt": "Varchar"}
-parser = etree.XMLParser(remove_blank_text=True)
 # types
 # not using lxml-stubs at the moment
 ET = Any
@@ -774,6 +773,7 @@ class Module(Helper):
         # we want to preserve systemField:__orgUnit
         # self._dropFields(element="systemField")
         self._dropFieldsByName(element="systemField", name="__id")
+        self._dropFieldsByName(element="systemField", name="__lastModified")
         self._dropFieldsByName(element="systemField", name="__lastModifiedUser")
         self._dropFieldsByName(element="systemField", name="__createdUser")
         self._dropFieldsByName(element="systemField", name="__created")
@@ -786,6 +786,7 @@ class Module(Helper):
         # self._dropAttribs(xpath="//m:moduleItem", attrib="id")
         # do we need to eliminate size attributes in repeatableGroups?
         self._dropAttribs(xpath="//m:repeatableGroup", attrib="size")
+        self._dropAttribs(xpath="//m:moduleItem", attrib="uuid")
 
         # various attributes in moduleReference? name we need to keep
         # <moduleReference name="InvNumberSchemeRef" targetModule="InventoryNumber" multiplicity="N:1" size="1">
@@ -815,7 +816,7 @@ class Module(Helper):
         self._dropFieldsByName(element="dataField", name="ObjInventoryDateDat")
         self._dropFieldsByName(element="dataField", name="DatestampFromFuzzySearchLnu")
         self._dropFieldsByName(element="dataField", name="DatestampToFuzzySearchLnu")
-        self._dropFieldsByName(element="moduleReference", name="ObjObjectGroupsRef")
+        # self._dropFieldsByName(element="moduleReference", name="ObjObjectGroupsRef")
         self._dropFieldsByName(element="moduleReference", name="ObjMultimediaRef")
 
     def vocabularyReference(

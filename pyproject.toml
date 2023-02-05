@@ -27,3 +27,6 @@ mink = 'mpapi:mink'
 getAttachments = 'mpapi:getAttachments'
 getItem = 'mpapi:getItem'
 updateItem = 'mpapi:updateItem'
+
+[tool.flit.sdist]
+include = ["src/mpapi/__init__.py"]
