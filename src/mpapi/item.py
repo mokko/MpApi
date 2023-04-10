@@ -1,4 +1,7 @@
 """
+Since we have record.py now, I think we abandon this attempt
+
+
 I am considering making a new class for moduleItems. These would represent
 a single moduleItem.
 

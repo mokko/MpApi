@@ -24,6 +24,7 @@ from lxml import etree  # type: ignore
 from mpapi.constants import NSMAP
 from mpapi.search import Search
 from mpapi.module import Module
+from pathlib import Path  # used only sparingly
 from typing import Any, Union
 import requests
 
@@ -676,20 +677,16 @@ class MpApi:
     def saveAttachment(self, *, module: str = "Multimedia", id: int, path: str) -> int:
         """
         Streaming version of getAttachment that saves attachment directly to disk.
-
         Expects
         - module: module type (e.g. "Multimedia"),
         - id: item id in specified module (int)
         - path: filename/path to save attachment to
         to.
-
         Returns id if successful.
-
         Note: There is a similar saveAttachments in Sar.py that calls this one.
         """
         url = f"{self.appURL}/module/{module}/{id}/attachment"
-        r = self._get(url, stream=True, headers={"Accept": "application/octet-stream"})
-        r.raise_for_status()  # todo: replace with r.raise_for_status()?
+        # r = self._get(url, stream=True, headers={"Accept": "application/octet-stream"})
 
         # exception: not using _get
         with self.session.get(
@@ -699,7 +696,6 @@ class MpApi:
             with open(path, "wb") as f:
                 for chunk in r.iter_content(chunk_size=8192):
                     f.write(chunk)
-        # self.headers["Accept"] = oldAccept
         return id
 
     def getThumbnail(self, *, module: str, id: int, path: str) -> requests.Response:
@@ -716,12 +712,26 @@ class MpApi:
         Add or update the attachment of a module item, as a base64 encoded XML
         Add or update the attachment of a module item, as a binary stream
         PUT http://.../ria-ws/application/module/{module}/{__id}/attachment
-        Untested
+        Successfully changed and tested: 9.4.2023
+
+        When an attachment is uploaded through the gui, the field Dateiname is set
+        automatically. This method does not update any fields.
+
+        It's unclear if this version can be streamed and how big the files can be.
+        Currently I am inclined to leave this version be and try out additional
+        version with corresponding numbers i.e. updateAttachment2 etc.
         """
         url = f"{self.appURL}/module/{module}/{id}/attachment"
         with open(path, mode="rb") as f:
             file = f.read()
-        return self._put(url, data=file)
+
+        fn = Path(path).name
+
+        print(f"FN:{fn} {file}")
+        headers = {"X-File-Name": fn, "Content-Type": "application/octet-stream"}
+        r = self.session.put(url, data=file, headers=headers)
+        r.raise_for_status()
+        return r
 
     def deleteAttachment(self, *, module: str, id: int) -> requests.Response:
         """
