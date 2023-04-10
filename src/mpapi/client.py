@@ -332,14 +332,27 @@ class MpApi:
         # print(xml)
         return self.updateItem(module=mtype, id=ID, xml=xml)
 
-    def updateItem3(self, *, mtype: str, ID: int, data: Module) -> requests.Response:
+    def updateItem3(self, *, mtype: str, ID: int, data: Module) -> Module:
         """
-        v3 return value Module object.
+        v3 return Module object. Does this return value make any sense? Is the item event returned?
         """
         xml = data.toString()
         # print(xml)
         ret = self.updateItem(module=mtype, id=ID, xml=xml)
         return Module(xml=ret.text)
+
+    def updateItem4(self, data: Module) -> requests.Response:
+        """
+        v4 where mtype and ID are extracted from data
+        """
+        if len(data) != 1:
+            raise SyntaxError("ERROR: Expecting single record!")
+        mtype = data.extract_mtype()
+        ID = data.extract_first_id()
+        xml = data.toString()
+        xml = xml.encode()  # why is this necessary?
+        ret = self.updateItem(module=mtype, id=ID, xml=xml)
+        return ret
 
     def deleteItem(self, *, module: str, id: int) -> requests.Response:
         """
@@ -727,7 +740,7 @@ class MpApi:
 
         fn = Path(path).name
 
-        print(f"FN:{fn} {file}")
+        # print(f"FN:{fn} {file}")
         headers = {"X-File-Name": fn, "Content-Type": "application/octet-stream"}
         r = self.session.put(url, data=file, headers=headers)
         r.raise_for_status()

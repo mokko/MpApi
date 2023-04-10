@@ -118,7 +118,7 @@ class Record:
         if len(origFileL) > 0:
             origFileN = origFileL[0]
             origFileN.getparent().remove(origFileN)
-            print("removing original MulOriginalFileTxt")
+            # print("removing original MulOriginalFileTxt")
         parentN = self.module.xpath(
             "/m:application/m:modules/m:module/m:moduleItem/m:dataField[last()]"
         )[0]
@@ -136,12 +136,25 @@ class Record:
         """
         self.raise_if_not_multimedia()
         p = Path(path)
-        img = pyexiv2.Image(path)
-        data = img.read_exif()
-        date_str = data["Exif.Image.DateTime"]  # 2011:04:12 16:29:52
-        dateDT = datetime.strptime(date_str, "%Y:%m:%d %H:%M:%S")
+        dateDT = False
+        try:
+            img = pyexiv2.Image(path)
+        except:
+            print("WARNING: Can't access exif info")
+            # mtime = p.stat().st_mtime
+        else:
+            try:
+                date_str = exif["Exif.Image.DateTime"]  # 2011:04:12 16:29:52
+            except:
+                print("WARNING Dont find exif date time, using mtime")
+                # mtime = p.stat().st_mtime
+            else:
+                dateDT = datetime.strptime(date_str, "%Y:%m:%d %H:%M:%S")
+        if not dateDT:
+            return
+        # dateDT = datetime.utcfromtimestamp(mtime)
         utc = dateDT.strftime("%Y-%m-%dT%H:%M:%SZ")
-        print(utc)
+        print(f"ddd-new date: {utc}")
         dateExifL = self.module.xpath(
             """
             /m:application/m:modules/m:module/m:moduleItem/m:dataField
@@ -151,9 +164,9 @@ class Record:
         if len(dateExifL) > 0:
             dateExifN = dateExifL[0]
             dateExifN.getparent().remove(dateExifN)
-            print("removing original MulDateExifTst")
-        else:
-            print("no MulDateExifTst")
+            # print("removing original MulDateExifTst")
+        # else:
+        # print("no MulDateExifTst")
         parentN = self.module.xpath(
             "/m:application/m:modules/m:module/m:moduleItem/m:dataField[last()]"
         )[0]
@@ -178,7 +191,7 @@ class Record:
         self.raise_if_not_multimedia()
         p = Path(path)
         size = p.stat().st_size
-        print(f"size {size}")
+        # print(f"size {size}")
 
         mulSizeL = self.module.xpath(
             """
@@ -190,7 +203,7 @@ class Record:
         if len(mulSizeL) > 0:
             mulSizeN = mulSizeL[0]
             mulSizeN.getparent().remove(mulSizeN)
-            print("removing original MulSizeTxt")
+            # print("removing original MulSizeTxt")
 
         parentN = self.module.xpath(
             "/m:application/m:modules/m:module/m:moduleItem/m:dataField[last()]"
@@ -214,8 +227,8 @@ class Record:
 if __name__ == "__main__":
     m = Module(file="getItem-Multimedia6549806.xml")
     r = Record(m)
-    print(m)
-    print(r._mtype())
+    # print(m)
+    # print(r._mtype())
     r.add_reference(targetModule="Object", moduleItemId=1233)
     r.set_filename(path="VII a 40.tif")
     r.set_size(path="VII a 40.tif")

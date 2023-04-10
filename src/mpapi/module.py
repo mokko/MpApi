@@ -32,7 +32,7 @@ USAGE:
     m = Module(tree=lxml.etree)  # from lxml.etree object
     m = Module()                 # new Object item from scratch CHANGED
 
-    # getting the XML out or validate it 
+    # getting the XML out or validating it 
     m.toFile(path="some.xml")
     xml_str = m.toString()
     lxml = m.toET()  # returns lxml etree document
@@ -46,6 +46,8 @@ USAGE:
     itemN = m[("Object",12345)]   # lxml element node that if changed, changes m
     if m:                         # m is True if len(m) > 0 (new)
     nodeL = m.xpath(path="/m:application") # m's shortcut to lxml xpath
+    list = m.extract_mtypes()
+    mtype = m.extract_mtype()
     
     #iterate through all moduleItems
     for item in m:
@@ -301,7 +303,7 @@ class Module(Helper):
 
     def addItem(self, *, itemN: ET, mtype: str):
         """
-        Adds a moduleItem to the internal Module object where item is an etree node.
+        Adds a moduleItem to the internal Module object where itemN is an etree node.
 
         New:
         - We're now checking if item (with that modItemId) exists already. If so, we're
@@ -433,17 +435,12 @@ class Module(Helper):
         else:
             return True
 
-    def extract_mtypes(self) -> list:
-        """
-        extracts the mtype; currently meant for cases where Module object has a single record
-
-        What if multiple types exist? Should we return a list?
-        """
-        return self.xpath("/m:application/m:modules/m:module/@name")
+    def extract_first_id(self) -> int:
+        return self.xpath("/m:application/m:modules/m:module/m:moduleItem[1]/@id")[0]
 
     def extract_mtype(self) -> str:
         """
-        Return mtype of single record.
+        Returns single mtype.
 
         Raises ValueError if zero or more than 1 mtypes in data
         """
@@ -455,6 +452,13 @@ class Module(Helper):
             raise ValueError("Only one record expected")
 
         return mtypeL[0]
+
+    def extract_mtypes(self) -> list:
+        """
+        Returns list of mtypes
+
+        """
+        return self.xpath("/m:application/m:modules/m:module/@name")
 
     def iter(self, *, module: str = "Object") -> Iterator:
         """
