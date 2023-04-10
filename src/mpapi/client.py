@@ -699,9 +699,6 @@ class MpApi:
         Note: There is a similar saveAttachments in Sar.py that calls this one.
         """
         url = f"{self.appURL}/module/{module}/{id}/attachment"
-        # r = self._get(url, stream=True, headers={"Accept": "application/octet-stream"})
-
-        # exception: not using _get
         with self.session.get(
             url, stream=True, headers={"Accept": "application/octet-stream"}
         ) as r:
