@@ -9,10 +9,24 @@ from mink import Mink
 from mpapi.module import Module
 from mpapi.client import MpApi
 from pathlib import Path
+import tomllib
 
+# old style
 if Path(credentials).exists():
     with open(credentials) as f:
         exec(f.read())
+
+# new style
+else:
+    cred_fn = Path.home() / ".ria"
+    if not cred_fn.exists():
+        raise SyntaxError(f"RIA Credentials not found at {cred_fn}")
+
+    with open(cred_fn, "rb") as f:
+        cred = tomllib.load(f)
+    user = cred["user"]
+    pw = cred["pw"]
+    baseURL = cred["baseURL"]
 
 
 def mink():
