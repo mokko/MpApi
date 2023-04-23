@@ -120,7 +120,7 @@ class Record:
             origFileN.getparent().remove(origFileN)
             # print("removing original MulOriginalFileTxt")
         parentN = self.module.xpath(
-            "/m:application/m:modules/m:module/m:moduleItem/m:dataField[last()]"
+            "/m:application/m:modules/m:module/m:moduleItem/*[last()]"
         )[0]
         xml = f"""<dataField dataType="Varchar" name="MulOriginalFileTxt">
           <value>{filename}</value>
@@ -206,7 +206,7 @@ class Record:
             # print("removing original MulSizeTxt")
 
         parentN = self.module.xpath(
-            "/m:application/m:modules/m:module/m:moduleItem/m:dataField[last()]"
+            "/m:application/m:modules/m:module/m:moduleItem/*[last()]"
         )[0]
         xml = f"""<dataField dataType="Varchar" name="MulSizeTxt">
           <value>{size} KB</value>
