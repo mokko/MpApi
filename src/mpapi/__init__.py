@@ -9,7 +9,13 @@ from mink import Mink
 from mpapi.module import Module
 from mpapi.client import MpApi
 from pathlib import Path
-import tomllib
+
+try:
+    import tomllib
+except ModuleNotFoundError:
+    import tomli as tomllib
+
+tomllib.loads("['This parses fine with Python 3.6+']")
 
 # old style
 if Path(credentials).exists():

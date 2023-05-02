@@ -48,7 +48,7 @@ New
 import datetime
 import logging
 from lxml import etree  # necessary?
-import os
+# import os
 from pathlib import Path
 import requests
 import sys
@@ -63,8 +63,6 @@ from mpapi.search import Search
 from zipfile import ZipFile, ZIP_LZMA
 
 Since = Optional[str]
-
-ETparser = etree.XMLParser(remove_blank_text=True)
 
 allowed_commands = ["all", "attachments", "chunk", "getItem", "getPack", "pack"]
 chunkSize = 1000
@@ -101,9 +99,9 @@ class Mink:
         * arg[0]: type (approval, exhibit, group or loc)
         * arg[1]: id of the respective type
         * arg[2]: label (used for filenames) or "chunk" to trigger chunk mode
-        * arg[3]: timestamp (optional); if specified, d/l attachents to subdir pix_update
+        * arg[3]: timestamp (optional); if specified, d/l attachments to subdir pix_update
 
-        It relies on user having downloaded the respective data beforehand,i.e.
+        It relies on user having downloaded the respective data beforehand, i.e.
         attachments will not download anything for you; instead it will work with
         what you have already downloaded.
 
@@ -133,14 +131,14 @@ class Mink:
             pix_dir = Path(f"{self.pix_dir}_update")
         if not pix_dir.exists():
             pix_dir.mkdir()
-        print(f" about to check attachments; saving to {pix_dir}")
+        print(f"about to check attachments; saving to {pix_dir}")
 
         if label == "chunk":
             no = 1
             while (
                 chunk_fn := self._chunkPath(Type=Type, ID=ID, no=no, suffix=".zip")
             ).exists():
-                print(f" looking for multimedia info at {chunk_fn}")
+                print(f"looking for multimedia info at {chunk_fn}")
                 self._getAttachments(From=chunk_fn, pix_dir=pix_dir)
                 no += 1
         else:
@@ -148,7 +146,7 @@ class Mink:
             # todo - we could trigger a new get if this file doesn't exist
             # or we trust the user to do the right thing?
             mm_fn = self.parts_dir / f"{label}-Multimedia-{Type}{ID}.xml"
-            print(f" looking for Multimedia info at {mm_fn}")
+            print(f"looking for Multimedia info at {mm_fn}")
             self._getAttachments(From=mm_fn, pix_dir=pix_dir)
 
     def chunk(self, args: list) -> None:
@@ -182,12 +180,12 @@ class Mink:
             since = None
 
         print(
-            f" CHUNKER: {Type}-{ID} since:{since} chunkSize: {self.chunker.chunkSize} "
+            f"CHUNKER: {Type}-{ID} since:{since} chunkSize: {self.chunker.chunkSize} "
         )
 
         # ignore chunks already on disk
         no, offset = self._fastforward(Type=Type, ID=ID, suffix=".zip")
-        print(f" fast forwarded to chunk no {no} with offset {offset}")
+        print(f"fast forwarded to chunk no {no} with offset {offset}")
         # how can i know if this is the last chunk?
         # Test if the last chunk has less items than chunkSize OR
         # Do another request to RIA and see if it comes back empty?
@@ -201,7 +199,7 @@ class Mink:
             since=since,
             offset=offset,
         ):
-            if chunk:  # Module is True if >0 items
+            if chunk:  # Module is True if > 0 items
                 # print(f"###chunk size:{chunk.actualSize(module='Object')}")
                 chunk_fn = self._chunkPath(Type=Type, ID=ID, no=no, suffix=".xml")
                 chunk.clean()
@@ -231,8 +229,9 @@ class Mink:
         """
         module = args[0]
         Id = args[1]
-        out_fn = self.project_dir / args[1] + ".xml"
-        if out_fn.exists():
+        out_fn = str(self.project_dir / args[1]) + ".xml" # type conversion for posix compliance
+        path = Path(out_fn)
+        if path.exists():
             print(f" Item from cache {out_fn}")
             return Module(file=out_fn)
         else:
@@ -281,10 +280,10 @@ class Mink:
         join_fn = self.project_dir / f"{label}-join-{Type}{Id}.xml"
 
         if join_fn.exists():
-            print(f" join from cache {join_fn}")
+            print(f"join from cache {join_fn}")
             m = Module(file=join_fn)
         else:
-            self.info(f" joining modules, saving to {join_fn}")
+            self.info(f"joining modules, saving to {join_fn}")
 
             # module for target and type refers to the type of selection
             m = (
@@ -300,13 +299,13 @@ class Mink:
             )
 
             if Type == "exhibit":
-                print(" d: about to get exhibit...")
+                print("d: about to get exhibit...")
                 m += self._getPart(
                     module="Exhibition", Id=Id, Type=Type, label=label, since=since
                 ) + self._getPart(
                     module="Registrar", Id=Id, Type=Type, label=label, since=since
                 )
-            print(" d: start cleaning")
+            print("d: start cleaning")
             m.clean()
             m.validate()
             m.toFile(path=join_fn)
@@ -409,7 +408,7 @@ class Mink:
           that date
 
         Returns:
-        * Module objct containing the data
+        * Module object containing the data
         """
         fn = self.parts_dir / f"{label}-{module}-{Type}{Id}.xml"
         if fn.exists():
