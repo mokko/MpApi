@@ -2,12 +2,12 @@
 getAttachments downloads attachments from RIA
 
 create a configuration file that describes one or multiple jobs
-e.g. getAttachments.jobs
-label:
-    type: group
-    id: 12345
-    restriction: None | freigegeben
-    name: dateiname | mulid
+e.g. getAttachments.toml
+[label]
+type = "group"
+id = "12345"
+restriction = "None" | "freigegeben"
+name = "dateiname" | "mulid"
 (where | indicates the possible options).
 
 You also need the credentials.py file in the pwd.
@@ -18,18 +18,22 @@ will put attachments in dir
 where the current date is used for the second directory.
 """
 
-import argparse
-import configparser
 from datetime import date
 from mpapi.client import MpApi
 from mpapi.module import Module
 from mpapi.search import Search
 from pathlib import Path
 
-conf_fn = "getAttachments.jobs"
+try:
+    import tomllib
+except ModuleNotFoundError:
+    import tomli as tomllib
+
+tomllib.loads("['This parses fine with Python 3.6+']")  
+
+conf_fn = "getAttachments.toml"
 response_cache = "_ga_response.xml"  # for debugging
 NSMAP = {"m": "http://www.zetcom.com/ria/ws/module"}
-
 
 class GetAttachments:
     def __init__(self, *, baseURL: str, job: str, user: str, pw: str) -> None:
@@ -125,7 +129,6 @@ class GetAttachments:
                 field="MulObjectRef.ObjCurrentLocationVoc",
                 value=self.conf["id"],
             )
-
         elif self.conf["type"] == "restExhibit":
             # get assets attached to restauration records attached to an exhibit
             # photos are typically not SMB-approved
@@ -156,9 +159,9 @@ class GetAttachments:
         """
         Saves configuration for selected job in self.conf
         """
-        config = configparser.ConfigParser()
         if not Path(conf_fn).exists():
             raise SyntaxError(f"ERROR: conf file not found! {conf_fn}")
-        config.read(conf_fn)
-        print(f"* Using job '{self.job}' from {conf_fn}")
-        self.conf = config[self.job]
+        with open(conf_fn, "r") as f:
+            config = tomllib.load(f)
+            print(f"* Using job '{self.job}' from {conf_fn}")
+            self.conf = config[self.job]

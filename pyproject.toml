@@ -1,32 +1,25 @@
-[build-system]
-requires = ["flit_core >=3.2"]
-build-backend = "flit_core.buildapi"
-
-[project]
-name = "MpApi"
-authors = [{name = "Maurice Mengel", email = "mauricemengel@gmail.com"}]
-readme = "README.md"
-license = {file = "LICENSE"}
-classifiers = ["License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)"]
-dynamic = ["version", "description"]
+[tool.poetry]
+name = "mpapi"
+version = "0.1.0"
+description = "MpApi is an unofficial Open Source Client for MuseumPlus MpRIA WS "
 keywords = ["museum", "museumPlus", "api client"]
-# datetime should be included in Python
-# typing_extensions makes newer typing features available to older Pythons 
-dependencies = [
-	"flit",
-    "lxml >=4.8.0", #pathlike objects
-    "requests >=2.6",
-]
-[project.optional-dependencies]
-test = [
-    "pytest >=2.7.3",
-]
+authors = ["Maurice Mengel <mauricemengel@gmail.com>"]
+readme = "README.md"
+license = "GPL-3.0-or-later"
 
-[project.scripts]
+[tool.poetry.dependencies]
+python = "^3.10"
+lxml = "^4.9.2"
+requests = "^2.6"
+tomli = { version = "^1.0.1", python = "<3.11" }
+pytest = { version = "^2.7.3", optional = true}
+
+[tool.poetry.scripts]
 mink = 'mpapi:mink'
 getAttachments = 'mpapi:getAttachments'
 getItem = 'mpapi:getItem'
 updateItem = 'mpapi:updateItem'
 
-[tool.flit.sdist]
-include = ["src/mpapi/__init__.py"]
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
