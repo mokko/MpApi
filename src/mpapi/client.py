@@ -572,7 +572,7 @@ class MpApi:
 
         """
         url = f"{self.appURL}/module/{module}/{id}/{repeatableGroup}/{referenceId}"
-        # xml = xml.encode()
+        xml = xml.encode()
         return self._put(url, data=xml)
 
     def updateRepeatableGroup2(

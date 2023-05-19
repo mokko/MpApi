@@ -92,9 +92,11 @@ class Record:
         if self._mtype() != "Object":
             raise TypeError(f"ERROR: Object expected, found {self._mtype()}!")
 
-    def set_filename(self, *, path: str) -> None:  # alternatively pathlib object
+    def set_filename(self, *, path: str) -> None:
         """
         deletes existing MulOriginalFileTxt, if any, and creates a new one
+
+        pathlib objects are ok for path as well
 
         - We dont check if the file exists. Only the last part of the path
           (i.e. the filename) is saved, so that path can be a full path.
