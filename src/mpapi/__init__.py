@@ -1,32 +1,27 @@
 """An Unofficial Open Source Client for the MuseumPlus API"""
 
-__version__ = "0.1.6"
-# v0.1.6 without old replace
-credentials = "credentials.py"  # expect credentials in pwd
+__version__ = "0.1.7"  # fully transition to new credentials file
 import argparse
 from getAttachments import GetAttachments
 from mink import Mink
 from mpapi.module import Module
 from mpapi.client import MpApi
 from pathlib import Path
-import tomllib
 
-# old style
-if Path(credentials).exists():
-    with open(credentials) as f:
-        exec(f.read())
+try:
+    import tomllib  # new in Python v3.11
+except ModuleNotFoundError:
+    import tomli as tomllib  # < Python v3.11
 
-# new style
-else:
-    cred_fn = Path.home() / ".ria"
-    if not cred_fn.exists():
-        raise SyntaxError(f"RIA Credentials not found at {cred_fn}")
+cred_fn = Path.home() / ".ria"
+if not cred_fn.exists():
+    raise SyntaxError(f"RIA Credentials not found at {cred_fn}")
 
-    with open(cred_fn, "rb") as f:
-        cred = tomllib.load(f)
-    user = cred["user"]
-    pw = cred["pw"]
-    baseURL = cred["baseURL"]
+with open(cred_fn, "rb") as f:
+    cred = tomllib.load(f)
+user = cred["user"]
+pw = cred["pw"]
+baseURL = cred["baseURL"]
 
 
 def mink():

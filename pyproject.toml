@@ -19,6 +19,7 @@ dependencies = [
 ]
 [project.optional-dependencies]
 test = [
+	"tomli >= 2.0.0", # only required for python_version < 3.11
     "pytest >=2.7.3",
 ]
 
