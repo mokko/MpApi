@@ -192,7 +192,7 @@ class Record:
         """
         self.raise_if_not_multimedia()
         p = Path(path)
-        size = p.stat().st_size / 1024  # from bytes to KB
+        size = int(p.stat().st_size / 1024)  # from bytes to KB
         # print(f"size {size}")
 
         mulSizeL = self.module.xpath(
