@@ -181,7 +181,7 @@ class Record:
     def set_size(self, *, path: str) -> None:
         """
         Set the file size in KB.
-        If it already exists, it gets overwritten.
+        If size already exists in RIA, it gets overwritten.
 
         It seems that RIA always shows values in KB in the form
         <dataField dataType="Varchar" name="MulSizeTxt">
@@ -192,7 +192,7 @@ class Record:
         """
         self.raise_if_not_multimedia()
         p = Path(path)
-        size = p.stat().st_size
+        size = p.stat().st_size / 1024  # from bytes to KB
         # print(f"size {size}")
 
         mulSizeL = self.module.xpath(
