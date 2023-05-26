@@ -6,6 +6,7 @@ try:
 except ModuleNotFoundError:
     import tomli as tomllib  # < Python v3.11
 
+
 # not exactly a constant, but dont know where else to put this function
 def get_credentials() -> dict:
     cred_fn = Path.home() / ".ria"
