@@ -6,22 +6,10 @@ from getAttachments import GetAttachments
 from mink import Mink
 from mpapi.module import Module
 from mpapi.client import MpApi
+from mpapi.constants import get_credentials
 from pathlib import Path
 
-try:
-    import tomllib  # new in Python v3.11
-except ModuleNotFoundError:
-    import tomli as tomllib  # < Python v3.11
-
-cred_fn = Path.home() / ".ria"
-if not cred_fn.exists():
-    raise SyntaxError(f"RIA Credentials not found at {cred_fn}")
-
-with open(cred_fn, "rb") as f:
-    cred = tomllib.load(f)
-user = cred["user"]
-pw = cred["pw"]
-baseURL = cred["baseURL"]
+user, pw, baseURL = get_credentials()
 
 
 def mink():

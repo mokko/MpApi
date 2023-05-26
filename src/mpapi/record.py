@@ -1,7 +1,9 @@
 """
 Record represents a single record, e.g. an Object record or a Multimedia record.
 
-Record provides methods to change (rewrite) that data.
+Record provides methods to test or change (rewrite) that data.
+
+In the future, there might be different records for the various mtypes
 
 USAGE
     m = Module(file="path.xml")
@@ -9,7 +11,8 @@ USAGE
                   # creates a deep copy so that changes to record don't effect original
 
     # apply to assets
-    r.add_reference(targetModule: str, moduleItemId: int) # add to existing refs
+    r.add_reference(targetModule: str, moduleItemId: int) 
+                              # add to existing refs
     r.set_filename(path=path) # overwrites existing filename
     r.set_dateexif(path=path) # overwrites existing exif date
     r.set_size(path=path)     # overwrites existing size
@@ -22,6 +25,15 @@ USAGE
     There can be multiple references, but only one filename, so when changing the former 
     we add so to existing references and when changing the latter we overwrite existing
     elements 
+
+FUTURE?
+    m = Module(file="path.xml")
+    r = record.Multimedia(m)
+    r.add_reference(targetModule: str, moduleItemId: int) 
+                              # add to existing refs
+    r.set_filename(path=path) # overwrites existing filename
+    r.set_dateexif(path=path) # overwrites existing exif date
+    r.set_size(path=path)     # overwrites existing size
 
 DESIGN CHOICES
 - Does Record.py belong to MpApi or to MpApi.Utils? I think in MpApi
@@ -50,6 +62,7 @@ class Record:
             raise TypeError(f"ERROR: Record received {len(dataM)} records!")
         self.module = copy.deepcopy(dataM)  # so we dont change the original
 
+    # should mtype become a property?
     def _mtype(self) -> str:
         return self.module.xpath("/m:application/m:modules/m:module/@name")[0]
 
@@ -61,8 +74,7 @@ class Record:
     #
 
     def add_reference(self, *, targetModule: str, moduleItemId: int) -> None:
-        self.raise_if_not_multimedia()
-        # would this also work for object records?
+        self.raise_if_not_multimedia()  # would this also work for object records?
 
         refL = self.module.xpath(
             "/m:application/m:modules/m:module/m:moduleItem/m:composite[@name='MulReferencesCre']"
