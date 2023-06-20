@@ -1,4 +1,4 @@
-from mpapi.constants import NSMAP
+from mpapi.constants import NSMAP, get_credentials
 from mpapi.chunky import Chunky
 from mpapi.module import Module
 from lxml import etree  # type: ignore
@@ -6,18 +6,13 @@ from typing import Union
 
 # types
 since = Union[str, None]
-# typed variables
-baseURL: str
-pw: str
-user: str
 
 #
 # has plenty of http tests...
 # pytest -sx -vv test_chunky.py
 
 
-with open("sdata/credentials.py") as f:
-    exec(f.read())
+user:str, pw:str, baseURL:str = get_credentials()
 
 
 def test_relatedItems():

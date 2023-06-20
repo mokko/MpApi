@@ -354,9 +354,9 @@ class Module(Helper):
         </dataField>
         """
         try:
-            dataFieldN = parent.xpath(f"m:/dataField[@name='{name}']", namespaces=NSMAP)[
-                0
-            ]
+            dataFieldN = parent.xpath(
+                f"m:/dataField[@name='{name}']", namespaces=NSMAP
+            )[0]
         except:
             if dataType is None:
                 typeHint = name[-3:]

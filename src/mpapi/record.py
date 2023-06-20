@@ -36,9 +36,13 @@ FUTURE?
     r.set_size(path=path)     # overwrites existing size
 
 DESIGN CHOICES
-- Does Record.py belong to MpApi or to MpApi.Utils? I think in MpApi
+- Does Record.py belong to MpApi or to MpApi.Utils? MpApi
 - Let's not provide an r.upload() method since this requires credentials
-
+- should we inherit from record and make dedicated record.Multimedia and 
+  record.object classes?
+- We were considering a crud interface to allow creating, reading, updating, 
+  deleting fields. First attempt tried to be too clever and required a 
+  database of field types. Next attempt requires this info from user.
 """
 import copy
 from datetime import datetime
