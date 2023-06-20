@@ -60,7 +60,7 @@ USAGE:
     m.dropRepeatableGroup(parent=miN, name="ObjValuationGrp")
     m._dropFields(parent=miN, type="systemField")
     m._dropFieldsByName(element="repeatableGroup", name="ObjValuationGrp)
-    m._dropAttribs(xpath="m://dataField", name="uuid")
+    m._dropAttribs(xpath="//m:dataField", attrib="uuid")
     m.clean()  # drops uuid attributes and certain value elements    
 
     # other changes to xml
@@ -354,7 +354,7 @@ class Module(Helper):
         </dataField>
         """
         try:
-            dataFieldN = parent.xpath("m:/dataField[@name='{name}']", namespaces=NSMAP)[
+            dataFieldN = parent.xpath(f"m:/dataField[@name='{name}']", namespaces=NSMAP)[
                 0
             ]
         except:
