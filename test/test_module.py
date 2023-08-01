@@ -5,6 +5,9 @@ import lxml
 from lxml import etree  # type: ignore
 import pytest
 
+# from mpapi.constants import get_credentials
+# from mpapi.client import MpApi
+
 
 def test_constructors_only():
     # four different constructors, sort of
@@ -30,6 +33,7 @@ def test_constructors_only():
     assert not (m)
 
 
+# doesn't really belong here
 def test_nsmap():
     # print(NSMAP)
     assert NSMAP["m"] is not None
@@ -174,3 +178,34 @@ def test_add():
 def test_toZip():
     m1 = Module(file="sdata/exhibit20222.xml")
     m1.toZip(path="sdata/exhibit20222.xml")
+
+
+def test_filter():
+    # q = Search(module="Object", limit=100)
+    # q.AND()
+    # q.addCriterion(
+    # operator="equalsField",
+    # field="ObjPublicationGrp.TypeVoc",
+    # value="2600647",  # Daten freigegeben für SMB-digital
+    # )
+    # q.addCriterion(
+    # operator="equalsField",
+    # field="ObjPublicationGrp.PublicationVoc",
+    # value="1810139",  # Ja
+    # )
+    # q.addField(field="__id")
+    # q.validate(mode="search") # raises on error
+    # user, pw, baseURL = get_credentials()
+    # client = MpApi(user=user, baseURL=baseURL, pw=pw)
+    # m = client.search2(query=q)
+    m = Module(file="filter-search.xml")
+    new_m = m.filter(
+        xpath="/m:application/m:modules/m:module/m:moduleItem[@hasAttachments = 'true']"
+    )
+    # write_to_file(new_m, "debug.filter.xml")
+    assert len(new_m) > 5
+
+
+def write_to_file(m, fn):
+    print(f"Writing to file '{fn}'")
+    m.toFile(path=fn)

@@ -124,15 +124,16 @@ class MpApi:
         if module is None:
             url = self.appURL + "/module/definition"
         else:
-            url = self.appURL + "/module/" + module + "/definition"
+            url = self.appURL + f"/module/{module}/definition"
 
         return self._get(url)
 
-    def getDefinition2(self, *, mtype: str = None) -> requests.Response:
+    def getDefinition2(self, *, mtype: str = None) -> Module:
         """
-        Return the data definition for a single or all modules
+        Return the data definition for a single or all modules as Module
         """
-        return self.getDefinition(module=mtype)
+        r = self.getDefinition(module=mtype)
+        return Module(xml=r.text)
 
     #
     # B.2 SEARCH
@@ -141,12 +142,6 @@ class MpApi:
         """
         Run a pre-existing saved search
         POST http://.../ria-ws/application/module/{module}/search/savedQuery/{__id}
-
-        N.B. / Caveats
-        - Currently only queries targeting the Object module are supported! Ideally,
-          client.py would extract that piece of information from the query.
-        - api does not support since. If you need that include that since date in your
-          RIA query.
 
         Quote from http://docs.zetcom.com/ws/:
         A request body must be provided, in order to control the paging. For example:

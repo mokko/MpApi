@@ -10,6 +10,7 @@ import pytest
 # obsolete
 #
 
+
 def test_constructors_only():
 
     m: MpApi.Module = Module(file="sdata/getItem-Object993084.xml")

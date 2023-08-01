@@ -84,7 +84,8 @@ from lxml import etree  # type: ignore
 from mpapi.constants import NSMAP, parser
 from mpapi.helper import Helper
 from pathlib import Path
-from typing import Any, Iterator, Optional, Union
+from typing import Any, Iterator, Optional, Union, Self
+
 
 # xpath 1.0 and lxml don't allow empty string or None for default ns
 dataTypes = {"Clb": "Clob", "Dat": "Date", "Lnu": "Long", "Txt": "Varchar"}
@@ -483,6 +484,29 @@ class Module(Helper):
         itemsN = self.xpath(apath)
         for itemN in itemsN:
             yield itemN
+
+    def filter(self, *, xpath: str) -> Self:
+        """
+        For an xpath that returns a list of moduleItems, return a new Module object with
+        only those items.
+        """
+        moduleItemL = self.xpath(xpath)
+        ET = etree.XML(
+            """
+            <application xmlns="http://www.zetcom.com/ria/ws/module">
+                <modules>
+                    <module name="Object">
+                    </module>
+                </modules>
+            </application>""",
+            parser=parser,
+        )
+
+        moduleN = ET.xpath("/m:application/m:modules/m:module", namespaces=NSMAP)[0]
+        [moduleN.append(moduleItemN) for moduleItemN in moduleItemL]
+        m = Module(tree=ET)
+        m.updateTotalSize()
+        return m
 
     def module(self, *, name: str) -> ET:
         """

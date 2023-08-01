@@ -12,7 +12,7 @@ since = Union[str, None]
 # pytest -sx -vv test_chunky.py
 
 
-user:str, pw:str, baseURL:str = get_credentials()
+user, pw, baseURL = get_credentials()
 
 
 def test_relatedItems():
