@@ -1,14 +1,10 @@
 from mpapi.module import Module
 from mpapi.record import Record
 import lxml
-
-# from lxml import etree  # type: ignore
 import pytest
 
-
-#
+# from lxml import etree  # type: ignore
 # obsolete
-#
 
 
 def test_constructors_only():
