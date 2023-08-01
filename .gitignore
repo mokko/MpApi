@@ -4,6 +4,8 @@
 .coverage
 credentials.py
 .settings/*
+.project
+.pydvproject
 __pycache__
 bak/*
 dist/*
