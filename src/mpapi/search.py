@@ -115,7 +115,7 @@ class Search(Helper):
             xmlns="http://www.zetcom.com/ria/ws/module/search" 
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
             xsi:schemaLocation="http://www.zetcom.com/ria/ws/module/search 
-            http://www.zetcom.com/ria/ws/module/search/search_1_6.xsd">
+            http://www.zetcom.com/ria/ws/module/search/search_1_8.xsd">
             <modules>
                 <module name="{module}">
                     <search limit="{limit}" offset="{offset}">
