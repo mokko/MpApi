@@ -485,17 +485,17 @@ class Module(Helper):
         for itemN in itemsN:
             yield itemN
 
-    def filter(self, *, xpath: str) -> Self:
+    def filter(self, *, xpath: str, mtype: str = "Object") -> Self:
         """
         For an xpath that returns a list of moduleItems, return a new Module object with
-        only those items.
+        only those items. Note: You need to set the mtype manually.
         """
         moduleItemL = self.xpath(xpath)
         ET = etree.XML(
-            """
+            f"""
             <application xmlns="http://www.zetcom.com/ria/ws/module">
                 <modules>
-                    <module name="Object">
+                    <module name="{mtype}">
                     </module>
                 </modules>
             </application>""",
