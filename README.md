@@ -9,7 +9,6 @@ Libraries
 
 Scripts (installed in path, all for the command line)
 * mink       - write your own jobs and execute them with mink
-* MPreplace  - replace things in RIA
 * getAttachments - download attachments from multimedia items (using groups)
 
 Example Plugins for Replace.py

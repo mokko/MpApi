@@ -1,6 +1,6 @@
 """An Unofficial Open Source Client for the MuseumPlus API"""
 
-__version__ = "0.1.7"  # fully transition to new credentials file
+__version__ = "0.1.8"  # cleanup
 import argparse
 from getAttachments import GetAttachments
 from mpapi.mink import Mink
