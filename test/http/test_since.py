@@ -9,9 +9,9 @@ from pathlib import Path
 from mpapi.client import MpApi
 from mpapi.search import Search
 from mpapi.module import Module
+from mpapi.constants import get_credentials
 
-with open("../sdata/credentials.py") as f:
-    exec(f.read())
+user, pw, baseURL = get_credentials()
 
 """
     I want to test a search which shows only records changed after a certain

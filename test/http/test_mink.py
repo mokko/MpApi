@@ -1,9 +1,9 @@
 from pathlib import Path
 from mpapi.mink import Mink
 from pathlib import Path
+from mpapi.constants import get_credentials
 
-with open("../sdata/credentials.py") as f:
-    exec(f.read())
+user, pw, baseURL = get_credentials()
 
 
 def test_init():

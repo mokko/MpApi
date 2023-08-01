@@ -2,9 +2,9 @@ import requests
 from requests.structures import CaseInsensitiveDict
 from requests.auth import HTTPBasicAuth
 from mpapi.module import Module
+from mpapi.constants import get_credentials
 
-with open("../sdata/credentials.py") as f:
-    exec(f.read())
+user, pw, baseURL = get_credentials()
 
 
 def test_nosession():

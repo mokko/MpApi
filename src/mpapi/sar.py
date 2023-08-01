@@ -70,8 +70,8 @@ import os  # b/c Pathlib has troubles with Windows network paths
 from lxml import etree
 from mpapi.client import MpApi
 from mpapi.constants import NSMAP
-from mpapi.search import Search
 from mpapi.module import Module
+from mpapi.search import Search
 from pathlib import Path
 from typing import Union
 

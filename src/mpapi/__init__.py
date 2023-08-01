@@ -3,7 +3,7 @@
 __version__ = "0.1.7"  # fully transition to new credentials file
 import argparse
 from getAttachments import GetAttachments
-from mink import Mink
+from mpapi.mink import Mink
 from mpapi.module import Module
 from mpapi.client import MpApi
 from mpapi.constants import get_credentials

@@ -1,9 +1,10 @@
 from pathlib import Path
 from mpapi.client import MpApi
 from mpapi.module import Module
+from mpapi.constants import get_credentials
 
-with open("../sdata/vierteInstanz.py") as f:
-    exec(f.read())
+user, pw, baseURL = get_credentials()
+
 
 # first test is if i can manually change Freigabe of obj id 744767
 # ok.

@@ -1,9 +1,9 @@
 from mpapi.search import Search
 from mpapi.module import Module
 from mpapi.sar import Sar
+from mpapi.constants import get_credentials
 
-with open("sdata/credentials.py") as f:
-    exec(f.read())
+user, pw, baseURL = get_credentials()
 
 NSMAP = {
     "s": "http://www.zetcom.com/ria/ws/module/search",
