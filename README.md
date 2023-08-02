@@ -23,7 +23,7 @@ For Testing
 * pytest 
 
 # Version History
-0.1.5 20220710 adds getAttachments script.
-0.1.7 new credentials
-0.1.8 20230801 cleanup, changed several vocabulary endpoints to have more consistent 
+- 0.1.5 20220710 adds getAttachments script.
+- 0.1.7 new credentials
+- 0.1.8 20230801 cleanup, changed several vocabulary endpoints to have more consistent 
 	  names and parameters.
