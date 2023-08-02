@@ -30,4 +30,4 @@ getItem = 'mpapi:getItem'
 updateItem = 'mpapi:updateItem'
 
 [tool.flit.sdist]
-include = ["src/MpApi/__init__.py"]
+include = ["src/MpApi/__init__.py"] # windows is strange with capital letters

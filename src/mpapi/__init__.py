@@ -12,43 +12,6 @@ from pathlib import Path
 user, pw, baseURL = get_credentials()
 
 
-def mink():
-    parser = argparse.ArgumentParser(description="Commandline frontend for MpApi.py")
-    parser.add_argument("-j", "--job", help="job to run")  # , required=True
-    parser.add_argument("-c", "--conf", help="config file", default="jobs.dsl")
-    parser.add_argument("-v", "--version", help="Display version information")
-    args = parser.parse_args()
-    if args.version:
-        print(f"Version: {__version__}")
-        sys.exit(0)
-    m = Mink(job=args.job, conf=args.conf, baseURL=baseURL, pw=pw, user=user)
-
-
-def updateItem():
-    parser = argparse.ArgumentParser(description="getItem for MpApi")
-    parser.add_argument("-f", "--file", help="File location to upload")
-    parser.add_argument("-i", "--id", help="moduleItem/@id")
-    parser.add_argument("-t", "--mtype", help="module type")
-    parser.add_argument("-v", "--version", help="Display version information")
-
-    # todowe could extract module type and id from the record
-
-    required_args = ["file", "id", "mtype"]
-
-    if args.version:
-        print(f"Version: {__version__}")
-        sys.exit(0)
-
-    for req in required_args:
-        if not req in args:
-            raise SyntaxError("Required args not provided")
-
-    args = parser.parse_args()
-    m = Module(file=args.file)
-    c = MpApi(baseURL=baseURL, pw=pw, user=user)
-    m = c.uploadItem2(mtype=args.mtype, ID=args.ID)
-
-
 def getItem():
     parser = argparse.ArgumentParser(description="getItem for MpApi")
     parser.add_argument(
@@ -88,3 +51,40 @@ def getAttachments():
     )
     args = parser.parse_args()
     GetAttachments(baseURL=baseURL, job=args.job, user=user, pw=pw)
+
+
+def mink():
+    parser = argparse.ArgumentParser(description="Commandline frontend for MpApi.py")
+    parser.add_argument("-j", "--job", help="job to run")  # , required=True
+    parser.add_argument("-c", "--conf", help="config file", default="jobs.dsl")
+    parser.add_argument("-v", "--version", help="Display version information")
+    args = parser.parse_args()
+    if args.version:
+        print(f"Version: {__version__}")
+        sys.exit(0)
+    m = Mink(job=args.job, conf=args.conf, baseURL=baseURL, pw=pw, user=user)
+
+
+def updateItem():
+    parser = argparse.ArgumentParser(description="getItem for MpApi")
+    parser.add_argument("-f", "--file", help="File location to upload")
+    parser.add_argument("-i", "--id", help="moduleItem/@id")
+    parser.add_argument("-t", "--mtype", help="module type")
+    parser.add_argument("-v", "--version", help="Display version information")
+
+    # todowe could extract module type and id from the record
+
+    required_args = ["file", "id", "mtype"]
+
+    if args.version:
+        print(f"Version: {__version__}")
+        sys.exit(0)
+
+    for req in required_args:
+        if not req in args:
+            raise SyntaxError("Required args not provided")
+
+    args = parser.parse_args()
+    m = Module(file=args.file)
+    c = MpApi(baseURL=baseURL, pw=pw, user=user)
+    m = c.uploadItem2(mtype=args.mtype, ID=args.ID)

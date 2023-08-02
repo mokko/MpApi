@@ -79,6 +79,8 @@ class Helper:
             xsd = pkgutil.get_data(__name__, "data/xsd/module_1_6.xsd")
         elif mode == "search":
             xsd = pkgutil.get_data(__name__, "data/xsd/search_1_6.xsd")
+        elif mode == "voc":
+            xsd = pkgutil.get_data(__name__, "data/xsd/vocabulary_1_1.xsd")
         else:
             raise TypeError("Unknown validation mode")
         # more options for http access?

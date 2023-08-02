@@ -8,11 +8,10 @@ USAGE
     ... todo: some more examples
 
 This will become the low-level, bare-knuckles and minimalistic client interface that should have  
-all of Zetcom's endpoints and simply implements them. A slightly higher level interface can be 
-found at client2.py
+all of Zetcom's endpoints and simply implements them. 
 
 ENCODING SCHEME
-    - RIA dishes out and requests UTF-8; mpapi should do that too
+    - RIA dishes out and requests UTF-8; mpapi does that too
 
 SEE ALSO
     http://docs.zetcom.com/ws
@@ -1027,7 +1026,7 @@ class MpApi:
         url = f"{self.appURL}/vocabulary/instances/{instanceName}/nodes"
         return self._post(url, data=xml)
 
-    def vDelNode(self, *, instanceName: str, id: int) -> requests.Response:
+    def vDelNode(self, *, instanceName: str, nodeId: int) -> requests.Response:
         """
         Delete Vocabulary Node
         DELETE https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodes/{id}
@@ -1035,12 +1034,14 @@ class MpApi:
         url = f"{self.appURL}/vocabulary/instances/{instanceName}/nodes/{id}"
         return self._delete(url)
 
-    def vUpdateNode(self, *, instanceName: str, id: int, xml: str) -> requests.Response:
+    def vUpdateNode(
+        self, *, instanceName: str, nodeId: int, xml: str
+    ) -> requests.Response:
         """
         Update Vocabulary Node
         PUT https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodes/{id}
         """
-        url = f"{self.appURL}/vocabulary/instances/{instanceName}/nodes/{id}"
+        url = f"{self.appURL}/vocabulary/instances/{instanceName}/nodes/{nodeId}"
         return self._put(url, data=xml)
 
     # TERM
@@ -1055,7 +1056,7 @@ class MpApi:
         return self._post(url, data=xml)
 
     def vUpdateTerm(
-        self, *, instanceName: str, nodeId: str, termId: int, xml: str
+        self, *, instanceName: str, nodeId: int, termId: int, xml: str
     ) -> requests.Response:
         """
         Update Vocabulary Term
@@ -1128,19 +1129,20 @@ class MpApi:
         with open(path, "w", encoding="UTF-8") as f:
             f.write(xml)
 
-    def completeXML(self, *, fragment: str) -> str:
+    def completeXML(self, *, fragment: str, mtype: str = "Object") -> str:
         """
-        Expects a moduleItem as xml string, returns a whole
+        Expects one or more moduleItem as xml string, returns a whole
         document as xml string.
+
+        See also Module.wrap().
         """
 
         whole = f"""
         <application xmlns="http://www.zetcom.com/ria/ws/module">
-            <modules name="Object">
-                <moduleItem>
+            <modules>
+                <module name="{mtype}">
                     {fragment}
-                </moduleItem>
+                </module>
             </modules>
-        </application>
-        """
+        </application>"""
         return whole
