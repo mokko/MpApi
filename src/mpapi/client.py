@@ -812,7 +812,7 @@ class MpApi:
     # Labels, Node Classes, TermClassLabel, Node, Term, nodeParents, nodeRelations
     # get, add, delete and sometimes update
     #
-    def vInfo(self, *, instanceName: str, id: int = None) -> requests.Response:
+    def vGetInfo(self, *, instanceName: str, id: int = None) -> requests.Response:
         """
         Shows the vocabulary instance information for the give vocabulary.
         GET http://.../ria-ws/application/vocabulary/instances/{instanceName}
@@ -836,12 +836,12 @@ class MpApi:
         """
         The request returns available vocabulary nodes of the vocabulary instance.
         GET http://.../ria-ws/application/vocabulary/instances/{instanceName}/nodes/search
-        Todo: json response
+        The default is to set limit to 100.
         """
         url = f"{self.appURL}/vocabulary/instances/{instanceName}/nodes/search"
         params: dict[str, Union[int, str]] = {
-            "offset": offset,
-            "limit": limit,
+            "offset": str(offset),
+            "limit": str(limit),
         }  # dict[str, int, str]
         # for each in termContent, status, nodeName:
         if termContent is not None:
@@ -850,16 +850,8 @@ class MpApi:
             params["status"] = status
         if nodeName is not None:
             params["nodeName"] = nodeName
+        print(f"{params=}")
         return self._get(url, headers=params)
-
-    def vUpdate(self, *, instanceName: str, xml: str) -> requests.Response:
-        """
-        Update Vocabulary Instance
-        PUT https://.../ria-ws/application/vocabulary/instances/{instanceName}
-        Request body definition: instance element from vocabulary_1_1.xsd
-        """
-        url = f"{self.appURL}/vocabulary/instances/{instanceName}"
-        return self._put(url, data=xml)
 
     # LABELS
     def vGetLabels(self, *, instanceName: str) -> requests.Response:
@@ -869,6 +861,67 @@ class MpApi:
         """
         url = f"{self.appURL}/vocabulary/instances/{instanceName}/labels"
         return self._get(url)
+
+    # NODE CLASSES
+    def vGetNodeClasses(self, *, instanceName: str) -> requests.Response:
+        """
+        Get Vocabulary Instance Node Classes
+        GET https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodeClasses
+        """
+        url = f"{self.appURL}/vocabulary/instances/{instanceName}/nodeClasses"
+        return self._get(url)
+
+    # TERM CLASSES
+    def vGetTermClasses(self, *, instanceName: str) -> requests.Response:
+        """
+        Get Vocabulary Instance Term Classes
+        GET https://.../ria-ws/application/vocabulary/instances/{instanceName}/termClasses
+        """
+        url = f"{self.appURL}/vocabulary/instances/{instanceName}/termClasses"
+        return self._get(url)
+
+    def vGetNodeByIdentifier(
+        self, *, instanceName: str, nodeId: int
+    ) -> requests.Response:
+        """
+        Get Vocabulary Node by identifier
+        GET https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodes/{id}
+        """
+        url = f"{self.appURL}/vocabulary/instances/{instanceName}/nodes/{nodeId}"
+        return self._get(url)
+
+    # NodeParent
+    def vGetNodeParents(self, *, instanceName: str, nodeId: int) -> requests.Response:
+        """
+        Get Vocabulary Node Parents / Default Node Relations
+        GET https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodes/{nodeId}/parents/
+        (I am assuming the trailing slash is a typo.)
+        """
+        url = (
+            f"{self.appURL}/vocabulary/instances/{instanceName}/nodes/{nodeId}/parents"
+        )
+        return self._delete(url)
+
+    def vGetNodeRelations(self, *, instanceName: str, nodeId: int) -> requests.Response:
+        """
+        Get Vocabulary Node Relations / Advanced Node Relations
+        GET https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodes/{nodeId}/relations/
+        """
+        url = f"{self.appURL}/vocabulary/instances/{instanceName}/nodes/{nodeId}/relations"
+        return self._get(url)
+
+    #
+    # changing vocabularies
+    #
+
+    def vUpdate(self, *, instanceName: str, xml: str) -> requests.Response:
+        """
+        Update Vocabulary Instance
+        PUT https://.../ria-ws/application/vocabulary/instances/{instanceName}
+        Request body definition: instance element from vocabulary_1_1.xsd
+        """
+        url = f"{self.appURL}/vocabulary/instances/{instanceName}"
+        return self._put(url, data=xml)
 
     def vAddLabel(self, *, instanceName: str, xml: str) -> requests.Response:
         """
@@ -885,15 +938,6 @@ class MpApi:
         """
         url = f"{self.appURL}/vocabulary/instances/{instanceName}/labels/{language}"
         return self._delete(url)
-
-    # NODE CLASSES
-    def vGetNodeClasses(self, *, instanceName: str) -> requests.Response:
-        """
-        Get Vocabulary Instance Node Classes
-        GET https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodeClasses
-        """
-        url = f"{self.appURL}/vocabulary/instances/{instanceName}/nodeClasses"
-        return self._get(url)
 
     def vAddNodeClass(self, *, instanceName: str, xml: str) -> requests.Response:
         """
@@ -913,6 +957,7 @@ class MpApi:
         url = f"{self.appURL}/vocabulary/instances/{instanceName}/nodeClasses/{className}/labels"
         return self._post(url, data=xml)
 
+    # nodeClass label
     def vDelNodeClassLabel(
         self, *, instanceName: str, className: str, language: str
     ) -> requests.Response:
@@ -933,15 +978,7 @@ class MpApi:
         )
         return self._delete(url)
 
-    # TERM CLASSES
-    def vGetTermClasses(self, *, instanceName: str) -> requests.Response:
-        """
-        Get Vocabulary Instance Term Classes
-        GET https://.../ria-ws/application/vocabulary/instances/{instanceName}/termClasses
-        """
-        url = f"{self.appURL}/vocabulary/instances/{instanceName}/termClasses"
-        return self._get(url)
-
+    # termClass
     def vAddTermClass(self, *, instanceName: str, xml: str) -> requests.Response:
         """
         Add Vocabulary Instance Term Class
@@ -982,14 +1019,6 @@ class MpApi:
         return self._delete(url)
 
     # vocabularyNode
-    def vNodeByIdentifier(self, *, instanceName: str, id: int) -> requests.Response:
-        """
-        Get Vocabulary Node by identifier
-        GET https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodes/{id}
-        """
-        url = f"{self.appURL}/vocabulary/instances/{instanceName}/nodes/{id}"
-        return self._get(url)
-
     def vAddNode(self, *, instanceName: str, xml: str) -> requests.Response:
         """
         Add Vocabulary Node
@@ -1045,18 +1074,6 @@ class MpApi:
         url = f"{self.appURL}/vocabulary/instances/{instanceName}/nodes/{nodeId}/terms/{termId}"
         return self._delete(url)
 
-    # NodeParent
-    def vNodeParents(self, *, instanceName: str, nodeId: int) -> requests.Response:
-        """
-        Get Vocabulary Node Parents / Default Node Relations
-        GET https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodes/{nodeId}/parents/
-        (I am assuming the trailing slash is a typo.)
-        """
-        url = (
-            f"{self.appURL}/vocabulary/instances/{instanceName}/nodes/{nodeId}/parents"
-        )
-        return self._delete(url)
-
     def vAddNodeParent(
         self, *, instanceName: str, nodeId: int, xml: str
     ) -> requests.Response:
@@ -1080,14 +1097,6 @@ class MpApi:
         return self._delete(url)
 
     # nodeRelations
-    def vNodeRelations(self, *, instanceName: str, nodeId: int) -> requests.Response:
-        """
-        Get Vocabulary Node Relations / Advanced Node Relations
-        GET https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodes/{nodeId}/relations/
-        """
-        url = f"{self.appURL}/vocabulary/instances/{instanceName}/nodes/{nodeId}/relations"
-        return self._get(url)
-
     def vAddNodeRelation(
         self, instanceName: str, nodeId: int, xml: str
     ) -> requests.Response:
