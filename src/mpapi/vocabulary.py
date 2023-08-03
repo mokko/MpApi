@@ -42,4 +42,4 @@ class Vocabulary(Helper):
         to check type:
             isinstance(v, Vocabulary)
         """
-        return int(self.xpath("count(//v:node|//v:instance)"))
+        return int(self.xpath("count(//v:node|/v:instance)"))
