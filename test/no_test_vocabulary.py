@@ -2,6 +2,7 @@
 from mpapi.module import Module
 from mpapi.client import MpApi
 from mpapi.constants import get_credentials
+from mpapi.vocabulary import Vocabulary
 from pathlib import Path
 from lxml import etree
 from requests.exceptions import HTTPError
@@ -21,6 +22,9 @@ IDs = {
 
 
 def write_to_file(txt, fn):
+    """
+    Let's keep it for posterity although we're not using it anymore
+    """
     if len(txt) == 0:
         print(f"WARNING: {fn} empty, not creating file")
         return
@@ -45,8 +49,11 @@ def test_vInfo():
         fn = Path(f"sdata/voc/vInfo-{voc}.xml")
         # if not fn.exists():
         r = client.vGetInfo(instanceName=voc)
-        write_to_file(r.text, fn)
-        assert r
+        # write_to_file(r.text, fn)
+        assert r.ok
+        v = Vocabulary(xml=r.text)
+        assert v
+        v.toFile(path=fn)
 
 
 def test_vNodes():
@@ -54,7 +61,10 @@ def test_vNodes():
         fn = Path(f"sdata/voc/nodes-{voc}.xml")
         # if not fn.exists():
         r = client.vGetNodes(instanceName=voc)
-        write_to_file(r.text, fn)
+        # write_to_file(r.text, fn)
+        v = Vocabulary(xml=r.text)
+        assert v
+        v.toFile(path=fn)
 
 
 def test_vLabels():
@@ -62,7 +72,11 @@ def test_vLabels():
         fn = Path(f"sdata/voc/label-{voc}.xml")
         # if not fn.exists():
         r = client.vGetLabels(instanceName=voc)
-        write_to_file(r.text, fn)
+        # write_to_file(r.text, fn)
+        if not r.text == "":  # often empty
+            v = Vocabulary(xml=r.text)
+            assert v
+            v.toFile(path=fn)
 
 
 def test_vNodeClasses():
@@ -70,7 +84,10 @@ def test_vNodeClasses():
         fn = Path(f"sdata/voc/nodeClasses-{voc}.xml")
         # if not fn.exists():
         r = client.vGetNodeClasses(instanceName=voc)
-        write_to_file(r.text, fn)
+        if not r.text == "":  # often empty
+            v = Vocabulary(xml=r.text)
+            assert v
+            v.toFile(path=fn)
 
 
 def test_vNodeByIdentifier():
@@ -84,7 +101,10 @@ def test_vNodeByIdentifier():
         except HTTPError as e:
             print(e)
         else:
-            write_to_file(r.text, fn)
+            # write_to_file(r.text, fn)
+            v = Vocabulary(xml=r.text)
+            assert v
+            v.toFile(path=fn)
 
 
 def test_vNodeParents():
@@ -96,7 +116,10 @@ def test_vNodeParents():
         except HTTPError as e:
             print(e)
         else:
-            write_to_file(r.text, fn)
+            # write_to_file(r.text, fn)
+            v = Vocabulary(xml=r.text)
+            assert v
+            v.toFile(path=fn)
 
 
 def test_vNodeRelations():
@@ -108,22 +131,35 @@ def test_vNodeRelations():
         except HTTPError as e:
             print(e)
         else:
-            write_to_file(r.text, fn)
+            # write_to_file(r.text, fn)
+            if not r.text == "":
+                v = Vocabulary(xml=r.text)
+                assert v
+                v.toFile(path=fn)
 
 
 def test_aat_examples():
     # from a so-called online vocabulary
     write_node("ObjTechnicalTermAatVgr", 4696986)
-    # manually inserted link in Beschreibung
 
+    # manually inserted link in Beschreibung
     instanceName = "GenPlaceVgr"
     nodeId = 5091855
     write_node(instanceName, nodeId)
+
+    # there are no descriptions although I wish there were
     # r = client.vNodeDescriptions(instanceName=instanceName,nodeId=nodeId)
-    # write_to_file(r.text, "sdata/voc/nodeDescriptions-{instanceName}-{nodeId}.xml")
+    # if not r.text == "":  # often empty
+    #    v = Vocabulary(xml=r.text)
+    #    assert v
+    #    v.toFile(path=f"sdata/voc/nodeDescriptions-{instanceName}-{nodeId}.xml")
+
     r = client.vGetTermClasses(instanceName=instanceName)
-    write_to_file(r.text, f"sdata/voc/termClasses-{instanceName}.xml")
-    v = Vocabulary(xml=r.text)
+    # print (f"TermClasses: {r.text=}")
+    if not r.text == "":  # often empty
+        v = Vocabulary(xml=r.text)
+        assert v
+        v.toFile(path=f"sdata/voc/termClasses-{instanceName}.xml")
 
 
 def write_node(instanceName: str, nodeId: int):
@@ -132,4 +168,6 @@ def write_node(instanceName: str, nodeId: int):
     except HTTPError as e:
         print(e)
     else:
-        write_to_file(r.text, f"sdata/voc/node-{instanceName}-{nodeId}.xml")
+        v = Vocabulary(xml=r.text)
+        assert v
+        v.toFile(path=f"sdata/voc/node-{instanceName}-{nodeId}.xml")

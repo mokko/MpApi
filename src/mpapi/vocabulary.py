@@ -14,6 +14,7 @@ class Vocabulary(Helper):
         if file is not None:
             self.etree = etree.parse(str(file), parser)
         if xml is not None:
+            xml = xml.encode()
             self.etree = etree.fromstring(xml, parser)
 
     def __iter__(self) -> Any:
@@ -41,4 +42,4 @@ class Vocabulary(Helper):
         to check type:
             isinstance(v, Vocabulary)
         """
-        return int(self.xpath("count(//v:node)"))
+        return int(self.xpath("count(//v:node|//v:instance)"))

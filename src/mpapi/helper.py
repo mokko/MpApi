@@ -12,6 +12,12 @@ ET = any
 
 
 class Helper:
+    def __str__(self):
+        return self.toString()
+
+    # def __repr__(self):
+    #    return self.toString()
+
     def fromFile(self, *, path: Path) -> None:
         self.etree = etree.parse(str(path))
 

@@ -198,9 +198,6 @@ class Module(Helper):
         """
         return int(self.xpath("count(/m:application/m:modules/m:module/m:moduleItem)"))
 
-    def __str__(self):
-        return self.toString()
-
     def actualSize(self, *, module: str) -> int:
         """
         Report the actual size of a requested module type (using number of
@@ -936,13 +933,6 @@ class Module(Helper):
         return vri
 
     def xpath(self, path: str) -> ET:
-        """
-        Shortcut to access the data in a Module object using lxml's xpath;
-        use m: for Zetcom's Module namespace.
-
-        Note: This is the first method with a positional argument that I write
-        in a long time.
-        """
         return self.etree.xpath(path, namespaces=NSMAP)
 
     #
