@@ -123,6 +123,7 @@ def test_aat_examples():
     # write_to_file(r.text, "sdata/voc/nodeDescriptions-{instanceName}-{nodeId}.xml")
     r = client.vGetTermClasses(instanceName=instanceName)
     write_to_file(r.text, f"sdata/voc/termClasses-{instanceName}.xml")
+    v = Vocabulary(xml=r.text)
 
 
 def write_node(instanceName: str, nodeId: int):
