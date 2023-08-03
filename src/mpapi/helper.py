@@ -91,7 +91,15 @@ class Helper:
         xmlschema.assertValid(self.etree)  # dies if doesn't validate
         return True
 
-    def xpath(self, *, xpath: str):
+    def xpath(self, xpath: str) -> list:
+        """
+        Shortcut to access the data in a Module object using lxml's xpath;
+        use m: for Zetcom's Module namespace.
+
+        Note: This is the first method with a positional argument that I write
+        in a long time.
+        """
+
         return self.etree.xpath(xpath, namespaces=NSMAP)
 
     def _write(self, *, path, doc) -> None:

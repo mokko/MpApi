@@ -7,6 +7,17 @@ except ModuleNotFoundError:
     import tomli as tomllib  # < Python v3.11
 
 
+NSMAP = {
+    "m": "http://www.zetcom.com/ria/ws/module",
+    "o": "http://www.zetcom.com/ria/ws/module/orgunit",
+    "s": "http://www.zetcom.com/ria/ws/module/search",
+    "v": "http://www.zetcom.com/ria/ws/vocabulary",
+}
+
+
+parser = etree.XMLParser(remove_blank_text=True)
+
+
 # not exactly a constant, but dont know where else to put this function
 def get_credentials() -> dict:
     cred_fn = Path.home() / ".ria"
@@ -21,13 +32,3 @@ def get_credentials() -> dict:
     baseURL = cred["baseURL"]
 
     return user, pw, baseURL
-
-
-NSMAP = {
-    "m": "http://www.zetcom.com/ria/ws/module",
-    "o": "http://www.zetcom.com/ria/ws/module/orgunit",
-    "s": "http://www.zetcom.com/ria/ws/module/search",
-}
-
-
-parser = etree.XMLParser(remove_blank_text=True)

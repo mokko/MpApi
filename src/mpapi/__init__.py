@@ -7,6 +7,7 @@ from mpapi.mink import Mink
 from mpapi.module import Module
 from mpapi.client import MpApi
 from mpapi.constants import get_credentials
+from mpapi.validate import Validate
 from pathlib import Path
 
 user, pw, baseURL = get_credentials()
@@ -71,6 +72,7 @@ def updateItem():
     parser.add_argument("-i", "--id", help="moduleItem/@id")
     parser.add_argument("-t", "--mtype", help="module type")
     parser.add_argument("-v", "--version", help="Display version information")
+    args = parser.parse_args()
 
     # todowe could extract module type and id from the record
 
@@ -88,3 +90,21 @@ def updateItem():
     m = Module(file=args.file)
     c = MpApi(baseURL=baseURL, pw=pw, user=user)
     m = c.uploadItem2(mtype=args.mtype, ID=args.ID)
+
+
+def validate():
+    parser = argparse.ArgumentParser(description="validate for MpApi")
+    parser.add_argument(
+        "-m", "--mode", help="mode (module, search or vocabulary)", default="module"
+    )
+    parser.add_argument("-v", "--version", help="Display version information")
+    parser.add_argument("file", nargs="?")
+    args = parser.parse_args()
+    if args.version:
+        print(f"Version: {__version__}")
+        sys.exit(0)
+    if args.file is None:
+        raise SyntaxError("ERROR: Required arg 'file' not provided!")
+
+    v = Validate(path=args.file)
+    v.validate(mode=args.mode)

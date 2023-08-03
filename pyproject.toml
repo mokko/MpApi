@@ -28,6 +28,7 @@ mink = 'mpapi:mink'
 getAttachments = 'mpapi:getAttachments'
 getItem = 'mpapi:getItem'
 updateItem = 'mpapi:updateItem'
+validate = 'mpapi:validate'
 
 [tool.flit.sdist]
 include = ["src/MpApi/__init__.py"] # windows is strange with capital letters
