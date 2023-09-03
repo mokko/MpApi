@@ -50,18 +50,18 @@ two = """
 """
 
 
-def test_one():
+def test_validate():
     # print(one)
     s = Search(fromString=one)
     assert s.validate(mode="search") is True
 
 
-def test_two():
+def test_validate2():
     s = Search(fromString=two)
     assert s.validate(mode="search") is True
 
 
-def test_three():
+def test_single_criterion():
     s = Search(module="Object")
     s.addCriterion(
         operator="equalsField",
@@ -71,7 +71,7 @@ def test_three():
     assert s.validate(mode="search") is True
 
 
-def test_four():
+def test_multiple_criteria():
     s = Search(module="Object")
     s.AND()
     s.addCriterion(
@@ -116,7 +116,7 @@ def test_five():
         s.validate(mode="search")
 
 
-def test_six():
+def test_AND_and_NOT():
     s = Search(module="Object")
     s.AND()
     s.addCriterion(
@@ -145,7 +145,7 @@ def test_six():
     assert s.validate(mode="search") is True
 
 
-def test_seven():  # addField
+def test_with_field():  # addField
     s = Search(module="Object")
     s.AND()
     s.addCriterion(
@@ -176,6 +176,7 @@ def test_seven():  # addField
 
 
 def test_attributes():
+    # attributes are limit and offset
     q = Search(module="Object")
     q.AND()
     q.addCriterion(
@@ -194,3 +195,13 @@ def test_attributes():
     assert q.limit() == -1
     q.limit(value=10)
     assert q.limit() == 10
+
+def test_equals_exact():
+    # trying out equalsExact
+    q = Search(module="Object")
+    q.addCriterion(
+        operator="equalsExact",
+        field="__id",
+        value="2165",  
+    )
+    assert q.validate(mode="search") is True

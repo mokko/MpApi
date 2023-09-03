@@ -77,6 +77,7 @@ allowedOperators = {
     "contains",
     "endsWithField",
     "endsWithTerm",
+    "equalsExact",
     "equalsField",
     "equalsTerm",
     "greater",
