@@ -11,9 +11,6 @@ Scripts (installed in path, all for the command line)
 * mink       - write your own jobs and execute them with cli command
 * getAttachments - download attachments from multimedia items (using groups)
 
-Example Plugins for Replace.py
-* see replace/*
-
 Requirements
 * Python 3.9
 * lxml

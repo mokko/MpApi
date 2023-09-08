@@ -196,12 +196,39 @@ def test_attributes():
     q.limit(value=10)
     assert q.limit() == 10
 
+
 def test_equals_exact():
     # trying out equalsExact
     q = Search(module="Object")
     q.addCriterion(
         operator="equalsExact",
         field="__id",
-        value="2165",  
+        value="2165",
     )
+    assert q.validate(mode="search") is True
+
+
+def test_exists():
+    q = Search(module="Object")
+    q.AND()
+    q.addCriterion(
+        operator="equalsField",  # notEqualsTerm
+        field="__orgUnit",
+        value="EMMusikethnologie",  # 1632806EM-Primärverpackungen
+    )
+    q.exists(field="ObjPublicationGrp")
+    q.AND()
+    q.addCriterion(
+        operator="equalsField",
+        field="ObjPublicationGrp.TypeVoc",
+        value="2600647",  # use id? Daten freigegeben für SMB-digital
+    )
+    q.addCriterion(
+        operator="equalsField",
+        field="ObjPublicationGrp.PublicationVoc",
+        value="1810139",  # Ja
+    )
+    q.endConjunction()
+    q.toFile(path="debug.exists.xml")
+
     assert q.validate(mode="search") is True

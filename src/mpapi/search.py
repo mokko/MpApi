@@ -67,6 +67,7 @@ from pathlib import Path
 from lxml import etree  # type: ignore
 from mpapi.helper import Helper
 from mpapi.constants import NSMAP
+from typing import Optional
 
 # xpath 1.0 and lxml don't empty string or None for default ns
 
@@ -97,8 +98,14 @@ allowedOperators = {
 
 class Search(Helper):
     def __init__(
-        self, *, module=None, limit=-1, offset=0, fromFile=None, fromString=None
-    ):
+        self,
+        *,
+        module: str = None,
+        limit: int = -1,
+        offset: int = 0,
+        fromFile: str = None,
+        fromString: str = None,
+    ) -> None:
         """
         Currently, limit, offset and module are ignored if fromFile or fromString are used.
         """
@@ -135,7 +142,7 @@ class Search(Helper):
                 "/s:application/s:modules/s:module/s:search/s:expert", namespaces=NSMAP
             )[0]
 
-    def addCriterion(self, *, operator, field, value=None):
+    def addCriterion(self, *, operator: str, field: str, value: str = None) -> None:
         if operator not in allowedOperators:
             raise ValueError(f"Unknown operator: '{operator}'")
 
@@ -153,7 +160,7 @@ class Search(Helper):
                 operand=value,
             )
 
-    def addField(self, *, field):
+    def addField(self, *, field) -> None:
         """
         should add field to query to limit response to listed fields
 
@@ -179,17 +186,26 @@ class Search(Helper):
             fieldPath=field,
         )
 
+    def exists(self, *, field: str) -> None:
+        self.lastN = etree.SubElement(
+            self.lastN, "{http://www.zetcom.com/ria/ws/module/search}exists"
+        )
+        self.lastN.attrib["fieldPath"] = field
+
     #
     # conjunctions
     #
 
-    def AND(self):
+    def AND(self) -> None:
         self._addConjunction(Type="and")
 
-    def OR(self):
+    def OR(self) -> None:
         self._addConjunction(Type="or")
 
-    def limit(self, *, value=None) -> int:
+    def NOT(self) -> None:
+        self._addConjunction(Type="not")
+
+    def limit(self, *, value: Optional[int] = None) -> int:
         """
         Get or set limit:
             limit = s.limit()
@@ -197,10 +213,7 @@ class Search(Helper):
         """
         return self._attribute(value=value, key="limit")
 
-    def NOT(self):
-        self._addConjunction(Type="not")
-
-    def offset(self, *, value=None) -> int:
+    def offset(self, *, value: Optional[int] = None) -> int:
         """
         Get or set offset:
             offset = s.offset()
@@ -212,10 +225,10 @@ class Search(Helper):
     # private helpers
     #
 
-    def endConjunction(self):
+    def endConjunction(self) -> None:
         self.lastN = self.lastN.getparent()
 
-    def _addConjunction(self, *, Type):
+    def _addConjunction(self, *, Type) -> None:
         """
         kind is "and", "or" or "not"
         either places conjunction under expert or under last conjunction that has been added.

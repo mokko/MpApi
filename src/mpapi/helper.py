@@ -29,17 +29,13 @@ class Helper:
         print(self.toString())
 
     def toFile(self, *, path: Union[Path, str]) -> None:
-        # path can be str or Pathlib object as well
         doc = self.etree
         try:
             self._write(path=str(path), doc=doc)
         except:
+            # print("WARNING: Trouble writing file")
             doc = etree.ElementTree(self.etree)
             self._write(path=str(path), doc=doc)
-
-    def toFile2(self, *, path) -> None:  # should not be necessary
-        doc = self.etree
-        doc.write(str(path), pretty_print=True, method="c14n2")
 
     def toET(self) -> ET:
         return self.etree
