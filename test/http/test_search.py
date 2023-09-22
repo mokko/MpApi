@@ -28,7 +28,7 @@ def test_exists():
     q.addCriterion(
         operator="equalsField",  # notEqualsTerm
         field="__orgUnit",
-        value="EMMusikethnologie",  # 1632806EM-Primärverpackungen
+        value="EMMusikethnologie",
     )
     q.exists(field="ObjPublicationGrp")
     q.AND()

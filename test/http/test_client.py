@@ -49,3 +49,13 @@ def tast_since():
     assert r.status_code == 200
     print(r.text)  # use pytest -s to see STDOUT when it occurs
     client.toFile(path="../sdata/sinceTest.xml", xml=r.text)
+
+
+def test_create_item():
+    client = MpApi(baseURL=baseURL, user=user, pw=pw)
+    m = Module()
+    objModule = m.module(name="Multimedia")
+    item = m.moduleItem(parent=objModule, hasAttachments="false")
+    m.toFile("debug.multmedia.xml")
+
+    client.create_item3(data=m)

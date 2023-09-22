@@ -458,6 +458,16 @@ class Module(Helper):
         """
         return self.xpath("/m:application/m:modules/m:module/@name")
 
+    def get_ids(self, *, mtype: str) -> list[int]:
+        """
+        Return the IDs of all records of one mtype (such as "Person") as a list.
+        """
+        idL = self.xpath(
+            f"/m:application/m:modules/m:module[@name='{mtype}']/m:moduleItem/@id"
+        )
+        # idL contains ids as str, we want int. Do we really [int(ID) for ID in idL]
+        return idL
+
     def iter(self, *, module: str = "Object") -> Iterator:
         """
         Iterates through moduleItems of the module type provided; use

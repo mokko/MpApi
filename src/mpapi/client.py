@@ -291,6 +291,7 @@ class MpApi:
         # why are we not using Module's toString method?
         ET = data.toET()
         xml = etree.tostring(ET, pretty_print=True)
+        # print(f"{xml=}")
         r = self.createItem(module=mtype, xml=xml)
         return Module(xml=r.text)
 
@@ -301,6 +302,7 @@ class MpApi:
         """
 
         mtype = data.extract_mtype()
+        # print (f"{mtype=}")
         m = self.createItem2(mtype=mtype, data=data)
         objIdL = m.xpath("/m:application/m:modules/m:module/m:moduleItem/@id")
         if len(objIdL) == 0:
