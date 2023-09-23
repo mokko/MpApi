@@ -109,7 +109,7 @@ class Record:
         if self._mtype() != "Object":
             raise TypeError(f"ERROR: Object expected, found {self._mtype()}!")
 
-    def set_creator(self, *, creatorID: int) -> None:
+    def set_creator(self, *, ID: int) -> None:
         """
         Given the ID for Urheber/Fotograf, we fill out that value.
         What happens if the field already exists? Currently, we're assuming it doesn't.
@@ -127,7 +127,7 @@ class Record:
         </moduleReference>
         """
         self.raise_if_not_multimedia()
-        creatorID = int(creatorID)  # guarantee int-ability
+        ID = int(ID)  # guarantee int-ability
 
         try:
             modRefN = self.module.xpath(
@@ -142,12 +142,12 @@ class Record:
             parentN = modRefN.getparent()
             parentN.remove(modRefN)
 
-        xml = """<moduleReference name="MulPhotographerPerRef" targetModule="Person">
-          <moduleReferenceItem moduleItemId="{creatorID}"/>
+        xml = f"""<moduleReference name="MulPhotographerPerRef" targetModule="Person">
+          <moduleReferenceItem moduleItemId="{ID}"/>
         </moduleReference>"""
 
         frag = etree.XML(xml, parser=parser)
-        parentN.addnext(frag)
+        parentN.append(frag)
 
     def set_dateexif(self, *, path: str) -> None:  # alternatively pathlib object
         """
