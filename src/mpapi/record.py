@@ -13,8 +13,9 @@ USAGE
     # apply to assets
     r.add_reference(targetModule: str, moduleItemId: int) 
                               # add to existing refs
-    r.set_filename(path=path) # overwrites existing filename
+    r.set_creator(ID=1234)    # overwrites existing photographer
     r.set_dateexif(path=path) # overwrites existing exif date
+    r.set_filename(path=path) # overwrites existing filename
     r.set_size(path=path)     # overwrites existing size
 
     #for convenience
@@ -108,41 +109,43 @@ class Record:
         if self._mtype() != "Object":
             raise TypeError(f"ERROR: Object expected, found {self._mtype()}!")
 
-    def set_filename(self, *, path: str) -> None:
+    def set_creator(self, *, creatorID: int) -> None:
         """
-        deletes existing MulOriginalFileTxt, if any, and creates a new one
+        Given the ID for Urheber/Fotograf, we fill out that value.
+        What happens if the field already exists? Currently, we're assuming it doesn't.
 
-        pathlib objects are ok for path as well
+        From existing record:
+        <moduleReference name="MulPhotographerPerRef" targetModule="Person" multiplicity="N:1" size="1">
+          <moduleReferenceItem moduleItemId="406600" uuid="406600">
+            <formattedValue language="de">Roxane von der Beek</formattedValue>
+          </moduleReferenceItem>
+        </moduleReference>
 
-        - We dont check if the file exists. Only the last part of the path
-          (i.e. the filename) is saved, so that path can be a full path.
-        - xml has the following shape
-          <dataField dataType="Varchar" name="MulOriginalFileTxt">
-             <value>VII a 40.jpg</value>
-          </dataField>
+        Assumed upload form:
+        <moduleReference name="MulPhotographerPerRef" targetModule="Person">
+          <moduleReferenceItem moduleItemId="406600"/>
+        </moduleReference>
         """
         self.raise_if_not_multimedia()
-        p = Path(path)
-        filename = p.name
+        creatorID = int(creatorID)  # guarantee int-ability
 
-        origFileL = self.module.xpath(
-            """
-            /m:application/m:modules/m:module/m:moduleItem/m:dataField
-                [@name = 'MulOriginalFileTxt']
-        """
-        )
+        try:
+            modRefN = self.module.xpath(
+                """/m:application/m:modules/m:module/m:moduleItem/m:moduleReference[
+                @name = 'MulPhotographerPerRef']"""
+            )[0]
+        except:
+            parentN = self.module.xpath(
+                """/m:application/m:modules/m:module/m:moduleItem"""
+            )[0]
+        else:  # if try successfull
+            parentN = modRefN.getparent()
+            parentN.remove(modRefN)
 
-        # if it already exists delete it
-        if len(origFileL) > 0:
-            origFileN = origFileL[0]
-            origFileN.getparent().remove(origFileN)
-            # print("removing original MulOriginalFileTxt")
-        parentN = self.module.xpath(
-            "/m:application/m:modules/m:module/m:moduleItem/*[last()]"
-        )[0]
-        xml = f"""<dataField dataType="Varchar" name="MulOriginalFileTxt">
-          <value>{filename}</value>
-        </dataField>"""
+        xml = """<moduleReference name="MulPhotographerPerRef" targetModule="Person">
+          <moduleReferenceItem moduleItemId="{creatorID}"/>
+        </moduleReference>"""
+
         frag = etree.XML(xml, parser=parser)
         parentN.addnext(frag)
 
@@ -190,6 +193,44 @@ class Record:
         )[0]
         xml = f"""<dataField dataType="Timestamp" name="MulDateExifTst">
           <value>{utc}</value>
+        </dataField>"""
+        frag = etree.XML(xml, parser=parser)
+        parentN.addnext(frag)
+
+    def set_filename(self, *, path: str) -> None:
+        """
+        deletes existing MulOriginalFileTxt, if any, and creates a new one
+
+        pathlib objects are ok for path as well
+
+        - We dont check if the file exists. Only the last part of the path
+          (i.e. the filename) is saved, so that path can be a full path.
+        - xml has the following shape
+          <dataField dataType="Varchar" name="MulOriginalFileTxt">
+             <value>VII a 40.jpg</value>
+          </dataField>
+        """
+        self.raise_if_not_multimedia()
+        p = Path(path)
+        filename = p.name
+
+        origFileL = self.module.xpath(
+            """
+            /m:application/m:modules/m:module/m:moduleItem/m:dataField
+                [@name = 'MulOriginalFileTxt']
+        """
+        )
+
+        # if it already exists delete it
+        if len(origFileL) > 0:
+            origFileN = origFileL[0]
+            origFileN.getparent().remove(origFileN)
+            # print("removing original MulOriginalFileTxt")
+        parentN = self.module.xpath(
+            "/m:application/m:modules/m:module/m:moduleItem/*[last()]"
+        )[0]
+        xml = f"""<dataField dataType="Varchar" name="MulOriginalFileTxt">
+          <value>{filename}</value>
         </dataField>"""
         frag = etree.XML(xml, parser=parser)
         parentN.addnext(frag)
