@@ -19,7 +19,7 @@ parser = etree.XMLParser(remove_blank_text=True)
 
 
 # not exactly a constant, but dont know where else to put this function
-def get_credentials() -> dict:
+def get_credentials() -> tuple[str, str, str]:
     cred_fn = Path.home() / ".ria"
     if not cred_fn.exists():
         raise SyntaxError(f"RIA Credentials not found at {cred_fn}")

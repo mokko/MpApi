@@ -484,8 +484,7 @@ class Module(Helper):
         * interator
 
         INTERFACE
-        * Do we really need to iterate through a document using this module or
-          should we simply use lxml for that?
+        * Does it make sense to return records(=moduleItems)?
         """
         apath = f"/m:application/m:modules/m:module[@name ='{module}']/m:moduleItem"
         itemsN = self.xpath(apath)
