@@ -11,9 +11,11 @@ from mpapi.validate import Validate
 from pathlib import Path
 import sys
 
+user, pw, baseURL = get_credentials()
+
 
 def _login() -> MpApi:
-    user, pw, baseURL = get_credentials()
+    print(f"Logging in as '{user}'")
     c = MpApi(baseURL=baseURL, pw=pw, user=user)
 
 
@@ -39,7 +41,6 @@ def getDefinition():
     args = _setup_args(parser)
     c = _login()
 
-    print(f"Logging in as '{user}'")
     m = c.getDefinition2(mtype=args.mtype)
     if args.mtype is None:
         fn = f"definition.xml"
@@ -84,7 +85,6 @@ def getAttachments():
         "-j", "--job", required=True, help="pick a job from getAttachments.jobs file"
     )
     args = _setup_args(parser)
-
     GetAttachments(baseURL=baseURL, job=args.job, user=user, pw=pw)
 
 
@@ -93,7 +93,6 @@ def mink():
     parser.add_argument("-j", "--job", help="job to run")  # , required=True
     parser.add_argument("-c", "--conf", help="config file", default="jobs.dsl")
     args = _setup_args(parser)
-
     m = Mink(job=args.job, conf=args.conf, baseURL=baseURL, pw=pw, user=user)
 
 
