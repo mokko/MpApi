@@ -81,6 +81,7 @@ USAGE:
 from collections import namedtuple  # experimenting with namedtuples
 from copy import deepcopy  # for lxml
 from lxml import etree  # type: ignore
+from lxml.etree import XMLSyntaxError
 from mpapi.constants import NSMAP, parser
 from mpapi.helper import Helper
 from pathlib import Path
@@ -153,11 +154,7 @@ class Module(Helper):
         if tree is not None:
             self.etree = tree
         elif xml is not None:
-            # fromstring is for xml without encoding declaration
-            if isinstance(xml, bytes):
-                self.etree = etree.fromstring(xml, parser)
-            else:
-                self.etree = etree.fromstring(bytes(xml, "utf-8"), parser)
+            self.etree = self._from_xml(xml)
         elif file is not None:
             self.etree = etree.parse(str(file), parser)
         else:
@@ -167,6 +164,20 @@ class Module(Helper):
                 <modules/>
             </application>"""
             self.etree = etree.fromstring(xml, parser)
+
+    def _from_xml(self, xml: str):
+        # fromstring is for xml without encoding declaration
+        if isinstance(xml, bytes):
+            try:
+                ET = etree.fromstring(xml, parser)
+            except XMLSyntaxError:
+                raise SyntaxError("Invalid module XML--!")
+        else:
+            try:
+                ET = etree.fromstring(bytes(xml, "utf-8"), parser)
+            except XMLSyntaxError:
+                raise SyntaxError("Invalid module XML!")
+        return ET
 
     def __iter__(self) -> ET:
         """

@@ -260,6 +260,7 @@ class MpApi:
         object.
         """
         r = self.getItem(module=mtype, id=ID)
+        # print(r.text)
         return Module(xml=r.text)
 
     def createItem(self, *, module: str, xml: str) -> requests.Response:

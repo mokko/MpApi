@@ -11,7 +11,7 @@ import pytest
 
 def test_constructors_only():
     # four different constructors, sort of
-    m: MpApi.Module = Module(file="sdata/exhibit20222.xml")
+    m: MpApi.Module = Module(file="sdata/m39-join-exhibit20222.xml")
     assert m  # len(m)>0
     xml = """
     <application xmlns="http://www.zetcom.com/ria/ws/module">
@@ -40,27 +40,35 @@ def test_nsmap():
 
 
 def test_output():
-    m = Module(file="sdata/exhibit20222.xml")
+    m = Module(file="sdata/m39-join-exhibit20222.xml")
     m.toFile(path="sdata/output.xml")  # not sure how to test
     xml = m.toString()
     assert xml  # not sure how to test
 
 
 def test_inspection():
-    m = Module(file="sdata/exhibit20222.xml")
+    # requires scaffold data
+    m = Module(file="sdata/m39-join-exhibit20222.xml")
     with pytest.raises(TypeError) as exc_info:
-        m.totalSize(module="Object")  # none
-    assert m.totalSize(module="Multimedia") == 642
+        m.totalSize(module="Objectssss")  # none
+    assert m.totalSize(module="Exhibition") == 1
     desc = m.describe()
+    # print (desc)
     assert isinstance(desc, dict)
-    assert desc == {"Multimedia": 642}
+    assert desc == {
+        "Exhibition": 1,
+        "Multimedia": 677,
+        "Object": 194,
+        "Person": 58,
+        "Registrar": 194,
+    }
     # print(desc)
     m.dropUUID()
     assert m.validate()
 
 
 def test_iter():
-    m = Module(file="sdata/exhibit20222.xml")
+    m = Module(file="sdata/m39-join-exhibit20222.xml")
     for itemN in m:
         pass  # not sure how to test
 
@@ -92,7 +100,7 @@ def test_from_scratch_interface():
 def test_drops():
     m = Module(file="sdata/exhibit20222.xml")
     uuid = m.xpath("/m:application/m:modules/m:module/m:moduleItem/@uuid")[0]
-    assert uuid == "507201"
+    assert uuid == "20222"
     m.dropUUID()
     try:
         uuid = m.xpath("/m:application/m:modules/m:module/m:moduleItem/@uuid")
@@ -103,10 +111,10 @@ def test_drops():
 
 
 def test_join():
-    m = Module(file="sdata/exhibit20222.xml")
+    m = Module(file="sdata/m39-join-exhibit20222.xml")
     MM_before = m.totalSize(module="Multimedia")
     assert isinstance(MM_before, int)
-    assert len(m) == 642
+    assert len(m) == 1124
 
     # first add
     ET = etree.parse("sdata/exhibit20222.xml")
@@ -116,15 +124,15 @@ def test_join():
     MM_after = m.totalSize(module="Multimedia")
     assert MM_before == MM_after
     # print(len(m))
-    assert len(m) == 642
+    assert len(m) == 1124
 
-    # second add
-    # print("2nd ADD")
-    ET2 = etree.parse("data/739673.xml")
+    # second add: add 2 different documents
+    ET2 = etree.parse("sdata/object739673.xml")
     Obj_before = Module(tree=ET2).actualSize(module="Object")
+    # print(f"{Obj_before=}")
     m.add(doc=ET2)
-    assert m.totalSize(module="Object") == 1
-    assert len(m) == 643
+    assert m.totalSize(module="Object") == 195
+    assert len(m) == 1125
 
     # there was a version where add(doc=ET) deleted most of the document, so now we
     # test that doc remains the "same"
@@ -137,12 +145,12 @@ def test_join():
 def test_length():
     m = Module()
     assert len(m) == 0
-    m = Module(file="sdata/exhibit20222.xml")
-    assert len(m) == 642
+    m = Module(file="sdata/m39-join-exhibit20222.xml")
+    assert len(m) == 1124
 
 
 def test_getItem():
-    m = Module(file="sdata/exhibit20222.xml")
+    m = Module(file="sdata/m39-join-exhibit20222.xml")
     # from collections import namedtuple
     # Item = namedtuple('Item', ['type', 'id'])
     itemN = m[("Multimedia", 507201)]
@@ -151,7 +159,7 @@ def test_getItem():
 
 
 def test_str():
-    m1 = Module(file="sdata/exhibit20222.xml")
+    m1 = Module(file="sdata/m39-join-exhibit20222.xml")
     assert isinstance(str(m1), str)
     # print (m1.__repr__)
 
@@ -160,19 +168,17 @@ def test_add():
     m1 = Module(file="sdata/exhibit20222.xml")
     m2 = Module(file="sdata/exhibit20222.xml")
     m3 = m1 + m2
-
-    m1Len = len(m1)
-    assert isinstance(m3, Module)
-    assert len(m3) == m1Len
-    assert m3.__repr__ != m1.__repr__
-
-    m4 = Module(file="data/739673.xml")
+    m4 = Module(file="sdata/Object739673.xml")
     m5 = m3 + m4
-    assert len(m5) == 643
+
+    assert isinstance(m3, Module)
+    assert len(m3) == len(m1)
+    assert m3.__repr__ != m1.__repr__
+    assert len(m5) == 2
     m1 = m1 + m2  # change in place
-    assert len(m1) == 642
+    assert len(m1) == 1
     m5 = m1 + m2 + m3  # more than 2 additions
-    assert len(m5) == 642
+    assert len(m5) == 1
 
 
 def test_toZip():
@@ -198,7 +204,8 @@ def test_filter():
     # user, pw, baseURL = get_credentials()
     # client = MpApi(user=user, baseURL=baseURL, pw=pw)
     # m = client.search2(query=q)
-    m = Module(file="filter-search.xml")
+
+    m = Module(file="sdata/filter-search.xml")
     new_m = m.filter(
         xpath="/m:application/m:modules/m:module/m:moduleItem[@hasAttachments = 'true']"
     )

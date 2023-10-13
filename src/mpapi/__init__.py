@@ -13,6 +13,34 @@ from pathlib import Path
 user, pw, baseURL = get_credentials()
 
 
+def getDefinition():
+    parser = argparse.ArgumentParser(description="getItem for MpApi")
+    parser.add_argument(
+        "-t",
+        "--mtype",
+        help="module type (Object, Multimedia etc.); optional",
+        default=None,
+    )
+    parser.add_argument("-v", "--version", help="Display version information")
+    args = parser.parse_args()
+
+    if args.version:
+        print(f"Version: {__version__}")
+        sys.exit(0)
+
+    c = MpApi(baseURL=baseURL, pw=pw, user=user)
+    print(f"Logging in as '{user}'")
+    m = c.getDefinition2(mtype=args.mtype)
+    if args.mtype is None:
+        fn = f"definition.xml"
+    else:
+        fn = f"definition-{args.mtype}.xml"
+    print(f"About to write to {fn}")
+    if Path(fn).exists():
+        print("   overwriting existing file")
+    m.toFile(path=fn)
+
+
 def getItem():
     parser = argparse.ArgumentParser(description="getItem for MpApi")
     parser.add_argument(
@@ -30,6 +58,7 @@ def getItem():
         sys.exit(0)
 
     c = MpApi(baseURL=baseURL, pw=pw, user=user)
+    print(f"Logging in as '{user}'")
     m = c.getItem2(mtype=args.mtype, ID=args.ID)
     if args.upload:
         fn = f"getItem-{args.mtype}{args.ID}u.xml"

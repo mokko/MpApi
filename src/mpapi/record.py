@@ -50,7 +50,7 @@ from datetime import datetime
 from lxml import etree
 from mpapi.module import Module
 from pathlib import Path
-import pyexiv2
+import PIL.Image
 
 parser = etree.XMLParser(remove_blank_text=True)
 
@@ -159,11 +159,12 @@ class Record:
         p = Path(path)
         dateDT = False
         try:
-            img = pyexiv2.Image(path)
+            img = PIL.Image.open(path)
         except:
             print("WARNING: Can't access exif info")
             # mtime = p.stat().st_mtime
         else:
+            exif = img._getexif()
             try:
                 date_str = exif["Exif.Image.DateTime"]  # 2011:04:12 16:29:52
             except:
