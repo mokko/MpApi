@@ -16,7 +16,7 @@ user, pw, baseURL = get_credentials()
 
 def _login() -> MpApi:
     print(f"Logging in as '{user}'")
-    c = MpApi(baseURL=baseURL, pw=pw, user=user)
+    return MpApi(baseURL=baseURL, pw=pw, user=user)
 
 
 def _setup_args(parser):
