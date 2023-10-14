@@ -27,6 +27,7 @@ test = [
 [project.scripts]
 mink = 'mpapi:mink'
 getAttachments = 'mpapi:getAttachments'
+getAttachment = 'mpapi:getAttachment'
 getItem = 'mpapi:getItem'
 getDefinition = 'mpapi:getDefinition'
 updateItem = 'mpapi:updateItem'

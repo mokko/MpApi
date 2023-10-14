@@ -1,8 +1,8 @@
-"""An Unofficial Open Source Client for the MuseumPlus API"""
+"""Unofficial Open Source Client for the MuseumPlus API written in Python"""
 
 __version__ = "0.1.9"  # replace pyexiv, cleanup __init__
 import argparse
-from getAttachments import GetAttachments
+from getAttachments import GetAttachments, get_attachment
 from mpapi.mink import Mink
 from mpapi.module import Module
 from mpapi.client import MpApi
@@ -19,6 +19,12 @@ def _login() -> MpApi:
     return MpApi(baseURL=baseURL, pw=pw, user=user)
 
 
+def _require(args, required_args):
+    for req in required_args:
+        if not req in args:
+            raise SyntaxError("Required args not provided")
+
+
 def _setup_args(parser):
     parser.add_argument(
         "-v", "--version", help="Display version information", action="store_true"
@@ -28,6 +34,32 @@ def _setup_args(parser):
         print(f"Version: {__version__}")
         sys.exit(0)
     return args
+
+
+def getAttachment():
+    parser = argparse.ArgumentParser(
+        description="simple getAttachment for attachments of single asset record"
+    )
+    parser.add_argument(
+        "ID",
+        nargs="?",
+        help="ID as integer for the Multimedia record you want the attachment from",
+    )
+    args = _setup_args(parser)
+    _require(args, ["ID"])
+    c = _login()
+    get_attachment(c, args.ID)
+
+
+def getAttachments():
+    parser = argparse.ArgumentParser(
+        description="getAttachments for MpApi (using config file)"
+    )
+    parser.add_argument(
+        "-j", "--job", required=True, help="pick a job from getAttachments.jobs file"
+    )
+    args = _setup_args(parser)
+    GetAttachments(baseURL=baseURL, job=args.job, user=user, pw=pw)
 
 
 def getDefinition():
@@ -79,15 +111,6 @@ def getItem():
     m.toFile(path=fn)
 
 
-def getAttachments():
-    parser = argparse.ArgumentParser(description="getAttachments for MpApi")
-    parser.add_argument(
-        "-j", "--job", required=True, help="pick a job from getAttachments.jobs file"
-    )
-    args = _setup_args(parser)
-    GetAttachments(baseURL=baseURL, job=args.job, user=user, pw=pw)
-
-
 def mink():
     parser = argparse.ArgumentParser(description="Commandline frontend for MpApi.py")
     parser.add_argument("-j", "--job", help="job to run")  # , required=True
@@ -104,12 +127,7 @@ def updateItem():
     args = _setup_args(parser)
 
     # todowe could extract module type and id from the record
-
-    required_args = ["file", "id", "mtype"]
-
-    for req in required_args:
-        if not req in args:
-            raise SyntaxError("Required args not provided")
+    _require(args, ["file", "id", "mtype"])
 
     m = Module(file=args.file)
     c = _login()

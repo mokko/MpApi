@@ -31,11 +31,45 @@ response_cache = "_ga_response.xml"  # for debugging
 NSMAP = {"m": "http://www.zetcom.com/ria/ws/module"}
 
 
+def get_attachment(c: MpApi, ID: int) -> None:
+    """
+    Get attachment from a specified Multimedia ID and save to disk. There can be only
+    one or none attachment.
+
+    This function profits from its more recent inception. Uses underscore in name,
+    function instead of method, no keyword argument.
+    """
+
+    print(f"Getting Multimedia {ID}")
+    # we need the dateiname to save, assuming there can be only one.
+    m = c.getItem2(mtype="Multimedia", ID=ID)
+    # m.toFile(path=f"debug.multimedia{ID}")
+    if (
+        m.xpath("/m:application/m:modules/m:module/m:moduleItem/@hasAttachments")[0]
+        == "true"
+    ):
+        hasAttachments = True
+    else:
+        hasAttachments = False
+        raise ValueError("ERROR: Record has not attachment")
+
+    try:
+        fn = m.xpath(
+            "/m:application/m:modules/m:module/m:moduleItem/m:dataField[@name='MulOriginalFileTxt']/m:value/text()"
+        )[0]
+    except:
+        fn = f"{ID}.jpg"  # use mulId as a fallback if no dateiname in RIA
+        print("WARNING: Falling back to {fn} since no Dateiname specified in RIA")
+
+    print(f"About to save attachment to '{fn}'")
+    c.saveAttachment(id=ID, path=fn)
+
+
 class GetAttachments:
     def __init__(self, *, baseURL: str, job: str, user: str, pw: str) -> None:
         self.api = MpApi(baseURL=baseURL, user=user, pw=pw)
         self.job = job
-        self.setup_conf()  # writes to self.conf
+        self.conf = self.setup_conf()
 
         # if Path(response_cache).exists():
         #    print(f"* loading response cache from '{response_cache}'")
@@ -46,7 +80,7 @@ class GetAttachments:
         m.toFile(path=response_cache)  # debug
         self.process_response(data=m)
 
-    def process_response(self, *, data: Module):  # returns nothing useful
+    def process_response(self, *, data: Module) -> None:
         no = data.actualSize(module="Multimedia")
         name_policy = self.conf["name"]
         print(f"* {no} digital assets found")
@@ -77,6 +111,9 @@ class GetAttachments:
                     f"{ID}.jpg"  # use mulId as a fallback if no dateiname in RIA
                 )
                 # there is a chance that this file is no jpg
+                print(
+                    "WARNING: Falling back to {fn} since no Dateiname specified in RIA"
+                )
             print(f"*  mulId {ID}")  # {dateiname}
             if name_policy == "mulId":
                 ext = Path(dateiname).suffix
@@ -95,7 +132,7 @@ class GetAttachments:
             else:
                 print("\tno attachment")
 
-    def query(self):
+    def query(self) -> Search:
         """
         Restriction: Currently, only gets attachments from Multimedia.
         """
@@ -152,13 +189,13 @@ class GetAttachments:
         print(f"* about to execute query\n{qu.toString()}")
         return self.api.search2(query=qu)
 
-    def setup_conf(self):
+    def setup_conf(self) -> dict:
         """
-        Saves configuration for selected job in self.conf
+        Returns configuration for selected job
         """
         config = configparser.ConfigParser()
         if not Path(conf_fn).exists():
             raise SyntaxError(f"ERROR: conf file not found! {conf_fn}")
         config.read(conf_fn)
         print(f"* Using job '{self.job}' from {conf_fn}")
-        self.conf = config[self.job]
+        return config[self.job]
