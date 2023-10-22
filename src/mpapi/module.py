@@ -85,7 +85,7 @@ from lxml.etree import XMLSyntaxError
 from mpapi.constants import NSMAP, parser
 from mpapi.helper import Helper
 from pathlib import Path
-from typing import Any, Iterator, Optional, Union, Self
+from typing import Any, Iterator, Optional, Self
 
 
 # xpath 1.0 and lxml don't allow empty string or None for default ns
@@ -93,7 +93,6 @@ dataTypes = {"Clb": "Clob", "Dat": "Date", "Lnu": "Long", "Txt": "Varchar"}
 # types
 # not using lxml-stubs at the moment
 ET = Any
-PathX = Union[Path, str]
 Item = namedtuple("Item", ["type", "id"])
 
 
@@ -113,7 +112,7 @@ class Module(Helper):
         m3.add(doc=m2.etree)  # using internal here instead of method from Helper
         return m3
 
-    def __getitem__(self, item: Item) -> ET:
+    def __getitem__(self, item: tuple[str, int]) -> ET:
         """
         m = Module(xml=someStr)
         itemN = m[("Object", 1234)]
@@ -132,7 +131,9 @@ class Module(Helper):
         )[0]
         return itemN
 
-    def __init__(self, *, file: PathX = None, tree: ET = None, xml: str = None) -> None:
+    def __init__(
+        self, *, file: Path | str | None = None, tree: ET = None, xml: str | None = None
+    ) -> None:
         """
         There are FOUR ways to make a new Module object. Pick one:
             m = Module(file="path.xml") # from a file
@@ -342,7 +343,12 @@ class Module(Helper):
         self.dropRepeatableGroup(name="ObjValuationGrp")
 
     def dataField(
-        self, *, parent: ET, name: str, dataType: str = None, value: str = None
+        self,
+        *,
+        parent: ET,
+        name: str,
+        dataType: str | None = None,
+        value: str | None = None,
     ) -> ET:
         """
         Get dataField with that name if it exists or make a new one.
@@ -437,8 +443,12 @@ class Module(Helper):
             rgN.getparent().remove(rgN)
 
     def existsItem(self, *, mtype: str, modItemId: int):
+        """
+        see item_exists; is this one used anywhere?
+        DEPRECATED
+        """
         try:
-            self.__getitem__([(mtype, newId)])
+            self.__getitem__([(mtype, modItemId)])
         except:
             return False
         else:
@@ -479,6 +489,21 @@ class Module(Helper):
         # idL contains ids as str, we want int. Do we really [int(ID) for ID in idL]
         return idL
 
+    def item_exists(self, *, mtype: str, ID: int) -> bool:
+        """
+        Test if a given item is included:
+            if m.item_exists(mtype="Object", ID=1234):
+                do_something()
+            else:
+                or_another()
+        """
+        try:
+            self[(mtype, ID)]
+        except IndexError:
+            return False
+        else:
+            return True
+
     def iter(self, *, module: str = "Object") -> Iterator:
         """
         Iterates through moduleItems of the module type provided; use
@@ -502,7 +527,7 @@ class Module(Helper):
         for itemN in itemsN:
             yield itemN
 
-    def filter(self, *, xpath: str, mtype: str = "Object") -> Self:
+    def filter(self, *, xpath: str, mtype: str = "Object") -> Module:
         """
         For an xpath that returns a list of moduleItems, return a new Module object with
         only those items. Note: You need to set the mtype manually.
@@ -519,7 +544,9 @@ class Module(Helper):
             parser=parser,
         )
 
-        moduleN = ET.xpath("/m:application/m:modules/m:module", namespaces=NSMAP)[0]
+        moduleN: Any = ET.xpath("/m:application/m:modules/m:module", namespaces=NSMAP)[
+            0
+        ]
         [moduleN.append(moduleItemN) for moduleItemN in moduleItemL]
         m = Module(tree=ET)
         m.updateTotalSize()
@@ -565,7 +592,7 @@ class Module(Helper):
         return moduleN
 
     def moduleItem(
-        self, *, parent: ET, ID: int = None, hasAttachments: Optional[str] = None
+        self, *, parent: ET, ID: int | None = None, hasAttachments: Optional[str] = None
     ) -> ET:
         """
         Gets moduleItem with that ID or creates a new one.
@@ -659,7 +686,7 @@ class Module(Helper):
         )
         return mri
 
-    def repeatableGroup(self, *, parent: ET, name: str, size: int = None):
+    def repeatableGroup(self, *, parent: ET, name: str, size: int | None = None):
         """
         Get existing repeatableGroup with that name or creates a new one.
 
@@ -692,7 +719,7 @@ class Module(Helper):
                 rGrp.set("size", size)
         return rGrp
 
-    def repeatableGroupItem(self, *, parent: ET, ID: int = None):
+    def repeatableGroupItem(self, *, parent: ET, ID: int | None = None):
         """
         Make a new rGrpItem
 
@@ -865,7 +892,12 @@ class Module(Helper):
         self._dropFieldsByName(element="moduleReference", name="ObjMultimediaRef")
 
     def vocabularyReference(
-        self, *, parent: ET, name: str, instanceName: str = None, ID: int = None
+        self,
+        *,
+        parent: ET,
+        name: str,
+        instanceName: str | None = None,
+        ID: int | None = None,
     ) -> ET:
         """
         Get vocabularyReference with that name if it exists or make a new one.
@@ -909,7 +941,7 @@ class Module(Helper):
         return vr
 
     def vocabularyReferenceItem(
-        self, *, parent: ET, name: str = None, ID: int = None
+        self, *, parent: ET, name: str | None = None, ID: int | None = None
     ) -> ET:
         """
         Get an existing vocabularyReferenceItem (vri) with that name or make a
@@ -988,7 +1020,7 @@ class Module(Helper):
                     oldItemN = newItemN  # this will probably not work, but we can debug that later
                     # else: keep oldItem = do nothing
 
-    def _dropAttribs(self, *, attrib, xpath):
+    def _dropAttribs(self, *, attrib: str, xpath: str):
         elemL: list[ET] = self.etree.xpath(xpath, namespaces=NSMAP)
         for elemN in elemL:
             try:
@@ -1025,9 +1057,7 @@ class Module(Helper):
         """
         # print(f"+++//m:{element}[@name = {name}]")
 
-        elemL: list[ET] = self.etree.xpath(
-            f"//m:{element}[@name = '{name}']", namespaces=NSMAP
-        )
+        elemL = self.etree.xpath(f"//m:{element}[@name = '{name}']", namespaces=NSMAP)
         for elemN in elemL:
             # print(f"-----------{elemN}")
             elemN.getparent().remove(elemN)

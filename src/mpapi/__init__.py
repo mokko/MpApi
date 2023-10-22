@@ -19,7 +19,10 @@ def _login() -> MpApi:
     return MpApi(baseURL=baseURL, pw=pw, user=user)
 
 
-def _require(args, required_args):
+def _require(args, required_args: list) -> None:
+    """
+    Since with nargs argparse can't use the required argument, we roll our own.
+    """
     for req in required_args:
         if not req in args:
             raise SyntaxError("Required args not provided")
