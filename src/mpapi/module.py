@@ -442,18 +442,6 @@ class Module(Helper):
         for rgN in rgL:
             rgN.getparent().remove(rgN)
 
-    def existsItem(self, *, mtype: str, modItemId: int):
-        """
-        see item_exists; is this one used anywhere?
-        DEPRECATED
-        """
-        try:
-            self.__getitem__([(mtype, modItemId)])
-        except:
-            return False
-        else:
-            return True
-
     def extract_first_id(self) -> int:
         return self.xpath("/m:application/m:modules/m:module/m:moduleItem[1]/@id")[0]
 
@@ -496,6 +484,7 @@ class Module(Helper):
                 do_something()
             else:
                 or_another()
+        Used to be called existsItem.
         """
         try:
             self[(mtype, ID)]
@@ -527,7 +516,7 @@ class Module(Helper):
         for itemN in itemsN:
             yield itemN
 
-    def filter(self, *, xpath: str, mtype: str = "Object") -> Module:
+    def filter(self, *, xpath: str, mtype: str = "Object") -> Self:
         """
         For an xpath that returns a list of moduleItems, return a new Module object with
         only those items. Note: You need to set the mtype manually.
