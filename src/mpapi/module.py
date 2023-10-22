@@ -323,7 +323,7 @@ class Module(Helper):
 
         newN = deepcopy(itemN)  # dont touch the original
         modItemId = newN.get("id")
-        if self.existsItem(mtype=mtype, modItemId=modItemId):
+        if self.item_exists(mtype=mtype, ID=modItemId):
             self.delItem(mtype=mtype, modItemId=modItemId)
 
         # it's conceivable that internal module has no module[@name=mtype] yet
