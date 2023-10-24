@@ -16,7 +16,6 @@ dependencies = [
 	"flit",
     "lxml >=4.8.0", #pathlike objects
     "requests >=2.6",
-	"pillow", # for exif in record
 ]
 [project.optional-dependencies]
 test = [
