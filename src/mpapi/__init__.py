@@ -13,6 +13,42 @@ import sys
 
 user, pw, baseURL = get_credentials()
 
+allowed_mtypes = (
+    "Accessory",
+    "Address",
+    "AddressGroup",
+    "CollectionActivity",
+    "Conservation",
+    "Contract",
+    "Datasource",
+    "DefDimension",
+    "DefLiterature",
+    "Event",
+    "Exhibition",
+    "Function",
+    "FunctionGenerator",
+    "Import",
+    "ImportDefinition",
+    "InventoryNumber",
+    "Literature",
+    "Movement",
+    "Multimedia",
+    "MultimediaGroup",
+    "Object",
+    "ObjectGroup",
+    "OrganisationUnit",
+    "Ownership",
+    "Parameter",
+    "Person",
+    "Place",
+    "Registrar",
+    "Search",
+    "Task",
+    "Template",
+    "User",
+    "UserGroup",
+)
+
 
 def _login() -> MpApi:
     print(f"Logging in as '{user}'")
@@ -97,6 +133,9 @@ def getItem():
     )
     parser.add_argument("-i", "--ID", help="ID")
     args = _setup_args(parser)
+
+    if args.mtype not in allowed_mtypes:
+        print(f"WARNING: Unknown type. Known types: {allowed_mtypes}")
 
     c = _login()
     m = c.getItem2(mtype=args.mtype, ID=args.ID)
