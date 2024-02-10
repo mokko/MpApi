@@ -443,6 +443,7 @@
         the EqualsField element with fieldPath: "Surname".
 
 		3.9.2023 __orgUnit added by Maurice
+		28.1.2024 __attachment added by Maurice. Cant get it to work
     -->
     <xs:simpleType name="Path">
         <xs:restriction base="xs:string">

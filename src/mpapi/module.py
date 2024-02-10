@@ -521,8 +521,7 @@ class Module(Helper):
         For an xpath that returns a list of moduleItems, return a new Module object with
         only those items. Note: You need to set the mtype manually.
         """
-        moduleItemL = self.xpath(xpath)
-        ET = etree.XML(
+        newET = etree.XML(
             f"""
             <application xmlns="http://www.zetcom.com/ria/ws/module">
                 <modules>
@@ -533,13 +532,20 @@ class Module(Helper):
             parser=parser,
         )
 
-        moduleN: Any = ET.xpath("/m:application/m:modules/m:module", namespaces=NSMAP)[
-            0
-        ]
+        moduleN: Any = newET.xpath(
+            f"/m:application/m:modules/m:module", namespaces=NSMAP
+        )[0]
+        moduleItemL = self.xpath(xpath)
+        print(f"FOUND ITEMS: {len(moduleItemL)}")
         [moduleN.append(moduleItemN) for moduleItemN in moduleItemL]
-        m = Module(tree=ET)
+        m = Module(tree=newET)
         m.updateTotalSize()
         return m
+
+    def filter2(self, *, xpath: str) -> Self:
+        """Version of filter that uses the first mtype from orignal module"""
+        mtype = self.extract_mtypes()[0]
+        return self.filter(xpath=xpath, mtype=mtype)
 
     def module(self, *, name: str) -> ET:
         """

@@ -267,7 +267,11 @@ class Mink:
     def join(self, args: list) -> Path:
         Type = args[0]
         Id = args[1]
-        label = args[2]
+        try:
+            label = args[2]
+        except:
+            label = "nolabel"
+
         try:
             since = args[4]
         except:

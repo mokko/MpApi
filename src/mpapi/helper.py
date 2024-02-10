@@ -34,7 +34,9 @@ class Helper:
             self._write(path=str(path), doc=doc)
         except:
             # print("WARNING: Trouble writing file")
-            doc = etree.ElementTree(self.etree)
+            doc = etree.ElementTree(
+                self.etree,
+            )
             self._write(path=str(path), doc=doc)
 
     def toET(self) -> ET:

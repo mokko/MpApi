@@ -399,7 +399,7 @@
     -->
     <xs:simpleType name="Path">
         <xs:restriction base="xs:string">
-            <xs:pattern value="__orgUnit|__id|__lastModified|__lastModifiedUser|__created|__createdUser|[a-zA-Z][a-zA-Z0-9_$]*(\.[a-zA-Z][a-zA-Z0-9_$]*)*(\[[a-zA-Z][a-zA-Z0-9_$]*\]|\.(__attributes\.[a-zA-Z][a-zA-Z0-9_$]*|__id|__lastModified|__lastModifiedUser|__created|__createdUser|__parent(((\.[a-zA-Z][a-zA-Z0-9_$]*)+((\[[a-zA-Z][a-zA-Z0-9_$]*\]|(\.__attributes\.[a-zA-Z][a-zA-Z0-9_$]*))|\.__id|\.__lastModified|\.__lastModifiedUser|\.__created|\.__createdUser)?)|(\.(__id|__lastModified|__lastModifiedUser|__created|__createdUser)))?))?" />
+            <xs:pattern value="__attachment|__orgUnit|__id|__lastModified|__lastModifiedUser|__created|__createdUser|[a-zA-Z][a-zA-Z0-9_$]*(\.[a-zA-Z][a-zA-Z0-9_$]*)*(\[[a-zA-Z][a-zA-Z0-9_$]*\]|\.(__attributes\.[a-zA-Z][a-zA-Z0-9_$]*|__id|__lastModified|__lastModifiedUser|__created|__createdUser|__parent(((\.[a-zA-Z][a-zA-Z0-9_$]*)+((\[[a-zA-Z][a-zA-Z0-9_$]*\]|(\.__attributes\.[a-zA-Z][a-zA-Z0-9_$]*))|\.__id|\.__lastModified|\.__lastModifiedUser|\.__created|\.__createdUser)?)|(\.(__id|__lastModified|__lastModifiedUser|__created|__createdUser)))?))?" />
         </xs:restriction>
     </xs:simpleType>
 
