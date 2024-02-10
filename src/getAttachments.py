@@ -1,9 +1,9 @@
 """
 getAttachments downloads attachments from RIA
 
-create a configuration file that describes one or multiple jobs
-e.g. getAttachments.jobs
-label:
+
+Configuration file format 
+[label]
     type: group
     id: 12345
     restriction: None | freigegeben
@@ -22,12 +22,13 @@ import argparse
 import configparser
 from datetime import date
 from mpapi.client import MpApi
+from mpapi.constants import get_credentials
 from mpapi.module import Module
 from mpapi.search import Search
 from pathlib import Path
 
 conf_fn = "getAttachments.jobs"
-response_cache = "_ga_response.xml"  # for debugging
+response_cache = "_ga_response.xml"  # cache
 NSMAP = {"m": "http://www.zetcom.com/ria/ws/module"}
 
 
@@ -51,7 +52,7 @@ def get_attachment(c: MpApi, ID: int) -> None:
         hasAttachments = True
     else:
         hasAttachments = False
-        raise ValueError("ERROR: Record has not attachment")
+        raise ValueError("ERROR: Record has no attachment")
 
     try:
         fn = m.xpath(
@@ -66,21 +67,28 @@ def get_attachment(c: MpApi, ID: int) -> None:
 
 
 class GetAttachments:
-    def __init__(self, *, baseURL: str, job: str, user: str, pw: str) -> None:
+    def __init__(self, *, job: str, cache: bool = False) -> None:
+        user, pw, baseURL = get_credentials()
         self.api = MpApi(baseURL=baseURL, user=user, pw=pw)
         self.job = job
         self.conf = self.setup_conf()
+        print(f"   type: {self.conf['type']}")
+        print(f"   id: {self.conf['id']}")
+        print(f"   rest: {self.conf['restriction']}")
+        print(f"   name: {self.conf['name']}")
 
-        # if Path(response_cache).exists():
-        #    print(f"* loading response cache from '{response_cache}'")
-        #    m = Module(file=response_cache)
-        # else:
-        print(f"* launching new query")
-        m = self.query()  # returns response as Module
-        m.toFile(path=response_cache)  # debug
+        if cache:
+            print("* loading cached response")
+            m = Module(file=response_cache)
+        else:
+            print(f"* launching new search")
+            m = self.query()
+            m.toFile(path=response_cache)
+
         self.process_response(data=m)
 
     def process_response(self, *, data: Module) -> None:
+        print(f"* processing response")
         no = data.actualSize(module="Multimedia")
         name_policy = self.conf["name"]
         print(f"* {no} digital assets found")
@@ -136,8 +144,6 @@ class GetAttachments:
         """
         Restriction: Currently, only gets attachments from Multimedia.
         """
-        print(f"* type: {self.conf['type']}")
-        print(f"* id: {self.conf['id']}")
         qu = Search(module="Multimedia")
         if self.conf["restriction"] == "freigegeben":
             qu.AND()
@@ -194,8 +200,21 @@ class GetAttachments:
         Returns configuration for selected job
         """
         config = configparser.ConfigParser()
+        required = ["type", "id", "restriction", "name"]
         if not Path(conf_fn).exists():
             raise SyntaxError(f"ERROR: conf file not found! {conf_fn}")
         config.read(conf_fn)
         print(f"* Using job '{self.job}' from {conf_fn}")
-        return config[self.job]
+        try:
+            c = config[self.job]
+        except:
+            raise SyntaxError(f"job '{self.job}' not found")
+
+        for each in required:
+            try:
+                c[each]
+            except:
+                raise SyntaxError(f"Config value {each} missing!")
+
+        print(f"Conf ok")  # : {c}
+        return c

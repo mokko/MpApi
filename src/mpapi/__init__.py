@@ -97,8 +97,15 @@ def getAttachments():
     parser.add_argument(
         "-j", "--job", required=True, help="pick a job from getAttachments.jobs file"
     )
+    parser.add_argument(
+        "-c",
+        "--cache",
+        action="store_true",
+        help="New query or load cached query?",
+        default=False,
+    )
     args = _setup_args(parser)
-    GetAttachments(baseURL=baseURL, job=args.job, user=user, pw=pw)
+    GetAttachments(job=args.job, cache=args.cache)
 
 
 def getDefinition():
