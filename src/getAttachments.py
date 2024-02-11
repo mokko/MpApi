@@ -1,18 +1,18 @@
 """
 getAttachments downloads attachments from RIA
 
-
-Configuration file format 
+Configuration file format (where | indicates the possible options):
+#file is typically named 'getAttachments.jobs'
 [label]
-    type: group
+    type: group | exhibit | loc | restExhibit
     id: 12345
     restriction: None | freigegeben
     name: dateiname | mulid
-(where | indicates the possible options).
 
 You also need the credentials.py file in the pwd.
 
     getAttachments -j label
+
 will put attachments in dir 
     ./label/20220708
 where the current date is used for the second directory.
@@ -72,10 +72,6 @@ class GetAttachments:
         self.api = MpApi(baseURL=baseURL, user=user, pw=pw)
         self.job = job
         self.conf = self.setup_conf()
-        print(f"   type: {self.conf['type']}")
-        print(f"   id: {self.conf['id']}")
-        print(f"   rest: {self.conf['restriction']}")
-        print(f"   name: {self.conf['name']}")
 
         if cache:
             print("* loading cached response")
@@ -90,11 +86,10 @@ class GetAttachments:
     def process_response(self, *, data: Module) -> None:
         print(f"* processing response")
         no = data.actualSize(module="Multimedia")
-        name_policy = self.conf["name"]
         print(f"* {no} digital assets found")
 
         yyyymmdd = date.today().strftime("%Y%m%d")
-        out_dir = Path(self.job).joinpath(yyyymmdd)
+        out_dir = Path(self.job) / yyyymmdd
 
         if not out_dir.exists():
             print(f"* Making dir {out_dir}")
@@ -120,16 +115,19 @@ class GetAttachments:
                 )
                 # there is a chance that this file is no jpg
                 print(
-                    "WARNING: Falling back to {fn} since no Dateiname specified in RIA"
+                    f"WARNING: Falling back to ID {dateiname} since no Dateiname specified in RIA"
                 )
             print(f"*  mulId {ID}")  # {dateiname}
-            if name_policy == "mulId":
-                ext = Path(dateiname).suffix
-                path = out_dir.joinpath(f"{ID}{ext}")
-            elif name_policy == "dateiname":
-                path = out_dir.joinpath(dateiname)
-            else:
-                raise SyntaxError(f"Error: Unknown config value: {name_policy}")
+            match self.conf["name"]:
+                case "mulId":
+                    suffix = Path(dateiname).suffix
+                    path = out_dir / f"{ID}{suffix}"
+                case "dateiname":
+                    path = out_dir / dateiname
+                case _:
+                    raise SyntaxError(
+                        f"Error: Unknown config value: {self.conf['name']}"
+                    )
 
             if hasAttachments:  # only d/l if there is an attachment
                 if path.exists():  # let's not overwrite existing files
@@ -147,49 +145,21 @@ class GetAttachments:
         qu = Search(module="Multimedia")
         if self.conf["restriction"] == "freigegeben":
             qu.AND()
-        elif self.conf["type"] == "approval":
-            raise SyntaxError("ERROR: approval group mode not implemented yet!")
-        if self.conf["type"] == "group":
-            qu.addCriterion(  #  get assets attached to objects in a given group
-                operator="equalsField",
-                field="MulObjectRef.ObjObjectGroupsRef.__id",
-                value=self.conf["id"],
-            )
-        elif self.conf["type"] == "exhibit":
-            qu.addCriterion(  #  get assets attached to objects in a given exhibition
-                operator="equalsField",
-                field="MulObjectRef.ObjRegistrarRef.RegExhibitionRef.__id",
-                value=self.conf["id"],
-            )
-        elif self.conf["type"] == "loc":
-            print("WARN: location mode not tested yet!")
-            qu.addCriterion(  #  get assets attached to objects at a given location
-                operator="equalsField",
-                field="MulObjectRef.ObjCurrentLocationVoc",
-                value=self.conf["id"],
-            )
 
-        elif self.conf["type"] == "restExhibit":
-            # get assets attached to restauration records attached to an exhibit
-            # photos are typically not SMB-approved
-            qu.addCriterion(
-                operator="equalsField",
-                field="MulConservationRef.ConExhibitionRef.__id",
-                value=self.conf["id"],
-            )
-        else:
-            raise TypeError(f"ERROR: This type is not known! {self.conf['type']}")
-        if self.conf["restriction"] == "freigegeben":
-            qu.addCriterion(
-                operator="equalsField",
-                field="MulApprovalGrp.TypeVoc",
-                value="1816002",  # SMB-Digital; search wants str
-            )
-            qu.addCriterion(
-                operator="equalsField",
-                field="MulApprovalGrp.ApprovalVoc",
-                value="4160027",  # Ja
-            )
+        _qm_type(qu, self.conf["id"])
+
+        match self.conf["restriction"]:
+            case "freigegeben":
+                qu.addCriterion(
+                    operator="equalsField",
+                    field="MulApprovalGrp.TypeVoc",
+                    value="1816002",  # SMB-Digital; search wants str
+                )
+                qu.addCriterion(
+                    operator="equalsField",
+                    field="MulApprovalGrp.ApprovalVoc",
+                    value="4160027",  # Ja
+                )
         qu.addField(field="MulOriginalFileTxt")  # speeds up query a lot!
         qu.validate(mode="search")
         print(f"* about to execute query\n{qu.toString()}")
@@ -216,5 +186,46 @@ class GetAttachments:
             except:
                 raise SyntaxError(f"Config value {each} missing!")
 
-        print(f"Conf ok")  # : {c}
+        print(f"   type: {c['type']}")
+        print(f"   id: {c['id']}")
+        print(f"   rest: {c['restriction']}")
+        print(f"   name: {c['name']}")
         return c
+
+    #
+    #
+    #
+
+    def _qm_type(qu: Search, Id: int):
+        match self.conf["type"]:
+            case "approval":
+                raise SyntaxError("ERROR: approval group mode not implemented yet!")
+            case "group":
+                qu.addCriterion(  #  get assets attached to objects in a given group
+                    operator="equalsField",
+                    field="MulObjectRef.ObjObjectGroupsRef.__id",
+                    value=Id,
+                )
+            case "exhibit":
+                qu.addCriterion(  #  get assets attached to objects in a given exhibition
+                    operator="equalsField",
+                    field="MulObjectRef.ObjRegistrarRef.RegExhibitionRef.__id",
+                    value=Id,
+                )
+            case "loc":
+                print("WARN: location mode not tested yet!")
+                qu.addCriterion(  #  get assets attached to objects at a given location
+                    operator="equalsField",
+                    field="MulObjectRef.ObjCurrentLocationVoc",
+                    value=Id,
+                )
+            case "restExhibit":
+                # get assets attached to restauration records attached to an exhibit
+                # photos are typically not SMB-approved
+                qu.addCriterion(
+                    operator="equalsField",
+                    field="MulConservationRef.ConExhibitionRef.__id",
+                    value=Id,
+                )
+            case _:
+                raise TypeError(f"ERROR: Unknown type! {self.conf['type']}")
