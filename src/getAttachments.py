@@ -146,7 +146,7 @@ class GetAttachments:
         if self.conf["restriction"] == "freigegeben":
             qu.AND()
 
-        _qm_type(qu, self.conf["id"])
+        self._qm_type(query=qu, Id=self.conf["id"])
 
         match self.conf["restriction"]:
             case "freigegeben":
@@ -196,20 +196,20 @@ class GetAttachments:
     #
     #
 
-    def _qm_type(qu: Search, Id: int):
+    def _qm_type(self, *, query: Search, Id: int):
         match self.conf["type"]:
             case "approval":
                 raise SyntaxError("ERROR: approval group mode not implemented yet!")
-            case "group":
-                qu.addCriterion(  #  get assets attached to objects in a given group
-                    operator="equalsField",
-                    field="MulObjectRef.ObjObjectGroupsRef.__id",
-                    value=Id,
-                )
             case "exhibit":
-                qu.addCriterion(  #  get assets attached to objects in a given exhibition
+                query.addCriterion(  #  get assets attached to objects in a given exhibition
                     operator="equalsField",
                     field="MulObjectRef.ObjRegistrarRef.RegExhibitionRef.__id",
+                    value=Id,
+                )
+            case "group":
+                query.addCriterion(  #  get assets attached to objects in a given group
+                    operator="equalsField",
+                    field="MulObjectRef.ObjObjectGroupsRef.__id",
                     value=Id,
                 )
             case "loc":
@@ -222,7 +222,7 @@ class GetAttachments:
             case "restExhibit":
                 # get assets attached to restauration records attached to an exhibit
                 # photos are typically not SMB-approved
-                qu.addCriterion(
+                query.addCriterion(
                     operator="equalsField",
                     field="MulConservationRef.ConExhibitionRef.__id",
                     value=Id,
