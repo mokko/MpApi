@@ -6,11 +6,16 @@ Configuration file format (where | indicates the possible options):
 [label]
     type: group | exhibit | loc | restExhibit
     id: 12345
-    restriction: None | freigegeben
+    restriction: None | freigegeben | Cornelia
     name: dateiname | mulid
 
-You also need the credentials.py file in the pwd.
+Restriction
+    None : download the attachments from each asset
+    freigegeben : download only assets which are freigegeben
+    Cornelia : download all attachments from each asset, but sort them in 
+       two folders 'standardbild' and 'nichtstandardild'
 
+Usage
     getAttachments -j label
 
 will put attachments in dir 
@@ -28,13 +33,12 @@ from mpapi.search import Search
 from pathlib import Path
 
 conf_fn = "getAttachments.jobs"
-response_cache = "_ga_response.xml"  # cache
 NSMAP = {"m": "http://www.zetcom.com/ria/ws/module"}
 
 
-def get_attachment(c: MpApi, ID: int) -> None:
+def get_attachment(client: MpApi, ID: int) -> None:
     """
-    Get attachment from a specified Multimedia ID and save to disk. There can be only
+    Get attachment from a single Multimedia ID and save it to disk. There can be only
     one or none attachment.
 
     This function profits from its more recent inception. Uses underscore in name,
@@ -43,7 +47,7 @@ def get_attachment(c: MpApi, ID: int) -> None:
 
     print(f"Getting Multimedia {ID}")
     # we need the dateiname to save, assuming there can be only one.
-    m = c.getItem2(mtype="Multimedia", ID=ID)
+    m = client.getItem2(mtype="Multimedia", ID=ID)
     # m.toFile(path=f"debug.multimedia{ID}")
     if (
         m.xpath("/m:application/m:modules/m:module/m:moduleItem/@hasAttachments")[0]
@@ -63,7 +67,7 @@ def get_attachment(c: MpApi, ID: int) -> None:
         print("WARNING: Falling back to {fn} since no Dateiname specified in RIA")
 
     print(f"About to save attachment to '{fn}'")
-    c.saveAttachment(id=ID, path=fn)
+    client.saveAttachment(id=ID, path=fn)
 
 
 class GetAttachments:
@@ -72,30 +76,30 @@ class GetAttachments:
         self.api = MpApi(baseURL=baseURL, user=user, pw=pw)
         self.job = job
         self.conf = self.setup_conf()
+        cache_fn = f"mul_{self.conf['type']}{self.conf['id']}.xml"  
 
         if cache:
             print("* loading cached response")
-            m = Module(file=response_cache)
+            m = Module(file=cache_fn)
         else:
             print(f"* launching new search")
             m = self.query()
-            m.toFile(path=response_cache)
+            m.toFile(path=cache_fn)
+
+        if self.conf["restriction"] == "Cornelia":
+            if self.conf["type"] != "group":
+                raise SyntaxError("Cornelia mode only works with groups")
+            #in this mode we need object data... 
+            print("Cornelia mode (Standardbild in separate folder)")
+            self._init_ObjData()
 
         self.process_response(data=m)
 
     def process_response(self, *, data: Module) -> None:
         print(f"* processing response")
         no = data.actualSize(module="Multimedia")
-        print(f"* {no} digital assets found")
-
-        yyyymmdd = date.today().strftime("%Y%m%d")
-        out_dir = Path(self.job) / yyyymmdd
-
-        if not out_dir.exists():
-            print(f"* Making dir {out_dir}")
-            out_dir.mkdir(parents=True)
-
-        print(f"* response has {no} asset items")
+        print(f"* {no} assets found")
+        out_dir = self._get_out_dir()
 
         for item in data.iter(module="Multimedia"):
             ID = item.get("id")
@@ -104,41 +108,51 @@ class GetAttachments:
             else:
                 hasAttachments = False
 
-            try:
-                dateiname = item.xpath(
-                    "./m:dataField[@name='MulOriginalFileTxt']/m:value/text()",
-                    namespaces=NSMAP,
-                )[0]
-            except:
-                dateiname = (
-                    f"{ID}.jpg"  # use mulId as a fallback if no dateiname in RIA
-                )
-                # there is a chance that this file is no jpg
-                print(
-                    f"WARNING: Falling back to ID {dateiname} since no Dateiname specified in RIA"
-                )
+            dateiname = self._get_dateiname(item)
+
             print(f"*  mulId {ID}")  # {dateiname}
+            if self.conf["restriction"] == "Cornelia":
+                res = self.ObjData.xpath(f"""
+                /m:application/m:modules/m:module/m:moduleItem/m:moduleReference[
+                    @name='ObjMultimediaRef'
+                ]/m:moduleReferenceItem[
+                    @moduleItemId =  {ID}
+                ]/m:dataField[
+                    @name ='ThumbnailBoo'
+                ][m:value = 'true'
+                ]""")
+                #print(f"xxxxxxxxxxxxxxxx {res=}")
+                if len(res) > 0:
+                    out_dir2 = out_dir / "Standardbild"
+                else:
+                    out_dir2 = out_dir / "nichtStandardbild"
+                out_dir2.mkdir(exist_ok=True)
+            else:
+                out_dir2 = out_dir
+
             match self.conf["name"]:
                 case "mulId":
                     suffix = Path(dateiname).suffix
-                    path = out_dir / f"{ID}{suffix}"
+                    path = out_dir2 / f"{ID}{suffix}"
                 case "dateiname":
-                    path = out_dir / dateiname
+                    path = out_dir2 / dateiname
                 case _:
+                    #we could check this earlier
                     raise SyntaxError(
                         f"Error: Unknown config value: {self.conf['name']}"
                     )
 
             if hasAttachments:  # only d/l if there is an attachment
                 if path.exists():  # let's not overwrite existing files
-                    print("\tfile exists already")
+                    print("\tfile exists already on disk")
                 else:
                     print(f"\t{path}")
                     self.api.saveAttachment(id=ID, path=path)
             else:
                 print("\tno attachment")
 
-    def query(self) -> Search:
+
+    def query(self) -> Module:
         """
         Restriction: Currently, only gets attachments from Multimedia.
         """
@@ -176,25 +190,72 @@ class GetAttachments:
         config.read(conf_fn)
         print(f"* Using job '{self.job}' from {conf_fn}")
         try:
-            c = config[self.job]
+            config2 = config[self.job]
         except:
             raise SyntaxError(f"job '{self.job}' not found")
 
         for each in required:
             try:
-                c[each]
+                config2[each]
             except:
                 raise SyntaxError(f"Config value {each} missing!")
 
-        print(f"   type: {c['type']}")
-        print(f"   id: {c['id']}")
-        print(f"   rest: {c['restriction']}")
-        print(f"   name: {c['name']}")
-        return c
+        print(f"   type: {config2['type']}")
+        print(f"   id: {config2['id']}")
+        print(f"   restriction: {config2['restriction']}")
+        print(f"   name: {config2['name']}")
+        return config2
 
     #
+    # somewhat private
     #
-    #
+
+    def _get_dateiname(self, item) -> str:
+        try:
+            dateiname = item.xpath(
+                "./m:dataField[@name='MulOriginalFileTxt']/m:value/text()",
+                namespaces=NSMAP,
+            )[0]
+        except:
+            dateiname = (
+                f"{ID}.jpg"  # use mulId as a fallback if no dateiname in RIA
+            )
+            # there is a chance that this file is no jpg
+            print(
+                f"WARNING: Falling back to ID {dateiname} since no Dateiname specified in RIA"
+            )
+        return dateiname
+
+    def _get_obj_group(self, *, grpId:int) -> Module:
+        qu = Search(module="Object")
+        qu.addCriterion(
+            operator="equalsField",
+            field="ObjObjectGroupsRef.__id",
+            value=str(grpId),  
+        )
+        #qu.addField(field="ObjMultimediaRef")  # speeds up query a lot!
+        #qu.addField(field="ObjMultimediaRef.moduleReferenceItem")
+        #qu.addField(field="ObjMultimediaRef.moduleReferenceItem.dataField.ThumbnailBoo")
+        qu.validate(mode="search")
+        print(f"* about to execute query\n{qu.toString()}")
+        return self.api.search2(query=qu)
+
+    def _get_out_dir(self) -> Path:
+        yyyymmdd = "pix"+date.today().strftime("%Y%m%d")
+        out_dir = Path(self.job) / yyyymmdd
+
+        if not out_dir.exists():
+            print(f"* Making dir {out_dir}")
+            out_dir.mkdir(parents=True)
+        return out_dir
+
+    def _init_ObjData(self) -> None:
+        obj_fn = Path(f"obj_{self.conf['type']}{self.conf['id']}.xml")
+        if obj_fn.exists():
+            self.ObjData = Module(file=obj_fn)
+        else:
+            self.ObjData = self._get_obj_group(grpId=self.conf["id"])
+            self.ObjData.toFile(path=obj_fn)
 
     def _qm_type(self, *, query: Search, Id: int):
         match self.conf["type"]:

@@ -91,6 +91,9 @@ def getAttachment():
 
 
 def getAttachments():
+    """
+    for config file format see getAttachments.py
+    """
     parser = argparse.ArgumentParser(
         description="getAttachments for MpApi (using config file)"
     )

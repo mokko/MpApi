@@ -468,9 +468,7 @@ class Mink:
         any_job: bool = False
         # pretty ugly dsl parser...
         with open(self.conf, mode="r") as file:
-            c = 0  # line counter
-            for line in file:
-                c += 1
+            for c, line in enumerate(file, start=1):
                 uncomment = line.split("#", 1)[0].strip()
                 if uncomment.isspace() or not uncomment:
                     continue
@@ -504,7 +502,7 @@ class Mink:
                         if cmd in allowed_commands:
                             getattr(self, cmd)(args)
                         else:
-                            raise SyntaxError(f"ERROR: Command {cmd} not recogized")
+                            raise SyntaxError(f"ERROR: Command '{cmd}' not recogized")
                 elif indent_lvl > 2:
                     print(f"indent lvl: {indent_lvl} {parts}")
                     raise SyntaxError("ERROR: Too many indents in dsl file")
