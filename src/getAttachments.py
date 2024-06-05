@@ -73,8 +73,7 @@ class GetAttachments:
     def __init__(self, *, job: str, cache: bool = False) -> None:
         user, pw, baseURL = get_credentials()
         self.api = MpApi(baseURL=baseURL, user=user, pw=pw)
-        self.job = job
-        self.conf = self.setup_conf()
+        self.conf = self.setup_conf(job)
         cache_fn = f"mul_{self.conf['type']}{self.conf['id']}.xml"
 
         if cache:
@@ -85,7 +84,7 @@ class GetAttachments:
             m = self.query()
             m.toFile(path=cache_fn)
 
-        if self.conf["restriction"] == "Cornelia":
+        if self.conf["attachments"]["restriction"] == "Cornelia":
             if self.conf["type"] != "group":
                 raise SyntaxError("Cornelia mode only works with groups")
             # in this mode we need object data...
@@ -110,7 +109,7 @@ class GetAttachments:
             dateiname = self._get_dateiname(item)
 
             print(f"*  mulId {ID}")  # {dateiname}
-            if self.conf["restriction"] == "Cornelia":
+            if self.conf["attachments"]["restriction"] == "Cornelia":
                 res = self.ObjData.xpath(f"""
                 /m:application/m:modules/m:module/m:moduleItem/m:moduleReference[
                     @name='ObjMultimediaRef'
@@ -129,7 +128,7 @@ class GetAttachments:
             else:
                 out_dir2 = out_dir
 
-            match self.conf["name"]:
+            match self.conf["attachments"]["name"]:
                 case "mulId":
                     suffix = Path(dateiname).suffix
                     path = out_dir2 / f"{ID}{suffix}"
@@ -155,12 +154,12 @@ class GetAttachments:
         Restriction: Currently, only gets attachments from Multimedia.
         """
         qu = Search(module="Multimedia")
-        if self.conf["restriction"] == "freigegeben":
+        if self.conf["attachments"]["restriction"] == "freigegeben":
             qu.AND()
 
         self._qm_type(query=qu, Id=self.conf["id"])
 
-        match self.conf["restriction"]:
+        match self.conf["attachments"]["restriction"]:
             case "freigegeben":
                 qu.addCriterion(
                     operator="equalsField",
@@ -177,37 +176,30 @@ class GetAttachments:
         print(f"* about to execute query\n{qu.toString()}")
         return self.api.search2(query=qu)
 
-    def setup_conf(self) -> dict:
+    def setup_conf(self, job: str) -> dict:
         """
         Returns configuration for selected job
         """
-        config_data = load_conf(conf_fn)
-        try:
-            job_data = conf_data[job]
-        except KeyError:
-            raise SyntaxError("Job not known in configuration")
-
-        required = ["type", "id", "attachments"]
         if not Path(conf_fn).exists():
             raise SyntaxError(f"ERROR: conf file not found! {conf_fn}")
-        config.read()
-        print(f"* Using job '{self.job}' from {conf_fn}")
+        config_data = load_conf(conf_fn)
+
         try:
-            config2 = config[self.job]
-        except:
-            raise SyntaxError(f"job '{self.job}' not found")
+            job_data = config_data[job]
+        except KeyError:
+            raise SyntaxError(f"Job '{job}' not known in configuration")
+
+        required = ["type", "id", "attachments"]
+        # print(f"* Using job '{self.job}' from {conf_fn}")
 
         for each in required:
             try:
-                config2[each]
+                job_data[each]
             except:
                 raise SyntaxError(f"Config value {each} missing!")
 
-        print(f"   type: {config2['type']}")
-        print(f"   id: {config2['id']}")
-        print(f"   restriction: {config2['restriction']}")
-        print(f"   name: {config2['name']}")
-        return config2
+        print(f"   {job_data=}")
+        return job_data
 
     #
     # somewhat private
@@ -272,7 +264,7 @@ class GetAttachments:
                 query.addCriterion(  #  get assets attached to objects in a given group
                     operator="equalsField",
                     field="MulObjectRef.ObjObjectGroupsRef.__id",
-                    value=Id,
+                    value=str(Id),
                 )
             case "loc":
                 print("WARN: location mode not tested yet!")
