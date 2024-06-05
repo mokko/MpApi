@@ -4,7 +4,6 @@ as good as I can
 https://pad.sbb.spk-berlin.de/yBVQy8vaS0qupYpUgVHK7g
 """
 
-
 from mpapi.search import Search
 from mpapi.module import Module
 from mpapi.client import MpApi

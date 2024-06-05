@@ -1,14 +1,14 @@
 """
-Sar stands for search and response. It's a higher level interface on top of 
-MpApi that bundles multiple requests in one method, typically a search and a 
-response. 
+Sar stands for search and response. It's a higher level interface on top of
+MpApi that bundles multiple requests in one method, typically a search and a
+response.
 
-I introduce it mainly to clean up the code of the Mink class, so that Mink 
-has to deal less with xml and Sar.py can be tested easier. (Conversely, that 
-means that mink parses DSL config file, writes files and logs report.) 
+I introduce it mainly to clean up the code of the Mink class, so that Mink
+has to deal less with xml and Sar.py can be tested easier. (Conversely, that
+means that mink parses DSL config file, writes files and logs report.)
 
-This is a new version of Sar that typically returns a Module object as a 
-requests reponse.  
+This is a new version of Sar that typically returns a Module object as a
+requests reponse.
 
 USAGE
     import Sar from mpapi.sar
@@ -32,18 +32,18 @@ USAGE
     m = sr.search(query=query) # returns Module object now
 
     # attachments
-    sr.saveAttachments(data=Module(file="a.xml"), adir=dir) 
+    sr.saveAttachments(data=Module(file="a.xml"), adir=dir)
         # for moduleItems in data download attachments and save as
-        #     adir/{mulId}.{ext} 
+        #     adir/{mulId}.{ext}
         # only download media with smbfreigabe
 
     # moved to Module now
     m.clean()    # cleans m as a side-effect
     m.validate() # dies if doesn't validate
-    m3 = m1 + m2 # distinct join/add 
+    m3 = m1 + m2 # distinct join/add
 
 NEW
-* we're slowly transitioning from 
+* we're slowly transitioning from
    id -> Id -> ID
    module -> mtype
 2022-01
@@ -51,18 +51,18 @@ NEW
 * type hints added (again)
 * down to 300 some lines where half are docstrings. Yay!
 2021-12
-* some methods removed since they didn't add anything to basic mpapi.client 
+* some methods removed since they didn't add anything to basic mpapi.client
   (definition, search, getItem)
-* some methods renamed, b/c they are useful and dont need to stay private 
+* some methods renamed, b/c they are useful and dont need to stay private
   (dropUUID, dropRepeatableGroup)
 * avoid capital letters in package names to be more conformist/pythonic
 
 THE SINCE PARAMETER
-The since parameter expects typical xs:dateTime format,e.g. 
+The since parameter expects typical xs:dateTime format,e.g.
     2021-10-14T07:40:29Z
 but internally it's transformed to a number to compare it in xpath 1.0
-    20211014074029 
-then it's reduced to a 14 digit number (resolution seconds) by cutting off 
+    20211014074029
+then it's reduced to a 14 digit number (resolution seconds) by cutting off
 additional numbers (referencing fractions of seconds).
 """
 
@@ -104,7 +104,7 @@ class Sar:
         query.addCriterion(
             field=field,
             operator="equalsField",
-            value=Id,
+            value=str(Id),
         )
         if since is not None:
             query.addCriterion(
@@ -395,9 +395,7 @@ class Sar:
             fn_old = itemN.xpath(
                 "m:dataField[@name = 'MulOriginalFileTxt']/m:value/text()",
                 namespaces=NSMAP,
-            )[
-                0
-            ]  # assuming that there can be only one
+            )[0]  # assuming that there can be only one
             fn = mmId + Path(fn_old).suffix
             mm_fn = Path(adir).joinpath(fn)
             positives.add(mm_fn)

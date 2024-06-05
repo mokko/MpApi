@@ -166,7 +166,7 @@ def getItem():
 def mink():
     parser = argparse.ArgumentParser(description="Commandline frontend for MpApi.py")
     parser.add_argument("-j", "--job", help="job to run")  # , required=True
-    parser.add_argument("-c", "--conf", help="config file", default="jobs.dsl")
+    parser.add_argument("-c", "--conf", help="config file", default="jobs.toml")
     args = _setup_args(parser)
     m = Mink(job=args.job, conf=args.conf, baseURL=baseURL, pw=pw, user=user)
 

@@ -1,5 +1,5 @@
 """
-Python class representing data in RIA's modules 
+Python class representing data in RIA's modules
 
 <application xmlns="http://www.zetcom.com/ria/ws/module">
   <modules>
@@ -7,21 +7,21 @@ Python class representing data in RIA's modules
       <moduleItem hasAttachments="false" id="254808" uuid="254808">
         ...
 
-Theses: 
+Theses:
 * a module is really a set of moduleItems.
 * What Zetcom calls "item" I also call "record" or a "Datensatz" in other contexts.
 * This class should have been called differently, perhaps data or moduleData
 
 Design
-* There is an old interface where every method has named parameters (e.g. 
+* There is an old interface where every method has named parameters (e.g.
     Module(file="path.xml")
   and there is a new interface which is perhaps more Pythonic
     m3 = m1 + m2
 
 Definition and decisions:
 * zml: the xml language we are dealing with here, there are other schemas for search etc.
-* a multi-type document is one which has multiple types of moduleItem nodes in 
-  different modules (Object, Multimedia). Sometimes I call them types, 
+* a multi-type document is one which has multiple types of moduleItem nodes in
+  different modules (Object, Multimedia). Sometimes I call them types,
   modules or moduletypes (mtypes).
 * Let's usually go with Zetcom's names
 
@@ -32,13 +32,13 @@ USAGE:
     m = Module(tree=lxml.etree)  # from lxml.etree object
     m = Module()                 # new Object item from scratch CHANGED
 
-    # getting the XML out or validating it 
+    # getting the XML out or validating it
     m.toFile(path="some.xml")
     xml_str = m.toString()
     lxml = m.toET()  # returns lxml etree document
     m.validate()     # dies if doc doesn't validate
 
-    # inspecting module data     
+    # inspecting module data
     adict = m.describe()          # no of items per mtype
     m.totalSize(module="Object")  # no of items as per attribute
     m.actualSize(module="Object") # no of actual items
@@ -48,7 +48,7 @@ USAGE:
     nodeL = m.xpath(path="/m:application") # m's shortcut to lxml xpath
     list = m.extract_mtypes()
     mtype = m.extract_mtype()
-    
+
     #iterate through all moduleItems
     for item in m:
         #do something with item
@@ -61,7 +61,7 @@ USAGE:
     m._dropFields(parent=miN, type="systemField")
     m._dropFieldsByName(element="repeatableGroup", name="ObjValuationGrp)
     m._dropAttribs(xpath="//m:dataField", attrib="uuid")
-    m.clean()  # drops uuid attributes and certain value elements    
+    m.clean()  # drops uuid attributes and certain value elements
 
     # other changes to xml
     m.updateTotalSize() # update for all module types
@@ -996,9 +996,7 @@ class Module(Helper):
                 # item with that ID exists already
                 oldItemN = self.xpath(
                     f"/m:application/m:modules/m:module[@name = '{mtype}']/m:moduleItem[@id = '{newID}']"
-                )[
-                    0
-                ]  # IDs should be unique
+                )[0]  # IDs should be unique
             except:
                 # itemN does not exist in old doc -> copy it over
                 d1moduleN = self.xpath(

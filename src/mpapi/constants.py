@@ -32,3 +32,11 @@ def get_credentials() -> tuple[str, str, str]:
     baseURL = cred["baseURL"]
 
     return user, pw, baseURL
+
+
+def load_conf(fn: Path) -> dict:
+    """
+    Just load and return the specified toml file.
+    """
+    with open(fn, "rb") as f:
+        return tomllib.load(f)

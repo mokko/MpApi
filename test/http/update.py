@@ -1,8 +1,8 @@
 """
-Trying out ways to update a moduleItem[@name='Object'] node so that the 
-last modified date gets updated. 
+Trying out ways to update a moduleItem[@name='Object'] node so that the
+last modified date gets updated.
 
-I dont want this file to run as part of the test suite, so I dont call 
+I dont want this file to run as part of the test suite, so I dont call
 it a test, although it's in the test directory.
 """
 

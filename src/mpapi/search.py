@@ -13,8 +13,8 @@ contain different search criteria. Criteria have three components
 
 With some operators, such as isNull, no value is needed/allowed.
 
-Each criterion can be combined with others using the usual conjunctions (and, 
-or, not). 
+Each criterion can be combined with others using the usual conjunctions (and,
+or, not).
 
 USAGE
     q = Search(module="Object") # from scratch
@@ -39,14 +39,14 @@ NEW
     value = q.limit()  # getter, returns int
     q.offset(value=10) # setter, returns int
     value = q.offset() # getter, returns int
-    
+
 INTERNAL
     self.etree stores the lxml object containing the xml document.
 
 EXAMPLE
-<application 
-    xmlns="http://www.zetcom.com/ria/ws/module/search" 
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+<application
+    xmlns="http://www.zetcom.com/ria/ws/module/search"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.zetcom.com/ria/ws/module/search http://www.zetcom.com/ria/ws/module/search/search_1_1.xsd">
     <modules>
         <module name="ObjectGroup">

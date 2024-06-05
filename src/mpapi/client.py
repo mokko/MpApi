@@ -1,5 +1,5 @@
 """
-MpApi - Unofficial Open Source Client for MuseumPlus MpRIA 
+MpApi - Unofficial Open Source Client for MuseumPlus MpRIA
 
 USAGE
     client = MpApi(baseURL=baseURL, user=user, pw=pw)
@@ -7,8 +7,8 @@ USAGE
     client.toFile(response=r, path="path/to/file.xml")
     ... todo: some more examples
 
-This will become the low-level, bare-knuckles and minimalistic client interface that should have  
-all of Zetcom's endpoints and simply implements them. 
+This will become the low-level, bare-knuckles and minimalistic client interface that should have
+all of Zetcom's endpoints and simply implements them.
 
 ENCODING SCHEME
     - RIA dishes out and requests UTF-8; mpapi does that too

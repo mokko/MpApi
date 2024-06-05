@@ -12,27 +12,26 @@ Configuration file format (where | indicates the possible options):
 Restriction
     None : download the attachments from each asset
     freigegeben : download only assets which are freigegeben
-    Cornelia : download all attachments from each asset, but sort them in 
+    Cornelia : download all attachments from each asset, but sort them in
        two folders 'standardbild' and 'nichtstandardild'
 
 Usage
     getAttachments -j label
 
-will put attachments in dir 
+will put attachments in dir
     ./label/20220708
 where the current date is used for the second directory.
 """
 
 import argparse
-import configparser
 from datetime import date
 from mpapi.client import MpApi
-from mpapi.constants import get_credentials
+from mpapi.constants import get_credentials, load_conf
 from mpapi.module import Module
 from mpapi.search import Search
 from pathlib import Path
 
-conf_fn = "getAttachments.jobs"
+conf_fn = "jobs.toml"
 NSMAP = {"m": "http://www.zetcom.com/ria/ws/module"}
 
 
@@ -76,7 +75,7 @@ class GetAttachments:
         self.api = MpApi(baseURL=baseURL, user=user, pw=pw)
         self.job = job
         self.conf = self.setup_conf()
-        cache_fn = f"mul_{self.conf['type']}{self.conf['id']}.xml"  
+        cache_fn = f"mul_{self.conf['type']}{self.conf['id']}.xml"
 
         if cache:
             print("* loading cached response")
@@ -89,7 +88,7 @@ class GetAttachments:
         if self.conf["restriction"] == "Cornelia":
             if self.conf["type"] != "group":
                 raise SyntaxError("Cornelia mode only works with groups")
-            #in this mode we need object data... 
+            # in this mode we need object data...
             print("Cornelia mode (Standardbild in separate folder)")
             self._init_ObjData()
 
@@ -121,7 +120,7 @@ class GetAttachments:
                     @name ='ThumbnailBoo'
                 ][m:value = 'true'
                 ]""")
-                #print(f"xxxxxxxxxxxxxxxx {res=}")
+                # print(f"xxxxxxxxxxxxxxxx {res=}")
                 if len(res) > 0:
                     out_dir2 = out_dir / "Standardbild"
                 else:
@@ -137,7 +136,7 @@ class GetAttachments:
                 case "dateiname":
                     path = out_dir2 / dateiname
                 case _:
-                    #we could check this earlier
+                    # we could check this earlier
                     raise SyntaxError(
                         f"Error: Unknown config value: {self.conf['name']}"
                     )
@@ -150,7 +149,6 @@ class GetAttachments:
                     self.api.saveAttachment(id=ID, path=path)
             else:
                 print("\tno attachment")
-
 
     def query(self) -> Module:
         """
@@ -183,11 +181,16 @@ class GetAttachments:
         """
         Returns configuration for selected job
         """
-        config = configparser.ConfigParser()
-        required = ["type", "id", "restriction", "name"]
+        config_data = load_conf(conf_fn)
+        try:
+            job_data = conf_data[job]
+        except KeyError:
+            raise SyntaxError("Job not known in configuration")
+
+        required = ["type", "id", "attachments"]
         if not Path(conf_fn).exists():
             raise SyntaxError(f"ERROR: conf file not found! {conf_fn}")
-        config.read(conf_fn)
+        config.read()
         print(f"* Using job '{self.job}' from {conf_fn}")
         try:
             config2 = config[self.job]
@@ -217,31 +220,29 @@ class GetAttachments:
                 namespaces=NSMAP,
             )[0]
         except:
-            dateiname = (
-                f"{ID}.jpg"  # use mulId as a fallback if no dateiname in RIA
-            )
+            dateiname = f"{ID}.jpg"  # use mulId as a fallback if no dateiname in RIA
             # there is a chance that this file is no jpg
             print(
                 f"WARNING: Falling back to ID {dateiname} since no Dateiname specified in RIA"
             )
         return dateiname
 
-    def _get_obj_group(self, *, grpId:int) -> Module:
+    def _get_obj_group(self, *, grpId: int) -> Module:
         qu = Search(module="Object")
         qu.addCriterion(
             operator="equalsField",
             field="ObjObjectGroupsRef.__id",
-            value=str(grpId),  
+            value=str(grpId),
         )
-        #qu.addField(field="ObjMultimediaRef")  # speeds up query a lot!
-        #qu.addField(field="ObjMultimediaRef.moduleReferenceItem")
-        #qu.addField(field="ObjMultimediaRef.moduleReferenceItem.dataField.ThumbnailBoo")
+        # qu.addField(field="ObjMultimediaRef")  # speeds up query a lot!
+        # qu.addField(field="ObjMultimediaRef.moduleReferenceItem")
+        # qu.addField(field="ObjMultimediaRef.moduleReferenceItem.dataField.ThumbnailBoo")
         qu.validate(mode="search")
         print(f"* about to execute query\n{qu.toString()}")
         return self.api.search2(query=qu)
 
     def _get_out_dir(self) -> Path:
-        yyyymmdd = "pix"+date.today().strftime("%Y%m%d")
+        yyyymmdd = "pix" + date.today().strftime("%Y%m%d")
         out_dir = Path(self.job) / yyyymmdd
 
         if not out_dir.exists():
