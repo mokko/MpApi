@@ -18,13 +18,12 @@ SEE ALSO
 """
 
 # import logging
-from requests.auth import HTTPBasicAuth
 from lxml import etree  # type: ignore
 from mpapi.constants import NSMAP
 from mpapi.search import Search
 from mpapi.module import Module
 from pathlib import Path  # used only sparingly
-from typing import Any, Union
+from typing import Union
 import requests
 
 # ET: Any
@@ -538,14 +537,14 @@ class MpApi:
         """
         xml = f"""<application xmlns="http://www.zetcom.com/ria/ws/module">
           <modules>
-            <module name="{mtype}">
+            <module name="{mType}">
               <moduleItem id="{modItemId}">
                 <moduleReference name="{refName}" targetModule="Object" multiplicity="M:N"/>
               </moduleItem>
             </module>
           </modules>
         </application>"""
-        docN = ET.xml(xml)
+        docN = etree.xml(xml)
         modRef = docN.xpath("//m:moduleReference", namespaces=NSMAP)[0]
         for refId in refIds:
             etree.SubElement(
@@ -579,7 +578,7 @@ class MpApi:
         Deprecated version. Please use updateRepeatableGroupItem2 instead
         """
         xml = etree.tostring(node)
-        return updateRepeatableGroup(
+        return self.updateRepeatableGroup(
             module=mtype,
             id=ID,
             referenceId=referenceId,
@@ -594,7 +593,7 @@ class MpApi:
         Version that requires xml as etree
         """
         xml = etree.tostring(node)
-        return updateRepeatableGroup(
+        return self.updateRepeatableGroup(
             module=mtype,
             id=ID,
             referenceId=referenceId,
@@ -994,6 +993,9 @@ class MpApi:
         Delete Vocabulary Instance Term Class
         DELETE https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodeClasses/{className}
         """
+        
+        xml = "missing"
+        
         url = (
             f"{self.appURL}/vocabulary/instances/{instanceName}/nodeClasses/{className}"
         )

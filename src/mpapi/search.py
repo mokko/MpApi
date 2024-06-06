@@ -63,7 +63,6 @@ EXAMPLE
 
 """
 
-from pathlib import Path
 from lxml import etree  # type: ignore
 from mpapi.helper import Helper
 from mpapi.constants import NSMAP
@@ -172,7 +171,7 @@ class Search(Helper):
             selectN = self.etree.xpath(
                 "/s:application/s:modules/s:module/s:search/s:select", namespaces=NSMAP
             )[0]
-        except:
+        except Exception:
             expertN = self.etree.xpath(
                 "/s:application/s:modules/s:module/s:search/s:expert", namespaces=NSMAP
             )[0]

@@ -32,7 +32,7 @@ class Helper:
         doc = self.etree
         try:
             self._write(path=str(path), doc=doc)
-        except:
+        except Exception:
             # print("WARNING: Trouble writing file")
             doc = etree.ElementTree(
                 self.etree,

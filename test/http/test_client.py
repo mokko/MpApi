@@ -1,10 +1,5 @@
 # -*- coding: UTF-8
 # content of test_sample.py
-import chardet
-import requests
-from pathlib import Path
-from lxml import etree
-from pathlib import Path
 
 from mpapi.client import MpApi
 from mpapi.search import Search
@@ -57,5 +52,5 @@ def test_create_item():
     objModule = m.module(name="Multimedia")
     item = m.moduleItem(parent=objModule, hasAttachments="false")
     m.toFile("debug.multmedia.xml")
-
+    print(item)
     client.create_item3(data=m)

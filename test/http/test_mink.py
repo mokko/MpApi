@@ -1,6 +1,5 @@
 from pathlib import Path
 from mpapi.mink import Mink
-from pathlib import Path
 from mpapi.constants import get_credentials
 
 user, pw, baseURL = get_credentials()

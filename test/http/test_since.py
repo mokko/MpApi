@@ -1,14 +1,8 @@
 # -*- coding: UTF-8
 # content of test_sample.py
-import chardet
-import requests
-from pathlib import Path
-from lxml import etree
-from pathlib import Path
 
 from mpapi.client import MpApi
 from mpapi.search import Search
-from mpapi.module import Module
 from mpapi.constants import get_credentials
 
 user, pw, baseURL = get_credentials()

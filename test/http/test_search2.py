@@ -1,7 +1,6 @@
 from mpapi.search import Search
 from mpapi.constants import get_credentials
 from mpapi.client import MpApi
-from mpapi.module import Module
 
 user, pw, baseURL = get_credentials()
 client = MpApi(baseURL=baseURL, user=user, pw=pw)

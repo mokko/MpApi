@@ -66,7 +66,6 @@ then it's reduced to a 14 digit number (resolution seconds) by cutting off
 additional numbers (referencing fractions of seconds).
 """
 
-import os  # b/c Pathlib has troubles with Windows network paths
 from lxml import etree
 from mpapi.client import MpApi
 from mpapi.constants import NSMAP
@@ -122,10 +121,12 @@ class Sar:
 
         add a groupItem where a group can be a repeatableGroup, a vocabularyReference or a moduleReference.
         """
+        rGrp = "missing"
+        objId = 12345
         xml = f"""<application xmlns="http://www.zetcom.com/ria/ws/module">
           <modules>
             <module name="{mtype}">
-              <moduleItem id="{grpId}">
+              <moduleItem id="{refId}">
                 <{gType} name="{rGrp}" targetModule="Object" multiplicity="M:N">
                   <{gType}Item {gType}Id="{objId}"/>
                 </{gType}>
@@ -135,8 +136,9 @@ class Sar:
         </application>"""
 
         r = self.client.createGrpItem2(
-            mtype="ObjectGroup", ID=grpId, grpref=rGrp, xml=xml
+            mtype="ObjectGroup", ID=refId, grpref=rGrp, xml=xml
         )
+        print(r)
 
     def checkApproval(self, *, ID: int, mtype: str) -> Union[bool, Module]:
         """

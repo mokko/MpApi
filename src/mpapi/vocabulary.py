@@ -6,7 +6,7 @@ Load vocabulary documents in analogy to mpapi.module
 
 from lxml import etree
 from mpapi.helper import Helper
-from mpapi.constants import parser, NSMAP
+from mpapi.constants import parser
 from typing import Any, Optional
 
 

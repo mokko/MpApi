@@ -1,5 +1,4 @@
 # from MpApi.Search import Search
-from mpapi.module import Module
 from mpapi.client import MpApi
 from mpapi.constants import get_credentials
 from mpapi.vocabulary import Vocabulary

@@ -67,8 +67,7 @@ NOTES / QUESTIONS / DEFINITIONS
 """
 
 from lxml import etree
-from pathlib import Path
-from typing import Any, Iterator, List, Union
+from typing import Any, Iterator, Union
 from mpapi.search import Search
 from mpapi.client import MpApi
 from mpapi.helper import Helper

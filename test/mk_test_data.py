@@ -4,7 +4,6 @@
 
 from pathlib import Path
 from mpapi.constants import get_credentials
-from mpapi.module import Module
 from mpapi.search import Search
 from mpapi.client import MpApi
 

@@ -1,6 +1,5 @@
 from mpapi.constants import NSMAP, get_credentials
 from mpapi.chunky import Chunky
-from mpapi.module import Module
 from lxml import etree  # type: ignore
 from typing import Union
 

@@ -1,12 +1,11 @@
 from mpapi.constants import NSMAP
-from mpapi.search import Search
 from mpapi.module import Module
 import lxml
 from lxml import etree  # type: ignore
 import pytest
 
 # from mpapi.constants import get_credentials
-# from mpapi.client import MpApi
+from mpapi.client import MpApi
 
 
 def test_constructors_only():
@@ -49,7 +48,7 @@ def test_output():
 def test_inspection():
     # requires scaffold data
     m = Module(file="sdata/m39-join-exhibit20222.xml")
-    with pytest.raises(TypeError) as exc_info:
+    with pytest.raises(TypeError): # as exc_info
         m.totalSize(module="Objectssss")  # none
     assert m.totalSize(module="Exhibition") == 1
     desc = m.describe()
@@ -104,7 +103,7 @@ def test_drops():
     m.dropUUID()
     try:
         uuid = m.xpath("/m:application/m:modules/m:module/m:moduleItem/@uuid")
-    except:
+    except Exception:
         assert 1 == 1
 
     assert m.validate()

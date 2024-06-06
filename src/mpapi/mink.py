@@ -48,19 +48,14 @@ New
 import datetime
 import logging
 from lxml import etree  # necessary?
-import os
 from pathlib import Path
-import requests
-import sys
-from typing import NewType, Optional, Union
+from typing import Optional
 
 from mpapi.chunky import Chunky
 from mpapi.client import MpApi
-from mpapi.constants import NSMAP, load_conf
+from mpapi.constants import load_conf
 from mpapi.module import Module
 from mpapi.sar import Sar
-from mpapi.search import Search
-from zipfile import ZipFile, ZIP_LZMA
 
 
 ETparser = etree.XMLParser(remove_blank_text=True)
@@ -76,7 +71,7 @@ class Mink:
         self.sar = Sar(baseURL=baseURL, user=user, pw=pw)
         self.api = MpApi(baseURL=baseURL, user=user, pw=pw)
         self.chunker = Chunky(chunkSize=chunkSize, baseURL=baseURL, pw=pw, user=user)
-        self.job_data = self._parse_conf(job=job, fn=conf)
+        self.job_data = self._parse_conf(job=job, fn=Path(conf))
         self.project_dir = self._mkdirs(job)
         self.parts_dir = self.project_dir / "parts"
         self._init_log()
@@ -185,7 +180,7 @@ class Mink:
         mink's dsl
             getItem group 123
         """
-        out_fn = self.project_dir / args[1] + ".xml"
+        out_fn = self.project_dir / f"getItem-{module}-{ID}.xml"
         if out_fn.exists():
             print(f" Item from cache {out_fn}")
             return Module(file=out_fn)
@@ -217,10 +212,9 @@ class Mink:
             getPack group 123 MyLabel [since]
         """
         print(f"GET PACK {Type=} {ID=} {label=} {since=}")
-        join_fn = self.join(
+        self.join(
             Type=Type, Id=ID, label=label, since=since
         )  # write join file, includes validation
-        # if we need to return M, we need to load it from join_fn
 
     def join(
         self, Type: str, Id: int, label: str = "nolabel", since: Optional[str] = None
@@ -301,13 +295,13 @@ class Mink:
         """
         no = 1
         while (
-            chunk_fn := self._chunkPath(Type=Type, ID=ID, no=no, suffix=suffix)
+            self._chunkPath(Type=Type, ID=ID, no=no, suffix=suffix)
         ).exists():
             no += 1
         else:
             if no > 1:
                 no -= 1
-
+            
         offset = (no - 1) * self.chunker.chunkSize
         return no, offset
         # print(f" next chunk {no}; offset:{offset}")
@@ -363,14 +357,14 @@ class Mink:
             format="%(asctime)s: %(message)s",
         )
 
-    def _mkdirs(self, job: str) -> str:
+    def _mkdirs(self, job: str) -> Path:
         date: str = datetime.datetime.today().strftime("%Y%m%d")
         project_dir: Path = Path(job) / date
         if not project_dir.is_dir():
             Path.mkdir(project_dir, parents=True)
         return project_dir
 
-    def _parse_conf(self, job: str, fn: str) -> dict:
+    def _parse_conf(self, job: str, fn: Path) -> dict:
         """
         Load configuration file and return info for current job.
         """

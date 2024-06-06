@@ -1,4 +1,3 @@
-from pathlib import Path
 from mpapi.client import MpApi
 from mpapi.module import Module
 from mpapi.constants import get_credentials

@@ -1,5 +1,3 @@
-from mpapi.search import Search
-from mpapi.module import Module
 from mpapi.sar import Sar
 from mpapi.constants import get_credentials
 

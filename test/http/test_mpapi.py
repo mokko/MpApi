@@ -1,9 +1,6 @@
 # -*- coding: UTF-8
 # content of test_sample.py
 # import chardet
-import requests
-from lxml import etree
-from pathlib import Path
 
 from mpapi.client import MpApi
 from mpapi.search import Search

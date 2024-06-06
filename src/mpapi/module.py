@@ -160,7 +160,7 @@ class Module(Helper):
             self.etree = etree.parse(str(file), parser)
         else:
             # missing <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-            xml = f"""
+            xml = """
             <application xmlns="http://www.zetcom.com/ria/ws/module">
                 <modules/>
             </application>"""
@@ -239,7 +239,7 @@ class Module(Helper):
                     f"count(/m:application/m:modules/m:module[@name ='{module}']/m:moduleItem)"
                 )
             )
-        except:
+        except Exception:
             raise TypeError(
                 f"Requested module '{module}' doesn't exist or has no moduleItems"
             )
@@ -287,7 +287,7 @@ class Module(Helper):
                 d2mtypeL: list[ET] = d2moduleN.xpath(
                     "/m:application/m:modules/m:module/@name", namespaces=NSMAP
                 )
-            except:
+            except Exception:
                 # newdoc has no mtypes, so appears empty, nothing to add
                 # print("newdoc appears to be empty")
                 return None
@@ -298,7 +298,7 @@ class Module(Helper):
                     self.xpath(
                         f"/m:application/m:modules/m:module[@name = '{d2mtype}']"
                     )[0]
-                except:
+                except Exception:
                     # old doc doesn't have this mtype, so we add the whole
                     # all of d2's modules[@name = {mtype}]/moduleItems to d1
                     # print (f"d1 doesn't know this mtype {d2mtype}")
@@ -372,7 +372,7 @@ class Module(Helper):
             dataFieldN = parent.xpath(
                 f"m:/dataField[@name='{name}']", namespaces=NSMAP
             )[0]
-        except:
+        except Exception:
             if dataType is None:
                 typeHint = name[-3:]
                 dataType = dataTypes[typeHint]
@@ -413,7 +413,7 @@ class Module(Helper):
 
         known_types = set()
         report = dict()
-        moduleL: list[ET] = self.xpath(f"/m:application/m:modules/m:module")
+        moduleL: list[ET] = self.xpath("/m:application/m:modules/m:module")
         for moduleN in moduleL:
             moduleA = moduleN.attrib
             known_types.add(moduleA["name"])
@@ -533,7 +533,7 @@ class Module(Helper):
         )
 
         moduleN: Any = newET.xpath(
-            f"/m:application/m:modules/m:module", namespaces=NSMAP
+            "/m:application/m:modules/m:module", namespaces=NSMAP
         )[0]
         moduleItemL = self.xpath(xpath)
         print(f"FOUND ITEMS: {len(moduleItemL)}")
@@ -575,7 +575,7 @@ class Module(Helper):
             moduleN = self.xpath(f"/m:application/m:modules/m:module[@name='{name}']")[
                 0
             ]
-        except:
+        except Exception:
             # modules should always exist, module doesn't
             modulesN = self.xpath("/m:application/m:modules")[0]
             moduleN = etree.SubElement(
@@ -612,7 +612,7 @@ class Module(Helper):
                 f"/m:moduleItem[@id = '{ID}'",
                 namespaces=NSMAP,
             )[0]
-        except:
+        except Exception:
             item = etree.Element(
                 "{http://www.zetcom.com/ria/ws/module}moduleItem",
             )
@@ -654,7 +654,7 @@ class Module(Helper):
                 f"./m:moduleReference[@name = '{name}']",
                 namespaces=NSMAP,
             )[0]
-        except:
+        except Exception:
             modRefN = etree.SubElement(
                 parent,
                 "{http://www.zetcom.com/ria/ws/module}moduleReference",
@@ -704,7 +704,7 @@ class Module(Helper):
                 f"./m:repeatableGroup[@name = '{name}']",
                 namespaces=NSMAP,
             )[0]
-        except:
+        except Exception:
             rGrp = etree.SubElement(
                 parent,
                 "{http://www.zetcom.com/ria/ws/module}repeatableGroup",
@@ -778,7 +778,7 @@ class Module(Helper):
                     f"/m:application/m:modules/m:module[@name ='{module}']/@totalSize"
                 )[0]
             )
-        except:
+        except Exception:
             raise TypeError(
                 f"Requested module '{module}' or attribute totalSize doesn't exist"
             )
@@ -806,7 +806,7 @@ class Module(Helper):
                 moduleN = self.xpath(
                     f"/m:application/m:modules/m:module[@name = '{modType}']"
                 )[0]
-            except:
+            except Exception:
                 pass  # it's not an error if file has no items that can be counted
             else:
                 # print (f".............updating totalSize for {modType}")
@@ -920,7 +920,7 @@ class Module(Helper):
             vr = parent.xpath(
                 f"m:vocabularyReference[@name = '{name}']", namespaces=NSMAP
             )[0]
-        except:
+        except Exception:
             # print (f"vr with name {name} doesn't exist yet")
             vr = etree.SubElement(
                 parent,
@@ -968,7 +968,7 @@ class Module(Helper):
             vri = parent.xpath(
                 f"m:vocabularyReferenceItem[@name = '{name}']", namespaces=NSMAP
             )[0]
-        except:
+        except Exception:
             vri = etree.SubElement(
                 parent,
                 "{http://www.zetcom.com/ria/ws/module}vocabularyReferenceItem",
@@ -997,7 +997,7 @@ class Module(Helper):
                 oldItemN = self.xpath(
                     f"/m:application/m:modules/m:module[@name = '{mtype}']/m:moduleItem[@id = '{newID}']"
                 )[0]  # IDs should be unique
-            except:
+            except Exception:
                 # itemN does not exist in old doc -> copy it over
                 d1moduleN = self.xpath(
                     f"/m:application/m:modules/m:module[@name = '{mtype}']"
@@ -1082,7 +1082,7 @@ class Module(Helper):
     def _types(self) -> set:
         """Returns a set of module types that exist in the document."""
         knownTypes = set()
-        moduleL = self.xpath(f"/m:application/m:modules/m:module")
+        moduleL = self.xpath("/m:application/m:modules/m:module")
 
         for moduleN in moduleL:
             moduleA = moduleN.attrib

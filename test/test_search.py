@@ -2,7 +2,6 @@
 Test the Search module
 """
 
-from lxml import etree
 from mpapi.search import Search
 import pytest
 
@@ -113,7 +112,7 @@ def test_five():
         value="EMPrimarverpackungen",  # 1632806EM-Primärverpackungen
     )
 
-    with pytest.raises(Exception) as e_info:
+    with pytest.raises(Exception):
         s.validate(mode="search")
 
 

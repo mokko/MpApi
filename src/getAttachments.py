@@ -23,7 +23,6 @@ will put attachments in dir
 where the current date is used for the second directory.
 """
 
-import argparse
 from datetime import date
 from mpapi.client import MpApi
 from mpapi.constants import get_credentials, load_conf
@@ -50,18 +49,15 @@ def get_attachment(client: MpApi, ID: int) -> None:
     # m.toFile(path=f"debug.multimedia{ID}")
     if (
         m.xpath("/m:application/m:modules/m:module/m:moduleItem/@hasAttachments")[0]
-        == "true"
+        != "true"
     ):
-        hasAttachments = True
-    else:
-        hasAttachments = False
         raise ValueError("ERROR: Record has no attachment")
 
     try:
         fn = m.xpath(
             "/m:application/m:modules/m:module/m:moduleItem/m:dataField[@name='MulOriginalFileTxt']/m:value/text()"
         )[0]
-    except:
+    except Exception:
         fn = f"{ID}.jpg"  # use mulId as a fallback if no dateiname in RIA
         print("WARNING: Falling back to {fn} since no Dateiname specified in RIA")
 
@@ -80,7 +76,7 @@ class GetAttachments:
             print("* loading cached response")
             m = Module(file=cache_fn)
         else:
-            print(f"* launching new search")
+            print("* launching new search")
             m = self.query()
             m.toFile(path=cache_fn)
 
@@ -94,7 +90,7 @@ class GetAttachments:
         self.process_response(data=m)
 
     def process_response(self, *, data: Module) -> None:
-        print(f"* processing response")
+        print("* processing response")
         no = data.actualSize(module="Multimedia")
         print(f"* {no} assets found")
         out_dir = self._get_out_dir()
@@ -195,7 +191,7 @@ class GetAttachments:
         for each in required:
             try:
                 job_data[each]
-            except:
+            except Exception:
                 raise SyntaxError(f"Config value {each} missing!")
 
         print(f"   {job_data=}")
@@ -211,7 +207,8 @@ class GetAttachments:
                 "./m:dataField[@name='MulOriginalFileTxt']/m:value/text()",
                 namespaces=NSMAP,
             )[0]
-        except:
+        except Exception:
+            ID = item.xpath("@id")
             dateiname = f"{ID}.jpg"  # use mulId as a fallback if no dateiname in RIA
             # there is a chance that this file is no jpg
             print(
@@ -268,7 +265,7 @@ class GetAttachments:
                 )
             case "loc":
                 print("WARN: location mode not tested yet!")
-                qu.addCriterion(  #  get assets attached to objects at a given location
+                query.addCriterion(  #  get assets attached to objects at a given location
                     operator="equalsField",
                     field="MulObjectRef.ObjCurrentLocationVoc",
                     value=Id,

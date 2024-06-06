@@ -60,7 +60,7 @@ def _require(args, required_args: list) -> None:
     Since with nargs argparse can't use the required argument, we roll our own.
     """
     for req in required_args:
-        if not req in args:
+        if req not in args:
             raise SyntaxError("Required args not provided")
 
 
@@ -124,7 +124,7 @@ def getDefinition():
 
     m = c.getDefinition2(mtype=args.mtype)
     if args.mtype is None:
-        fn = f"definition.xml"
+        fn = "definition.xml"
     else:
         fn = f"definition-{args.mtype}.xml"
     print(f"About to write to {fn}")
@@ -168,7 +168,7 @@ def mink():
     parser.add_argument("-j", "--job", help="job to run")  # , required=True
     parser.add_argument("-c", "--conf", help="config file", default="jobs.toml")
     args = _setup_args(parser)
-    m = Mink(job=args.job, conf=args.conf, baseURL=baseURL, pw=pw, user=user)
+    Mink(job=args.job, conf=args.conf, baseURL=baseURL, pw=pw, user=user)
 
 
 def updateItem():
@@ -184,7 +184,7 @@ def updateItem():
     m = Module(file=args.file)
     c = _login()
     m = c.uploadItem2(mtype=args.mtype, ID=args.ID)
-
+    print(m)
 
 def validate():
     parser = argparse.ArgumentParser(description="validate for MpApi")

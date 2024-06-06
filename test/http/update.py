@@ -6,6 +6,14 @@ I dont want this file to run as part of the test suite, so I dont call
 it a test, although it's in the test directory.
 """
 
+# from MpApi.Module import Module
+# from MpApi.Search import Search
+from MpApi.Client import MpApi
+from mpapi.constants import get_credentials
+from lxml import etree  # type: ignore
+
+# from MpApi.Sar import Sar
+
 NSMAP = {
     "s": "http://www.zetcom.com/ria/ws/module/search",
     "m": "http://www.zetcom.com/ria/ws/module",
@@ -13,26 +21,11 @@ NSMAP = {
 
 ETparser = etree.XMLParser(remove_blank_text=True)
 
-import argparse
-import logging
-from lxml import etree
-import os
-import sys
-
-credentials = "emem1.py"  # in pwd
-
-# from MpApi.Module import Module
-# from MpApi.Search import Search
-from MpApi.Client import MpApi
-
-# from MpApi.Sar import Sar
-
 
 # first way
 class Updater:
     def _init_(self):
-        with open(credentials) as f:
-            exec(f.read())
+        user, pw, baseURL = get_credentials()
         self.api = MpApi(baseURL=baseURL, user=user, pw=pw)
 
     def update1(self, objId, module):
