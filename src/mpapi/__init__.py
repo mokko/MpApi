@@ -1,6 +1,6 @@
 """Unofficial Open Source Client for the MuseumPlus API written in Python"""
 
-__version__ = "0.1.9"  # replace pyexiv, cleanup __init__
+__version__ = "0.1.10"  # unified toml configuration
 import argparse
 from getAttachments import GetAttachments, get_attachment
 from mpapi.mink import Mink
