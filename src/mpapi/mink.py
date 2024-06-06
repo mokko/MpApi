@@ -294,14 +294,12 @@ class Mink:
         well as the corresponding offset.
         """
         no = 1
-        while (
-            self._chunkPath(Type=Type, ID=ID, no=no, suffix=suffix)
-        ).exists():
+        while (self._chunkPath(Type=Type, ID=ID, no=no, suffix=suffix)).exists():
             no += 1
         else:
             if no > 1:
                 no -= 1
-            
+
         offset = (no - 1) * self.chunker.chunkSize
         return no, offset
         # print(f" next chunk {no}; offset:{offset}")

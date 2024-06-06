@@ -186,6 +186,7 @@ def updateItem():
     m = c.uploadItem2(mtype=args.mtype, ID=args.ID)
     print(m)
 
+
 def validate():
     parser = argparse.ArgumentParser(description="validate for MpApi")
     parser.add_argument(

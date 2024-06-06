@@ -993,9 +993,9 @@ class MpApi:
         Delete Vocabulary Instance Term Class
         DELETE https://.../ria-ws/application/vocabulary/instances/{instanceName}/nodeClasses/{className}
         """
-        
+
         xml = "missing"
-        
+
         url = (
             f"{self.appURL}/vocabulary/instances/{instanceName}/nodeClasses/{className}"
         )
