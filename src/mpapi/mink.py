@@ -156,9 +156,6 @@ class Mink:
         """
         Download object and related information (attachment, media, people), join data
         together and clean it.
-
-        mink's dsl
-            getPack group 123 MyLabel [since]
         """
         if label is None:
             label = ""
@@ -276,17 +273,18 @@ class Mink:
         else:
             # print (f"GH TYPE {Type}")
             self.info(f" {module} from remote, saving to {fn}")
-            if Type == "approval":
-                m = self.sar.getByApprovalGrp(Id=Id, module=module, since=since)
-            elif Type == "exhibit":
-                # print ("***GH Exhibit")
-                m = self.sar.getByExhibit(Id=Id, module=module, since=since)
-            elif Type == "group":
-                m = self.sar.getByGroup(Id=Id, module=module, since=since)
-            elif Type == "loc":
-                m = self.sar.getByLocation(Id=Id, module=module, since=since)
-            else:
-                raise TypeError("UNKNOWN type")
+            match Type:
+                case "approval":
+                    m = self.sar.getByApprovalGrp(Id=Id, module=module, since=since)
+                case "exhibit":
+                    # print ("***GH Exhibit")
+                    m = self.sar.getByExhibit(Id=Id, module=module, since=since)
+                case "group":
+                    m = self.sar.getByGroup(Id=Id, module=module, since=since)
+                case "loc":
+                    m = self.sar.getByLocation(Id=Id, module=module, since=since)
+                case _:
+                    raise TypeError("UNKNOWN type")
             m.toFile(path=fn)
             return m
 
