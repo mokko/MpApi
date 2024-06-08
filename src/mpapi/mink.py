@@ -1,53 +1,36 @@
 """
-mink.py: Commandline frontend for MpApi.py
+mink.py: Commandline frontend for MpApi; dowloads native xml & writes files
 
 CLI USAGE
     cd projectData
     mink.py -j job
 
 CONFIGURATION
-    credentials.py   # put it out of harm's way
-    jobs.dsl         # defines/describes multiple jobs; expected in project dir
+    $HOME/RIA.toml           # put it out of harm's way
+    jobs.toml                # defines/describes multiple jobs; expected in project dir
 
 DIR STRUCTURE
     projectData              # <-- use it as working directory (pwd)
-        ajob/20210401        # <-- project dir
-            report.log
-            variousFiles.xml
-            ...
-        credentials.py       # use protection (e.g. .gitignore)
-        jobs.dsl             # expected in pwd
+        ajob/20210401        # <-- project dir, created by running mink
+        jobs.toml             # expected in pwd
 
-DSL COMMANDs
-    all     : chain together several jobs
+COMMANDs (from jobs.toml)
     chunk   : paginated version of getPack
     getItem : save a single item to disk
     getPack : for a single id, get multi-type info (Objects, Multimedia, Persons...)
     pack    : pack together several (clean) files
-    attachments: downloads attachments for given module data
 
-MPAPI CLASSES
-    SEARCH -> CLIENT -> MODULE
-    SEARCH ->  SAR   -> MODULE
-    mink: user interface, writes files
-
-    search  : makes query objects
-    client  : low-level client
-    sar     : specialized higher level client
-    module  : response data
-    mink2   : CLI frontend
-
-New
-* chunks are now zipped to save disk space 20221226
-* Experimenting with sar2 for a cleaner interface. 20220116
-* I eliminated some DSL commands that I haven't been using and integrated clean into join 20220116
-* TODO: getPack ends now with a cleaned join file, so programs that expect clean file need to change
-* 20221210: use separate command getAttachments to d/l attachments
+NEW
+20240604
+* unified configuration using jobs.toml
+20221226
+* chunks are now zipped to save disk space
+20221210
+* use separate command getAttachments to d/l attachments
 """
 
 import datetime
 import logging
-from lxml import etree  # necessary?
 from pathlib import Path
 from typing import Optional
 
@@ -57,10 +40,6 @@ from mpapi.constants import load_conf
 from mpapi.module import Module
 from mpapi.sar import Sar
 
-
-ETparser = etree.XMLParser(remove_blank_text=True)
-
-allowed_commands = ["all", "attachments", "chunk", "getItem", "getPack", "pack"]
 chunkSize = 1000
 
 
@@ -79,25 +58,21 @@ class Mink:
 
         Type = self.job_data["type"]
         ID = self.job_data["id"]
-        try:
-            label = self.job_data["label"]
-        except KeyError:
-            label = "nolabel"
-        try:
-            since = self.job_data["since"]
-        except KeyError:
-            since = None
+        label = self._init_conf_value("label")
+        since = self._init_conf_value("since")
+        target = self._init_conf_value("target")
 
         match self.job_data["cmd"]:
             case "chunk":
-                self.chunk(Type=Type, ID=ID, since=since)
+                self.chunk(Type=Type, ID=ID, since=since, target=target)
             case "getItem":
-                self.getItem(module=self.job_data["type"], ID=self.job_data["id"])
+                self.getItem(module=Type, ID=ID)
             case "getPack":
                 self.getPack(Type=Type, ID=ID, since=since, label=label)
             case "join":
                 self.join(Type=Type, ID=ID, since=since, label=label)
-            # pack todo
+            case "pack":  # untested
+                self.pack()
 
     def info(self, msg: str) -> None:
         logging.info(msg)
@@ -116,16 +91,6 @@ class Mink:
     ) -> None:
         """
         New chunky version of getPack
-
-        Expects
-        * args: a list with arguments that it passes along;
-        * args[0]: type of the ID (approval, exhibit, group, loc, query)
-        * args[1]: ID
-        * args[2]: target type (new, only optional when since is not used)
-        * args[3]: since date (optional)
-
-        mink's dsl
-            chunk group 123 [target] [since]
 
         NEW
         * If last run was aborted, you can restart where you left off, so exisiting chunks
@@ -169,16 +134,6 @@ class Mink:
             {project_dir}/{id}.xml
         and makes new http request only if cache doesn't exist.
 
-        Expects
-        * args: list with two arguments
-        * args[0] module type
-        * args[1] id
-
-        returns
-        * writes item to disk as side-effect
-
-        mink's dsl
-            getItem group 123
         """
         out_fn = self.project_dir / f"getItem-{module}-{ID}.xml"
         if out_fn.exists():
@@ -192,39 +147,37 @@ class Mink:
             return m
 
     def getPack(
-        self, Type: str, ID: int, label: str = "nolabel", since: Optional[str] = None
+        self,
+        Type: str,
+        ID: int,
+        label: Optional[str] = None,
+        since: Optional[str] = None,
     ) -> None:
         """
         Download object and related information (attachment, media, people), join data
         together and clean it.
 
-        Expects
-        * args: a list with arguments that it passes along;
-        * arg[0]: type (approval, exhibit or group)
-        * arg[1]: id
-        * arg[2]: label
-        * arg[3]: since date, optional
-
-        Returns
-        * None
-
         mink's dsl
             getPack group 123 MyLabel [since]
         """
+        if label is None:
+            label = ""
         print(f"GET PACK {Type=} {ID=} {label=} {since=}")
         self.join(
-            Type=Type, Id=ID, label=label, since=since
+            Type=Type, ID=ID, label=label, since=since
         )  # write join file, includes validation
 
     def join(
-        self, Type: str, Id: int, label: str = "nolabel", since: Optional[str] = None
+        self, Type: str, ID: int, label: Optional[str], since: Optional[str] = None
     ) -> Path:
-        # let's only make parts dir if we need it...
+        if label is None:
+            label = ""
+
         if not self.parts_dir.exists():
             self.parts_dir.mkdir(parents=True)
 
         # parts_dir now made during _mkdirs()
-        join_fn = self.project_dir / f"{label}-join-{Type}{Id}.xml"
+        join_fn = self.project_dir / f"{label}-join-{Type}{ID}.xml"
 
         if join_fn.exists():
             print(f" join from cache {join_fn}")
@@ -235,22 +188,22 @@ class Mink:
             # module for target and type refers to the type of selection
             m = (
                 self._getPart(
-                    module="Person", Id=Id, Type=Type, label=label, since=since
+                    module="Person", Id=ID, Type=Type, label=label, since=since
                 )
                 + self._getPart(
-                    module="Multimedia", Id=Id, Type=Type, label=label, since=since
+                    module="Multimedia", Id=ID, Type=Type, label=label, since=since
                 )
                 + self._getPart(
-                    module="Object", Id=Id, Type=Type, label=label, since=since
+                    module="Object", Id=ID, Type=Type, label=label, since=since
                 )
             )
 
             if Type == "exhibit":
                 print(" d: about to get exhibit...")
                 m += self._getPart(
-                    module="Exhibition", Id=Id, Type=Type, label=label, since=since
+                    module="Exhibition", Id=ID, Type=Type, label=label, since=since
                 ) + self._getPart(
-                    module="Registrar", Id=Id, Type=Type, label=label, since=since
+                    module="Registrar", Id=ID, Type=Type, label=label, since=since
                 )
             print(" d: start cleaning")
             m.clean()
@@ -263,13 +216,10 @@ class Mink:
         Pack (or join) all clean files into one bigger package. We act on all
         *-join-*.xml files in the current project directory and save to
         $label$date.xml in current working directory.
-
-        mink's dsl
-            pack
         """
         label = str(self.project_dir.parent.name)
         date = str(self.project_dir.name)
-        pack_fn = self.project_dir / f"../{label}{date}.xml".resolve()
+        pack_fn = self.project_dir.parent / f"{label}{date}.xml"
         if pack_fn.exists():
             print(f"Pack file exists already, no overwrite: {pack_fn}")
         else:
@@ -305,22 +255,19 @@ class Mink:
         # print(f" next chunk {no}; offset:{offset}")
 
     def _getPart(
-        self, *, Id: int, label: str, module: str, Type: str, since: str = None
+        self,
+        *,
+        Id: int,
+        label: str,
+        module: str,
+        Type: str,
+        since: Optional[str] = None,
     ) -> Module:
         """
         Gets a set of moduleItems depending on requested module type. Caches
         results in a file and returns from file cache if that exists already.
 
-        Expects:
-        * Type: query type (approval, exhibit, group or loc)
-        * Id: Id of that query type
-        * module: requested target module type
-        * label: a label to be used as part of a filename (for cache)
-        * since: dateTime (optional); if provided only get items newer than
-          that date
-
-        Returns:
-        * Module objct containing the data
+        Type: query type (approval, exhibit, group or loc)
         """
         fn = self.parts_dir / f"{label}-{module}-{Type}{Id}.xml"
         if fn.exists():
@@ -343,6 +290,16 @@ class Mink:
             m.toFile(path=fn)
             return m
 
+    def _init_conf_value(self, key):
+        """
+        Return conf value by key or None if value doesn't exist
+        """
+        try:
+            value = self.job_data[key]
+        except KeyError:
+            value = None
+        return value
+
     def _init_log(self) -> None:
         now = datetime.datetime.now()
         log_fn = Path(self.project_dir).joinpath(now.strftime("%Y%m%d") + ".log")
@@ -357,7 +314,7 @@ class Mink:
 
     def _mkdirs(self, job: str) -> Path:
         date: str = datetime.datetime.today().strftime("%Y%m%d")
-        project_dir: Path = Path(job) / date
+        project_dir = Path(job) / date
         if not project_dir.is_dir():
             Path.mkdir(project_dir, parents=True)
         return project_dir

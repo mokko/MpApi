@@ -72,7 +72,7 @@ from mpapi.constants import NSMAP
 from mpapi.module import Module
 from mpapi.search import Search
 from pathlib import Path
-from typing import Union
+from typing import Optional, Union
 
 ETparser = etree.XMLParser(remove_blank_text=True)
 
@@ -172,7 +172,9 @@ class Sar:
         else:
             return False
 
-    def getByApprovalGrp(self, *, Id: int, module: str, since: str = None) -> Module:
+    def getByApprovalGrp(
+        self, *, Id: int, module: str, since: Optional[str] = None
+    ) -> Module:
         """
         ApprovalGrp is the term used in the multimedia module, it's a better label than
         PublicationGrp. So I use it here generically for Freigabe in RIA.
@@ -239,7 +241,9 @@ class Sar:
             )
         return self.api.search2(query=query)
 
-    def getByExhibit(self, *, Id: int, module: str, since: str = None) -> Module:
+    def getByExhibit(
+        self, *, Id: int, module: str, since: Optional[str] = None
+    ) -> Module:
         """
         Gets a set of items related to a certain exhibit depending on the
         requested module.
@@ -272,7 +276,9 @@ class Sar:
         }
         return self._getBy(module=module, Id=Id, field=fields[module], since=since)
 
-    def getByGroup(self, *, Id: int, module: str, since: str = None) -> Module:
+    def getByGroup(
+        self, *, Id: int, module: str, since: Optional[str] = None
+    ) -> Module:
         fields: dict = {
             "Multimedia": "MulObjectRef.ObjObjectGroupsRef.__id",
             "Object": "ObjObjectGroupsRef.__id",
@@ -280,7 +286,9 @@ class Sar:
         }
         return self._getBy(module=module, Id=Id, field=fields[module], since=since)
 
-    def getByLocation(self, *, Id: int, module: str, since: str = None) -> Module:
+    def getByLocation(
+        self, *, Id: int, module: str, since: Optional[str] = None
+    ) -> Module:
         """
         Gets items of the requested module type by location id.
 
