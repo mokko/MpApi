@@ -1,5 +1,8 @@
-# unified configuration file for mink and getAttachments using toml
+# unified configuration 
+file format for mink and getAttachments using toml format
+filename: jobs.toml
 
+```
 [SHF] # job label
 # Required values for every job: cmd, type, id
 cmd = "getPack" # command
@@ -27,3 +30,4 @@ id = 469805
 label = "gte" 
 attachments.restriction = "Cornelia" # which assets get downloaded (only freigegeben or other)
 attachments.name = "mulId" # naming policy
+```
