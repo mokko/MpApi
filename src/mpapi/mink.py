@@ -124,10 +124,11 @@ class Mink:
 
     def getItem(self, module: str, ID: int) -> Module:
         """
-        gets a single items. Caches item on disk at
-            {project_dir}/{id}.xml
-        and makes new http request only if cache doesn't exist.
+        gets a single item and caches it on disk at
+            {project_dir}/getItem-{module}-{ID}.xml
 
+        Makes new http request only if cache doesn't exist. So you might need to delete
+        cache file manually.
         """
         out_fn = self.project_dir / f"getItem-{module}-{ID}.xml"
         if out_fn.exists():
@@ -148,8 +149,8 @@ class Mink:
         since: Optional[str] = None,
     ) -> None:
         """
-        Download object and related information (attachment, media, people), join data
-        together and clean it.
+        Download object and related information (attachment, media, people), join,
+        validate and clean it.
         """
         if label is None:
             label = ""
