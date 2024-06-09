@@ -6,8 +6,8 @@ CLI USAGE
     mink.py -j job
 
 CONFIGURATION
-    $HOME/RIA.toml           # put it out of harm's way
-    jobs.toml                # defines/describes multiple jobs; expected in project dir
+    $HOME/RIA.toml           # credentials
+    jobs.toml                # defines multiple jobs; expected above project dir
 
 DIR STRUCTURE
     projectData              # <-- use it as working directory (pwd)
@@ -19,14 +19,6 @@ COMMANDs (from jobs.toml)
     getItem : save a single item to disk
     getPack : for a single id, get multi-type info (Objects, Multimedia, Persons...)
     pack    : pack together several (clean) files
-
-NEW
-20240604
-* unified configuration using jobs.toml
-20221226
-* chunks are now zipped to save disk space
-20221210
-* use separate command getAttachments to d/l attachments
 """
 
 import datetime
