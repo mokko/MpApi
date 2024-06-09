@@ -2,7 +2,7 @@
 
 __version__ = "0.1.10"  # unified toml configuration
 import argparse
-from getAttachments import GetAttachments, get_attachment
+from mpapi.getAttachments import GetAttachments, get_attachment
 from mpapi.mink import Mink
 from mpapi.module import Module
 from mpapi.client import MpApi

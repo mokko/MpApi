@@ -31,14 +31,15 @@ NEW
 
 import datetime
 import logging
-from pathlib import Path
-from typing import Optional
-
 from mpapi.chunky import Chunky
 from mpapi.client import MpApi
 from mpapi.constants import load_conf
 from mpapi.module import Module
 from mpapi.sar import Sar
+from pathlib import Path
+import sys
+from typing import Optional
+
 
 chunkSize = 1000
 
@@ -47,24 +48,25 @@ class Mink:
     def __init__(
         self, *, conf: str, job: str, baseURL: str, user: str, pw: str
     ) -> None:
-        self.sar = Sar(baseURL=baseURL, user=user, pw=pw)
-        self.api = MpApi(baseURL=baseURL, user=user, pw=pw)
-        self.chunker = Chunky(chunkSize=chunkSize, baseURL=baseURL, pw=pw, user=user)
+        # if you can't load jobs.toml, we're likely in wrong diretory
         self.job_data = self._parse_conf(job=job, fn=Path(conf))
         self.project_dir = self._mkdirs(job)
         self.parts_dir = self.project_dir / "parts"
-        self._init_log()
-        self.info(f"Project dir: {self.project_dir}")
+        self._init_log(self.project_dir)
+        self.sar = Sar(baseURL=baseURL, user=user, pw=pw)
+        self.api = MpApi(baseURL=baseURL, user=user, pw=pw)
+        self.chunker = Chunky(chunkSize=chunkSize, baseURL=baseURL, pw=pw, user=user)
+        logging.info(f"Project dir: {self.project_dir}")
 
-        Type = self.job_data["type"]
+        Type = self.job_data["type"]  # cannot be None
         ID = self.job_data["id"]
-        label = self._init_conf_value("label")
+        label = self._init_conf_value("label")  # can be None
         since = self._init_conf_value("since")
-        target = self._init_conf_value("target")
+        # target = self._init_conf_value("target")
 
         match self.job_data["cmd"]:
             case "chunk":
-                self.chunk(Type=Type, ID=ID, since=since, target=target)
+                self.chunk(Type=Type, ID=ID, since=since, target="Object")
             case "getItem":
                 self.getItem(module=Type, ID=ID)
             case "getPack":
@@ -73,14 +75,6 @@ class Mink:
                 self.join(Type=Type, ID=ID, since=since, label=label)
             case "pack":  # untested
                 self.pack()
-
-    def info(self, msg: str) -> None:
-        logging.info(msg)
-        print(msg)
-
-    #
-    # MINK's DSL COMMANDs
-    #
 
     def chunk(
         self,
@@ -121,7 +115,7 @@ class Mink:
                 # print(f"###chunk size:{chunk.actualSize(module='Object')}")
                 chunk_fn = self._chunkPath(Type=Type, ID=ID, no=no, suffix=".xml")
                 chunk.clean()
-                self.info(f"zipping chunk {chunk_fn}")
+                logging.info(f"zipping chunk {chunk_fn}")
                 chunk.toZip(path=chunk_fn)
                 chunk.validate()
                 no += 1
@@ -140,7 +134,7 @@ class Mink:
             print(f" Item from cache {out_fn}")
             return Module(file=out_fn)
         else:
-            self.info(f"getItem module={module} Id={ID} out_fn={out_fn}")
+            logging.info(f"getItem module={module} Id={ID} out_fn={out_fn}")
             r = self.api.getItem(module=module, id=ID)
             m = Module(xml=r.text)
             m.toFile(path=out_fn)
@@ -180,7 +174,7 @@ class Mink:
             print(f" join from cache {join_fn}")
             m = Module(file=join_fn)
         else:
-            self.info(f" joining modules, saving to {join_fn}")
+            logging.info(f" joining modules, saving to {join_fn}")
 
             # module for target and type refers to the type of selection
             m = (
@@ -272,7 +266,7 @@ class Mink:
             return Module(file=fn)
         else:
             # print (f"GH TYPE {Type}")
-            self.info(f" {module} from remote, saving to {fn}")
+            logging.info(f" {module} from remote, saving to {fn}")
             match Type:
                 case "approval":
                     m = self.sar.getByApprovalGrp(Id=Id, module=module, since=since)
@@ -298,9 +292,9 @@ class Mink:
             value = None
         return value
 
-    def _init_log(self) -> None:
+    def _init_log(self, project_dir: Path) -> None:
         now = datetime.datetime.now()
-        log_fn = Path(self.project_dir).joinpath(now.strftime("%Y%m%d") + ".log")
+        log_fn = Path(project_dir).joinpath(now.strftime("%Y%m%d") + ".log")
         logging.basicConfig(
             datefmt="%Y%m%d %I:%M:%S %p",
             filename=log_fn,
@@ -309,8 +303,14 @@ class Mink:
             level=logging.DEBUG,
             format="%(asctime)s: %(message)s",
         )
+        log = logging.getLogger()
+        log.addHandler(logging.StreamHandler(sys.stdout))
 
     def _mkdirs(self, job: str) -> Path:
+        """
+        Determine, make and return project directory.
+        It has this shape "job_name/20240609" and will be created in current dir.
+        """
         date: str = datetime.datetime.today().strftime("%Y%m%d")
         project_dir = Path(job) / date
         if not project_dir.is_dir():
@@ -319,16 +319,23 @@ class Mink:
 
     def _parse_conf(self, job: str, fn: Path) -> dict:
         """
-        Load configuration file and return info for current job.
+        Load configuration file, check for required keys and return info for current job.
         """
-        conf_data = load_conf(fn)
+        try:
+            conf_data = load_conf(fn)
+        except FileNotFoundError:
+            raise FileNotFoundError(
+                "File jobs.toml not found in this dir. Are you in the right dir?"
+            )
+
         try:
             job_data = conf_data[job]
         except KeyError:
-            raise SyntaxError("job not known in configuration")
-        for each in ["cmd", "type", "id"]:
+            raise SyntaxError(f"Job '{job}' not known in configuration")
+
+        for key in ["cmd", "type", "id"]:
             try:
-                job_data[each]
+                job_data[key]
             except KeyError:
-                raise SyntaxError("job '{job}' missing config value '{each}'")
+                raise SyntaxError("job '{job}' missing config value '{key}'")
         return job_data
