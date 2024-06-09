@@ -4,18 +4,12 @@
 pip install git+https://github.com/mokko/MpApi#egg=MpApi
 ```
 
-## Or new clone
+
+## Install from git clone
+Or try this for editable install 
 ```
 git clone https://github.com/mokko/MpApi.git
 cd MpApi
-pip install 
-```
-
-## from existing git clone
-Or try this for editable install 
-```
-cd MpApi
-git pull
 pip install -e .
 ```
 
