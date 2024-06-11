@@ -31,6 +31,7 @@ getItem = 'mpapi:getItem'
 getDefinition = 'mpapi:getDefinition'
 updateItem = 'mpapi:updateItem'
 validate = 'mpapi:validate'
+filter = 'mpapi:filter'
 
 [tool.flit.sdist]
 include = ["src/MpApi/__init__.py"] # windows is strange with capital letters

@@ -58,7 +58,21 @@ class Mink:
 
         match self.job_data["cmd"]:
             case "chunk":
-                self.chunk(Type=Type, ID=ID, since=since, target="Object")
+                onlyPublished = False
+                try:
+                    self.job_data["onlyPublished"]
+                except KeyError:
+                    pass
+                else:
+                    if self.job_data["onlyPublished"].lower() == "true":
+                        onlyPublished = True
+                self.chunk(
+                    Type=Type,
+                    ID=ID,
+                    since=since,
+                    target="Object",
+                    onlyPublished=onlyPublished,
+                )
             case "getItem":
                 self.getItem(module=Type, ID=ID)
             case "getPack":
@@ -74,6 +88,7 @@ class Mink:
         ID: int,
         target: Optional[str] = "Object",
         since: Optional[str] = None,
+        onlyPublished: bool = False,
     ) -> None:
         """
         New chunky version of getPack
@@ -102,6 +117,7 @@ class Mink:
             target=target,
             since=since,
             offset=offset,
+            onlyPublished=onlyPublished,
         ):
             if chunk:  # Module is True if >0 items
                 # print(f"###chunk size:{chunk.actualSize(module='Object')}")

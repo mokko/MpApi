@@ -1,9 +1,8 @@
-# INSTALLING MpApi
+# Installing MpApi
 ## directly from github
 ```
 pip install git+https://github.com/mokko/MpApi#egg=MpApi
 ```
-
 
 ## Install from git clone
 Or try this for editable install 

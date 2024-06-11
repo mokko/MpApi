@@ -108,6 +108,7 @@ class Chunky(Helper):
         target="Object",
         since: since = None,
         offset: int = 0,
+        onlyPublished: bool = False,
     ) -> Iterator[Module]:
         """
         Get a pack based on approval [group], loc[ation], group, exhibit or query.
@@ -149,7 +150,10 @@ class Chunky(Helper):
                 # all related Multimedia and Persons items, no chunking
                 for targetType in ["Multimedia", "Person"]:
                     relatedET = self._relatedItems(
-                        part=partET, target=targetType, since=since
+                        part=partET,
+                        target=targetType,
+                        since=since,
+                        onlyPublished=onlyPublished,
                     )
                     if relatedET is not None:
                         chunkData.add(doc=relatedET)
@@ -245,7 +249,7 @@ class Chunky(Helper):
         return etree.fromstring(r.content, ETparser)
 
     def _relatedItems(
-        self, *, part: ET, target: str, since: since = None
+        self, *, part: ET, target: str, since: since = None, onlyPublished: bool = False
     ) -> Union[ET, None]:
         """
         For a zml document, return all related items of the target type.
@@ -284,13 +288,23 @@ class Chunky(Helper):
                 value=str(ID),
             )
             count += 1
-            if since is not None:
-                s.AND()
+        if since is not None:
+            s.AND()
+            s.addCriterion(
+                operator="greater",
+                field="__lastModified",
+                value=str(since),  # "2021-12-23T12:00:00.0"
+            )
+        if onlyPublished and target == "Multimedia":
+            # UNTESTED!!!
+            s.NOT()
+            for each in [".mp3", ".pdf", ".wav", "mp4"]:
                 s.addCriterion(
-                    operator="greater",
-                    field="__lastModified",
-                    value=str(since),  # "2021-12-23T12:00:00.0"
+                    operator="endsWithTerm",
+                    field="MulOriginalFileTxt",
+                    value=each,
                 )
+
         s.toFile(path="debug.search.xml")
         # s.print()
         s.validate(mode="search")

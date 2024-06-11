@@ -2,6 +2,7 @@
 
 __version__ = "0.1.10"  # unified toml configuration
 import argparse
+from mpapi.filterUnpublished import filter_unpublished
 from mpapi.getAttachments import GetAttachments, get_attachment
 from mpapi.mink import Mink
 from mpapi.module import Module
@@ -73,6 +74,26 @@ def _setup_args(parser):
         print(f"Version: {__version__}")
         sys.exit(0)
     return args
+
+
+def filter():
+    # filter out multimedia items that are not really published on researche.smb.museum
+    parser = argparse.ArgumentParser(
+        description="discard multimedia assets that are not public although freigegeben(mp3,wav,pdf,mp4)."
+    )
+    parser.add_argument(
+        "-s",
+        "--src",
+        help="input file",
+    )
+    parser.add_argument(
+        "-f",
+        "--force",
+        action="store_true",
+        help="overwrite existing zip files",
+    )
+    args = _setup_args(parser)
+    filter_unpublished(src=args.src, force=args.force)
 
 
 def getAttachment():
