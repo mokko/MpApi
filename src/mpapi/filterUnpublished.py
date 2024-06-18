@@ -29,40 +29,53 @@ def iter_chunks(src: Path) -> Iterable[Path]:
     """
     print(f"chunk src: {src}")
     parent, beginning, no, tail = _analyze_chunkFn(src=src)
-    chunkFn = src
+    chunkFn = Path(src)
 
-    while Path(chunkFn).exists():
+    while chunkFn.exists():
         yield chunkFn
         # print(f"{chunkFn} exists")
         no += 1
-        chunkFn = parent / f"{beginning}-chunk{no}{tail}"
+        chunkFn = Path(parent / f"{beginning}-chunk{no}{tail}")
 
 
-def filter_unpublished(src: str, force: bool = False) -> None:
+def filter_(src: str, force: bool = False) -> None:
     """
     Expect chunks like this
 
     C:/m3/MpApi/sdata/CCC/cccall/20240610/query767070-chunk1.zip
     """
     src = Path(src)
-    pro_dir = src.parent.parent
-    target = pro_dir / f"{src.parent.name}" / "filter"
-    if not target.exists():
-        target.mkdir(parents=True)
-    # print(f"target:{target}")
-    _init_log(target)
-    pdir = src.parent
-    for p in iter_chunks(src):
-        member = Path(p).with_suffix(".xml")
-        temp_fn = pdir / member
+    target_dir = src.parent.parent / f"{src.parent.name}" / "filter"
+    if not target_dir.exists():
+        target_dir.mkdir(parents=True)
+    print(f"{target_dir=}")
+    _init_log(target_dir)
+    src_dir = src.parent
+    for src_zip in iter_chunks(src):
+        member = Path(src_zip).with_suffix(".xml").name
+        temp_fn = src_dir / member
+        target_fn = target_dir / member
+        target_zip = target_fn.with_suffix(".zip")
+        # print(f"{target_dir=}")
+        # print(f"{target_fn=}")
+        # print(f"{target_zip=}")
+        # print(f"{member=}")
+        # print(f"{src_zip=}")
+        # if src_zip.exists():
+        # print("src_zip exists")
+        # else:
+        # print("src_zip DOES NOT exists")
 
-        if not temp_fn.exists():
-            with ZipFile(p, "r") as zippy:
-                print("unzipping...")
-                zippy.extractall(pdir)
-        _per_chunk(src_xml=temp_fn, target_dir=target, force=force)
-        if temp_fn.with_suffix(".zip").exists():
-            print("unlinking")  # {temp_fn}
+        if not target_zip.exists() or force:
+            if not temp_fn.exists():
+                with ZipFile(src_zip, "r") as zippy:
+                    print("unzipping...")
+                    zippy.extractall(src_dir)
+            m = _unpublished(data=Module(file=temp_fn))
+            m = _only_em(data=m)
+            m.toZip(path=target_zip)
+        if temp_fn.with_suffix(".zip").exists() and temp_fn.exists():
+            print("unlinking temp file")
             temp_fn.unlink()
 
 
@@ -100,7 +113,30 @@ def _init_log(target_dir: Path) -> None:
     log.addHandler(logging.StreamHandler(sys.stdout))
 
 
-def _per_chunk(*, src_xml: Path, target_dir: Path, force: bool) -> None:
+def _only_em(*, data: Module) -> Module:
+    """
+    drop moduleItems that are have verwaltendeInstituion = Ethnologisches Museum
+    """
+    xpath = """/m:application/m:modules/m:module[
+        @name = 'Object'
+    ]/m:moduleItem[
+        m:moduleReference[
+            @name ='ObjOwnerRef'
+        ]/m:moduleReferenceItem/m:formattedValue[
+            @language='de'
+        ] != 'Ethnologisches Museum, Staatliche Museen zu Berlin'
+    ]"""
+    for itemN in data.xpath(xpath):
+        inst = itemN.xpath(
+            "m:moduleReference[@name ='ObjOwnerRef']/m:moduleReferenceItem/m:formattedValue/text()",
+            namespaces=NSMAP,
+        )[0]
+        print(f"Unlinking object with verwaltendeInstituion != EM {inst}")
+        itemN.getparent().remove(itemN)
+    return data
+
+
+def _unpublished(*, data: Module) -> Module:
     """
     src_xml is the path to the unpacked xml file
     target_dir is the path to the target directory
@@ -108,27 +144,20 @@ def _per_chunk(*, src_xml: Path, target_dir: Path, force: bool) -> None:
     The respective Multimedia moduleItems get deleted, the entry in moduleReferenceItem
     remain...
     """
-    new_fn = target_dir / src_xml.name
-    zip_fn = new_fn.with_suffix(".zip")
-    if not zip_fn.exists() or force:
-        m = Module(file=src_xml)
-        for itemN in m.xpath("""/m:application/m:modules/m:module[
-            @name = 'Multimedia'
-            ]/m:moduleItem"""):
-            # print(f"{itemN=}")zu
-            dateiname = itemN.xpath(
-                """m:dataField[
-                @name = 'MulOriginalFileTxt'
-            ]/m:value/text()""",
-                namespaces=NSMAP,
-            )
-            if len(dateiname) > 0 and dateiname[0].endswith(
-                (".mp3", ".pdf", "mp4", ".wav")
-            ):
-                mulId = itemN.xpath("@id")[0]
-                logging.info(f"{src_xml.name}: DEL {mulId} {dateiname[0]}")
-                itemN.getparent().remove(itemN)
-        print(f"writing to {zip_fn}")
-        m.toZip(path=new_fn)  # overwriting existing file
-    else:
-        print(f"target zip exists already: {zip_fn}")
+    for itemN in data.xpath("""/m:application/m:modules/m:module[
+        @name = 'Multimedia'
+        ]/m:moduleItem"""):
+        # print(f"{itemN=}")zu
+        dateinameL = itemN.xpath(
+            """m:dataField[
+            @name = 'MulOriginalFileTxt'
+        ]/m:value/text()""",
+            namespaces=NSMAP,
+        )
+        if len(dateinameL) > 0 and dateinameL[0].endswith(
+            (".mp3", ".pdf", "mp4", ".wav")
+        ):
+            mulId = itemN.xpath("@id")[0]
+            logging.info(f"DEL {mulId} {dateinameL[0]}")
+            itemN.getparent().remove(itemN)
+    return data
