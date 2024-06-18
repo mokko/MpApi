@@ -1,6 +1,7 @@
 """
-commandline utitly that reads in a series of zipped chunks, unpacks them, filters out
-Multimedia items that are freigegeben, but still not available on recherche.smb.museum.
+quick and dirty commandline utitly for ccc portal. It reads in a series of zipped chunks,
+unpacks them, filters out Multimedia items that are freigegeben, but still not available
+on recherche.smb.museum.
 
 pdf werden nicht auf recherche angezeigt, selbst wenn diese Assets eine Freigabe haben.
 tif werden als jpg angezeigt, wenn sie entsprechende Freigabe haben.
@@ -73,7 +74,7 @@ def filter_(src: str, force: bool = False) -> None:
                     zippy.extractall(src_dir)
             m = _unpublished(data=Module(file=temp_fn))
             m = _only_em(data=m)
-            m.toZip(path=target_zip)
+            m.toZip(path=target_fn)
         if temp_fn.with_suffix(".zip").exists() and temp_fn.exists():
             print("unlinking temp file")
             temp_fn.unlink()

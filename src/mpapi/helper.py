@@ -49,21 +49,19 @@ class Helper:
             et, pretty_print=True, encoding="unicode"
         )  # why not utf-8?
 
-    def toZip(self, *, path: Union[Path, str]) -> Path:
+    def toZip(self, *, path: Path) -> Path:
         """
         Save module data to a zip file
 
-        Expects path of the unzipped file (as str or path object);
+        Expects path of the __unzipped file__ ;
         creates and returns the zipped filepath (with_suffix .zip)
-
-        i.e path is full path ending on .xml
 
         path: AKu/260k/20221201/query513067-chunk1.xml
         zip_path: AKu/260k/20221201/query513067-chunk1.zip
         short_path: query513067-chunk1.xml
         """
-        short_path = Path(path).name
-        zip_path = Path(path).with_suffix(".zip")
+        short_path = path.name  # str
+        zip_path = path.with_suffix(".zip")
 
         with ZipFile(zip_path, "w", compression=ZIP_LZMA) as zip:
             zip.writestr(
