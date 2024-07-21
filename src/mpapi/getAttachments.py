@@ -86,23 +86,20 @@ class GetAttachments:
         cache_fn = f"mul_{self.conf['type']}{self.conf['id']}.xml"
 
         if cache:
-            self.cache = Path(cache)
             print("* loading cached response")
-            m = Module(file=cache)
+            self.cache = Module(file=cache)
         else:
             print("* launching new search")
-            self.cache = cache_fn
-            m = self.query()
+            m = self.get_multimedia_for_job()
             m.toFile(path=cache_fn)
+            self.cache = m
 
         if self.conf["attachments"]["name"] == "Cornelia":
-            # if self.conf["type"] != "group":
-            #    raise SyntaxError("Cornelia mode only works with groups")
             # in this mode we need object data...
-            # print("Cornelia mode (Standardbild in separate folder)")
-            self.objData = self._init_ObjData()
+            self.cache += self._init_objData()
+            self.cache.toFile(path=cache)
 
-        self.process_response(data=m)
+        self.process_response(data=self.cache)
 
     def process_response(self, *, data: Module) -> None:
         print("* processing response")
@@ -148,14 +145,17 @@ class GetAttachments:
             else:
                 print(f"*  mulId {ID} no attachment")
 
-    def query(self) -> Module:
+    def get_multimedia_for_job(self) -> Module:
         """
+        gets Multimedia items for current job.
+
         Restriction: Currently, only gets attachments from Multimedia.
         """
         qu = Search(module="Multimedia")
         if self.conf["attachments"]["restriction"] == "freigegeben":
             qu.AND()
 
+        # doesn't work for type=query atm
         qu = self._qm_type(query=qu, Id=self.conf["id"])
 
         match self.conf["attachments"]["restriction"]:
@@ -248,7 +248,7 @@ class GetAttachments:
 
         match self.conf["attachments"]["name"]:
             case "Cornelia":
-                res = self.objData.xpath(f"""
+                res = self.cache.xpath(f"""
                 /m:application/m:modules/m:module[
                     @name = 'Object'
                 ]/m:moduleItem/m:moduleReference[
@@ -295,16 +295,23 @@ class GetAttachments:
             out_dir.mkdir(parents=True)
         return out_dir
 
-    def _init_ObjData(self) -> None:
+    def _init_objData(self) -> None:
         obj_fn = Path(f"obj_{self.conf['type']}{self.conf['id']}.xml")
+        if self.cache:
+            if self.cache.actualSize(module="Object") > 0:
+                return Module()
         if self.cache.exists():
-            ObjData = Module(file=str(self.cache))
+            objData = Module(file=str(self.cache))
         elif obj_fn.exists():
-            ObjData = Module(file=obj_fn)
+            objData = Module(file=obj_fn)
         else:
-            ObjData = self._get_obj_group(grpId=self.conf["id"])
-            ObjData.toFile(path=obj_fn)
-        return ObjData
+            print("getting objData from fresh query")
+            if self.conf["type"] == "query":
+                objData = self.api.runSavedQuery2(Type="query", ID=self.conf["id"])
+            else:
+                objData = self._get_obj_group(grpId=self.conf["id"])
+            objData.toFile(path=obj_fn)
+        return objData
 
     def _qm_type(self, *, query: Search, Id: int):
         match self.conf["type"]:
