@@ -119,16 +119,22 @@ def getAttachments():
         description="getAttachments for MpApi (using config file)"
     )
     parser.add_argument(
-        "-j", "--job", required=True, help="pick a job from getAttachments.jobs file"
-    )
-    parser.add_argument(
         "-c",
         "--cache",
         help="Specify cache file",
         default=None,
     )
+    parser.add_argument(
+        "-f",
+        "--force",
+        help="overwrite existing attachments with me download",
+        action="store_true",
+    )
+    parser.add_argument(
+        "-j", "--job", required=True, help="pick a job from getAttachments.jobs file"
+    )
     args = _setup_args(parser)
-    GetAttachments(job=args.job, cache=args.cache)
+    GetAttachments(job=args.job, cache=args.cache, force=args.force)
 
 
 def getDefinition():
