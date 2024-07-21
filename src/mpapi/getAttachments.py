@@ -4,23 +4,27 @@ getAttachments downloads attachments from RIA
 Configuration file format (where | indicates the possible options):
 #file is typically named 'getAttachments.jobs'
 [label]
-    type: group | exhibit | loc | restExhibit
+    type = "group" | "exhibit" | "loc" | "query" | "restExhibit"
     id: 12345
-    restriction: None | freigegeben | Cornelia
-    name: dateiname | mulid
+    label: "alabel"
+    restriction: "keine" | "freigegeben"
+    name: "dateiname" | "mulid" | "Cornelia"
 
 Restriction
     None : download the attachments from each asset
     freigegeben : download only assets which are freigegeben
-    Cornelia : download all attachments from each asset, but sort them in
-       two folders 'standardbild' and 'nichtstandardild'
 
-Usage
+USAGE
     getAttachments -j label
+    getAttachments -j m39 -c path/to/m39.xml
+
 
 will put attachments in dir
-    ./label/20220708
+    ./label/20220708/pix
 where the current date is used for the second directory.
+
+NEW
+- 21.7.2024: We're using the downloaded data from MpApi as the cache
 """
 
 from datetime import date
@@ -73,6 +77,7 @@ class GetAttachments:
         self.conf = self.setup_conf(job)
         self.job = job
         # default for saving new request
+        # if we're not using a cache
         cache_fn = f"mul_{self.conf['type']}{self.conf['id']}.xml"
 
         if cache:
@@ -81,6 +86,7 @@ class GetAttachments:
             m = Module(file=cache)
         else:
             print("* launching new search")
+            self.cache = cache_fn
             m = self.query()
             m.toFile(path=cache_fn)
 
@@ -100,7 +106,7 @@ class GetAttachments:
         out_dir = self._get_out_dir()
 
         match self.conf["attachments"]["restriction"]:
-            case "alle":
+            case "keine":
                 moduleItemsL = data.xpath(f"""
                 /m:application/m:modules/m:module[
                     @name = 'Multimedia'
@@ -136,10 +142,8 @@ class GetAttachments:
         for itemN in moduleItemsL:
             ID = itemN.get("id")
             if itemN.get("hasAttachments") == "true":
-                hasAttachments = True
-                self._get_attachment(item=itemN, ID=ID, out_dir=out_dir)
+                self._get_single_attachment(item=itemN, ID=ID, out_dir=out_dir)
             else:
-                hasAttachments = False
                 print(f"*  mulId {ID} no attachment")
 
     def query(self) -> Module:
@@ -204,8 +208,38 @@ class GetAttachments:
     # somewhat private
     #
 
-    def _get_attachment(self, *, item, ID: int, out_dir: Path) -> None:
-        dateiname = self._get_dateiname(item)  # may fail
+    def _get_dateiname(self, item) -> str:
+        try:
+            dateiname = item.xpath(
+                "./m:dataField[@name='MulOriginalFileTxt']/m:value/text()",
+                namespaces=NSMAP,
+            )[0]
+        except Exception:
+            ID = item.xpath("@id")[0]
+            dateiname = f"{ID}.jpg"  # use mulId as a fallback if no dateiname in RIA
+            # there is a chance that this file is no jpg
+            print(
+                f"WARNING: Falling back to ID {dateiname} since no Dateiname specified in RIA"
+            )
+        return dateiname
+
+    def _get_obj_group(self, *, grpId: int) -> Module:
+        qu = Search(module="Object")
+        qu.addCriterion(
+            operator="equalsField",
+            field="ObjObjectGroupsRef.__id",
+            value=str(grpId),
+        )
+        # would speed up query a lot, but we cant get it to work!
+        # qu.addField(field="ObjMultimediaRef")
+        # qu.addField(field="ObjMultimediaRef.moduleReferenceItem")
+        # qu.addField(field="ObjMultimediaRef.moduleReferenceItem.dataField.ThumbnailBoo")
+        qu.validate(mode="search")
+        print(f"* about to execute query\n{qu.toString()}")
+        return self.api.search2(query=qu)
+
+    def _get_single_attachment(self, *, item, ID: int, out_dir: Path) -> None:
+        dateiname = self._get_dateiname(item)  # may fail if no attachment
         suffix = Path(dateiname).suffix
 
         print(f"*  mulId {ID}")  # {dateiname}
@@ -243,36 +277,6 @@ class GetAttachments:
         else:
             print(f"\t{path}")
             self.api.saveAttachment(id=ID, path=path)
-
-    def _get_dateiname(self, item) -> str:
-        try:
-            dateiname = item.xpath(
-                "./m:dataField[@name='MulOriginalFileTxt']/m:value/text()",
-                namespaces=NSMAP,
-            )[0]
-        except Exception:
-            ID = item.xpath("@id")[0]
-            dateiname = f"{ID}.jpg"  # use mulId as a fallback if no dateiname in RIA
-            # there is a chance that this file is no jpg
-            print(
-                f"WARNING: Falling back to ID {dateiname} since no Dateiname specified in RIA"
-            )
-        return dateiname
-
-    def _get_obj_group(self, *, grpId: int) -> Module:
-        qu = Search(module="Object")
-        qu.addCriterion(
-            operator="equalsField",
-            field="ObjObjectGroupsRef.__id",
-            value=str(grpId),
-        )
-        # would speed up query a lot, but we cant get it to work!
-        # qu.addField(field="ObjMultimediaRef")
-        # qu.addField(field="ObjMultimediaRef.moduleReferenceItem")
-        # qu.addField(field="ObjMultimediaRef.moduleReferenceItem.dataField.ThumbnailBoo")
-        qu.validate(mode="search")
-        print(f"* about to execute query\n{qu.toString()}")
-        return self.api.search2(query=qu)
 
     def _get_out_dir(self) -> Path:
         """
