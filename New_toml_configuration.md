@@ -29,6 +29,6 @@ cmd = "getPack"
 type = "exhibit" 
 id = 469805
 label = "gte" 
-attachments.restriction = "Cornelia" # which assets get downloaded (only freigegeben or other)
-attachments.name = "mulId" # naming policy
+attachments.restriction = "freigegeben" # or "alle" which assets get downloaded (only freigegeben or other)
+attachments.name = "Cornelia" # naming policy
 ```

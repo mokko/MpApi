@@ -124,9 +124,8 @@ def getAttachments():
     parser.add_argument(
         "-c",
         "--cache",
-        action="store_true",
-        help="New query or load cached query?",
-        default=False,
+        help="Specify cache file",
+        default=None,
     )
     args = _setup_args(parser)
     GetAttachments(job=args.job, cache=args.cache)

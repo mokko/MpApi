@@ -24,6 +24,7 @@ where the current date is used for the second directory.
 """
 
 from datetime import date
+from lxml import etree
 from mpapi.client import MpApi
 from mpapi.constants import get_credentials, load_conf
 from mpapi.module import Module
@@ -66,23 +67,26 @@ def get_attachment(client: MpApi, ID: int) -> None:
 
 
 class GetAttachments:
-    def __init__(self, *, job: str, cache: bool = False) -> None:
+    def __init__(self, *, job: str, cache: str | None = None) -> None:
         user, pw, baseURL = get_credentials()
         self.api = MpApi(baseURL=baseURL, user=user, pw=pw)
         self.conf = self.setup_conf(job)
+        self.job = job
+        # default for saving new request
         cache_fn = f"mul_{self.conf['type']}{self.conf['id']}.xml"
 
         if cache:
+            self.cache = Path(cache)
             print("* loading cached response")
-            m = Module(file=cache_fn)
+            m = Module(file=cache)
         else:
             print("* launching new search")
             m = self.query()
             m.toFile(path=cache_fn)
 
-        if self.conf["attachments"]["restriction"] == "Cornelia":
-            if self.conf["type"] != "group":
-                raise SyntaxError("Cornelia mode only works with groups")
+        if self.conf["attachments"]["name"] == "Cornelia":
+            # if self.conf["type"] != "group":
+            #    raise SyntaxError("Cornelia mode only works with groups")
             # in this mode we need object data...
             print("Cornelia mode (Standardbild in separate folder)")
             self._init_ObjData()
@@ -95,55 +99,48 @@ class GetAttachments:
         print(f"* {no} assets found")
         out_dir = self._get_out_dir()
 
-        for item in data.iter(module="Multimedia"):
-            ID = item.get("id")
-            if item.get("hasAttachments") == "true":
+        match self.conf["attachments"]["restriction"]:
+            case "alle":
+                moduleItemsL = data.xpath(f"""
+                /m:application/m:modules/m:module[
+                    @name = 'Multimedia'
+                ]/m:moduleItem""")
+            case "freigegeben":
+                moduleItemsL = data.xpath(f"""
+                /m:application/m:modules/m:module[
+                    @name = 'Multimedia'
+                ]/m:moduleItem[
+                    m:repeatableGroup[
+                        @name = 'MulApprovalGrp'
+                    ]/m:repeatableGroupItem[
+                        m:vocabularyReference[
+                            @name='TypeVoc'
+                        ]/m:vocabularyReferenceItem[
+                            @name = 'SMB-digital' 
+                        ] 
+                    and m:vocabularyReference[
+                        @name='ApprovalVoc'
+                        ]/m:vocabularyReferenceItem[
+                            @name = 'Ja' 
+                        ]
+                    ]
+                ]""")
+                print(
+                    "restricting to smb-freigegebene Multimedia items {len(modulesItemsL)}"
+                )
+
+                # for each in freigegebenL:
+                #   print (etree.tostring(each, pretty_print=True, encoding="unicode"))
+                # raise SyntaxError("Stop here")
+
+        for itemN in moduleItemsL:
+            ID = itemN.get("id")
+            if itemN.get("hasAttachments") == "true":
                 hasAttachments = True
+                self._get_attachment(item=itemN, ID=ID, out_dir=out_dir)
             else:
                 hasAttachments = False
-
-            dateiname = self._get_dateiname(item)
-
-            print(f"*  mulId {ID}")  # {dateiname}
-            if self.conf["attachments"]["restriction"] == "Cornelia":
-                res = self.ObjData.xpath(f"""
-                /m:application/m:modules/m:module/m:moduleItem/m:moduleReference[
-                    @name='ObjMultimediaRef'
-                ]/m:moduleReferenceItem[
-                    @moduleItemId =  {ID}
-                ]/m:dataField[
-                    @name ='ThumbnailBoo'
-                ][m:value = 'true'
-                ]""")
-                # print(f"xxxxxxxxxxxxxxxx {res=}")
-                if len(res) > 0:
-                    out_dir2 = out_dir / "Standardbild"
-                else:
-                    out_dir2 = out_dir / "nichtStandardbild"
-                out_dir2.mkdir(exist_ok=True)
-            else:
-                out_dir2 = out_dir
-
-            match self.conf["attachments"]["name"]:
-                case "mulId":
-                    suffix = Path(dateiname).suffix
-                    path = out_dir2 / f"{ID}{suffix}"
-                case "dateiname":
-                    path = out_dir2 / dateiname
-                case _:
-                    # we could check this earlier
-                    raise SyntaxError(
-                        f"Error: Unknown config value: {self.conf['name']}"
-                    )
-
-            if hasAttachments:  # only d/l if there is an attachment
-                if path.exists():  # let's not overwrite existing files
-                    print("\tfile exists already on disk")
-                else:
-                    print(f"\t{path}")
-                    self.api.saveAttachment(id=ID, path=path)
-            else:
-                print("\tno attachment")
+                print(f"*  mulId {ID} no attachment")
 
     def query(self) -> Module:
         """
@@ -153,7 +150,7 @@ class GetAttachments:
         if self.conf["attachments"]["restriction"] == "freigegeben":
             qu.AND()
 
-        self._qm_type(query=qu, Id=self.conf["id"])
+        qu = self._qm_type(query=qu, Id=self.conf["id"])
 
         match self.conf["attachments"]["restriction"]:
             case "freigegeben":
@@ -166,6 +163,12 @@ class GetAttachments:
                     operator="equalsField",
                     field="MulApprovalGrp.ApprovalVoc",
                     value="4160027",  # Ja
+                )
+            case "alle":
+                pass
+            case _:
+                raise SyntaxError(
+                    f"Unknown restriction value {self.conf['attachments']['restriction']}"
                 )
         qu.addField(field="MulOriginalFileTxt")  # speeds up query a lot!
         qu.validate(mode="search")
@@ -201,6 +204,46 @@ class GetAttachments:
     # somewhat private
     #
 
+    def _get_attachment(self, *, item, ID: int, out_dir: Path) -> None:
+        dateiname = self._get_dateiname(item)  # may fail
+        suffix = Path(dateiname).suffix
+
+        print(f"*  mulId {ID}")  # {dateiname}
+
+        match self.conf["attachments"]["name"]:
+            case "Cornelia":
+                res = self.ObjData.xpath(f"""
+                /m:application/m:modules/m:module[
+                    @name = 'Object'
+                ]/m:moduleItem/m:moduleReference[
+                    @name = 'ObjMultimediaRef'
+                ]/m:moduleReferenceItem[
+                    @moduleItemId =  {ID}
+                ]/m:dataField[
+                    @name = 'ThumbnailBoo'
+                ][m:value = 'true'
+                ]""")
+                # print(f"xxxxxxxxxxxxxxxx {res=}")
+                if len(res) > 0:
+                    out_dir2 = out_dir / "Standardbild"
+                else:
+                    out_dir2 = out_dir / "nichtStandardbild"
+                out_dir2.mkdir(exist_ok=True)
+                path = out_dir2 / f"{ID}{suffix}"
+            case "mulId":
+                suffix = Path(dateiname).suffix
+                path = out_dir / f"{ID}{suffix}"
+            case "dateiname":
+                path = out_dir / dateiname  # includes suffix
+            case _:
+                raise SyntaxError(f"Error: Unknown config value: {self.conf['name']}")
+
+        if path.exists():  # let's not overwrite existing files
+            print("\tfile exists already on disk")
+        else:
+            print(f"\t{path}")
+            self.api.saveAttachment(id=ID, path=path)
+
     def _get_dateiname(self, item) -> str:
         try:
             dateiname = item.xpath(
@@ -208,7 +251,7 @@ class GetAttachments:
                 namespaces=NSMAP,
             )[0]
         except Exception:
-            ID = item.xpath("@id")
+            ID = item.xpath("@id")[0]
             dateiname = f"{ID}.jpg"  # use mulId as a fallback if no dateiname in RIA
             # there is a chance that this file is no jpg
             print(
@@ -223,7 +266,8 @@ class GetAttachments:
             field="ObjObjectGroupsRef.__id",
             value=str(grpId),
         )
-        # qu.addField(field="ObjMultimediaRef")  # speeds up query a lot!
+        # would speed up query a lot, but we cant get it to work!
+        # qu.addField(field="ObjMultimediaRef")
         # qu.addField(field="ObjMultimediaRef.moduleReferenceItem")
         # qu.addField(field="ObjMultimediaRef.moduleReferenceItem.dataField.ThumbnailBoo")
         qu.validate(mode="search")
@@ -231,8 +275,12 @@ class GetAttachments:
         return self.api.search2(query=qu)
 
     def _get_out_dir(self) -> Path:
-        yyyymmdd = "pix" + date.today().strftime("%Y%m%d")
-        out_dir = Path(self.job) / yyyymmdd
+        """
+        Determines directory for saving pix in; makes it if it doesn't exist
+        yet.
+        """
+        yyyymmdd = date.today().strftime("%Y%m%d")
+        out_dir = Path(self.job) / yyyymmdd / "pix"
 
         if not out_dir.exists():
             print(f"* Making dir {out_dir}")
@@ -241,7 +289,9 @@ class GetAttachments:
 
     def _init_ObjData(self) -> None:
         obj_fn = Path(f"obj_{self.conf['type']}{self.conf['id']}.xml")
-        if obj_fn.exists():
+        if self.cache.exists():
+            self.ObjData = Module(file=str(self.cache))
+        elif obj_fn.exists():
             self.ObjData = Module(file=obj_fn)
         else:
             self.ObjData = self._get_obj_group(grpId=self.conf["id"])
@@ -270,6 +320,12 @@ class GetAttachments:
                     field="MulObjectRef.ObjCurrentLocationVoc",
                     value=Id,
                 )
+            case "query":
+                # saved query
+                # I cant get the list of assets associated with a saved query through
+                # extended search
+                # why don't we use the already downloaded cache file?
+                raise TypeError("Not yet implemented!")
             case "restExhibit":
                 # get assets attached to restauration records attached to an exhibit
                 # photos are typically not SMB-approved
@@ -280,3 +336,5 @@ class GetAttachments:
                 )
             case _:
                 raise TypeError(f"ERROR: Unknown type! {self.conf['type']}")
+
+                return query
