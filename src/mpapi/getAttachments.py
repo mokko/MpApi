@@ -83,23 +83,23 @@ class GetAttachments:
         self.force = force
         # default for saving new request
         # if we're not using a cache
-        cache_fn = f"mul_{self.conf['type']}{self.conf['id']}.xml"
+        cache_fn = f"{self.conf['type']}{self.conf['id']}.xml"
 
         if cache:
             print("* loading cached response")
-            self.cache = Module(file=cache)
+            self.data = Module(file=cache)
         else:
             print("* launching new search")
-            m = self.get_multimedia_for_job()
-            m.toFile(path=cache_fn)
-            self.cache = m
+            self.data = self.get_multimedia_for_job()
+            self.data.toFile(path=cache_fn)
 
         if self.conf["attachments"]["name"] == "Cornelia":
             # in this mode we need object data...
-            self.cache += self._init_objData()
-            self.cache.toFile(path=cache)
+            self.data += self._init_objData()
+            if not cache:
+                self.data.toFile(path=cache_fn)
 
-        self.process_response(data=self.cache)
+        self.process_response(data=self.data)
 
     def process_response(self, *, data: Module) -> None:
         print("* processing response")
@@ -248,7 +248,7 @@ class GetAttachments:
 
         match self.conf["attachments"]["name"]:
             case "Cornelia":
-                res = self.cache.xpath(f"""
+                res = self.data.xpath(f"""
                 /m:application/m:modules/m:module[
                     @name = 'Object'
                 ]/m:moduleItem/m:moduleReference[
@@ -296,21 +296,17 @@ class GetAttachments:
         return out_dir
 
     def _init_objData(self) -> None:
-        obj_fn = Path(f"obj_{self.conf['type']}{self.conf['id']}.xml")
-        if self.cache:
-            if self.cache.actualSize(module="Object") > 0:
+        # obj_fn = Path(f"obj_{self.conf['type']}{self.conf['id']}.xml")
+        if self.data:
+            if self.data.actualSize(module="Object") > 0:
                 return Module()
-        if self.cache.exists():
-            objData = Module(file=str(self.cache))
-        elif obj_fn.exists():
-            objData = Module(file=obj_fn)
         else:
             print("getting objData from fresh query")
             if self.conf["type"] == "query":
                 objData = self.api.runSavedQuery2(Type="query", ID=self.conf["id"])
             else:
                 objData = self._get_obj_group(grpId=self.conf["id"])
-            objData.toFile(path=obj_fn)
+            # objData.toFile(path=obj_fn)
         return objData
 
     def _qm_type(self, *, query: Search, Id: int):

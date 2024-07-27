@@ -315,7 +315,7 @@ class Chunky(Helper):
         #    binary_file.write(r.content)
         return etree.fromstring(r.content, ETparser)
 
-    def _savedQuery(self, *, Type: str = "Object", ID: int, offset: int = 0):
+    def _savedQuery(self, *, Type: str = "Object", ID: int, offset: int = 0) -> Module:
         return self.api.runSavedQuery2(
             Type=Type, ID=ID, offset=offset, limit=self.chunkSize
         )
