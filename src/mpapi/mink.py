@@ -45,13 +45,7 @@ def arg():
     parser = argparse.ArgumentParser(description="Commandline frontend for MpApi.py")
     parser.add_argument("-j", "--job", help="job to run")  # , required=True
     parser.add_argument("-c", "--conf", help="config file", default="jobs.toml")
-    parser.add_argument(
-        "-v", "--version", help="Display version information", action="store_true"
-    )
     args = parser.parse_args()
-    if args.version:
-        print(f"Version: {__version__}")
-        sys.exit(0)
     Mink(job=args.job, conf=args.conf, baseURL=baseURL, pw=pw, user=user)
 
 
