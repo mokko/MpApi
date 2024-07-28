@@ -21,11 +21,12 @@ COMMANDs (from jobs.toml)
     pack    : pack together several (clean) files
 """
 
+import argparse
 import datetime
 import logging
 from mpapi.chunky import Chunky
 from mpapi.client import MpApi
-from mpapi.constants import load_conf
+from mpapi.constants import load_conf, get_credentials
 from mpapi.module import Module
 from mpapi.sar import Sar
 from pathlib import Path
@@ -34,6 +35,24 @@ from typing import Optional
 
 
 chunkSize = 1000
+
+
+def arg():
+    # since fvh is blocked by Windows group policy
+
+    user, pw, baseURL = get_credentials()
+
+    parser = argparse.ArgumentParser(description="Commandline frontend for MpApi.py")
+    parser.add_argument("-j", "--job", help="job to run")  # , required=True
+    parser.add_argument("-c", "--conf", help="config file", default="jobs.toml")
+    parser.add_argument(
+        "-v", "--version", help="Display version information", action="store_true"
+    )
+    args = parser.parse_args()
+    if args.version:
+        print(f"Version: {__version__}")
+        sys.exit(0)
+    Mink(job=args.job, conf=args.conf, baseURL=baseURL, pw=pw, user=user)
 
 
 class Mink:
@@ -351,20 +370,4 @@ class Mink:
 
 
 if __name__ == "__main__":
-    # since fvh is blocked by Windows group policy
-    import argparse
-    from mpapi.constants import get_credentials
-
-    user, pw, baseURL = get_credentials()
-
-    parser = argparse.ArgumentParser(description="Commandline frontend for MpApi.py")
-    parser.add_argument("-j", "--job", help="job to run")  # , required=True
-    parser.add_argument("-c", "--conf", help="config file", default="jobs.toml")
-    parser.add_argument(
-        "-v", "--version", help="Display version information", action="store_true"
-    )
-    args = parser.parse_args()
-    if args.version:
-        print(f"Version: {__version__}")
-        sys.exit(0)
-    Mink(job=args.job, conf=args.conf, baseURL=baseURL, pw=pw, user=user)
+    arg()

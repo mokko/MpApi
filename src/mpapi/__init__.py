@@ -4,10 +4,10 @@ __version__ = "0.1.10"  # unified toml configuration
 import argparse
 from mpapi.filterUnpublished import filter_
 from mpapi.getAttachments import GetAttachments, get_attachment
-from mpapi.mink import Mink
-from mpapi.module import Module
 from mpapi.client import MpApi
 from mpapi.constants import get_credentials
+from mpapi.mink import Mink, arg as mink_arg
+from mpapi.module import Module
 from mpapi.validate import Validate
 from pathlib import Path
 import sys
@@ -190,11 +190,7 @@ def getItem():
 
 
 def mink():
-    parser = argparse.ArgumentParser(description="Commandline frontend for MpApi.py")
-    parser.add_argument("-j", "--job", help="job to run")  # , required=True
-    parser.add_argument("-c", "--conf", help="config file", default="jobs.toml")
-    args = _setup_args(parser)
-    Mink(job=args.job, conf=args.conf, baseURL=baseURL, pw=pw, user=user)
+    mink_arg()
 
 
 def updateItem():
