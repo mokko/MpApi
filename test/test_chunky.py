@@ -1,5 +1,6 @@
 from mpapi.constants import NSMAP, get_credentials
 from mpapi.chunky import Chunky
+from mpapi.module import Module
 from lxml import etree  # type: ignore
 
 # types
@@ -42,20 +43,16 @@ def test_relatedItems():
     relMul = c._relatedItems(part=partET, target="Multimedia")
     resL = relMul.xpath(
         "//m:module[@name = 'Multimedia']/m:moduleItem[@id = '468698']",
-        namespaces=NSMAP,
     )
     assert len(resL) == 1
     resL = relMul.xpath(
         "//m:module[@name = 'Multimedia']/m:moduleItem[@id = '517501']",
-        namespaces=NSMAP,
     )
     assert len(resL) == 1
 
     relPer = c._relatedItems(part=partET, target="Person")
     # toFile(relPer, "sdata/relPer.xml")
-    resL = relPer.xpath(
-        "count(//m:module[@name = 'Person']/m:moduleItem)", namespaces=NSMAP
-    )
+    resL = relPer.xpath("count(//m:module[@name = 'Person']/m:moduleItem)")
     assert int(resL) == 1
 
 

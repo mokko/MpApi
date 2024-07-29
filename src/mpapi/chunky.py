@@ -1,23 +1,23 @@
 """
 For a given search query, return the results. If the number of results exceeds
-the chunkSize, return multiple chunks. For now, we only allow very limited set 
+the chunkSize, return multiple chunks. For now, we only allow very limited set
 of search queries based on a single id (group, exhibit, location, approvalGrp).
 
-A chunk consists of, say, 1000 objects and their corresponding multimedia and 
-persons items. However, if the person or multimedia items reference other 
-persons and multimedia, we don't include them, i.e. we're including only 
+A chunk consists of, say, 1000 objects and their corresponding multimedia and
+persons items. However, if the person or multimedia items reference other
+persons and multimedia, we don't include them, i.e. we're including only
 immediate relatives, no distant cousins. To be excplicit, we call this a multi-
-part response in contrast with a single-part chunk that only contains items of 
+part response in contrast with a single-part chunk that only contains items of
 type object.
 
 USAGE
     from Mp.Api.Chunky import Chunky
     c = Chunky(chunkSize=1000, baseURL=baseURL, pw=pw, user=user)
     for chunkM in c.getByType(ID=ID, Type="group"):
-        do_something_with (chunkM) 
+        do_something_with (chunkM)
 
     for chunkM in c.search(query=query, offset=0):
-        do_something_with (chunkM) 
+        do_something_with (chunkM)
 
 
 TOWARDS AN ALGORITHM
@@ -64,7 +64,7 @@ ETparser = etree.XMLParser(remove_blank_text=True)
 
 # types aliasses
 ET = etree._Element
-ETNone = etree._Element| None
+ETNone = etree._Element | None
 since = str | None
 
 # typed variables
@@ -124,28 +124,28 @@ class Chunky(Helper):
                 m = self._savedQuery(Type=target, ID=ID, offset=offset)
             else:
                 m = self._getObjects(Type=Type, ID=ID, offset=offset, since=since)
-            chunkData += m 
+            chunkData += m
             # only look for related data if there is something in current chunk
             if m:
-                partET = m.toET()
                 # all related Multimedia and Persons items, no chunking
                 for targetType in ["Multimedia", "Person"]:
-                    relatedET = self._relatedItems(
-                        part=partET,
+                    relatedM = self._relatedItems(
+                        part=m.toET(),
                         target=targetType,
                         since=since,
                         onlyPublished=onlyPublished,
                     )
-                    if relatedET is not None:
-                        chunkData.add(doc=relatedET)
+                    if relatedM:
+                        chunkData += relatedM
 
             offset += self.chunkSize  # wrong for last chunk
-            actualSize = chunkData.actualSize(module="Object")
-            if actualSize < self.chunkSize:
+            if chunkData.actualSize(module="Object") < self.chunkSize:
                 lastChunk = True
             yield chunkData
 
-    def search(self, query: Search, since: since = None, offset: int = 0) -> Iterator[Module]:
+    def search(
+        self, query: Search, since: since = None, offset: int = 0
+    ) -> Iterator[Module]:
         """
         We could attempt a general chunky search. Just hand over a search query
         (presumably one which finds object items). We split the results into
@@ -157,22 +157,20 @@ class Chunky(Helper):
         while not lastChunk:
             chunkData = Module()  # make a new zml module document
             query.offset(value=offset)  # todo in search
-            r = self.api.search(xml=query.toString())
-            partET = etree.fromstring(r.content, ETparser)
-            chunkData.add(doc=partET)
+            m = self.api.search2(query=query)
+            chunkData += m
             # all related Multimedia and Persons items, no chunking
             for targetType in ["Multimedia", "Person"]:
-                relatedET = self._relatedItems(
+                relatedM = self._relatedItems(
                     part=partET, target=targetType, since=since
                 )
-                if relatedET is not None:
-                    chunkData.add(doc=relatedET)
+                if relatedM:
+                    chunkData += relatedM
 
             offset = offset + self.chunkSize
-            actualNo = chunkData.actualSize(module="Object")
             # print(f"*** actual VS chunkSize: {actualNo} VS {self.chunkSize}")
 
-            if actualNo < self.chunkSize:
+            if chunkData.actualSize(module="Object") < self.chunkSize:
                 lastChunk = True
             yield chunkData
 
@@ -228,7 +226,7 @@ class Chunky(Helper):
 
     def _relatedItems(
         self, *, part: ET, target: str, since: since = None, onlyPublished: bool = False
-    ) -> ET | None:
+    ) -> Module:
         """
         For a zml document, return all related items of the target type.
 
@@ -237,9 +235,9 @@ class Chunky(Helper):
         * target:  target module type (either "Person" or "Multimedia")
         * since: TODO. Date to filter for updates
 
-        RETURNS
-        * etree document with related items of the target type
-        * this is old way which returns ET
+        NEW
+        * returns Module, not ET | None
+        * avoid optional (mixed) return value
         """
 
         IDs: Any = part.xpath(
@@ -249,7 +247,7 @@ class Chunky(Helper):
 
         if len(IDs) == 0:
             print(f"***WARN: No related {target} IDs found!")  # this is not an ERROR
-            return None
+            return Module()
 
         # use limit=0 for a deterministic search as RIA's response provides the
         # number of search results limit -1 not documented at
@@ -287,14 +285,15 @@ class Chunky(Helper):
         s.toFile(path="debug.search.xml")
         # s.print()
         s.validate(mode="search")
-        r = self.api.search(xml=s.toString())
-        # DEBUG
-        # with open("DEBUGresponse.xml", "wb") as binary_file:
-        # Write bytes to file
-        #    binary_file.write(r.content)
-        return etree.fromstring(r.content, ETparser)
+        return self.api.search2(query=s)
 
     def _savedQuery(self, *, Type: str = "Object", ID: int, offset: int = 0) -> Module:
+        """
+        returns the result of a saved query (limited to chunkSize)
+
+        Is this correct? `Yes, we're calling this from getByType with various offsets.
+        Each call returns the object part of the a chunk.
+        """
         return self.api.runSavedQuery2(
             Type=Type, ID=ID, offset=offset, limit=self.chunkSize
         )

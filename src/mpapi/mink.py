@@ -38,7 +38,7 @@ chunkSize = 1000
 
 def arg():
     """
-        since fvh is blocked by Windows group policy
+    since fvh is blocked by Windows group policy
     """
     import argparse
     from mpapi.constants import get_credentials
