@@ -1,10 +1,9 @@
 from mpapi.constants import NSMAP, get_credentials
 from mpapi.chunky import Chunky
 from lxml import etree  # type: ignore
-from typing import Union
 
 # types
-since = Union[str, None]
+since = str | None
 
 #
 # has plenty of http tests...
@@ -14,63 +13,50 @@ since = Union[str, None]
 user, pw, baseURL = get_credentials()
 
 
+def test_getObjects():
+    c = Chunky(chunkSize=1, baseURL=baseURL, pw=pw, user=user)
+    m = c._getObjects(Type="group", ID=162397, offset=0)
+
+    itemCnt = m.xpath("count(//m:moduleItem)")
+    assert int(itemCnt) == 1
+
+    m = c._getObjects(Type="group", ID=162397, offset=0, since=None)
+
+    itemCnt = int(
+        m.xpath(
+            "count(//m:moduleItem)",
+        )
+    )
+    assert itemCnt == 1
+
+    m = c._getObjects(Type="group", ID=162397, offset=1, since=None)
+
+    itemCnt = int(m.xpath("count(//m:moduleItem)"))
+    assert itemCnt == 1
+
+
 def test_relatedItems():
     c = Chunky(chunkSize=1, baseURL=baseURL, pw=pw, user=user)
-    partET = etree.parse("sdata/testobjects.xml")
+    partET = etree.parse("sdata/getItem-Object609717.xml")
 
     relMul = c._relatedItems(part=partET, target="Multimedia")
-    rL = relMul.xpath(
+    resL = relMul.xpath(
         "//m:module[@name = 'Multimedia']/m:moduleItem[@id = '468698']",
         namespaces=NSMAP,
     )
-    assert len(rL) == 1
-    rL = relMul.xpath(
+    assert len(resL) == 1
+    resL = relMul.xpath(
         "//m:module[@name = 'Multimedia']/m:moduleItem[@id = '517501']",
         namespaces=NSMAP,
     )
-    assert len(rL) == 1
+    assert len(resL) == 1
 
     relPer = c._relatedItems(part=partET, target="Person")
     # toFile(relPer, "sdata/relPer.xml")
-    r = relPer.xpath(
+    resL = relPer.xpath(
         "count(//m:module[@name = 'Person']/m:moduleItem)", namespaces=NSMAP
     )
-    assert int(r) == 1
-
-
-def test_getObjects():
-    c = Chunky(chunkSize=1, baseURL=baseURL, pw=pw, user=user)
-    partET = c._getObjects(Type="group", ID=162397, offset=0)
-
-    itemCnt = partET.xpath(
-        "count(//m:moduleItem)",
-        namespaces=NSMAP,
-    )
-    assert int(itemCnt) == 1
-
-    partET = c._getObjects(Type="group", ID=162397, offset=0, since=None)
-
-    itemCnt = int(
-        partET.xpath(
-            "count(//m:moduleItem)",
-            namespaces=NSMAP,
-        )
-    )
-    assert itemCnt == 1
-
-    partET = c._getObjects(Type="group", ID=162397, offset=1, since=None)
-
-    itemCnt = int(
-        partET.xpath(
-            "count(//m:moduleItem)",
-            namespaces=NSMAP,
-        )
-    )
-    assert itemCnt == 1
-
-    # print(
-    # etree.tostring(partET, pretty_print=True, encoding="unicode")
-    # )
+    assert int(resL) == 1
 
 
 def test_getByGroup():

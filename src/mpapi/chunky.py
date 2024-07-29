@@ -1,56 +1,41 @@
 """
-For a given search query, return the results. If the number of results
-exceeds the chunkSize, return multiple chunks. For now, we only allow very
-limited set of search queries based on a single id (group, exhibit,
-location, approvalGrp).
+For a given search query, return the results. If the number of results exceeds
+the chunkSize, return multiple chunks. For now, we only allow very limited set 
+of search queries based on a single id (group, exhibit, location, approvalGrp).
+
+A chunk consists of, say, 1000 objects and their corresponding multimedia and 
+persons items. However, if the person or multimedia items reference other 
+persons and multimedia, we don't include them, i.e. we're including only 
+immediate relatives, no distant cousins. To be excplicit, we call this a multi-
+part response in contrast with a single-part chunk that only contains items of 
+type object.
 
 USAGE
-from Mp.Api.Chunky import Chunky
-for chunk in getByType(ID=ID, Type="group"):
-    do_something_with (chunk) # chunk is ET
+    from Mp.Api.Chunky import Chunky
+    c = Chunky(chunkSize=1000, baseURL=baseURL, pw=pw, user=user)
+    for chunkM in c.getByType(ID=ID, Type="group"):
+        do_something_with (chunkM) 
 
-for chunk in search(query=query, offset=0):
-    do_something_with (chunk) # chunk is ET
+    for chunkM in c.search(query=query, offset=0):
+        do_something_with (chunkM) 
 
-THE PROBLEM
-* A search returns more items (=results) than I can digest, i.e over 1 GB,
-  i typically can't process xml files anymore with the memory in my laptop.
-
-THE SOLUTION
-* to split up the response in chunks (aka blocks or pages) and to deal with
-  them individually
-* in good old MPX tradition, we want independent chunks, i.e. the objects
-  should be accompanied not by random Person and Multimedia records, but
-  exactly by those that are referenced in the object records. So related
-  items are those referenced from the object item. However, if the person
-  or multimedia items reference other persons and multimedia, we don't
-  include them, i.e. we're including only immediate relatives, no distant
-  cousins.
 
 TOWARDS AN ALGORITHM
 A "deterministic" solution would first (1) query how many results there are
-and then (2) do further queries for every chunk until done. It turns out
-that a deterministic algorithm would be very easy, b/c RIA reports the
-total hits in the totalSize attribute.
-
-Example: 100 results, but chunk size is 10, so we make 10 chunks
-(in production we expect that chunk size should be between 1000 or 3000, in
-development we're using a much smaller number to reduce the wait)
+and then (2) do further queries for every chunk until done. It turns out that
+a deterministic algorithm would be very easy, b/c RIA reports the total hits
+in the totalSize attribute.
 
 What about an "undeterministic" solution, e.g. a solution where we don't
 know the total number of results until we have gotten all results?
 
-Let's look for the simplest solution: A block is the last block if the
-number of results is smaller than chunkSize (even if it is null).
+Let's look for the simplest solution: A chunk is the last chunk if the number
+of results is smaller than chunkSize.
 
 NOTES / QUESTIONS / DEFINITIONS
 * The chunky (=paginated) search is expected not to be faster than an
   unchunked search since it will likely involve more http requests for the
   same thing.
-* We'll call the one-type response/document "a part" in contrast to
-  "chunk", which we'll reserve for multi-type documents.
-* We want a multi-type chunk, i.e. have objects, multimedia, and persons,
-  perhaps others in one chunk.
 * I could hide which modules are included, or I can make it explicit.
   Compromise would be a default value. On the other hand, this is not our
   problem atm. Let's just bake Object, Multimedia and Person in and find
@@ -58,21 +43,17 @@ NOTES / QUESTIONS / DEFINITIONS
   argument to specify the requested target modules, e.g.:
     mtype: List[str] = ['Object', 'Multimedia', 'Person']
   But we decided against it; this can be done later, if really of use.
-* This time I want to return document as etree, b/c in the long term I
-  expect that this solution will be faster than converting between etree
-  and string repeatedly.
 * Should we write chunks to disk? No. That's not chunky's job. Should be
   done by mink etc.
-* Let's experiment with type hints again; we're using Python 3.9 type hints
 """
 
 from lxml import etree
-from typing import Any, Iterator, Union
-from mpapi.search import Search
 from mpapi.client import MpApi
 from mpapi.helper import Helper
 from mpapi.module import Module
 from mpapi.sar import Sar
+from mpapi.search import Search
+from typing import Any, Iterator
 
 NSMAP = {
     "s": "http://www.zetcom.com/ria/ws/module/search",
@@ -83,8 +64,8 @@ ETparser = etree.XMLParser(remove_blank_text=True)
 
 # types aliasses
 ET = etree._Element
-ETNone = Union[etree._Element, None]
-since = Union[str, None]
+ETNone = etree._Element| None
+since = str | None
 
 # typed variables
 baseURL: str
@@ -140,13 +121,13 @@ class Chunky(Helper):
         while not lastChunk:
             chunkData = Module()  # new zml Module object
             if Type == "query":
-                partET = self._savedQuery(Type=target, ID=ID, offset=offset)
+                m = self._savedQuery(Type=target, ID=ID, offset=offset)
             else:
-                partET = self._getObjects(Type=Type, ID=ID, offset=offset, since=since)
-            chunkData.add(doc=partET)
-
+                m = self._getObjects(Type=Type, ID=ID, offset=offset, since=since)
+            chunkData += m 
             # only look for related data if there is something in current chunk
-            if chunkData:
+            if m:
+                partET = m.toET()
                 # all related Multimedia and Persons items, no chunking
                 for targetType in ["Multimedia", "Person"]:
                     relatedET = self._relatedItems(
@@ -164,7 +145,7 @@ class Chunky(Helper):
                 lastChunk = True
             yield chunkData
 
-    def search(self, query: Search, since: since = None, offset: int = 0):
+    def search(self, query: Search, since: since = None, offset: int = 0) -> Iterator[Module]:
         """
         We could attempt a general chunky search. Just hand over a search query
         (presumably one which finds object items). We split the results into
@@ -175,7 +156,7 @@ class Chunky(Helper):
         lastChunk: bool = False
         while not lastChunk:
             chunkData = Module()  # make a new zml module document
-            query.offset = offset  # todo in search
+            query.offset(value=offset)  # todo in search
             r = self.api.search(xml=query.toString())
             partET = etree.fromstring(r.content, ETparser)
             chunkData.add(doc=partET)
@@ -201,7 +182,7 @@ class Chunky(Helper):
 
     def _getObjects(
         self, *, Type: str, ID: int, offset: int, since: since = None
-    ) -> ET:
+    ) -> Module:
         """
         A part is the result from a single request, e.g. for one module type.
         EXPECTS
@@ -211,12 +192,11 @@ class Chunky(Helper):
         * since: dateTime string; TODO
 
         RETURNS
-        * ET document
+        * was: ET document, now Module
 
         NOTE
         * ATM this is a getByGroup query always, but a generic getPart query as
           the name of the method suggests.
-        * Let's not return a Module object, b/c that simplifies the code
         """
         fields: dict = {  # TODO: untested
             "approval": "ObjPublicationGrp.TypeVoc",
@@ -244,13 +224,11 @@ class Chunky(Helper):
             )
         # print(s.toString())
         s.validate(mode="search")
-        r = self.api.search(xml=s.toString())
-        # print(f"status {r.status_code}")
-        return etree.fromstring(r.content, ETparser)
+        return self.api.search2(query=s)
 
     def _relatedItems(
         self, *, part: ET, target: str, since: since = None, onlyPublished: bool = False
-    ) -> Union[ET, None]:
+    ) -> ET | None:
         """
         For a zml document, return all related items of the target type.
 
@@ -261,6 +239,7 @@ class Chunky(Helper):
 
         RETURNS
         * etree document with related items of the target type
+        * this is old way which returns ET
         """
 
         IDs: Any = part.xpath(

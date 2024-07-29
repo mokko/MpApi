@@ -21,12 +21,11 @@ COMMANDs (from jobs.toml)
     pack    : pack together several (clean) files
 """
 
-import argparse
 import datetime
 import logging
 from mpapi.chunky import Chunky
 from mpapi.client import MpApi
-from mpapi.constants import load_conf, get_credentials
+from mpapi.constants import load_conf
 from mpapi.module import Module
 from mpapi.sar import Sar
 from pathlib import Path
@@ -38,14 +37,18 @@ chunkSize = 1000
 
 
 def arg():
-    # since fvh is blocked by Windows group policy
-
-    user, pw, baseURL = get_credentials()
+    """
+        since fvh is blocked by Windows group policy
+    """
+    import argparse
+    from mpapi.constants import get_credentials
 
     parser = argparse.ArgumentParser(description="Commandline frontend for MpApi.py")
     parser.add_argument("-j", "--job", help="job to run")  # , required=True
     parser.add_argument("-c", "--conf", help="config file", default="jobs.toml")
     args = parser.parse_args()
+
+    user, pw, baseURL = get_credentials()
     Mink(job=args.job, conf=args.conf, baseURL=baseURL, pw=pw, user=user)
 
 
@@ -118,13 +121,8 @@ class Mink:
         # ignore chunks already on disk
         no, offset = self._fastforward(Type=Type, ID=ID, suffix=".zip")
         print(f" fast forwarded to chunk no {no} with offset {offset}")
-        # how can i know if this is the last chunk?
-        # Test if the last chunk has less items than chunkSize OR
-        # Do another request to RIA and see if it comes back empty?
-        # we go the second route
 
-        # getByType returns Module, not ET
-        for chunk in self.chunker.getByType(
+        for chunkM in self.chunker.getByType(
             ID=ID,
             Type=Type,
             target=target,
@@ -132,13 +130,13 @@ class Mink:
             offset=offset,
             onlyPublished=onlyPublished,
         ):
-            if chunk:  # Module is True if >0 items
-                # print(f"###chunk size:{chunk.actualSize(module='Object')}")
+            if chunkM:  # Module is True if >0 items
+                # print(f"###chunk size:{chunkM.actualSize(module='Object')}")
                 chunk_fn = self._chunkPath(Type=Type, ID=ID, no=no, suffix=".xml")
-                chunk.clean()
+                chunkM.clean()
                 logging.info(f"zipping chunk {chunk_fn}")
-                chunk.toZip(path=chunk_fn)
-                chunk.validate()
+                chunkM.toZip(path=chunk_fn)
+                chunkM.validate()
                 no += 1
             else:
                 print("Chunk empty; we're at the end")
