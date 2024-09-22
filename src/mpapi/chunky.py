@@ -294,6 +294,7 @@ class Chunky(Helper):
         Is this correct? `Yes, we're calling this from getByType with various offsets.
         Each call returns the object part of the a chunk.
         """
-        return self.api.runSavedQuery2(
+        ET = self.api.runSavedQuery2(
             Type=Type, ID=ID, offset=offset, limit=self.chunkSize
         )
+        return Module(tree=ET)

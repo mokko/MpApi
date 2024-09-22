@@ -97,7 +97,7 @@ Item = namedtuple("Item", ["type", "id"])
 
 
 class Module(Helper):
-    def __add__(self, m2):  # pytest complains when I add type hints
+    def __add__(self, m2: Self) -> Self:  # pytest complains when I add type hints
         """
         join two Module objects using the + operator:
             m1 = Module(file="one.xml")
@@ -275,7 +275,6 @@ class Module(Helper):
         * The current implmentation is very slow; it takes ca. 20 min to add a
           couple thousand records.
         """
-        # List[Union[_Element, Union[_ElementUnicodeResult, _PyElementUnicodeResult, _ElementStringResult]]]
         doc2 = deepcopy(doc)  # leave doc alone, so we don't change it
         d2moduleL = doc2.xpath(  # newdoc
             "/m:application/m:modules/m:module",
