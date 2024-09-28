@@ -373,6 +373,7 @@ class Module(Helper):
             )[0]
         except Exception:
             if dataType is None:
+                # print (f"{name=}")
                 typeHint = name[-3:]
                 dataType = dataTypes[typeHint]
             if value is None:
@@ -388,6 +389,25 @@ class Module(Helper):
             )
             valueN.text = value
         return dataFieldN
+
+    def systemField(self, *, parent: ET, name: str, dataType: str, value: str):
+        """
+        I dont seem to change a systemField with an updateField endpoint.
+            <systemField dataType="{dataType}" name="{name}">
+              <value>{value}</value>
+            </systemField>
+        """
+        systemFieldN = etree.SubElement(
+            parent, "{http://www.zetcom.com/ria/ws/module}systemField", name=name
+        )
+        # dataType=dataType,
+
+        valueN = etree.SubElement(
+            systemFieldN, "{http://www.zetcom.com/ria/ws/module}value"
+        )
+        valueN.text = value
+
+        return systemFieldN
 
     def delItem(self, *, modItemId: int, mtype: str):
         itemN = self.xpath(
@@ -859,6 +879,7 @@ class Module(Helper):
         # self._dropAttribs(xpath="//m:moduleReference", attrib="targetModule")
         # self._dropAttribs(xpath="//m:moduleReference", attrib="multiplicity")
         # self._dropAttribs(xpath="//m:moduleReference", attrib="size")
+        self._dropAttribs(xpath="//m:moduleReferenceItem", attrib="uuid")
         self._dropAttribs(xpath="//m:vocabularyReference", attrib="id")
         self._dropAttribs(xpath="//m:vocabularyReference", attrib="instanceName")
         self._dropAttribs(xpath="//m:vocabularyReferenceItem", attrib="name")
