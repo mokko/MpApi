@@ -494,7 +494,7 @@ class Module(Helper):
             f"/m:application/m:modules/m:module[@name='{mtype}']/m:moduleItem/@id"
         )
         # idL contains ids as str, we want int. Do we really [int(ID) for ID in idL]
-        return idL
+        return [int(ID) for ID in idL]
 
     def item_exists(self, *, mtype: str, ID: int) -> bool:
         """

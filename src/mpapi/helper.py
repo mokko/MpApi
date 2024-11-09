@@ -29,15 +29,8 @@ class Helper:
         print(self.toString())
 
     def toFile(self, *, path: Union[Path, str]) -> None:
-        doc = self.etree
-        try:
-            self._write(path=str(path), doc=doc)
-        except Exception:
-            # print("WARNING: Trouble writing file")
-            doc = etree.ElementTree(
-                self.etree,
-            )
-            self._write(path=str(path), doc=doc)
+        tree = etree.ElementTree(self.etree)
+        self._write(path=str(path), doc=tree)
 
     def toET(self) -> ET:
         return self.etree
