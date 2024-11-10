@@ -25,7 +25,7 @@ will put attachments in dir
 where the current date is used for the second directory.
 
 NEW
-- 21.7.2024: We're using the downloaded data from MpApi as the cache, ao we dont
+- 21.7.2024: We're using the downloaded data from MpApi as the cache, so we dont
     have to d/n same stuff again.
 """
 
@@ -36,6 +36,7 @@ from mpapi.constants import get_credentials, load_conf
 from mpapi.module import Module
 from mpapi.search import Search
 from pathlib import Path
+import shutil
 
 conf_fn = "jobs.toml"
 NSMAP = {"m": "http://www.zetcom.com/ria/ws/module"}
@@ -91,7 +92,7 @@ class GetAttachments:
         else:
             print("* launching new search")
             self.data = self.get_multimedia_for_job()
-            self.data.toFile(path=cache_fn)
+            self.data.toFile(path=cache_fn)  # overwrites?
 
         if self.conf["attachments"]["name"] == "Cornelia":
             # in this mode we need object data...
@@ -102,6 +103,10 @@ class GetAttachments:
         self.process_response(data=self.data)
 
     def process_response(self, *, data: Module) -> None:
+        """
+        Downloads Multimedia attachments in data depending on
+        confiuration restriction (freigabe, keine) to outdir.
+        """
         print("* processing response")
         no = data.actualSize(module="Multimedia")
         print(f"* {no} assets found")
@@ -145,6 +150,16 @@ class GetAttachments:
             else:
                 print(f"*  mulId {ID} no attachment")
 
+        # out_dir: {jobDir}/yyyymmdd/pix
+        out_zip = out_dir.parent / "pix.zip"
+        if self.force or not out_zip.exists():
+            print("zipping pix directory")
+            shutil.make_archive(out_dir, "zip", out_dir)
+        else:
+            print(f"Zip file '{out_zip}' exists already and force is off")
+        # Do we delete the original folder automatically?
+        # Since I am undecided, we leave it for now.
+
     def get_multimedia_for_job(self) -> Module:
         """
         gets Multimedia items for current job.
@@ -155,8 +170,9 @@ class GetAttachments:
         if self.conf["attachments"]["restriction"] == "freigegeben":
             qu.AND()
 
-        # doesn't work for type=query atm
-        qu = self._qm_type(query=qu, Id=self.conf["id"])
+        qu = self._qm_type(
+            query=qu, Id=self.conf["id"]
+        )  # query_maker: doesn't work for type=query atm
 
         match self.conf["attachments"]["restriction"]:
             case "freigegeben":
@@ -211,6 +227,12 @@ class GetAttachments:
     #
 
     def _get_dateiname(self, item) -> str:
+        """
+        For a give item node from an Multimedia item, return the filename as stored
+        in field dateiname.
+
+        Falls back to {mulId}.jpg if no dateiname exists with a warning to STDOUT.
+        """
         try:
             dateiname = item.xpath(
                 "./m:dataField[@name='MulOriginalFileTxt']/m:value/text()",
@@ -226,6 +248,9 @@ class GetAttachments:
         return dateiname
 
     def _get_obj_group(self, *, grpId: int) -> Module:
+        """
+        For a given grpId, get that group and return it as Module object.
+        """
         qu = Search(module="Object")
         qu.addCriterion(
             operator="equalsField",
@@ -241,6 +266,10 @@ class GetAttachments:
         return self.api.search2(query=qu)
 
     def _get_single_attachment(self, *, item, ID: int, out_dir: Path) -> None:
+        """
+        Downloads a single attachment. Respects naming policy from configuration
+        and force (without force no overwriting of existing files).
+        """
         dateiname = self._get_dateiname(item)  # may fail if no attachment
         suffix = Path(dateiname).suffix
 
@@ -284,8 +313,9 @@ class GetAttachments:
 
     def _get_out_dir(self) -> Path:
         """
-        Determines directory for saving pix in; makes it if it doesn't exist
-        yet.
+        Determines directory for saving pix in; makes it if it doesn't exist yet.
+
+        {jobDir}/yyyymmdd/pix
         """
         yyyymmdd = date.today().strftime("%Y%m%d")
         out_dir = Path(self.job) / yyyymmdd / "pix"
@@ -337,7 +367,7 @@ class GetAttachments:
                 # I cant get the list of assets associated with a saved query through
                 # extended search
                 # why don't we use the already downloaded cache file?
-                raise TypeError("Not yet implemented!")
+                raise TypeError("Not implemented. Use -c cache file instead!")
             case "restExhibit":
                 # get assets attached to restauration records attached to an exhibit
                 # photos are typically not SMB-approved
