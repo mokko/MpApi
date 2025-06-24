@@ -59,7 +59,7 @@ USAGE:
     # deleting stuff
     m.dropRepeatableGroup(parent=miN, name="ObjValuationGrp")
     m._dropFields(parent=miN, type="systemField")
-    m._dropFieldsByName(element="repeatableGroup", name="ObjValuationGrp)
+    m._dropFieldsByName(element="repeatableGroup", name="ObjValuationGrp")
     m._dropAttribs(xpath="//m:dataField", attrib="uuid")
     m.clean()  # drops uuid attributes and certain value elements
 
@@ -832,14 +832,6 @@ class Module(Helper):
                 attributes = moduleN.attrib
                 attributes["totalSize"] = str(int(len(itemsL)))
 
-    def _parse_ident_in_parts(self, *, nr):  # xxx
-        partsL = [x.strip() for x in nr.split()]
-        part1 = partsL[0]
-        part2 = " " + partsL[1]
-        part3 = " ".join(partsL[2:])
-
-        return [part1, part2, part3]
-
     def uploadForm(self) -> None:
         """
         Rewrites module in upload form. Expects module in download form.
@@ -863,7 +855,7 @@ class Module(Helper):
         self._dropFieldsByName(element="systemField", name="__lastModifiedUser")
         self._dropFieldsByName(element="systemField", name="__createdUser")
         self._dropFieldsByName(element="systemField", name="__created")
-        self._dropFieldsByName(element="systemField", name="__uuid")
+        # self._dropFieldsByName(element="systemField", name="__uuid")
 
         self._dropFields(element="virtualField")
         self._dropFields(element="formattedValue")
@@ -1079,6 +1071,14 @@ class Module(Helper):
         """
         We want to eliminate identNr as part of sanitizing xml for upload form.
         """
+
+    def _parse_ident_in_parts(self, *, nr):  # xxx
+        partsL = [x.strip() for x in nr.split()]
+        part1 = partsL[0]
+        part2 = " " + partsL[1]
+        part3 = " ".join(partsL[2:])
+
+        return [part1, part2, part3]
 
     def _standardDT(self, *, inputN) -> str:
         """

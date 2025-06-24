@@ -92,10 +92,11 @@ class GetAttachments:
         else:
             print("* launching new search")
             self.data = self.get_multimedia_for_job()
-            self.data.toFile(path=cache_fn)  # overwrites?
+            self.data.toFile(path=cache_fn)  # overwrites existing files
 
         if self.conf["attachments"]["name"] == "Cornelia":
-            # in this mode we need object data...
+            # uses mulId for naming policy and puts pix in separate folders if
+            # they are standardbild, in this mode we need object data
             self.data += self._init_objData()
             if not cache:
                 self.data.toFile(path=cache_fn)
@@ -112,6 +113,7 @@ class GetAttachments:
         print(f"* {no} assets found")
         out_dir = self._get_out_dir()
 
+        print(f"* restriction:{self.conf['attachments']['restriction']}*")
         match self.conf["attachments"]["restriction"]:
             case "keine":
                 moduleItemsL = data.xpath(f"""
@@ -138,10 +140,14 @@ class GetAttachments:
                         ]
                     ]
                 ]""")
+            case _:
+                raise Exception(
+                    f"Unknown restriction in configuration {self.conf['attachments']['restriction']}"
+                )
                 # for each in freigegebenL:
                 #   print (etree.tostring(each, pretty_print=True, encoding="unicode"))
                 # raise SyntaxError("Stop here")
-        print(f"*  About to loop thru {len(moduleItemsL)} assets.")
+        print(f"* About to loop thru {len(moduleItemsL)} assets.")
 
         for itemN in moduleItemsL:
             ID = itemN.get("id")
@@ -193,6 +199,11 @@ class GetAttachments:
                     f"Unknown restriction value {self.conf['attachments']['restriction']}"
                 )
         qu.addField(field="MulOriginalFileTxt")  # speeds up query a lot!
+        qu.addField(field="MulApprovalGrp")
+        qu.addField(field="MulApprovalGrp.repeatableGroupItem")
+        qu.addField(field="MulApprovalGrp.TypeVoc")
+        qu.addField(field="MulApprovalGrp.ApprovalVoc")
+
         qu.validate(mode="search")
         print(f"* about to execute query\n{qu.toString()}")
         return self.api.search2(query=qu)
@@ -337,7 +348,8 @@ class GetAttachments:
             else:
                 objData = self._get_obj_group(grpId=self.conf["id"])
             # objData.toFile(path=obj_fn)
-        return objData
+            return objData
+        return Module()  # new
 
     def _qm_type(self, *, query: Search, Id: int):
         match self.conf["type"]:
