@@ -761,6 +761,35 @@ class Module(Helper):
             itemN.set("id", str(ID))
         return itemN
 
+    def sort_elements(self) -> None:
+        """
+        Sort the elements within moduleItem in the expected order.
+
+        N.B. Not successfully tested.
+        """
+        desired_order = [
+            "{http://www.zetcom.com/ria/ws/module}systemField",
+            "{http://www.zetcom.com/ria/ws/module}dataField",
+            "{http://www.zetcom.com/ria/ws/module}vocabularyReference",
+            "{http://www.zetcom.com/ria/ws/module}virtualField",
+            "{http://www.zetcom.com/ria/ws/module}repeatableGroup",
+            "{http://www.zetcom.com/ria/ws/module}moduleReference",
+            "{http://www.zetcom.com/ria/ws/module}composite",
+            "{http://www.zetcom.com/ria/ws/module}attachment",
+            "{http://www.zetcom.com/ria/ws/module}thumbnails",
+        ]
+
+        for moduleItem in self.etree.xpath(".//m:moduleItem", namespaces=NSMAP):
+            children = list(moduleItem)
+            # print(children)
+            # Sort children by desired order; unknown tags go to the end
+            children.sort(
+                key=lambda el: desired_order.index(el.tag)
+                if el.tag in desired_order
+                else len(desired_order)
+            )
+            moduleItem[:] = children  # Replace children in sorted order
+
     def totalSize(self, *, module: str) -> int:
         """
         Report the totalSize of a requested module (as provided by the xml

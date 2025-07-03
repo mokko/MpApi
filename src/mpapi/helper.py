@@ -28,8 +28,11 @@ class Helper:
     def print(self) -> None:
         print(self.toString())
 
-    def toFile(self, *, path: Union[Path, str]) -> None:
-        tree = etree.ElementTree(self.etree)
+    def toFile(self, *, path: Path | str) -> None:
+        if not isinstance(self.etree, etree._ElementTree):
+            tree = etree.ElementTree(self.etree)
+        else:
+            tree = self.etree
         self._write(path=str(path), doc=tree)
 
     def toET(self) -> ET:
