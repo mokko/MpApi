@@ -784,9 +784,11 @@ class Module(Helper):
             # print(children)
             # Sort children by desired order; unknown tags go to the end
             children.sort(
-                key=lambda el: desired_order.index(el.tag)
-                if el.tag in desired_order
-                else len(desired_order)
+                key=lambda el: (
+                    desired_order.index(el.tag)
+                    if el.tag in desired_order
+                    else len(desired_order)
+                )
             )
             moduleItem[:] = children  # Replace children in sorted order
 

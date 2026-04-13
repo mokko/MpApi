@@ -2,13 +2,13 @@
 getAttachments downloads attachments from RIA
 
 Configuration file format (where | indicates the possible options):
-#file is typically named 'getAttachments.jobs'
+#file is typically named 'jobs.toml'
 [label]
     type = "group" | "exhibit" | "loc" | "query" | "restExhibit"
-    id: 12345
-    label: "alabel"
-    restriction: "keine" | "freigegeben"
-    name: "dateiname" | "mulid" | "Cornelia"
+    id = 12345
+    label = "alabel"
+    attachments.restriction = "keine" | "freigegeben"
+    attachments.name = "dateiname" | "mulid" | "Cornelia"
 
     keine : download the attachments from all assets
     freigegeben : download only assets which are freigegeben for SMB-Digital
@@ -192,7 +192,7 @@ class GetAttachments:
                     field="MulApprovalGrp.ApprovalVoc",
                     value="4160027",  # Ja
                 )
-            case "alle":
+            case "keine":
                 pass
             case _:
                 raise SyntaxError(
