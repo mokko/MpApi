@@ -37,6 +37,7 @@ from mpapi.module import Module
 from mpapi.search import Search
 from pathlib import Path
 import shutil
+import zipfile
 
 conf_fn = "jobs.toml"
 NSMAP = {"m": "http://www.zetcom.com/ria/ws/module"}
@@ -88,6 +89,17 @@ class GetAttachments:
 
         if cache:
             print("* loading cached response")
+            p = Path(cache)
+            suffix = p.suffix.lower()
+            if suffix == ".zip":
+                print("*** Unzipping...")
+                with zipfile.ZipFile(p, "r") as zip_ref:
+                    filenames = zip_ref.namelist()
+                    zip_ref.extractall()  # Extracts to current working directory
+                if len(filenames) > 1:
+                    raise ValueError("ERROR: Zip file has more than one member")
+            cache = Path.cwd() / filenames[0]
+
             self.data = Module(file=cache)
         else:
             print("* launching new search")
