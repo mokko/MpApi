@@ -6,6 +6,7 @@
 .project
 .pydvproject
 __pycache__
+.venv/
 bak/*
 dist/*
 build/*

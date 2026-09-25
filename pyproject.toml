@@ -33,5 +33,12 @@ updateItem = 'mpapi:updateItem'
 validate = 'mpapi:validate'
 filter = 'mpapi:filter'
 
+[tool.flit.module]
+# The package directory is src/mpapi (lower case). Flit looks for a folder
+# matching the project name, so "MpApi" only resolves on a file system that
+# ignores case — on Linux the build fails with "No file/folder found for
+# module MpApi". Naming the module here fixes that.
+name = "mpapi"
+
 [tool.flit.sdist]
-include = ["src/MpApi/__init__.py"] # windows is strange with capital letters
+include = ["src/mpapi/__init__.py"]
