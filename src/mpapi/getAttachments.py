@@ -348,20 +348,24 @@ class GetAttachments:
             out_dir.mkdir(parents=True)
         return out_dir
 
-    def _init_objData(self) -> None:
+    def _init_objData(self) -> Module:
+        """
+        Return Object moduleItems for the current job so the Cornelia naming
+        policy can tell Standardbild from nichtStandardbild.
+
+        Returns an empty Module if self.data already carries Object items.
+        Otherwise the Object items are requested. Note that a Multimedia-only
+        response (the normal case for a fresh, unchached run) is truthy but
+        has zero Object items, so the old "if self.data" guard skipped the
+        query and silently dumped every asset into nichtStandardbild.
+        """
         # obj_fn = Path(f"obj_{self.conf['type']}{self.conf['id']}.xml")
-        if self.data:
-            if self.data.actualSize(module="Object") > 0:
-                return Module()
-        else:
-            print("getting objData from fresh query")
-            if self.conf["type"] == "query":
-                objData = self.api.runSavedQuery2(Type="query", ID=self.conf["id"])
-            else:
-                objData = self._get_obj_group(grpId=self.conf["id"])
-            # objData.toFile(path=obj_fn)
-            return objData
-        return Module()  # new
+        if self.data and self.data.actualSize(module="Object") > 0:
+            return Module()
+        print("getting objData from fresh query")
+        if self.conf["type"] == "query":
+            return self.api.runSavedQuery2(Type="query", ID=self.conf["id"])
+        return self._get_obj_group(grpId=self.conf["id"])
 
     def _qm_type(self, *, query: Search, Id: int):
         match self.conf["type"]:
